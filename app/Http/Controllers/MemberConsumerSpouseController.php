@@ -68,7 +68,8 @@ class MemberConsumerSpouseController extends AppBaseController
 
         Flash::success('Member Consumer Spouse saved successfully.');
 
-        return redirect(route('memberConsumers.show', [$input['MemberConsumerId']]));
+        return redirect(route('memberConsumers.assess-checklists', [$input['MemberConsumerId']]));
+        // return redirect(route('memberConsumers.show', [$input['MemberConsumerId']]));
     }
 
     /**

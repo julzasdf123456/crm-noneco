@@ -69,7 +69,8 @@ class ServiceConnections extends Model
         'ConnectionApplicationType',
         'BuildingType',
         'Status',
-        'Notes'
+        'Notes',
+        'Trash'
     ];
 
     /**
@@ -96,7 +97,8 @@ class ServiceConnections extends Model
         'ConnectionApplicationType' => 'string',
         'BuildingType' => 'string',
         'Status' => 'string',
-        'Notes' => 'string'
+        'Notes' => 'string',
+        'Trash' => 'string'
     ];
 
     /**
@@ -124,6 +126,7 @@ class ServiceConnections extends Model
         'BuildingType' => 'nullable|string',
         'Status' => 'nullable|string|max:100',
         'Notes' => 'nullable|string|max:2000',
+        'Trash' => 'nullable|string',
         'created_at' => 'nullable',
         'updated_at' => 'nullable'
     ];

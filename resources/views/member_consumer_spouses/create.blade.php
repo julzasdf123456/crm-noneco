@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <h1>Create Member Consumer Spouse</h1>
+                    <p><strong><span class="badge-lg bg-success">Step 1.1</span>Register Spouse</strong></p>
                 </div>
             </div>
         </div>
@@ -22,7 +22,7 @@
                     <div class="card-header">
                         <span>Since the applicant is married, you have the option to add a spouse.</span>
                         <div class="card-tools">
-                            <a href="{{ route('memberConsumers.show', [$memberConsumer->Id]) }}" class="btn btn-info btn-sm">Skip</a>
+                            <a href="{{ route('memberConsumers.assess-checklists', [$memberConsumer->Id]) }}" class="btn btn-info btn-sm">Skip</a>
                         </div>
                     </div>
 

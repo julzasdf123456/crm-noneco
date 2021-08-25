@@ -1,6 +1,15 @@
 @if($serviceConnectionTransactions == null)
     <p class="text-center"><i>No payment transactions recorded!</i></p>
-    <a href="{{ route('serviceConnectionPayTransactions.create-step-four', [$serviceConnections->id]) }}" class="btn btn-primary btn-sm" title="Add Payment Transaction"><i class="fas fa-pen ico-tab"></i>Create Payment Invoice</a>
+    <a href="{{ route('serviceConnectionPayTransactions.create-step-four', [$serviceConnections->id]) }}" class="btn btn-primary btn-sm" title="Add Payment Transaction">
+        <lord-icon
+            src="https://cdn.lordicon.com/mecwbjnp.json"
+            trigger="loop"
+            delay="1500"
+            stroke="100"
+            colors="primary:#ffffff,secondary:#ffffff"
+            style="width:25px;height:25px">
+        </lord-icon>
+        Create Payment Invoice</a>
 @else
     <div class="row">
         <div class="col-md-12">
@@ -73,11 +82,38 @@
             <h4>Overall Total: <strong>{{ number_format($totalTransactions->Total, 2) }}</strong></h4>
 
             <br>
-            <a href="{{ route('serviceConnectionPayTransactions.create-step-four', [$serviceConnections->id]) }}" class="btn btn-sm btn-warning"><i class="fas fa-pen ico-tab"></i>Update Payment</a>
-            <a href="" class="btn btn-sm btn-success"><i class="fas fa-print ico-tab"></i>Print Invoice</a>
+            <a href="{{ route('serviceConnectionPayTransactions.create-step-four', [$serviceConnections->id]) }}" class="btn btn-sm btn-warning">
+                <lord-icon
+                    src="https://cdn.lordicon.com/wloilxuq.json"
+                    trigger="loop"
+                    colors="primary:#343434,secondary:#343434"
+                    stroke="100"
+                    delay="2000"
+                    style="width:25px;height:25px">
+                </lord-icon>
+                Update Payment</a>
+            <a href="" class="btn btn-sm btn-success">
+                <lord-icon
+                    src="https://cdn.lordicon.com/nocovwne.json"
+                    trigger="loop"
+                    colors="primary:#ffffff,secondary:#ffffff"
+                    stroke="100"
+                    delay="2000"
+                    style="width:25px;height:25px">
+                </lord-icon>
+                Print Invoice</a>
         </div>
     @else
         <p class="text-center"><i>No total transactions recorded!</i></p>
-        <a href="{{ route('serviceConnectionPayTransactions.create-step-four', [$serviceConnections->id]) }}" class="btn btn-sm btn-warning"><i class="fas fa-pen ico-tab"></i>Update Payment</a>
+        <a href="{{ route('serviceConnectionPayTransactions.create-step-four', [$serviceConnections->id]) }}" class="btn btn-sm btn-warning">
+            <lord-icon
+                src="https://cdn.lordicon.com/wloilxuq.json"
+                trigger="loop"
+                colors="primary:#343434,secondary:#343434"
+                stroke="100"
+                delay="2000"
+                style="width:25px;height:25px">
+            </lord-icon>
+            Update Payment</a>
     @endif
 @endif

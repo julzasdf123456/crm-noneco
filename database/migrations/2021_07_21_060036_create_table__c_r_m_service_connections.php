@@ -33,6 +33,7 @@ class CreateTableCRMServiceConnections extends Migration
             $table->string('ConnectionApplicationType', 100)->nullable();
             $table->string('Status', 100)->nullable();
             $table->string('Notes', 2000)->nullable();
+            $table->string('Trash', 50)->nullable(); // YES OR NO/NULL
             $table->timestamps();
         });
     }

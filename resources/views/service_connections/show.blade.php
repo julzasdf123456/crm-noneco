@@ -14,7 +14,7 @@ use App\Models\ServiceConnections;
                     @if (empty($timeFrame) | $timeFrame == null)
                         <span><i>Timeframe not recorded</i></span>
                     @else
-                        <span class="badge-lg bg-warning">{{ $timeFrame->last()==null ? 'Timeframe not recorded' : $timeFrame->last()->Status; }}</span>
+                        <span class="badge-lg bg-warning"><strong>{{ $timeFrame->first()==null ? 'Timeframe not recorded' : $timeFrame->first()->Status; }}</strong></span>
                     @endif
                     
                 </div> 
@@ -76,66 +76,84 @@ use App\Models\ServiceConnections;
                         <strong><i class="far fa-file-alt mr-1"></i> Notes</strong>
                         <p class="text-muted">{{ $serviceConnections->Notes}}</p>
 
-                        <a href="{{ route('serviceConnections.edit', [$serviceConnections->id]) }}" class="text-warning" title="Edit service connection details"><i class="fas fa-user-edit"></i></a>
-                    </div>
-                </div>
+                        <a href="{{ route('serviceConnections.edit', [$serviceConnections->id]) }}" class="text-warning" title="Edit service connection details">
+                            <lord-icon
+                                src="https://cdn.lordicon.com/puvaffet.json"
+                                trigger="loop"
+                                delay="1500"
+                                colors="primary:#121331,secondary:#08a88a"
+                                stroke="100"
+                                style="width:28px;height:28px">
+                            </lord-icon>
+                        </a>
 
-                {{-- TIMELINE --}}
-                <div class="card card-primary card-outline">
-                    <div class="card-header border-0">
-                        <h3 class="card-title">Timeframe</h3>
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>           
-                        </div>
+                        <a href="{{ route('serviceConnections.move-to-trash', [$serviceConnections->id]) }}" class="text-danger float-right" title="Move to trash">
+                            <lord-icon
+                                src="https://cdn.lordicon.com/gsqxdxog.json"
+                                trigger="loop"
+                                delay="1500"
+                                colors="primary:#c71f16,secondary:#c71f16"
+                                stroke="100"
+                                style="width:28px;height:28px">
+                            </lord-icon>
+                        </a>
                     </div>
-
-                    <div class="card-body">
-                        <div class="timeline timeline-inverse">
-                            @if ($timeFrame == null)
-                                <p><i>No timeframe recorded</i></p>
-                            @else
-                                @php
-                                    $timeframeCount = count($timeFrame);
-                                    $i = 0;
-                                @endphp
-                                @foreach ($timeFrame as $item)
-                                    <div class="time-label">
-                                        <span class="{{ $i+1==$timeframeCount ? 'bg-success' : 'bg-secondary' }}">
-                                            {{ $item->Status }}
-                                        </span>
-                                    </div>
-                                    <div>
-                                    <i class="fas fa-info-circle bg-primary"></i>
-            
-                                    <div class="timeline-item">
-                                            <span class="time"><i class="far fa-clock"></i> {{ date('H:i A', strtotime($item->created_at)) }}</span>
-                
-                                            <h3 class="timeline-header"><a href="">{{ date('F d, Y', strtotime($item->created_at)) }}</a> by {{ $item->name }}</h3>
-                                        </div>
-                                    </div>
-                                    @php
-                                        $i++;
-                                    @endphp
-                                @endforeach
-                            @endif
-                        </div>
-                    </div>
-                </div>
+                </div> 
             </div>
 
             <div class="col-md-8 col-lg-8">
                 <div class="card">
                     <div class="card-header p-2">
                         <ul class="nav nav-pills">
-                            <li class="nav-item"><a class="nav-link active" href="#verification" data-toggle="tab"><i class="fas fa-clipboard-check ico-tab"></i>Verification</a></li>
-                            <li class="nav-item"><a class="nav-link" href="#metering" data-toggle="tab"><i class="fas fa-charging-station ico-tab"></i>Metering and Transformer</a></li>
-                            <li class="nav-item"><a class="nav-link" href="#invoice" data-toggle="tab"><i class="fas fa-shopping-cart ico-tab"></i>Payment Invoice</a></li>
+                            <li class="nav-item"><a class="nav-link active" href="#logs" data-toggle="tab">
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/tdrtiskw.json"
+                                    trigger="loop"
+                                    delay="800"
+                                    colors="primary:#ffffff,secondary:#ffffff"
+                                    stroke="100"
+                                    style="width:28px;height:28px">
+                                </lord-icon>
+                                Details and Logs</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#verification" data-toggle="tab">
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/nocovwne.json"
+                                    trigger="loop"
+                                    delay="800"
+                                    colors="primary:#ffffff,secondary:#ffffff"
+                                    stroke="100"
+                                    style="width:28px;height:28px">
+                                </lord-icon>Verification</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#metering" data-toggle="tab">
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/dbsklakl.json"
+                                    trigger="loop"
+                                    colors="primary:#ffffff,secondary:#ffffff"
+                                    stroke="100"
+                                    delay="800"
+                                    style="width:28px;height:28px">
+                                </lord-icon>
+                                Metering and Transformer</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#invoice" data-toggle="tab">
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/huwchbks.json"
+                                    trigger="loop"
+                                    stroke="100"
+                                    delay="800"
+                                    colors="primary:#ffffff,secondary:#ffffff"
+                                    style="width:28px;height:28px">
+                                </lord-icon>
+                                Payment Invoice</a></li>
                         </ul>
                     </div>
 
                     <div class="card-body">
                         <div class="tab-content">
-                            <div class="tab-pane active" id="verification">
+                            <div class="tab-pane active" id="logs">
+                                @include('service_connections.details')
+                            </div>
+
+                            <div class="tab-pane" id="verification">
                                 @include('service_connections.verification')
                             </div>
 

@@ -11,7 +11,7 @@ use App\Models\IDGenerator;
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <h4>Register New Service Connection Application</h4>
+                    <p><strong><span class="badge-lg bg-danger">Step 7</span>Service Connection - Meter and Transformer Assignment</strong></p>
                 </div>
             </div>
         </div>
@@ -27,7 +27,7 @@ use App\Models\IDGenerator;
                 <div class="card">
 
                     <div class="card-header">
-                        <span class="card-title">Step <strong>3</strong> of 4 - <strong>Meter, Transformer, and Other Equipments</strong></span>
+                        <span class="card-title">Meter, Transformer, and Other Equipment Entry</span>
                     </div>
 
                     {!! Form::open(['route' => 'serviceConnectionMtrTrnsfrmrs.store']) !!}

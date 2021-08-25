@@ -1,0 +1,115 @@
+<div class="row">
+    {{-- CHECKLISTS --}}
+    <div class="col-lg-6 col-md-6">
+        <div class="card card-primary card-outline">
+            <div class="card-header border-0">
+                <h3 class="card-title">Requirements Checklist</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>           
+                </div>
+            </div>
+
+            <div class="card-body">
+                @if ($serviceConnectionChecklistsRep == null) 
+                    <p class="text-center"><i>No checklist set. Go to settings and add some.</i></p>
+                @else
+                    @if ($serviceConnectionChecklists == null)
+                        <p class="text-center"><i>No checklist recorded.</i></p>
+                        <a href="{{ route('serviceConnections.assess-checklists', [$serviceConnections->id]) }}" class="btn btn-sm btn-primary">
+                            <lord-icon
+                                src="https://cdn.lordicon.com/jvihlqtw.json"
+                                trigger="loop"
+                                colors="primary:#ffffff,secondary:#ffffff"
+                                stroke="100"
+                                delay="1500"
+                                style="width:28px;height:28px">
+                            </lord-icon>
+                            Assess Requirements</a>
+                    @else
+                        <ul class="todo-list ui-sortable" data-widget="todo-list">
+                            @foreach ($serviceConnectionChecklistsRep as $item)
+
+                                @if (!in_array($item->id, $serviceConnectionChecklists))
+                                    {{-- IF HASN'T COMPLIED --}}
+                                    <li class="done">
+                                        <span class="handle ui-sortable-handle">
+                                        </span>
+                                        <div class="icheck-primary d-inline ml-2">
+                                            <i class="fas fa-times-circle"></i>
+                                        </div>
+                                        <span class="text">{{ $item->Checklist }}</span>
+
+                                        <div class="tools">
+                                            <a href="{{ route('serviceConnections.update-checklists', [$serviceConnections->id]) }}"><i class="fas fa-edit"></i></a>
+                                        </div>
+                                    </li>
+                                @else
+                                    {{-- IF COMPLIED --}}
+                                    <li class="">
+                                        <span class="handle ui-sortable-handle">
+                                        </span>
+                                        <div class="icheck-primary d-inline ml-2">
+                                            <i class="fas fa-check text-success"></i>
+                                        </div>
+                                        <span class="text">{{ $item->Checklist }}</span>
+                                    </li>
+                                @endif
+                            @endforeach
+                        </ul>
+                    @endif
+                @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- TIMELINE --}}
+    <div class="col-lg-6 col-md-6">
+        <div class="card card-primary card-outline">
+            <div class="card-header border-0">
+                <h3 class="card-title">Timeframe</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>           
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="timeline timeline-inverse">
+                    @if ($timeFrame == null)
+                        <p><i>No timeframe recorded</i></p>
+                    @else
+                        @php
+                            $i = 0;
+                        @endphp
+                        @foreach ($timeFrame as $item)
+                            <div class="time-label" style="font-size: .9em !important;">
+                                <span class="{{ $i==0 ? 'bg-success' : 'bg-secondary' }}">
+                                    {{ $item->Status }}
+                                </span>
+                            </div>
+                            <div>
+                            <i class="fas fa-info-circle bg-primary"></i>
+
+                            <div class="timeline-item">
+                                    <span class="time"><i class="far fa-clock"></i> {{ date('h:i A', strtotime($item->created_at)) }}</span>
+
+                                    <p class="timeline-header"  style="font-size: .9em !important;"><a href="">{{ date('F d, Y', strtotime($item->created_at)) }}</a> by {{ $item->name }}</p>
+
+                                    @if ($item->Notes != null)
+                                        <div class="timeline-body" style="font-size: .9em !important;">
+                                            {{ $item->Notes }}
+                                        </div>
+                                    @endif
+                                    
+                                </div>
+                            </div>
+                            @php
+                                $i++;
+                            @endphp
+                        @endforeach
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

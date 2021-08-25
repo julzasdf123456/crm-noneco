@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use App\Models\ServiceConnections;
 use App\Http\Controllers\ServiceConnectionsController;
 use App\Models\User;
+use App\Models\ServiceConnectionTimeframes;
+use App\Models\IDGenerator;
+use Illuminate\Support\Facades\Auth;
 use Flash;
 use Response;
 
@@ -63,6 +66,15 @@ class ServiceConnectionInspectionsController extends AppBaseController
         $serviceConnectionInspections = $this->serviceConnectionInspectionsRepository->create($input);
 
         Flash::success('Service Connection Inspections saved successfully.');
+
+        // CREATE Timeframes
+        $timeFrame = new ServiceConnectionTimeframes;
+        $timeFrame->id = IDGenerator::generateID();
+        $timeFrame->ServiceConnectionId = $input['ServiceConnectionId'];
+        $timeFrame->UserId = Auth::id();
+        $timeFrame->Status = 'For Inspection';
+        $timeFrame->Notes = 'Tickets for staking and inspection created!';
+        $timeFrame->save();
 
         // return redirect()->action([ServiceConnectionsController::class, 'show'], [$input['ServiceConnectionId']]);
         // return redirect()->action([App\Http\Controllers\ServiceConnectionMtrTrnsfrmrController::class, 'createStepThree'], [$input['ServiceConnectionId']]);

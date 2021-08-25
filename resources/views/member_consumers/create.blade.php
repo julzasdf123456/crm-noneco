@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <h1>Create Member Consumers</h1>
+                    <p><strong><span class="badge-lg bg-success">Step 1</span>Register Member Consumer</strong></p>
                 </div>
             </div>
         </div>

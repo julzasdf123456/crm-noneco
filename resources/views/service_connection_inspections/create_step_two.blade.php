@@ -11,7 +11,7 @@ use App\Models\IDGenerator;
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <h4>Register New Service Connection Application</h4>
+                    <p><strong><span class="badge-lg bg-warning">Step 5</span>Service Connection - Inspection and Staking</strong></p>
                 </div>
             </div>
         </div>
@@ -27,7 +27,7 @@ use App\Models\IDGenerator;
                 <div class="card">
 
                     <div class="card-header">
-                        <span class="card-title">Step <strong>2</strong> of 4 - <strong>Technical and Verification</strong></span>
+                        <span class="card-title">In-office Initial Assessment</span>
                     </div>
 
                     {!! Form::open(['route' => 'serviceConnectionInspections.store']) !!}

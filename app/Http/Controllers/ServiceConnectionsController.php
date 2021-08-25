@@ -17,6 +17,8 @@ use App\Models\ServiceConnectionPayTransaction;
 use App\Models\ServiceConnectionTotalPayments;
 use App\Models\ServiceConnectionTimeframes;
 use App\Models\IDGenerator;
+use App\Models\ServiceConnectionChecklistsRep;
+use App\Models\ServiceConnectionChecklists;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Flash;
@@ -81,7 +83,8 @@ class ServiceConnectionsController extends AppBaseController
 
         Flash::success('Service Connections saved successfully.');
 
-        return redirect(route('serviceConnectionInspections.create-step-two', [$input['id']]));
+        // return redirect(route('serviceConnectionInspections.create-step-two', [$input['id']]));
+        return redirect(route('serviceConnections.assess-checklists', [$input['id']]));
     }
 
     /**
@@ -94,10 +97,10 @@ class ServiceConnectionsController extends AppBaseController
     public function show($id)
     {
         $serviceConnections = DB::table('CRM_ServiceConnections')
-        ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
-        ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
-        ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
-        ->select('CRM_ServiceConnections.id as id',
+            ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+            ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->select('CRM_ServiceConnections.id as id',
                         'CRM_ServiceConnections.AccountCount as AccountCount', 
                         'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
                         'CRM_ServiceConnections.DateOfApplication as DateOfApplication', 
@@ -115,6 +118,7 @@ class ServiceConnectionsController extends AppBaseController
                         'CRM_Barangays.Barangay as Barangay',
                         'CRM_ServiceConnectionAccountTypes.AccountType as AccountType')
         ->where('CRM_ServiceConnections.id', $id)
+        // ->whereNotIn('CRM_ServiceConnections.Trash', ['Yes','YES'])
         ->first(); 
 
         $serviceConnectionInspections = ServiceConnectionInspections::where('ServiceConnectionId', $id)->first();
@@ -153,16 +157,23 @@ class ServiceConnectionsController extends AppBaseController
                         'CRM_ServiceConnectionTimeframes.created_at',
                         'CRM_ServiceConnectionTimeframes.ServiceConnectionId',
                         'CRM_ServiceConnectionTimeframes.UserId',
+                        'CRM_ServiceConnectionTimeframes.Notes',
                         'users.name')
                 ->where('CRM_ServiceConnectionTimeframes.ServiceConnectionId', $id)
-                ->orderBy('created_at')
+                ->orderByDesc('created_at')
                 ->get();
+
+        
 
         if (empty($serviceConnections)) {
             Flash::error('Service Connections not found');
 
             return redirect(route('serviceConnections.index'));
         }
+
+        $serviceConnectionChecklistsRep = ServiceConnectionChecklistsRep::all();
+        
+        $serviceConnectionChecklists = ServiceConnectionChecklists::where('ServiceConnectionId', $id)->pluck('ChecklistId')->all();
 
         return view('service_connections.show', ['serviceConnections' => $serviceConnections, 
                                                 'serviceConnectionInspections' => $serviceConnectionInspections, 
@@ -171,7 +182,9 @@ class ServiceConnectionsController extends AppBaseController
                                                 'materialPayments' => $materialPayments,
                                                 'particularPayments' => $particularPayments,
                                                 'totalTransactions' => $totalTransactions,
-                                                'timeFrame' => $timeFrame]);
+                                                'timeFrame' => $timeFrame,
+                                                'serviceConnectionChecklistsRep' => $serviceConnectionChecklistsRep,
+                                                'serviceConnectionChecklists' => $serviceConnectionChecklists]);
     }
 
     /**
@@ -430,8 +443,13 @@ class ServiceConnectionsController extends AppBaseController
                                     'CRM_Towns.Town as Town',
                                     'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
                                     'CRM_Barangays.Barangay as Barangay')
+                    ->where(function ($query) {
+                                        $query->where('CRM_ServiceConnections.Trash', 'No')
+                                            ->orWhereNull('CRM_ServiceConnections.Trash');
+                                    })
                     ->where('CRM_ServiceConnections.ServiceAccountName', 'LIKE', '%' . $query . '%')
                     ->orWhere('CRM_ServiceConnections.Id', 'LIKE', '%' . $query . '%')
+                    
                     ->orderBy('CRM_ServiceConnections.ServiceAccountName')
                     ->get();
             } else {
@@ -450,6 +468,10 @@ class ServiceConnectionsController extends AppBaseController
                                     'CRM_Towns.Town as Town',
                                     'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
                                     'CRM_Barangays.Barangay as Barangay')
+                    ->where(function ($query) {
+                                        $query->where('CRM_ServiceConnections.Trash', 'No')
+                                            ->orWhereNull('CRM_ServiceConnections.Trash');
+                                    })
                     ->orderByDesc('CRM_ServiceConnections.created_at')
                     ->take(10)
                     ->get();
@@ -499,5 +521,147 @@ class ServiceConnectionsController extends AppBaseController
 
             echo json_encode($data);
         }
+    }
+
+    public function assessChecklists($id) {
+        $serviceConnections = $this->serviceConnectionsRepository->find($id);
+
+        $checklist = ServiceConnectionChecklistsRep::all();
+
+        return view('/service_connections/assess_checklists', ['serviceConnections' => $serviceConnections, 'checklist' => $checklist]);
+    }
+
+    public function updateChecklists($id) {
+        $serviceConnections = $this->serviceConnectionsRepository->find($id);
+
+        $checklist = ServiceConnectionChecklistsRep::all();
+
+        $checklistCompleted = ServiceConnectionChecklists::where('ServiceConnectionId', $id)->pluck('ChecklistId')->all();
+
+        return view('/service_connections/update_checklists', ['serviceConnections' => $serviceConnections, 'checklist' => $checklist, 'checklistCompleted' => $checklistCompleted]);
+    }
+
+    public function moveToTrash($id) {
+        $serviceConnections = $this->serviceConnectionsRepository->find($id);
+
+        $serviceConnections->Trash = 'Yes';
+
+        $serviceConnections->save();
+
+        return redirect(route('serviceConnections.index'));
+    }
+
+    public function trash() {
+        return view('/service_connections/trash');
+    }
+
+    public function fetchserviceconnectiontrash(Request $request) {
+        if ($request->ajax()) {
+            $query = $request->get('query');
+            
+            if ($query != '' ) {
+                $data = DB::table('CRM_ServiceConnections')
+                    ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+                    ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+                    ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+                    ->select('CRM_ServiceConnections.id as ConsumerId',
+                                    'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                                    'CRM_ServiceConnections.Status as Status',
+                                    'CRM_ServiceConnections.DateOfApplication as DateOfApplication', 
+                                    'CRM_ServiceConnections.ContactNumber as ContactNumber', 
+                                    'CRM_ServiceConnections.EmailAddress as EmailAddress',  
+                                    'CRM_ServiceConnections.AccountCount as AccountCount',  
+                                    'CRM_ServiceConnections.Sitio as Sitio', 
+                                    'CRM_Towns.Town as Town',
+                                    'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
+                                    'CRM_Barangays.Barangay as Barangay')
+                    ->where('CRM_ServiceConnections.Trash', 'Yes')
+                    ->where('CRM_ServiceConnections.ServiceAccountName', 'LIKE', '%' . $query . '%')
+                    ->orWhere('CRM_ServiceConnections.Id', 'LIKE', '%' . $query . '%')
+                    
+                    ->orderBy('CRM_ServiceConnections.ServiceAccountName')
+                    ->get();
+            } else {
+                $data = DB::table('CRM_ServiceConnections')
+                    ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+                    ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+                    ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+                    ->select('CRM_ServiceConnections.id as ConsumerId',
+                                    'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                                    'CRM_ServiceConnections.Status as Status',
+                                    'CRM_ServiceConnections.DateOfApplication as DateOfApplication', 
+                                    'CRM_ServiceConnections.ContactNumber as ContactNumber', 
+                                    'CRM_ServiceConnections.EmailAddress as EmailAddress',  
+                                    'CRM_ServiceConnections.AccountCount as AccountCount',  
+                                    'CRM_ServiceConnections.Sitio as Sitio', 
+                                    'CRM_Towns.Town as Town',
+                                    'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
+                                    'CRM_Barangays.Barangay as Barangay')
+                    ->where('CRM_ServiceConnections.Trash', 'Yes')
+                    ->orderByDesc('CRM_ServiceConnections.created_at')
+                    ->take(10)
+                    ->get();
+            }
+
+            $total_row = $data->count();
+            if ($total_row > 0) {
+                $output = '';
+                foreach ($data as $row) {
+
+                    $output .= '
+                        <div class="col-md-10 offset-md-1 col-lg-10 offset-lg-1" style="margin-top: 10px;">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 col-lg-6">
+                                            <div>
+                                                <h4>' .$row->ServiceAccountName . '</h4>
+                                                <p class="text-muted" style="margin-bottom: 0;">Acount Number: ' . $row->ConsumerId . '</p>
+                                                <p class="text-muted" style="margin-bottom: 0;">' . $row->Barangay . ', ' . $row->Town  . '</p>
+                                                <a href="' . route('serviceConnections.restore', [$row->ConsumerId]) . '" class="text-primary" style="margin-top: 5px; padding: 8px;" title="Restore"><lord-icon
+                                                        src="https://cdn.lordicon.com/ybgqhhgb.json"
+                                                        trigger="loop"
+                                                        delay="1500"
+                                                        colors="primary:#e83a30,secondary:#e83a30"
+                                                        stroke="100"
+                                                        style="width:25px;height:25px">
+                                                    </lord-icon></a>
+                                            </div>     
+                                        </div> 
+
+                                        <div class="col-md-6 col-lg-6 d-sm-none d-md-block d-none d-sm-block" style="border-left: 2px solid #007bff; padding-left: 15px;">
+                                            <div>
+                                                <p class="text-muted" style="margin-bottom: 0;">Date of Application: <strong>' . date('F d, Y', strtotime($row->DateOfApplication)) . '</strong></p>
+                                                <p class="text-muted" style="margin-bottom: 0;">AccountCount: <strong>' . $row->AccountCount . '</strong></p>
+                                                <p class="text-muted" style="margin-bottom: 0;">Status: <strong>' . $row->Status . '</strong></p>
+                                                <p class="text-muted" style="margin-bottom: 0;">Account Type: <strong>' . $row->AccountType . '</strong></p>
+                                            </div>     
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>   
+                    ';
+                }                
+            } else {
+                $output = '<p class="text-center">No data found.</p>';
+            }
+
+            $data = [
+                'table_data' => $output
+            ];
+
+            echo json_encode($data);
+        }
+    }
+
+    public function restore($id) {
+        $serviceConnections = $this->serviceConnectionsRepository->find($id);
+
+        $serviceConnections->Trash = null;
+
+        $serviceConnections->save();
+
+        return redirect(route('serviceConnections.trash'));
     }
 }

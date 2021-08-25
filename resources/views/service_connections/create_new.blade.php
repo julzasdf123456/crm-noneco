@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <h4>Register New Service Connection Application</h4>
+                    <p><strong><span class="badge-lg bg-warning">Step 3</span>Apply for Service Connection</strong></p>
                 </div>
             </div>
         </div>
@@ -21,7 +21,12 @@
                 <div class="card">
 
                     <div class="card-header">
-                        <span class="card-title">Step <strong>1</strong> of 4 - <strong>Applicant Basic Account Info</strong></span>
+                        {{-- <span class="card-title">Step <strong>1</strong> of 4 - <strong>Applicant Basic Account Info</strong></span> --}}
+                        <span class="card-title">Applicant Basic Account Info</strong></span>
+
+                        <div class="card-tools">
+                            <a href="{{ route('memberConsumers.show', [$memberConsumer->ConsumerId]) }}">Skip For Now</a>
+                        </div>
                     </div>
 
                     {!! Form::open(['route' => 'serviceConnections.store']) !!}

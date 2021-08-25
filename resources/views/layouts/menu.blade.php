@@ -11,20 +11,30 @@
         <ul class="nav nav-treeview">
             <li class="nav-item">
                 <a href="{{ route('memberConsumers.index') }}"
-                class="nav-link {{ Request::is('memberConsumers*') ? 'active' : '' }}">
+                class="nav-link {{ Request::is('memberConsumers.index*') ? 'active' : '' }}">
                 <i class="fas fa-street-view nav-icon"></i><p>Member Consumers</p>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="{{ route('memberConsumers.create') }}"
-                class="nav-link {{ Request::is('memberConsumers*') ? 'active' : '' }}">
+                class="nav-link {{ Request::is('memberConsumers.create*') ? 'active' : '' }}">
                 <i class="fas fa-user-plus nav-icon"></i><p>Register New MCO</p>
                 </a>
             </li>
+
+            <li class="nav-header"><i class="fas fa-cogs"></i> Settings</li>
+
             <li class="nav-item">
                 <a href="{{ route('memberConsumerTypes.index') }}"
                 class="nav-link {{ Request::is('memberConsumerTypes*') ? 'active' : '' }}">
                 <i class="fas fa-code-branch nav-icon"></i><p>Consumer Types</p>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="{{ route('memberConsumerChecklistsReps.index') }}"
+                class="nav-link {{ Request::is('memberConsumerChecklistsReps*') ? 'active' : '' }}">
+                <i class="fas fa-check nav-icon"></i><p>Checklists</p>
                 </a>
             </li>
         </ul>
@@ -88,8 +98,24 @@
                         <i class="fas fa-shopping-cart nav-icon"></i><p>Payment Particulars</p>
                         </a>
                     </li>
+                    
+                    <li class="nav-item">
+                        <a href="{{ route('serviceConnectionChecklistsReps.index') }}"
+                        class="nav-link {{ Request::is('serviceConnectionChecklistsReps*') ? 'active' : '' }}">
+                        <i class="fas fa-check nav-icon"></i><p>Checklists</p>
+                        </a>
+                    </li>
+
                 </ul>
-              </li>
+            </li>
+        
+            <li class="nav-item">
+                <a href="{{ route('serviceConnections.trash') }}"
+                class="nav-link {{ Request::is('serviceConnections.trash*') ? 'active' : '' }}">
+                <i class="fas fa-trash nav-icon"></i><p>Trash</p>
+                </a>
+            </li>
+        
         </ul>
     </li>
 @endcanany
@@ -158,6 +184,4 @@
         </ul>
     </li>
 @endcan
-
-
 

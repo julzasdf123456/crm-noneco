@@ -12,6 +12,7 @@ use App\Models\IDGenerator;
 use App\Models\Barangays;
 use App\Models\Towns;
 use App\Models\MemberConsumers;
+use App\Models\MemberConsumerChecklistsRep;
 use Illuminate\Support\Facades\DB;
 use Flash;
 use Response;
@@ -80,7 +81,7 @@ class MemberConsumersController extends AppBaseController
         if ($input['CivilStatus'] == 'Married') {
             return redirect(route('memberConsumerSpouses.create', [$input['Id']]));
         } else {
-            return redirect(route('memberConsumers.index'));
+            return redirect(route('memberConsumers.assess-checklists', [$input['Id']]));
         }
     }
 
@@ -327,5 +328,13 @@ class MemberConsumersController extends AppBaseController
 
             echo json_encode($data);
         }
+    }
+
+    public function assessChecklists($id) {
+        $memberConsumers = $this->memberConsumersRepository->find($id);
+
+        $checklist = MemberConsumerChecklistsRep::all();
+
+        return view('/member_consumers/assess_checklists', ['memberConsumers' => $memberConsumers, 'checklist' => $checklist]);
     }
 }

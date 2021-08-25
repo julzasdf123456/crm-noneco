@@ -19,7 +19,16 @@
             @if($serviceConnectionInspections == null)
                 <a href="" class="btn btn-sm" title="Add Verification Details"><i class="fas fa-plus-square"></i></a>
             @else
-                <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details"><i class="fas fa-pen"></i></a>
+                <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details">
+                    <lord-icon
+                        src="https://cdn.lordicon.com/wloilxuq.json"
+                        trigger="loop"
+                        delay="1500"
+                        stroke="100"
+                        colors="primary:#121331,secondary:#08a88a"
+                        style="width:32px;height:32px">
+                    </lord-icon>
+                </a>
                 <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
             @endif
         </div>
@@ -58,7 +67,16 @@
             @if($serviceConnectionInspections == null)
                 <a href="" class="btn btn-sm" title="Add Verification Details"><i class="fas fa-plus-square"></i></a>
             @else
-                <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details"><i class="fas fa-pen"></i></a>
+                <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details">
+                    <lord-icon
+                        src="https://cdn.lordicon.com/wloilxuq.json"
+                        trigger="loop"
+                        delay="1500"
+                        stroke="100"
+                        colors="primary:#121331,secondary:#08a88a"
+                        style="width:32px;height:32px">
+                    </lord-icon>
+                </a>
                 <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
             @endif
         </div>
@@ -107,7 +125,16 @@
             @if($serviceConnectionInspections == null)
                 <a href="" class="btn btn-sm" title="Add Verification Details"><i class="fas fa-plus-square"></i></a>
             @else
-                <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details"><i class="fas fa-pen"></i></a>
+                <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details">
+                    <lord-icon
+                        src="https://cdn.lordicon.com/wloilxuq.json"
+                        trigger="loop"
+                        delay="1500"
+                        stroke="100"
+                        colors="primary:#121331,secondary:#08a88a"
+                        style="width:32px;height:32px">
+                    </lord-icon>
+                </a>
                 <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
             @endif
         </div>
@@ -155,7 +182,16 @@
             @if($serviceConnectionInspections == null)
                 <a href="" class="btn btn-sm" title="Add Verification Details"><i class="fas fa-plus-square"></i></a>
             @else
-                <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details"><i class="fas fa-pen"></i></a>
+                <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details">
+                    <lord-icon
+                        src="https://cdn.lordicon.com/wloilxuq.json"
+                        trigger="loop"
+                        delay="1500"
+                        stroke="100"
+                        colors="primary:#121331,secondary:#08a88a"
+                        style="width:32px;height:32px">
+                    </lord-icon>
+                </a>
                 <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
             @endif
         </div>
