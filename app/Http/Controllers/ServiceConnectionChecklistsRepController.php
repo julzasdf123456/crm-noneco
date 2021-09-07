@@ -17,6 +17,7 @@ class ServiceConnectionChecklistsRepController extends AppBaseController
 
     public function __construct(ServiceConnectionChecklistsRepRepository $serviceConnectionChecklistsRepRepo)
     {
+        $this->middleware('auth');
         $this->serviceConnectionChecklistsRepRepository = $serviceConnectionChecklistsRepRepo;
     }
 

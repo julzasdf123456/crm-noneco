@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\ServiceConnectionInspectionsAPI;
+use App\Http\Controllers\API\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,10 +16,15 @@ use App\Http\Controllers\API\ServiceConnectionInspectionsAPI;
 |
 */
 
+// DOWNLOAD DATA
+Route::get('get-service-connections/', [ServiceConnectionInspectionsAPI::class, 'getServiceConnections']);
+Route::get('get-service-inspections/', [ServiceConnectionInspectionsAPI::class, 'getServiceInspections']);
+Route::post('update-service-inspections/', [ServiceConnectionInspectionsAPI::class, 'updateServiceInspections']);
+
+Route::post('login', [UserController::class, 'login']);
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// DOWNLOAD DATA
-Route::get('get-service-connections/', [ServiceConnectionInspectionsAPI::class, 'getServiceConnections']);
-Route::get('get-service-inspections/', [ServiceConnectionInspectionsAPI::class, 'getServiceInspections']);
+

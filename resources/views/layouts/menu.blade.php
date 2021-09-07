@@ -2,7 +2,14 @@
 @canany(['Super Admin', 'view membership'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-users"></i>
+            <lord-icon
+                src="https://cdn.lordicon.com/imamsnbq.json"
+                trigger="loop-on-hover"
+                delay="500"
+                stroke="100"
+                colors="primary:#ffffff,secondary:#ffffff"
+                style="width:23px;height:23px">
+            </lord-icon>
             <p>
                 Membership
                 <i class="fas fa-angle-left right"></i>
@@ -22,7 +29,16 @@
                 </a>
             </li>
 
-            <li class="nav-header"><i class="fas fa-cogs"></i> Settings</li>
+            <li class="nav-header">                
+                <lord-icon
+                    src="https://cdn.lordicon.com/sbiheqdr.json"
+                    trigger="loop"
+                    colors="primary:#ffffff,secondary:#ffffff"
+                    stroke="100"
+                    delay="1800"
+                    style="width:21px;height:21px">
+                </lord-icon> Settings
+            </li>
 
             <li class="nav-item">
                 <a href="{{ route('memberConsumerTypes.index') }}"
@@ -46,7 +62,13 @@
 @canany(['Super Admin', 'sc view'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-plug"></i>
+            <lord-icon
+                src="https://cdn.lordicon.com/dbsklakl.json"
+                trigger="hover"
+                colors="primary:#ffffff,secondary:#ffffff"
+                stroke="100"
+                style="width:23px;height:23px">
+            </lord-icon>
             <p>
                 Service Connections
                 <i class="fas fa-angle-left right"></i>
@@ -71,7 +93,14 @@
 
             <li class="nav-item">
                 <a href="#" class="nav-link">
-                    <i class="fas fa-cogs nav-icon"></i>
+                    <lord-icon
+                        src="https://cdn.lordicon.com/sbiheqdr.json"
+                        trigger="loop"
+                        colors="primary:#ffffff,secondary:#ffffff"
+                        stroke="100"
+                        delay="1800"
+                        style="width:22px;height:22px">
+                    </lord-icon>
                     <p>
                         Settings
                         <i class="fas fa-angle-left right"></i>
@@ -124,7 +153,13 @@
 @canany(['Super Admin', 'view membership', 'view complains', 'view service connections'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-ellipsis-h"></i>
+            <lord-icon
+                src="https://cdn.lordicon.com/jvucoldz.json"
+                trigger="hover"
+                colors="primary:#ffffff,secondary:#ffffff"
+                stroke="100"
+                style="width:23px;height:23px">
+            </lord-icon>
             <p>
                 Extras
                 <i class="fas fa-angle-left right"></i>
@@ -153,7 +188,13 @@
 @can('Super Admin')
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-shield-alt"></i>
+            <lord-icon
+                src="https://cdn.lordicon.com/huwchbks.json"
+                trigger="hover"
+                colors="primary:#ffffff,secondary:#ffffff"
+                stroke="100"
+                style="width:23px;height:23px">
+            </lord-icon>
             <p>
                 Administrator
                 <i class="fas fa-angle-left right"></i>

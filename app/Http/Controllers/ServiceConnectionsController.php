@@ -113,15 +113,21 @@ class ServiceConnectionsController extends AppBaseController
                         'CRM_ServiceConnections.MemberConsumerId as MemberConsumerId',
                         'CRM_ServiceConnections.Status as Status',  
                         'CRM_ServiceConnections.Notes as Notes', 
+                        'CRM_ServiceConnections.ORNumber as ORNumber', 
                         'CRM_ServiceConnections.Sitio as Sitio', 
                         'CRM_Towns.Town as Town',
                         'CRM_Barangays.Barangay as Barangay',
                         'CRM_ServiceConnectionAccountTypes.AccountType as AccountType')
         ->where('CRM_ServiceConnections.id', $id)
-        // ->whereNotIn('CRM_ServiceConnections.Trash', ['Yes','YES'])
+        ->where(function ($query) {
+            $query->where('CRM_ServiceConnections.Trash', 'No')
+                ->orWhereNull('CRM_ServiceConnections.Trash');
+        })
         ->first(); 
 
-        $serviceConnectionInspections = ServiceConnectionInspections::where('ServiceConnectionId', $id)->first();
+        $serviceConnectionInspections = ServiceConnectionInspections::where('ServiceConnectionId', $id)
+                                ->orderByDesc('created_at')
+                                ->first();
 
         $serviceConnectionMeter = ServiceConnectionMtrTrnsfrmr::where('ServiceConnectionId', $id)->first();
 
@@ -577,8 +583,7 @@ class ServiceConnectionsController extends AppBaseController
                                     'CRM_Barangays.Barangay as Barangay')
                     ->where('CRM_ServiceConnections.Trash', 'Yes')
                     ->where('CRM_ServiceConnections.ServiceAccountName', 'LIKE', '%' . $query . '%')
-                    ->orWhere('CRM_ServiceConnections.Id', 'LIKE', '%' . $query . '%')
-                    
+                    ->orWhere('CRM_ServiceConnections.Id', 'LIKE', '%' . $query . '%')                    
                     ->orderBy('CRM_ServiceConnections.ServiceAccountName')
                     ->get();
             } else {

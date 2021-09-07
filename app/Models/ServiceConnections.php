@@ -70,7 +70,9 @@ class ServiceConnections extends Model
         'BuildingType',
         'Status',
         'Notes',
-        'Trash'
+        'Trash',
+        'ORNumber',
+        'ORDate',
     ];
 
     /**
@@ -98,7 +100,11 @@ class ServiceConnections extends Model
         'BuildingType' => 'string',
         'Status' => 'string',
         'Notes' => 'string',
-        'Trash' => 'string'
+        'Trash' => 'string',
+        'ORNumber' => 'string',
+        'ORDate' => 'date',
+        'DateTimeLinemenArrived' => 'datetime',
+        'DateTimeOfEnergization' => 'datetime',
     ];
 
     /**
@@ -127,8 +133,12 @@ class ServiceConnections extends Model
         'Status' => 'nullable|string|max:100',
         'Notes' => 'nullable|string|max:2000',
         'Trash' => 'nullable|string',
+        'ORNumber' => 'nullable|string',
+        'ORDate' => 'nullable',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'DateTimeLinemenArrived' => 'nullable',
+        'DateTimeOfEnergization' => 'nullable',
     ];
 
     public static function getAccountCount($consumerId) {

@@ -20,6 +20,7 @@ class MemberConsumerChecklistsController extends AppBaseController
 
     public function __construct(MemberConsumerChecklistsRepository $memberConsumerChecklistsRepo)
     {
+        $this->middleware('auth');
         $this->memberConsumerChecklistsRepository = $memberConsumerChecklistsRepo;
     }
 

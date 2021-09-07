@@ -1,15 +1,21 @@
 @if($serviceConnectionTransactions == null)
     <p class="text-center"><i>No payment transactions recorded!</i></p>
-    <a href="{{ route('serviceConnectionPayTransactions.create-step-four', [$serviceConnections->id]) }}" class="btn btn-primary btn-sm" title="Add Payment Transaction">
-        <lord-icon
-            src="https://cdn.lordicon.com/mecwbjnp.json"
-            trigger="loop"
-            delay="1500"
-            stroke="100"
-            colors="primary:#ffffff,secondary:#ffffff"
-            style="width:25px;height:25px">
-        </lord-icon>
-        Create Payment Invoice</a>
+    @if ($serviceConnectionInspections != null)
+        @if ($serviceConnectionInspections->Status != "Approved")
+            <p class="text-danger"><i class="fas fa-info-circle ico-tab"></i> <i>NOTE that you can't create payment invoice if the inspection isn't approved or successful.</i></p>
+        @else
+            <a href="{{ route('serviceConnectionPayTransactions.create-step-four', [$serviceConnections->id]) }}" class="btn btn-primary btn-sm" title="Add Payment Transaction">
+                <lord-icon
+                    src="https://cdn.lordicon.com/mecwbjnp.json"
+                    trigger="loop"
+                    delay="1500"
+                    stroke="100"
+                    colors="primary:#ffffff,secondary:#ffffff"
+                    style="width:25px;height:25px">
+                </lord-icon>
+                Create Payment Invoice</a>
+        @endif
+    @endif
 @else
     <div class="row">
         <div class="col-md-12">

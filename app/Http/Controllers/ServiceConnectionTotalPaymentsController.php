@@ -7,6 +7,9 @@ use App\Http\Requests\UpdateServiceConnectionTotalPaymentsRequest;
 use App\Repositories\ServiceConnectionTotalPaymentsRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
+use App\Models\ServiceConnectionTimeframes;
+use App\Models\IDGenerator;
+use Illuminate\Support\Facades\Auth;
 use Flash;
 use Response;
 
@@ -60,6 +63,14 @@ class ServiceConnectionTotalPaymentsController extends AppBaseController
         $serviceConnectionTotalPayments = $this->serviceConnectionTotalPaymentsRepository->create($input);
 
         Flash::success('Service Connection Total Payments saved successfully.');
+
+        // CREATE Timeframes
+        $timeFrame = new ServiceConnectionTimeframes;
+        $timeFrame->id = IDGenerator::generateID();
+        $timeFrame->ServiceConnectionId = $input['ServiceConnectionId'];
+        $timeFrame->UserId = Auth::id();
+        $timeFrame->Status = 'Payment Invoice Created';
+        $timeFrame->save();
 
         // return redirect(route('serviceConnectionTotalPayments.index'));
         return redirect()->action([ServiceConnectionsController::class, 'show'], [$input['ServiceConnectionId']]); 
@@ -127,6 +138,14 @@ class ServiceConnectionTotalPaymentsController extends AppBaseController
         $serviceConnectionTotalPayments = $this->serviceConnectionTotalPaymentsRepository->update($request->all(), $id);
 
         // Flash::success('Service Connection Total Payments updated successfully.');
+
+        // CREATE Timeframes
+        $timeFrame = new ServiceConnectionTimeframes;
+        $timeFrame->id = IDGenerator::generateID();
+        $timeFrame->ServiceConnectionId = $request['ServiceConnectionId'];
+        $timeFrame->UserId = Auth::id();
+        $timeFrame->Status = 'Payment Invoice Updated';
+        $timeFrame->save();
 
         // return redirect(route('serviceConnectionTotalPayments.index'));
         return redirect()->action([ServiceConnectionsController::class, 'show'], [$request['ServiceConnectionId']]); 

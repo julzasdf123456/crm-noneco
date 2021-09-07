@@ -78,7 +78,8 @@ class ServiceConnectionInspectionsController extends AppBaseController
 
         // return redirect()->action([ServiceConnectionsController::class, 'show'], [$input['ServiceConnectionId']]);
         // return redirect()->action([App\Http\Controllers\ServiceConnectionMtrTrnsfrmrController::class, 'createStepThree'], [$input['ServiceConnectionId']]);
-        return redirect(route('serviceConnectionMtrTrnsfrmrs.create-step-three', [$input['ServiceConnectionId']]));
+        // return redirect(route('serviceConnectionMtrTrnsfrmrs.create-step-three', [$input['ServiceConnectionId']]));
+        return redirect()->action([ServiceConnectionsController::class, 'show'], [$input['ServiceConnectionId']]); 
     }
 
     /**
