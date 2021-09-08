@@ -16,46 +16,52 @@
             </p>
         </a>
         <ul class="nav nav-treeview">
-            <li class="nav-item">
-                <a href="{{ route('memberConsumers.index') }}"
-                class="nav-link {{ Request::is('memberConsumers.index*') ? 'active' : '' }}">
-                <i class="fas fa-street-view nav-icon"></i><p>Member Consumers</p>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('memberConsumers.create') }}"
-                class="nav-link {{ Request::is('memberConsumers.create*') ? 'active' : '' }}">
-                <i class="fas fa-user-plus nav-icon"></i><p>Register New MCO</p>
-                </a>
-            </li>
+            @canany(['Super Admin', 'view membership'])
+                <li class="nav-item">
+                    <a href="{{ route('memberConsumers.index') }}"
+                    class="nav-link {{ Request::is('memberConsumers.index*') ? 'active' : '' }}">
+                    <i class="fas fa-street-view nav-icon"></i><p>Member Consumers</p>
+                    </a>
+                </li>
+            @endcanany
 
-            <li class="nav-header">                
-                <lord-icon
-                    src="https://cdn.lordicon.com/sbiheqdr.json"
-                    trigger="loop"
-                    colors="primary:#ffffff,secondary:#ffffff"
-                    stroke="100"
-                    delay="1800"
-                    style="width:21px;height:21px">
-                </lord-icon> Settings
-            </li>
+            @canany(['Super Admin', 'create membership'])
+                <li class="nav-item">
+                    <a href="{{ route('memberConsumers.create') }}"
+                    class="nav-link {{ Request::is('memberConsumers.create*') ? 'active' : '' }}">
+                    <i class="fas fa-user-plus nav-icon"></i><p>Register New MCO</p>
+                    </a>
+                </li>
+            @endcanany
 
-            <li class="nav-item">
-                <a href="{{ route('memberConsumerTypes.index') }}"
-                class="nav-link {{ Request::is('memberConsumerTypes*') ? 'active' : '' }}">
-                <i class="fas fa-code-branch nav-icon"></i><p>Consumer Types</p>
-                </a>
-            </li>
-            
-            <li class="nav-item">
-                <a href="{{ route('memberConsumerChecklistsReps.index') }}"
-                class="nav-link {{ Request::is('memberConsumerChecklistsReps*') ? 'active' : '' }}">
-                <i class="fas fa-check nav-icon"></i><p>Checklists</p>
-                </a>
-            </li>
+            @canany(['Super Admin', 'update membership'])
+                <li class="nav-header">                
+                    <lord-icon
+                        src="https://cdn.lordicon.com/sbiheqdr.json"
+                        trigger="loop"
+                        colors="primary:#ffffff,secondary:#ffffff"
+                        stroke="100"
+                        delay="1800"
+                        style="width:21px;height:21px">
+                    </lord-icon> Settings
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('memberConsumerTypes.index') }}"
+                    class="nav-link {{ Request::is('memberConsumerTypes*') ? 'active' : '' }}">
+                    <i class="fas fa-code-branch nav-icon"></i><p>Consumer Types</p>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="{{ route('memberConsumerChecklistsReps.index') }}"
+                    class="nav-link {{ Request::is('memberConsumerChecklistsReps*') ? 'active' : '' }}">
+                    <i class="fas fa-check nav-icon"></i><p>Checklists</p>
+                    </a>
+                </li>
+            @endcanany
         </ul>
-    </li>
-    
+    </li>    
 @endcanany
 
 <!-- SERVICE CONNECTION MENU -->
@@ -75,22 +81,27 @@
             </p>
         </a>
         <ul class="nav nav-treeview">
-            <li class="nav-item">
-                <a href="{{ route('serviceConnections.index') }}"
-                class="nav-link {{ Request::is('serviceConnections*') ? 'active' : '' }}">
-                    <i class="fas fa-bolt nav-icon"></i>
-                    <p>All Applications</p>
-                </a>
-            </li>
+            @canany(['Super Admin', 'sc view'])
+                <li class="nav-item">
+                    <a href="{{ route('serviceConnections.index') }}"
+                    class="nav-link {{ Request::is('serviceConnections*') ? 'active' : '' }}">
+                        <i class="fas fa-bolt nav-icon"></i>
+                        <p>All Applications</p>
+                    </a>
+                </li>
+            @endcanany
 
-            <li class="nav-item">
-                <a href="{{ route('serviceConnections.selectmembership') }}"
-                class="nav-link {{ Request::is('serviceConnections.selectmembership') ? 'active' : '' }}">
-                    <i class="fas fa-plus nav-icon"></i>
-                    <p>New Application</p>
-                </a>
-            </li>
+            @canany(['Super Admin', 'sc create'])
+                <li class="nav-item">
+                    <a href="{{ route('serviceConnections.selectmembership') }}"
+                    class="nav-link {{ Request::is('serviceConnections.selectmembership') ? 'active' : '' }}">
+                        <i class="fas fa-plus nav-icon"></i>
+                        <p>New Application</p>
+                    </a>
+                </li>
+            @endcanany
 
+            @canany(['Super Admin', 'sc settings'])
             <li class="nav-item">
                 <a href="#" class="nav-link">
                     <lord-icon
@@ -134,23 +145,24 @@
                         <i class="fas fa-check nav-icon"></i><p>Checklists</p>
                         </a>
                     </li>
-
                 </ul>
             </li>
-        
+            @endcanany
+            
+            @canany(['Super Admin', 'sc delete'])
             <li class="nav-item">
                 <a href="{{ route('serviceConnections.trash') }}"
                 class="nav-link {{ Request::is('serviceConnections.trash*') ? 'active' : '' }}">
                 <i class="fas fa-trash nav-icon"></i><p>Trash</p>
                 </a>
             </li>
-        
+            @endcanany
         </ul>
     </li>
 @endcanany
 
 <!-- EXTRAS MENU -->
-@canany(['Super Admin', 'view membership', 'view complains', 'view service connections'])
+@canany(['Super Admin', 'create membership', 'sc create'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <lord-icon

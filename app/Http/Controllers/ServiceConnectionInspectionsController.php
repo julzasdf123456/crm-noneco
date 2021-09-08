@@ -179,7 +179,7 @@ class ServiceConnectionInspectionsController extends AppBaseController
     public function createStepTwo($scId) {
         $serviceConnection = ServiceConnections::find($scId);
 
-        $inspectors = User::permission('sc verifier')->pluck('name', 'id'); // CHANGE PERMISSION TO WHATEVER VERIFIER NAME IS
+        $inspectors = User::role('Inspector')->pluck('name', 'id'); // CHANGE PERMISSION TO WHATEVER VERIFIER NAME IS
 
         $serviceConnectionInspections = null;
 

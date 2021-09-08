@@ -90,7 +90,7 @@ class UsersController extends AppBaseController
 
         $userModel = User::find($id);
 
-        $userPermissions = $userModel->getAllPermissions();
+        $userPermissions = $userModel->getPermissionsViaRoles();
 
         if (empty($users)) {
             Flash::error('Users not found');
@@ -183,9 +183,10 @@ class UsersController extends AppBaseController
     public function createUserRoles(Request $request) {
         $user = User::find($request->userId);
 
-        // $user->syncRoles($request->input('roles', []));
+        $user->syncRoles($request->input('roles', []));
 
-        return redirect(route('users.add_user_permissions', ['id' => $user->id, 'roles' => $request->input('roles', [])]));
+        // return redirect(route('users.add_user_permissions', ['id' => $user->id, 'roles' => $request->input('roles', [])]));
+        return redirect('users/' . $request->userId);
     }
 
     public function addUserPermissions($id) {

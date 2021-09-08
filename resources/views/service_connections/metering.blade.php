@@ -6,27 +6,32 @@
             <h3 class="card-title">Meter Details</h3>
             <div class="card-tools">
                 @if($serviceConnectionMeter == null)
-                    <a href="{{ route('serviceConnectionMtrTrnsfrmrs.create-step-three', [$serviceConnections->id]) }}" class="btn btn-sm" title="Add Metering Details">
-                        <lord-icon
-                            src="https://cdn.lordicon.com/mecwbjnp.json"
-                            trigger="loop"
-                            delay="1500"
-                            stroke="100"
-                            colors="primary:#121331,secondary:#08a88a"
-                            style="width:32px;height:32px">
-                        </lord-icon>
-                    </a>
+                    @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Metering Personnel'])) 
+                        <a href="{{ route('serviceConnectionMtrTrnsfrmrs.create-step-three', [$serviceConnections->id]) }}" class="btn btn-sm" title="Add Metering Details">
+                            <lord-icon
+                                src="https://cdn.lordicon.com/mecwbjnp.json"
+                                trigger="loop"
+                                delay="1500"
+                                stroke="100"
+                                colors="primary:#121331,secondary:#08a88a"
+                                style="width:32px;height:32px">
+                            </lord-icon>
+                        </a>
+                    @endif                    
                 @else
-                    <a href="{{ route('serviceConnectionMtrTrnsfrmrs.edit', [$serviceConnectionMeter->id]) }}" class="btn btn-sm" title="Update Metering Details">
-                        <lord-icon
-                            src="https://cdn.lordicon.com/wloilxuq.json"
-                            trigger="loop"
-                            delay="1500"
-                            stroke="100"
-                            colors="primary:#121331,secondary:#08a88a"
-                            style="width:32px;height:32px">
-                        </lord-icon>
-                    </a>
+                    @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Metering Personnel'])) 
+                        <a href="{{ route('serviceConnectionMtrTrnsfrmrs.edit', [$serviceConnectionMeter->id]) }}" class="btn btn-sm" title="Update Metering Details">
+                            <lord-icon
+                                src="https://cdn.lordicon.com/wloilxuq.json"
+                                trigger="loop"
+                                delay="1500"
+                                stroke="100"
+                                colors="primary:#121331,secondary:#08a88a"
+                                style="width:32px;height:32px">
+                            </lord-icon>
+                        </a>
+                    @endif 
+                    
                     <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
                 @endif           
             </div>
@@ -104,27 +109,31 @@
             <h3 class="card-title">Transformer Details</h3>
             <div class="card-tools">
                 @if($serviceConnectionMeter == null)
-                    <a href="{{ route('serviceConnectionMtrTrnsfrmrs.create-step-three', [$serviceConnections->id]) }}" class="btn btn-sm" title="Add Transformer Details">
-                        <lord-icon
-                            src="https://cdn.lordicon.com/mecwbjnp.json"
-                            trigger="loop"
-                            delay="1500"
-                            stroke="100"
-                            colors="primary:#121331,secondary:#08a88a"
-                            style="width:32px;height:32px">
-                        </lord-icon>
-                    </a>
+                    @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Metering Personnel'])) 
+                        <a href="{{ route('serviceConnectionMtrTrnsfrmrs.create-step-three', [$serviceConnections->id]) }}" class="btn btn-sm" title="Add Transformer Details">
+                            <lord-icon
+                                src="https://cdn.lordicon.com/mecwbjnp.json"
+                                trigger="loop"
+                                delay="1500"
+                                stroke="100"
+                                colors="primary:#121331,secondary:#08a88a"
+                                style="width:32px;height:32px">
+                            </lord-icon>
+                        </a>
+                    @endif
                 @else
-                    <a href="{{ route('serviceConnectionMtrTrnsfrmrs.edit', [$serviceConnectionMeter->id]) }}" class="btn btn-sm" title="Update Transformer Details">
-                        <lord-icon
-                            src="https://cdn.lordicon.com/wloilxuq.json"
-                            trigger="loop"
-                            delay="1500"
-                            stroke="100"
-                            colors="primary:#121331,secondary:#08a88a"
-                            style="width:32px;height:32px">
-                        </lord-icon>
-                    </a>
+                    @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Metering Personnel'])) 
+                        <a href="{{ route('serviceConnectionMtrTrnsfrmrs.edit', [$serviceConnectionMeter->id]) }}" class="btn btn-sm" title="Update Transformer Details">
+                            <lord-icon
+                                src="https://cdn.lordicon.com/wloilxuq.json"
+                                trigger="loop"
+                                delay="1500"
+                                stroke="100"
+                                colors="primary:#121331,secondary:#08a88a"
+                                style="width:32px;height:32px">
+                            </lord-icon>
+                        </a>
+                    @endif
                     <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
                 @endif  
             </div>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\ServiceConnections;
+use Illuminate\Support\Facades\Auth;
 
 ?>
 
@@ -76,27 +77,30 @@ use App\Models\ServiceConnections;
                         <strong><i class="far fa-file-alt mr-1"></i> Notes</strong>
                         <p class="text-muted">{{ $serviceConnections->Notes}}</p>
 
-                        <a href="{{ route('serviceConnections.edit', [$serviceConnections->id]) }}" class="text-warning" title="Edit service connection details">
-                            <lord-icon
-                                src="https://cdn.lordicon.com/puvaffet.json"
-                                trigger="loop"
-                                delay="1500"
-                                colors="primary:#121331,secondary:#08a88a"
-                                stroke="100"
-                                style="width:28px;height:28px">
-                            </lord-icon>
-                        </a>
+                        @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Service Connection Assessor'])) 
+                            <a href="{{ route('serviceConnections.edit', [$serviceConnections->id]) }}" class="text-warning" title="Edit service connection details">
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/puvaffet.json"
+                                    trigger="loop"
+                                    delay="1500"
+                                    colors="primary:#121331,secondary:#08a88a"
+                                    stroke="100"
+                                    style="width:28px;height:28px">
+                                </lord-icon>
+                            </a>
 
-                        <a href="{{ route('serviceConnections.move-to-trash', [$serviceConnections->id]) }}" class="text-danger float-right" title="Move to trash">
-                            <lord-icon
-                                src="https://cdn.lordicon.com/gsqxdxog.json"
-                                trigger="loop"
-                                delay="1500"
-                                colors="primary:#c71f16,secondary:#c71f16"
-                                stroke="100"
-                                style="width:28px;height:28px">
-                            </lord-icon>
-                        </a>
+                            <a href="{{ route('serviceConnections.move-to-trash', [$serviceConnections->id]) }}" class="text-danger float-right" title="Move to trash">
+                                <lord-icon
+                                    src="https://cdn.lordicon.com/gsqxdxog.json"
+                                    trigger="loop"
+                                    delay="1500"
+                                    colors="primary:#c71f16,secondary:#c71f16"
+                                    stroke="100"
+                                    style="width:28px;height:28px">
+                                </lord-icon>
+                            </a>                            
+                        @endif
+                        
                     </div>
                 </div> 
             </div>

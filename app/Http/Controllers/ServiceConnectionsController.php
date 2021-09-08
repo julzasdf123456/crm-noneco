@@ -669,4 +669,74 @@ class ServiceConnectionsController extends AppBaseController
 
         return redirect(route('serviceConnections.trash'));
     }
+
+    public function energization() {
+        if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Energization Clerk'])) {
+            $serviceConnections = DB::table('CRM_ServiceConnections')
+                        ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+                        ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+                        ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+                        ->select('CRM_ServiceConnections.id as id',
+                                        'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                                        'CRM_ServiceConnections.Status as Status',
+                                        'CRM_ServiceConnections.DateOfApplication as DateOfApplication', 
+                                        'CRM_ServiceConnections.ContactNumber as ContactNumber', 
+                                        'CRM_ServiceConnections.EmailAddress as EmailAddress',  
+                                        'CRM_ServiceConnections.AccountCount as AccountCount',  
+                                        'CRM_ServiceConnections.Sitio as Sitio', 
+                                        'CRM_Towns.Town as Town',
+                                        'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
+                                        'CRM_Barangays.Barangay as Barangay')
+                        ->whereNotNull('CRM_ServiceConnections.ORNumber')
+                        ->where('CRM_ServiceConnections.Status', 'Approved')
+                        ->whereIn('CRM_ServiceConnections.id', DB::table('CRM_ServiceConnectionMeterAndTransformer')->pluck('ServiceConnectionId'))
+                        ->orderBy('CRM_ServiceConnections.ServiceAccountName')
+                        ->get();
+
+            return view('/service_connections/energization', ['serviceConnections' => $serviceConnections]);
+        } else {
+            abort(403, 'Access denied');
+        }      
+    }
+
+    public function printOrder($id) {
+        $serviceConnections = DB::table('CRM_ServiceConnections')
+            ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+            ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->select('CRM_ServiceConnections.id as id',
+                        'CRM_ServiceConnections.AccountCount as AccountCount', 
+                        'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                        'CRM_ServiceConnections.DateOfApplication as DateOfApplication', 
+                        'CRM_ServiceConnections.ContactNumber as ContactNumber', 
+                        'CRM_ServiceConnections.EmailAddress as EmailAddress',  
+                        'CRM_ServiceConnections.AccountApplicationType as AccountApplicationType', 
+                        'CRM_ServiceConnections.AccountOrganization as AccountOrganization', 
+                        'CRM_ServiceConnections.AccountApplicationType as AccountApplicationType', 
+                        'CRM_ServiceConnections.ConnectionApplicationType as ConnectionApplicationType',
+                        'CRM_ServiceConnections.MemberConsumerId as MemberConsumerId',
+                        'CRM_ServiceConnections.Status as Status',  
+                        'CRM_ServiceConnections.BuildingType',
+                        'CRM_ServiceConnections.Notes as Notes', 
+                        'CRM_ServiceConnections.ORNumber as ORNumber', 
+                        'CRM_ServiceConnections.ORDate as ORDate', 
+                        'CRM_ServiceConnections.Sitio as Sitio', 
+                        'CRM_Towns.Town as Town',
+                        'CRM_Barangays.Barangay as Barangay',
+                        'CRM_ServiceConnectionAccountTypes.AccountType as AccountType')
+        ->where('CRM_ServiceConnections.id', $id)
+        ->where(function ($query) {
+            $query->where('CRM_ServiceConnections.Trash', 'No')
+                ->orWhereNull('CRM_ServiceConnections.Trash');
+        })
+        ->first(); 
+
+        $serviceConnectionInspections = ServiceConnectionInspections::where('ServiceConnectionId', $id)
+                                ->orderByDesc('created_at')
+                                ->first();
+
+        $serviceConnectionMeter = ServiceConnectionMtrTrnsfrmr::where('ServiceConnectionId', $id)->first();
+
+        return view('/service_connections/print_order', ['serviceConnection' => $serviceConnections, 'serviceConnectionInspections' => $serviceConnectionInspections, 'serviceConnectionMeter' => $serviceConnectionMeter]);
+    }
 }

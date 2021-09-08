@@ -73,6 +73,8 @@ class ServiceConnections extends Model
         'Trash',
         'ORNumber',
         'ORDate',
+        'EnergizationOrderIssued',
+        'DateTimeOfEnergizationIssue',
     ];
 
     /**
@@ -105,6 +107,8 @@ class ServiceConnections extends Model
         'ORDate' => 'date',
         'DateTimeLinemenArrived' => 'datetime',
         'DateTimeOfEnergization' => 'datetime',
+        'EnergizationOrderIssued' => 'string',
+        'DateTimeOfEnergizationIssue' => 'datetime',
     ];
 
     /**
@@ -139,6 +143,8 @@ class ServiceConnections extends Model
         'updated_at' => 'nullable',
         'DateTimeLinemenArrived' => 'nullable',
         'DateTimeOfEnergization' => 'nullable',
+        'EnergizationOrderIssued' => 'nullable|string',
+        'DateTimeOfEnergizationIssue' => 'nullable',
     ];
 
     public static function getAccountCount($consumerId) {

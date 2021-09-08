@@ -17,18 +17,23 @@
         <h3 class="card-title">Inspection Details</h3>
         <div class="card-tools">
             @if($serviceConnectionInspections == null)
-                <a href="" class="btn btn-sm" title="Add Verification Details"><i class="fas fa-plus-square"></i></a>
+                @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Inspector', 'Service Connection Assessor'])) 
+                    <a href="" class="btn btn-sm" title="Add Verification Details"><i class="fas fa-plus-square"></i></a>
+                @endif
             @else
-                <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details">
-                    <lord-icon
-                        src="https://cdn.lordicon.com/wloilxuq.json"
-                        trigger="loop"
-                        delay="1500"
-                        stroke="100"
-                        colors="primary:#121331,secondary:#08a88a"
-                        style="width:32px;height:32px">
-                    </lord-icon>
-                </a>
+                @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Inspector', 'Service Connection Assessor'])) 
+                    <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details">
+                        <lord-icon
+                            src="https://cdn.lordicon.com/wloilxuq.json"
+                            trigger="loop"
+                            delay="1500"
+                            stroke="100"
+                            colors="primary:#121331,secondary:#08a88a"
+                            style="width:32px;height:32px">
+                        </lord-icon>
+                    </a>
+                @endif
+
                 <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
             @endif
         </div>
@@ -65,18 +70,22 @@
         <h3 class="card-title">Breaker and Service Drop Wire</h3>
         <div class="card-tools">
             @if($serviceConnectionInspections == null)
-                <a href="" class="btn btn-sm" title="Add Verification Details"><i class="fas fa-plus-square"></i></a>
+                @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Inspector', 'Service Connection Assessor'])) 
+                    <a href="" class="btn btn-sm" title="Add Verification Details"><i class="fas fa-plus-square"></i></a>
+                @endif
             @else
-                <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details">
-                    <lord-icon
-                        src="https://cdn.lordicon.com/wloilxuq.json"
-                        trigger="loop"
-                        delay="1500"
-                        stroke="100"
-                        colors="primary:#121331,secondary:#08a88a"
-                        style="width:32px;height:32px">
-                    </lord-icon>
-                </a>
+                @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Inspector', 'Service Connection Assessor'])) 
+                    <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details">
+                        <lord-icon
+                            src="https://cdn.lordicon.com/wloilxuq.json"
+                            trigger="loop"
+                            delay="1500"
+                            stroke="100"
+                            colors="primary:#121331,secondary:#08a88a"
+                            style="width:32px;height:32px">
+                        </lord-icon>
+                    </a>
+                @endif
                 <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
             @endif
         </div>
@@ -123,18 +132,22 @@
         <h3 class="card-title">Pole Data</h3>
         <div class="card-tools">
             @if($serviceConnectionInspections == null)
-                <a href="" class="btn btn-sm" title="Add Verification Details"><i class="fas fa-plus-square"></i></a>
+                @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Inspector', 'Service Connection Assessor'])) 
+                    <a href="" class="btn btn-sm" title="Add Verification Details"><i class="fas fa-plus-square"></i></a>
+                @endif
             @else
-                <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details">
-                    <lord-icon
-                        src="https://cdn.lordicon.com/wloilxuq.json"
-                        trigger="loop"
-                        delay="1500"
-                        stroke="100"
-                        colors="primary:#121331,secondary:#08a88a"
-                        style="width:32px;height:32px">
-                    </lord-icon>
-                </a>
+                @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Inspector', 'Service Connection Assessor'])) 
+                    <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details">
+                        <lord-icon
+                            src="https://cdn.lordicon.com/wloilxuq.json"
+                            trigger="loop"
+                            delay="1500"
+                            stroke="100"
+                            colors="primary:#121331,secondary:#08a88a"
+                            style="width:32px;height:32px">
+                        </lord-icon>
+                    </a>
+                @endif
                 <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
             @endif
         </div>
@@ -180,18 +193,22 @@
         <h3 class="card-title">Geo Tagging and Neighboring</h3>
         <div class="card-tools">
             @if($serviceConnectionInspections == null)
-                <a href="" class="btn btn-sm" title="Add Verification Details"><i class="fas fa-plus-square"></i></a>
+                @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Inspector', 'Service Connection Assessor'])) 
+                    <a href="" class="btn btn-sm" title="Add Verification Details"><i class="fas fa-plus-square"></i></a>
+                @endif
             @else
-                <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details">
-                    <lord-icon
-                        src="https://cdn.lordicon.com/wloilxuq.json"
-                        trigger="loop"
-                        delay="1500"
-                        stroke="100"
-                        colors="primary:#121331,secondary:#08a88a"
-                        style="width:32px;height:32px">
-                    </lord-icon>
-                </a>
+                @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Inspector', 'Service Connection Assessor'])) 
+                    <a href="{{ route('serviceConnectionInspections.edit', [$serviceConnectionInspections->id]) }}" class="btn btn-sm" title="Update Verification Details">
+                        <lord-icon
+                            src="https://cdn.lordicon.com/wloilxuq.json"
+                            trigger="loop"
+                            delay="1500"
+                            stroke="100"
+                            colors="primary:#121331,secondary:#08a88a"
+                            style="width:32px;height:32px">
+                        </lord-icon>
+                    </a>
+                @endif
                 <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
             @endif
         </div>
@@ -253,6 +270,8 @@
 </div>
 @else 
 <p class="text-center"><i>No inspection data found!</i></p>
-<a href="{{ route('serviceConnectionInspections.create-step-two', [$serviceConnections->id]) }}" class="btn btn-primary btn-sm" title="Add Verification Details"><i class="fas fa-pen ico-tab"></i>Create Verification</a>
+    @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Inspector', 'Service Connection Assessor'])) 
+        <a href="{{ route('serviceConnectionInspections.create-step-two', [$serviceConnections->id]) }}" class="btn btn-primary btn-sm" title="Add Verification Details"><i class="fas fa-pen ico-tab"></i>Create Verification</a>
+    @endif
 @endif
 

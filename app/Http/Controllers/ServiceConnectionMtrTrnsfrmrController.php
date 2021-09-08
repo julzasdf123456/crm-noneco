@@ -9,6 +9,10 @@ use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
 use App\Models\ServiceConnections;
 use App\Http\Controllers\ServiceConnectionsController;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use App\Models\ServiceConnectionTimeframes;
+use App\Models\IDGenerator;
 use Flash;
 use Response;
 
@@ -63,8 +67,17 @@ class ServiceConnectionMtrTrnsfrmrController extends AppBaseController
 
         Flash::success('Service Connection Mtr Trnsfrmr saved successfully.');
 
+        // CREATE Timeframes
+        $timeFrame = new ServiceConnectionTimeframes;
+        $timeFrame->id = IDGenerator::generateID();
+        $timeFrame->ServiceConnectionId = $input['ServiceConnectionId'];
+        $timeFrame->UserId = Auth::id();
+        $timeFrame->Status = 'Meter and Transformer Assigned';
+        $timeFrame->save();
+
         // return redirect()->action([ServiceConnectionsController::class, 'show'], [$input['ServiceConnectionId']]);        
-        return redirect(route('serviceConnectionPayTransactions.create-step-four', [$input['ServiceConnectionId']]));
+        // return redirect(route('serviceConnectionPayTransactions.create-step-four', [$input['ServiceConnectionId']]));
+        return redirect(route('serviceConnectionMtrTrnsfrmrs.assigning'));
     }
 
     /**
@@ -129,6 +142,14 @@ class ServiceConnectionMtrTrnsfrmrController extends AppBaseController
 
         Flash::success('Service Connection Mtr Trnsfrmr updated successfully.');
 
+        // CREATE Timeframes
+        $timeFrame = new ServiceConnectionTimeframes;
+        $timeFrame->id = IDGenerator::generateID();
+        $timeFrame->ServiceConnectionId = $request['ServiceConnectionId'];
+        $timeFrame->UserId = Auth::id();
+        $timeFrame->Status = 'Meter and Transformer Updated';
+        $timeFrame->save();
+
         // return redirect(route('serviceConnectionMtrTrnsfrmrs.index'));
         return redirect()->action([ServiceConnectionsController::class, 'show'], [$request['ServiceConnectionId']]);
     }
@@ -165,5 +186,33 @@ class ServiceConnectionMtrTrnsfrmrController extends AppBaseController
         $serviceConnectionMtrTrnsfrmr = null;
 
         return view('/service_connection_mtr_trnsfrmrs/create_step_three', ['serviceConnection' => $serviceConnection, 'serviceConnectionMtrTrnsfrmr' => $serviceConnectionMtrTrnsfrmr]);
+    }
+
+    public function assigning() {
+        if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Metering Personnel'])) {
+            $serviceConnections = DB::table('CRM_ServiceConnections')
+                        ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+                        ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+                        ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+                        ->select('CRM_ServiceConnections.id as id',
+                                        'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                                        'CRM_ServiceConnections.Status as Status',
+                                        'CRM_ServiceConnections.DateOfApplication as DateOfApplication', 
+                                        'CRM_ServiceConnections.ContactNumber as ContactNumber', 
+                                        'CRM_ServiceConnections.EmailAddress as EmailAddress',  
+                                        'CRM_ServiceConnections.AccountCount as AccountCount',  
+                                        'CRM_ServiceConnections.Sitio as Sitio', 
+                                        'CRM_Towns.Town as Town',
+                                        'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
+                                        'CRM_Barangays.Barangay as Barangay')
+                        ->whereNotNull('CRM_ServiceConnections.ORNumber')
+                        ->whereNotIn('CRM_ServiceConnections.id', DB::table('CRM_ServiceConnectionMeterAndTransformer')->pluck('ServiceConnectionId'))
+                        ->orderBy('CRM_ServiceConnections.ServiceAccountName')
+                        ->get();
+
+            return view('/service_connection_mtr_trnsfrmrs/assigning', ['serviceConnections' => $serviceConnections]);
+        } else {
+            abort(403, 'Access denied');
+        }        
     }
 }

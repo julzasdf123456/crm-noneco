@@ -12,37 +12,36 @@
     </section>
     
     <div>
-        <form class="form" method="POST" action="{{ url('users/create-user-permissions') }}">
-            <!-- SUBMIT -->
-            <button type="submit" class="btn btn-sm btn-info" style="margin-bottom: 15px;"><i class="fas fa-fw fa-check"></i> Set</button> 
+        <form class="form" method="POST" action="{{ url('users/create-user-roles') }}">
 
             <div class="row">
-                
-                @csrf
-                @foreach($roles as $role)                     
-                    <div class="col-md-4 col-lg-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <span>{{ $role->name }}</span>
-                            </div>
-                            <div class="card-body">
-                                @php 
-                                    $permissions = $role->permissions;
-                                @endphp
-                                @foreach ($permissions as $permission)
-                                    <div class="form-check">  
-                                        <input type="checkbox" class="form-check-input" value="{{ $permission->id }}" name="permissions[]"  @if($user->getAllPermissions()) @if(in_array($permission->id, $user->getAllPermissions()->pluck('id')->toArray())) checked @endif @endif>
-                                        <label for="permissions" class="form-check-label">{{ $permission->name }}</label>
-                                    </div>
-                                @endforeach
-                                
-                            </div>
+
+                <div class="col-md-6 offset-md-3 col-lg-4 offset-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Customize Roles</span>
                         </div>
-                        
+
+                        <div class="card-body">
+                            @csrf
+                            @foreach($roles as $role)  
+                                <div class="form-check">  
+                                    <input type="checkbox" class="form-check-input" value="{{ $role->id }}" name="roles[]"  @if($user->roles) @if(in_array($role->id, $user->roles->pluck('id')->toArray())) checked @endif @endif>
+                                    <label for="roles" class="form-check-label">{{ $role->name }}</label>
+                                </div>    
+                            @endforeach
+                            <!-- ADD USER ID -->
+                            <input type="hidden" name="userId" value="{{ $user->id }}">     
+                        </div>
+
+                        <div class="card-footer">
+                            <!-- SUBMIT -->
+                            <button type="submit" class="btn btn-sm btn-info" style="margin-bottom: 15px;"><i class="fas fa-fw fa-check"></i> Set</button> 
+                        </div>
                     </div>
-                @endforeach
-                <!-- ADD USER ID -->
-                <input type="hidden" name="userId" value="{{ $user->id }}">               
+                </div>
+                
+                          
             
             </div>
         </form>

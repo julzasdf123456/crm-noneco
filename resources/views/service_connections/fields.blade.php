@@ -331,4 +331,56 @@ use App\Models\IDGenerator;
     </div> 
 </div>
 
+@canany(['Super Admin'])
+<div class="divider"></div>
+<br>
+
+{{-- OR UPDATING ON ADMINS --}}
+<!-- OR Field -->
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('ORNumber', 'OR Number') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-coins"></i></span>
+                </div>
+                {!! Form::text('ORNumber', null, ['class' => 'form-control','maxlength' => 1000,'maxlength' => 1000, 'placeholder' => 'OR Number']) !!}
+            </div>
+        </div>
+    </div> 
+</div>
+
+<!-- OR Date Field -->
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('ORDate', 'Payment Date') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                </div>
+                    {!! Form::text('ORDate', null, ['class' => 'form-control','id'=>'ORDate']) !!}
+            </div>
+        </div>
+    </div> 
+</div>
+
+@push('page_scripts')
+    <script type="text/javascript">
+        $('#ORDate').datetimepicker({
+            format: 'YYYY-MM-DD',
+            useCurrent: true,
+            sideBySide: true
+        })
+    </script>
+@endpush
+@endcanany
+
 <p id="Def_Brgy" style="display: none;">{{ $cond=='new' ? $memberConsumer->BarangayId : $serviceConnections->Barangay }}</p>
