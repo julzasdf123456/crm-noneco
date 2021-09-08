@@ -40,6 +40,7 @@ class CreateTableCRMServiceConnections extends Migration
             $table->datetime('DateTimeOfEnergization')->nullable();
             $table->string('EnergizationOrderIssued', 50)->nullable();
             $table->datetime('DateTimeOfEnergizationIssue')->nullable();
+            $table->string('StationCrewAssigned', 50)->nullable();
             $table->timestamps();
         });
     }

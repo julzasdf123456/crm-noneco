@@ -155,10 +155,27 @@
 
 <script type="text/javascript">   
 
+    function getLocData() {
+        var centerLoc = "";
+
+        if (document.getElementById("building-latlng").innerText === "") {
+            if (document.getElementById("metering-latlng").innerText === "") {
+                centerLoc = document.getElementById("tapping-latlng").innerText;
+            } else {
+                centerLoc = document.getElementById("metering-latlng").innerText;
+            }            
+        } else {
+            centerLoc = document.getElementById("building-latlng").innerText;
+        }
+
+        return centerLoc;
+    }
+
     // MAPBOX
     mapboxgl.accessToken = 'pk.eyJ1IjoianVsemxvcGV6IiwiYSI6ImNqZzJ5cWdsMjJid3Ayd2xsaHcwdGhheW8ifQ.BcTcaOXmXNLxdO3wfXaf5A';
 
-    var centerLoc = document.getElementById("building-latlng").innerText;
+    var centerLoc = getLocData();
+
     var map = new mapboxgl.Map({
         container: 'map',
         zoom: 15,
@@ -170,22 +187,11 @@
         .setLngLat([centerLoc.split(",")[1], centerLoc.split(",")[0]])
         .addTo(map);
 
-    map.on('idle',function(){
+    map.once('idle',function(){
         window.print();
 
         window.setTimeout(function(){
             window.location.href = "{{ route('serviceConnections.energization') }}";
         }, 1000);
-    })
-
-    // PRINT
-    // window.onload = function() {
-    //     window.print();
-
-    //     window.setTimeout(function(){
-    //         window.location.href = "{{ route('serviceConnections.energization') }}";
-    //     }, 1000);
-    // };
-
-    
+    });    
 </script>

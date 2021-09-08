@@ -84,6 +84,8 @@ Route::get('/service_connections/restore/{id}', [ServiceConnectionsController::c
 Route::get('/service_connections/fetchserviceconnectiontrash', [ServiceConnectionsController::class, 'fetchserviceconnectiontrash'])->name('serviceConnections.fetch-service-connection-trash');
 Route::get('/service_connections/energization', [ServiceConnectionsController::class, 'energization'])->name('serviceConnections.energization');
 Route::get('/service_connections/print_order/{id}', [ServiceConnectionsController::class, 'printOrder'])->name('serviceConnections.print-order');
+Route::post('/service_connections/change-station-crew', [ServiceConnectionsController::class, 'changeStationCrew']);
+Route::post('/service_connections/update-energization-status', [ServiceConnectionsController::class, 'updateEnergizationStatus']);
 Route::resource('serviceConnections', App\Http\Controllers\ServiceConnectionsController::class);
 
 
@@ -128,3 +130,6 @@ Route::resource('serviceConnectionChecklistsReps', App\Http\Controllers\ServiceC
 
 Route::post('/service_connection_checklists_reps/complyChecklists/{id}', [App\Http\Controllers\ServiceConnectionChecklistsController::class, 'complyChecklists'])->name('serviceConnectionChecklists.comply-checklists');
 Route::resource('serviceConnectionChecklists', App\Http\Controllers\ServiceConnectionChecklistsController::class);
+
+
+Route::resource('serviceConnectionCrews', App\Http\Controllers\ServiceConnectionCrewController::class);

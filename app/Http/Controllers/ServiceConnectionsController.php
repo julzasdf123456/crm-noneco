@@ -19,6 +19,7 @@ use App\Models\ServiceConnectionTimeframes;
 use App\Models\IDGenerator;
 use App\Models\ServiceConnectionChecklistsRep;
 use App\Models\ServiceConnectionChecklists;
+use App\Models\ServiceConnectionCrew;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Flash;
@@ -100,6 +101,7 @@ class ServiceConnectionsController extends AppBaseController
             ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
             ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
             ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->join('CRM_ServiceConnectionCrew', 'CRM_ServiceConnections.StationCrewAssigned', '=', 'CRM_ServiceConnectionCrew.id')
             ->select('CRM_ServiceConnections.id as id',
                         'CRM_ServiceConnections.AccountCount as AccountCount', 
                         'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
@@ -115,9 +117,14 @@ class ServiceConnectionsController extends AppBaseController
                         'CRM_ServiceConnections.Notes as Notes', 
                         'CRM_ServiceConnections.ORNumber as ORNumber', 
                         'CRM_ServiceConnections.Sitio as Sitio', 
+                        'CRM_ServiceConnections.DateTimeOfEnergization as DateTimeOfEnergization', 
+                        'CRM_ServiceConnections.DateTimeLinemenArrived as DateTimeLinemenArrived', 
                         'CRM_Towns.Town as Town',
                         'CRM_Barangays.Barangay as Barangay',
-                        'CRM_ServiceConnectionAccountTypes.AccountType as AccountType')
+                        'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
+                        'CRM_ServiceConnectionCrew.StationName as StationName',
+                        'CRM_ServiceConnectionCrew.CrewLeader as CrewLeader',
+                        'CRM_ServiceConnectionCrew.Members as Members')
         ->where('CRM_ServiceConnections.id', $id)
         ->where(function ($query) {
             $query->where('CRM_ServiceConnections.Trash', 'No')
@@ -212,13 +219,15 @@ class ServiceConnectionsController extends AppBaseController
 
         $accountTypes = ServiceConnectionAccountTypes::orderBy('id')->pluck('AccountType', 'id');
 
+        $crew = ServiceConnectionCrew::orderBy('StationName')->pluck('StationName', 'id');
+
         if (empty($serviceConnections)) {
             Flash::error('Service Connections not found');
 
             return redirect(route('serviceConnections.index'));
         }
 
-        return view('service_connections.edit', ['serviceConnections' => $serviceConnections, 'cond' => $cond, 'towns' => $towns, 'memberConsumer' => $memberConsumer, 'accountTypes' => $accountTypes]);
+        return view('service_connections.edit', ['serviceConnections' => $serviceConnections, 'cond' => $cond, 'towns' => $towns, 'memberConsumer' => $memberConsumer, 'accountTypes' => $accountTypes, 'crew' => $crew]);
     }
 
     /**
@@ -426,7 +435,9 @@ class ServiceConnectionsController extends AppBaseController
 
         $accountTypes = ServiceConnectionAccountTypes::orderBy('id')->pluck('AccountType', 'id');
 
-        return view('/service_connections/create_new', ['memberConsumer' => $memberConsumer, 'cond' => $cond, 'towns' => $towns, 'accountTypes' => $accountTypes]);
+        $crew = ServiceConnectionCrew::orderBy('StationName')->pluck('StationName', 'id');
+
+        return view('/service_connections/create_new', ['memberConsumer' => $memberConsumer, 'cond' => $cond, 'towns' => $towns, 'accountTypes' => $accountTypes, 'crew' => $crew]);
     }
 
     public function fetchserviceconnections(Request $request) {
@@ -675,7 +686,8 @@ class ServiceConnectionsController extends AppBaseController
             $serviceConnections = DB::table('CRM_ServiceConnections')
                         ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
                         ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
-                        ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+                        ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')                        
+                        ->join('CRM_ServiceConnectionCrew', 'CRM_ServiceConnections.StationCrewAssigned', '=', 'CRM_ServiceConnectionCrew.id')
                         ->select('CRM_ServiceConnections.id as id',
                                         'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
                                         'CRM_ServiceConnections.Status as Status',
@@ -686,17 +698,72 @@ class ServiceConnectionsController extends AppBaseController
                                         'CRM_ServiceConnections.Sitio as Sitio', 
                                         'CRM_Towns.Town as Town',
                                         'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
+                                        'CRM_ServiceConnections.EnergizationOrderIssued as EnergizationOrderIssued', 
+                                        'CRM_ServiceConnections.StationCrewAssigned as StationCrewAssigned',
+                                        'CRM_ServiceConnectionCrew.StationName as StationName',
+                                        'CRM_ServiceConnectionCrew.CrewLeader as CrewLeader',
+                                        'CRM_ServiceConnectionCrew.Members as Members',
                                         'CRM_Barangays.Barangay as Barangay')
                         ->whereNotNull('CRM_ServiceConnections.ORNumber')
-                        ->where('CRM_ServiceConnections.Status', 'Approved')
+                        ->where(function ($query) {
+                            $query->where('CRM_ServiceConnections.Status', 'Approved')
+                                ->orWhere('CRM_ServiceConnections.Status', 'Not Energized');
+                        })
                         ->whereIn('CRM_ServiceConnections.id', DB::table('CRM_ServiceConnectionMeterAndTransformer')->pluck('ServiceConnectionId'))
                         ->orderBy('CRM_ServiceConnections.ServiceAccountName')
                         ->get();
 
-            return view('/service_connections/energization', ['serviceConnections' => $serviceConnections]);
+            $crew = ServiceConnectionCrew::orderBy('StationName')->get();
+
+            return view('/service_connections/energization', ['serviceConnections' => $serviceConnections, 'crew' => $crew]);
         } else {
             abort(403, 'Access denied');
         }      
+    }
+
+    public function changeStationCrew(Request $request) {
+        if(request()->ajax()){
+            $serviceConnection = ServiceConnections::find($request['id']);
+
+            $serviceConnection->StationCrewAssigned = $request['StationCrewAssigned'];
+            $serviceConnection->DateTimeOfEnergizationIssue = date('Y-m-d H:i:s');
+
+            $serviceConnection->save();
+
+            // CREATE Timeframes
+            $timeFrame = new ServiceConnectionTimeframes;
+            $timeFrame->id = IDGenerator::generateID();
+            $timeFrame->ServiceConnectionId = $request['id'];
+            $timeFrame->UserId = Auth::id();
+            $timeFrame->Status = 'Station Crew Re-assigned';
+            $timeFrame->Notes = 'From ' . $request['FromStationCrewName'] . ' to ' . $request['ToStationCrewName'];
+            $timeFrame->save();
+
+            return response()->json([ 'success' => true ]);
+        }        
+    }
+
+    public function updateEnergizationStatus(Request $request) {
+        if (request()->ajax()) {
+            $serviceConnection = ServiceConnections::find($request['id']);
+
+            $serviceConnection->Status = $request['Status'];
+            $serviceConnection->DateTimeOfEnergization = $request['EnergizationDate'];
+            $serviceConnection->DateTimeLinemenArrived = $request['ArrivalDate'];
+
+            $serviceConnection->save();
+
+            // CREATE Timeframes
+            $timeFrame = new ServiceConnectionTimeframes;
+            $timeFrame->id = IDGenerator::generateID();
+            $timeFrame->ServiceConnectionId = $request['id'];
+            $timeFrame->UserId = Auth::id();
+            $timeFrame->Status = $request['Status'];
+            $timeFrame->Notes = 'Crew arrived at ' . date('F d, Y h:i:s A', strtotime($request['ArrivalDate'])) . '<br>' . 'Performed energization attempt at ' . date('F d, Y h:i:s A', strtotime($request['EnergizationDate'])) . '<br>' . $request['Reason'];
+            $timeFrame->save();
+
+            return response()->json([ 'success' => true ]);
+        }
     }
 
     public function printOrder($id) {
@@ -736,6 +803,20 @@ class ServiceConnectionsController extends AppBaseController
                                 ->first();
 
         $serviceConnectionMeter = ServiceConnectionMtrTrnsfrmr::where('ServiceConnectionId', $id)->first();
+
+        // CREATE Timeframes
+        $timeFrame = new ServiceConnectionTimeframes;
+        $timeFrame->id = IDGenerator::generateID();
+        $timeFrame->ServiceConnectionId = $id;
+        $timeFrame->UserId = Auth::id();
+        $timeFrame->Status = 'Energization Order Issued';
+        $timeFrame->save();
+
+        // UPDATE ENERGIZATION COLUMN IN SEVICE CONNECTIONS;
+        $scUpdate = ServiceConnections::find($id);
+        $scUpdate->EnergizationOrderIssued = 'Yes';
+        $scUpdate->DateTimeOfEnergizationIssue = date('Y-m-d H:i:s');
+        $scUpdate->save();
 
         return view('/service_connections/print_order', ['serviceConnection' => $serviceConnections, 'serviceConnectionInspections' => $serviceConnectionInspections, 'serviceConnectionMeter' => $serviceConnectionMeter]);
     }

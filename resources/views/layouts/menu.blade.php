@@ -192,6 +192,13 @@
                 <i class="fas fa-map-marked-alt nav-icon"></i><p>Barangays</p>
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a href="{{ route('serviceConnectionCrews.index') }}"
+                   class="nav-link {{ Request::is('serviceConnectionCrews*') ? 'active' : '' }}">
+                   <i class="fas fa-map-marked-alt nav-icon"></i><p>Station Crews</p>
+                </a>
+            </li>
         </ul>
     </li>
 @endcanany
@@ -237,4 +244,5 @@
         </ul>
     </li>
 @endcan
+
 

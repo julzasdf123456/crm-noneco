@@ -310,6 +310,24 @@ use App\Models\IDGenerator;
     </div>  
 </div>
 
+<!-- Station Field -->
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('StationCrewAssigned', 'Station Crew') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-hard-hat"></i></span>
+                </div>
+                {!! Form::select('StationCrewAssigned', $crew, $cond=='new' ? '' : $serviceConnections->StationCrewAssigned, ['class' => 'form-control']) !!}
+            </div>
+        </div>
+    </div>  
+</div>
+
 <!-- Isnihe Field -->
 <input type="hidden" name="IsNIHE" value="NO">
 

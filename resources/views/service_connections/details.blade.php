@@ -60,6 +60,48 @@
                 @endif
             </div>
         </div>
+
+        <div class="card card-primary card-outline">
+            <div class="card-header border-0">
+                <h3 class="card-title">Station Crew Assigned</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>           
+                </div>
+            </div>
+
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>Station</th>
+                        <td>{{ $serviceConnections->StationName }}</td>
+                    </tr>
+                    <tr>
+                        <th>Leader</th>
+                        <td>{{ $serviceConnections->CrewLeader }}</td>
+                    </tr>
+                    <tr>
+                        <th>Members</th>
+                        <td>{{ $serviceConnections->Members }}</td>
+                    </tr>
+                </table>
+
+                @if ($serviceConnections->Status == 'Energized')
+                    <div class="position-relative p-3 bg-gray" style="height: 180px">
+                        <div class="ribbon-wrapper ribbon-lg">
+                            <div class="ribbon bg-success text-lg">
+                                ENERGIZED
+                            </div>
+                        </div>
+                        <small>Crew arrived at</small><br>
+                        {{ date('F d, Y, h:i:s A', strtotime($serviceConnections->DateTimeLinemenArrived)) }}<br>
+                        <hr>
+                        <small>Energized at</small><br>
+                        {{ date('F d, Y, h:i:s A', strtotime($serviceConnections->DateTimeOfEnergization)) }}<br>
+                    </div>
+                @endif
+                
+            </div>
+        </div>
     </div>
 
     {{-- TIMELINE --}}
@@ -96,7 +138,7 @@
 
                                     @if ($item->Notes != null)
                                         <div class="timeline-body" style="font-size: .9em !important;">
-                                            {{ $item->Notes }}
+                                            <?= $item->Notes ?>
                                         </div>
                                     @endif
                                     
