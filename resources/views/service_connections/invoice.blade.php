@@ -1,4 +1,4 @@
-@if($serviceConnectionTransactions == null)
+@if($totalTransactions == null)
     <p class="text-center"><i>No payment transactions recorded!</i></p>
     @if ($serviceConnectionInspections != null)
         @if ($serviceConnectionInspections->Status != "Approved")

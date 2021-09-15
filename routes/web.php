@@ -30,6 +30,7 @@ Route::get('/home/get-unassigned-meters', [HomeController::class, 'fetchUnassign
 Route::get('/home/get-new-service-connections', [HomeController::class, 'fetchNewServiceConnections'])->name('home.get-new-service-connections');
 Route::get('/home/get-approved-service-connections', [HomeController::class, 'fetchApprovedServiceConnections'])->name('home.get-approved-service-connections');
 Route::get('/home/get-for-engergization', [HomeController::class, 'fetchForEnergization'])->name('home.get-for-engergization');
+Route::get('/home/get-inspection-report', [HomeController::class, 'fetchInspectionReport'])->name('home.get-inspection-report');
 
 // ADD PERMISSIONS TO ROLES
 Route::get('/roles/add-permissions/{id}', [RoleController::class, 'addPermissions'])->name('roles.add_permissions');
@@ -74,7 +75,7 @@ Route::patch('/member_consumer_spouses/update/{id}', [App\Http\Controllers\Membe
 Route::get('/service_connections/fetchserviceconnections', [ServiceConnectionsController::class, 'fetchserviceconnections'])->name('serviceConnections.fetch-service-connections');
 Route::get('/service_connections/selectmembership', [ServiceConnectionsController::class, 'selectMembership'])->name('serviceConnections.selectmembership');
 Route::get('/service_connections/fetchmemberconsumer', [ServiceConnectionsController::class, 'fetchmemberconsumer'])->name('serviceConnections.fetch-member-consumers');
-Route::get('/service_connections/create_new/{consumerId}', [ServiceConnectionsController::class, 'createNew'])->name('serviceConnections.create_new');
+Route::get('/service_connections/create_new/{consumerId}/{accountType}', [ServiceConnectionsController::class, 'createNew'])->name('serviceConnections.create_new');
 Route::get('/service_connections/create_new_step_two/{scId}', [ServiceConnectionsController::class, 'createNewStepTwo'])->name('serviceConnections.create_new_step_two');
 Route::get('/service_connections/assess_checklists/{id}', [ServiceConnectionsController::class, 'assessChecklists'])->name('serviceConnections.assess-checklists');
 Route::get('/service_connections/update_checklists/{id}', [ServiceConnectionsController::class, 'updateChecklists'])->name('serviceConnections.update-checklists');
@@ -86,6 +87,8 @@ Route::get('/service_connections/energization', [ServiceConnectionsController::c
 Route::get('/service_connections/print_order/{id}', [ServiceConnectionsController::class, 'printOrder'])->name('serviceConnections.print-order');
 Route::post('/service_connections/change-station-crew', [ServiceConnectionsController::class, 'changeStationCrew']);
 Route::post('/service_connections/update-energization-status', [ServiceConnectionsController::class, 'updateEnergizationStatus']);
+Route::get('/service_connections/select_application_type/{consumerId}', [ServiceConnectionsController::class, 'selectApplicationType'])->name('serviceConnections.select-application-type');
+Route::post('/service_connections/relay_account_type/{consumerId}', [ServiceConnectionsController::class, 'relayApplicationType'])->name('serviceConnections.relay-account-type');
 Route::resource('serviceConnections', App\Http\Controllers\ServiceConnectionsController::class);
 
 
@@ -133,3 +136,6 @@ Route::resource('serviceConnectionChecklists', App\Http\Controllers\ServiceConne
 
 
 Route::resource('serviceConnectionCrews', App\Http\Controllers\ServiceConnectionCrewController::class);
+
+
+Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);

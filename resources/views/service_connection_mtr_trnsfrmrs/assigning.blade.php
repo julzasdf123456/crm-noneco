@@ -53,7 +53,7 @@
                             <tbody>
                                 @foreach ($serviceConnections as $item)
                                     <tr>
-                                        <td>{{ $item->id }}</td>
+                                        <td><a href="{{ route('serviceConnections.show', [$item->id]) }}">{{ $item->id }}</a></td>
                                         <td>{{ $item->ServiceAccountName }}</td>
                                         <td>{{ ServiceConnections::getAddress($item) }}</td>
                                         <td>{{ $item->AccountType }}</td>

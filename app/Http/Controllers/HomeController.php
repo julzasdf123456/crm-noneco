@@ -32,6 +32,10 @@ class HomeController extends Controller
             $data = DB::table('CRM_ServiceConnections')
                     ->whereNotNull('ORNumber')
                     ->whereNotIn('id', DB::table('CRM_ServiceConnectionMeterAndTransformer')->pluck('ServiceConnectionId'))
+                    ->where(function ($query) {
+                        $query->where('Trash', 'No')
+                            ->orWhereNull('Trash');
+                    })
                     ->select('*')
                     ->orderBy('ServiceAccountName')
                     ->get();
@@ -43,9 +47,18 @@ class HomeController extends Controller
     public function fetchNewServiceConnections(Request $request) {
         if ($request->ajax()) {            
             $data = DB::table('CRM_ServiceConnections')
-                    ->where('Status', 'Received')
-                    ->select('*')
-                    ->orderBy('ServiceAccountName')
+                    ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+                    ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+                    ->where('CRM_ServiceConnections.Status', 'Received')
+                    ->where(function ($query) {
+                        $query->where('Trash', 'No')
+                            ->orWhereNull('Trash');
+                    })
+                    ->select('CRM_ServiceConnections.id as id',
+                        'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName', 
+                        'CRM_Towns.Town as Town',
+                        'CRM_Barangays.Barangay as Barangay',)
+                    ->orderBy('CRM_ServiceConnections.ServiceAccountName')
                     ->get();
 
             echo json_encode($data);
@@ -59,6 +72,10 @@ class HomeController extends Controller
                     ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
                     ->where('CRM_ServiceConnections.Status', 'Approved')
                     ->whereNull('CRM_ServiceConnections.ORNumber')
+                    ->where(function ($query) {
+                        $query->where('CRM_ServiceConnections.Trash', 'No')
+                            ->orWhereNull('CRM_ServiceConnections.Trash');
+                    })
                     ->select('CRM_ServiceConnections.id as id',
                         'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName', 
                         'CRM_Towns.Town as Town',
@@ -81,6 +98,24 @@ class HomeController extends Controller
                     ->whereIn('id', DB::table('CRM_ServiceConnectionMeterAndTransformer')->pluck('ServiceConnectionId'))
                     ->select('*')
                     ->orderBy('ServiceAccountName')
+                    ->get();
+
+            echo json_encode($data);
+        }
+    }
+
+    public function fetchInspectionReport(Request $request) {
+        if ($request->ajax()) {            
+            $data = DB::table('users')
+                    ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+                    ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')
+                    ->where('roles.name', 'Inspector')
+                    ->select([
+                        'users.name',
+                        DB::raw("(SELECT COUNT(x.id) FROM CRM_ServiceConnections x 
+                        LEFT JOIN CRM_ServiceConnectionInspections y ON x.id=y.ServiceConnectionId
+                        WHERE x.Status='Received' AND x.Trash IS NULL AND y.Inspector=users.id) AS Total")    
+                    ])
                     ->get();
 
             echo json_encode($data);

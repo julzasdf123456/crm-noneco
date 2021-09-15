@@ -8,9 +8,29 @@ use App\Models\IDGenerator;
 
 @if($cond == 'new') 
     <input type="hidden" name="id" id="Membership_Id" value="{{ IDGenerator::generateID() }}">
+
+    <!-- Accountapplicationtype Field -->
+    <div class="form-group col-sm-12">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('AccountApplicationType', 'Energization Classification') !!}
+            </div>
+
+            <div class="col-lg-9 col-md-7">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
+                    </div>
+                    {!! Form::text('AccountApplicationType', $accountType, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255, 'readonly' => 'true']) !!}
+                </div>
+            </div>
+        </div>  
+    </div>
 @else 
     <input type="hidden" name="id" id="Membership_Id" value="{{ $serviceConnections->id }}">
 @endif
+
+
 
 <!-- Connectionapplicationtype Field -->
 <div class="form-group col-sm-12">
@@ -291,24 +311,6 @@ use App\Models\IDGenerator;
         });
     </script>
 @endpush
-
-<!-- Accountapplicationtype Field -->
-<div class="form-group col-sm-12">
-    <div class="row">
-        <div class="col-lg-3 col-md-5">
-            {!! Form::label('AccountApplicationType', 'Energization Classification') !!}
-        </div>
-
-        <div class="col-lg-9 col-md-7">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
-                </div>
-                {!! Form::select('AccountApplicationType', ['Permanent' => 'Permanent', 'Temporary' => 'Temporary'], $cond=='new' ? '' : $serviceConnections->AccountApplicationType, ['class' => 'form-control']) !!}
-            </div>
-        </div>
-    </div>  
-</div>
 
 <!-- Station Field -->
 <div class="form-group col-sm-12">

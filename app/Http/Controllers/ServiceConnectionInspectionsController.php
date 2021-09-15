@@ -67,14 +67,33 @@ class ServiceConnectionInspectionsController extends AppBaseController
 
         Flash::success('Service Connection Inspections saved successfully.');
 
-        // CREATE Timeframes
-        $timeFrame = new ServiceConnectionTimeframes;
-        $timeFrame->id = IDGenerator::generateID();
-        $timeFrame->ServiceConnectionId = $input['ServiceConnectionId'];
-        $timeFrame->UserId = Auth::id();
-        $timeFrame->Status = 'For Inspection';
-        $timeFrame->Notes = 'Tickets for staking and inspection created!';
-        $timeFrame->save();
+        $serviceConnection = ServiceConnections::find($input['ServiceConnectionId']);
+
+        if ($serviceConnection->AccountApplicationType == 'Permanent') {
+            $serviceConnection->Status = 'For Inspection';
+
+            // CREATE Timeframes
+            $timeFrame = new ServiceConnectionTimeframes;
+            $timeFrame->id = IDGenerator::generateID();
+            $timeFrame->ServiceConnectionId = $input['ServiceConnectionId'];
+            $timeFrame->UserId = Auth::id();
+            $timeFrame->Status = 'For Inspection';
+            $timeFrame->Notes = 'Tickets for staking and inspection created!';
+            $timeFrame->save();
+        } else {
+            $serviceConnection->Status = 'Forwarded To Planning';
+
+            // CREATE Timeframes
+            $timeFrame = new ServiceConnectionTimeframes;
+            $timeFrame->id = IDGenerator::generateID();
+            $timeFrame->ServiceConnectionId = $input['ServiceConnectionId'];
+            $timeFrame->UserId = Auth::id();
+            $timeFrame->Status = 'Forwarded To Planning';
+            $timeFrame->Notes = 'For assigning of BoM and Staking.';
+            $timeFrame->save();
+        }
+        $serviceConnection->save();
+
 
         // return redirect()->action([ServiceConnectionsController::class, 'show'], [$input['ServiceConnectionId']]);
         // return redirect()->action([App\Http\Controllers\ServiceConnectionMtrTrnsfrmrController::class, 'createStepThree'], [$input['ServiceConnectionId']]);

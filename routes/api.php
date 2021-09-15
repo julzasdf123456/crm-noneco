@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\ServiceConnectionInspectionsAPI;
+use App\Http\Controllers\API\TelleringController;
 use App\Http\Controllers\API\UserController;
 
 /*
@@ -20,6 +21,8 @@ use App\Http\Controllers\API\UserController;
 Route::get('get-service-connections/', [ServiceConnectionInspectionsAPI::class, 'getServiceConnections']);
 Route::get('get-service-inspections/', [ServiceConnectionInspectionsAPI::class, 'getServiceInspections']);
 Route::post('update-service-inspections/', [ServiceConnectionInspectionsAPI::class, 'updateServiceInspections']);
+
+Route::get('get-payment-queues/', [TelleringController::class, 'fetchApprovedServiceConnections']);
 
 Route::post('login', [UserController::class, 'login']);
 

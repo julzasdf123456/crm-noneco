@@ -129,7 +129,7 @@
 <!-- Pole -->
 <div class="card card-primary card-outline">
     <div class="card-header border-0">
-        <h3 class="card-title">Pole Data</h3>
+        <h3 class="card-title">Pole Data (Pole Number: {{ $serviceConnectionInspections->PoleNumber==null ? 'not specified' : $serviceConnectionInspections->PoleNumber }})</h3>
         <div class="card-tools">
             @if($serviceConnectionInspections == null)
                 @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Inspector', 'Service Connection Assessor'])) 
@@ -224,48 +224,42 @@
             <tbody>
                 <tr>
                     <td>Building</td>
-                    <td>{{ $serviceConnectionInspections->GeoBuilding }}</td>
-                    <td width="10"><a href="#" title="View in map"><i class="fas fa-directions"></i></a></td>
+                    <td id="geobuilding">{{ $serviceConnectionInspections->GeoBuilding }}</td>
                 </tr>
                 <tr>
                     <td>Tapping Pole</td>
-                    <td>{{ $serviceConnectionInspections->GeoTappingPole }}</td>
-                    <td width="10"><a href="#" title="View in map"><i class="fas fa-directions"></i></a></td>
+                    <td id="geotappingpole">{{ $serviceConnectionInspections->GeoTappingPole }}</td>
                 </tr>
                 <tr>
                     <td>Metering Pole</td>
-                    <td>{{ $serviceConnectionInspections->GeoMeteringPole }}</td>
-                    <td width="10"><a href="#" title="View in map"><i class="fas fa-directions"></i></a></td>
+                    <td id="geometering">{{ $serviceConnectionInspections->GeoMeteringPole }}</td>
                 </tr>
                 <tr>
                     <td>Service Entrance Pole</td>
-                    <td>{{ $serviceConnectionInspections->GeoSEPole }}</td>
-                    <td width="10"><a href="#" title="View in map"><i class="fas fa-directions"></i></a></td>
+                    <td id="geosepole">{{ $serviceConnectionInspections->GeoSEPole }}</td>
                 </tr>
 
                 <tr>
                     <td>Nearest Neighbor 1</td>
                     <td>{{ $serviceConnectionInspections->FirstNeighborName }}</td>
-                    <td width="10"></td>
                 </tr>
                 <tr>
                     <td>Nearest Neighbor 1 Meter #</td>
                     <td>{{ $serviceConnectionInspections->FirstNeighborMeterSerial }}</td>
-                    <td width="10"></td>
                 </tr>
                 <tr>
                     <td>Nearest Neighbor 2</td>
                     <td>{{ $serviceConnectionInspections->SecondNeighborName }}</td>
-                    <td width="10"></td>
                 </tr>
                 <tr>
                     <td>Nearest Neighbor 2 Meter #</td>
                     <td>{{ $serviceConnectionInspections->SecondNeighborMeterSerial }}</td>
-                    <td width="10"></td>
                 </tr>
             </tbody>
             
         </table>
+
+        <div id='map' style="width: 100%; height: 400px;"></div>
     </div>
 </div>
 @else 
@@ -274,4 +268,70 @@
         <a href="{{ route('serviceConnectionInspections.create-step-two', [$serviceConnections->id]) }}" class="btn btn-primary btn-sm" title="Add Verification Details"><i class="fas fa-pen ico-tab"></i>Create Verification</a>
     @endif
 @endif
+
+@push('page_scripts')
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js'></script>
+
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css' rel='stylesheet' />
+
+    <script type="text/javascript">
+        function getLocData() {
+            var centerLoc = "";
+
+            if ($("#geobuilding").text() === "") {
+                if ($('#geometering').text() === "") {
+                    centerLoc = $('#geotappingpole').text();
+                } else {
+                    centerLoc = $('#geometering').text();
+                }            
+            } else {
+                centerLoc = $("#geobuilding").text();
+            }
+
+            return centerLoc;
+        }
+
+        $(document).ready(function() {
+            // MAPBOX
+            mapboxgl.accessToken = 'pk.eyJ1IjoianVsemxvcGV6IiwiYSI6ImNqZzJ5cWdsMjJid3Ayd2xsaHcwdGhheW8ifQ.BcTcaOXmXNLxdO3wfXaf5A';
+
+            var centerLoc = getLocData();
+
+            var map = new mapboxgl.Map({
+                container: 'map',
+                zoom: 15,
+                center: [centerLoc.split(",")[1], centerLoc.split(",")[0]],
+                style: 'mapbox://styles/mapbox/satellite-v9'
+            });
+
+            map.once('idle',function(){
+                if (!jQuery.isEmptyObject($('#geobuilding').text())) {
+                    const markerBldg = new mapboxgl.Marker()
+                        .setLngLat([$('#geobuilding').text().split(",")[1], $('#geobuilding').text().split(",")[0]])
+                        .addTo(map);
+                }
+
+                if (!jQuery.isEmptyObject($('#geometering').text())) {
+                    const markerMetering = new mapboxgl.Marker()
+                        .setLngLat([$('#geometering').text().split(",")[1], $('#geometering').text().split(",")[0]])
+                        .addTo(map);
+                }
+
+                if (!jQuery.isEmptyObject($('#geotappingpole').text())) {
+                    const markerTapping = new mapboxgl.Marker()
+                        .setLngLat([$('#geotappingpole').text().split(",")[1], $('#geotappingpole').text().split(",")[0]])
+                        .addTo(map);
+                }
+
+                if (!jQuery.isEmptyObject($('#geosepole').text())) {
+                    const markerSe = new mapboxgl.Marker()
+                        .setLngLat([$('#geosepole').text().split(",")[1], $('#geosepole').text().split(",")[0]])
+                        .addTo(map);
+                }
+            });    
+
+            
+        });
+    </script>
+@endpush
 

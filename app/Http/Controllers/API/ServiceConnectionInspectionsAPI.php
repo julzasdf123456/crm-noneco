@@ -19,6 +19,7 @@ class ServiceConnectionInspectionsAPI extends Controller {
         $serviceConnections = DB::table('CRM_ServiceConnectionInspections')
             ->leftJoin('CRM_ServiceConnections', 'CRM_ServiceConnectionInspections.ServiceConnectionId', '=', 'CRM_ServiceConnections.id')
             ->select('CRM_ServiceConnections.*')
+            ->where('CRM_ServiceConnections.Status', "For Inspection")
             ->where(function($query) {
                 $query->where('CRM_ServiceConnectionInspections.Status', "For Inspection")
                     ->orWhere('CRM_ServiceConnectionInspections.Status', "For Re-Inspection");
@@ -41,6 +42,7 @@ class ServiceConnectionInspectionsAPI extends Controller {
         $serviceConnections = DB::table('CRM_ServiceConnectionInspections')
             ->leftJoin('CRM_ServiceConnections', 'CRM_ServiceConnectionInspections.ServiceConnectionId', '=', 'CRM_ServiceConnections.id')
             ->select('CRM_ServiceConnectionInspections.*')
+            ->where('CRM_ServiceConnections.Status', "For Inspection")
             ->where(function($query) {
                 $query->where('CRM_ServiceConnectionInspections.Status', "For Inspection")
                     ->orWhere('CRM_ServiceConnectionInspections.Status', "For Re-Inspection");

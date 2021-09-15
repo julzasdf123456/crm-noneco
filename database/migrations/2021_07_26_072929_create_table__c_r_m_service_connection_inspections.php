@@ -21,6 +21,7 @@ class CreateTableCRMServiceConnectionInspections extends Migration
             $table->string('SEMainCircuitBreakerAsInstalled')->nullable();
             $table->string('SENoOfBranchesAsPlan')->nullable();
             $table->string('SENoOfBranchesAsInstalled')->nullable();
+            $table->string('PoleNumber')->nullable();
             $table->string('PoleGIEstimatedDiameter')->nullable();
             $table->string('PoleGIHeight')->nullable();
             $table->string('PoleGINoOfLiftPoles')->nullable();

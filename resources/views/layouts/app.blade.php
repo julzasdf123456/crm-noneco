@@ -34,6 +34,8 @@
 
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
 
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     <!-- <link href="{{ asset('css/app.css') }}" rel="stylesheet"> -->
 
     <style>
@@ -181,13 +183,13 @@
 
 <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"
-        integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A=="
-        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
         
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/js/bootstrap-switch.min.js" integrity="sha512-J+763o/bd3r9iW+gFEqTaeyi+uAphmzkE/zU8FxY6iAvD3nQKXa+ZAWkBI9QS9QkYEKddQoiy0I5GDxKf/ORBA==" crossorigin="anonymous"></script>
 
 <script src="https://cdn.lordicon.com/libs/mssddfmo/lord-icon-2.1.0.js"></script>
+
+<script src="https://adminlte.io/themes/v3/plugins/chart.js/Chart.min.js"></script>
 
 <script>
     $(function () {
@@ -213,6 +215,8 @@
 
     // APPLICATION JS
     $(document).ready(function() {
+        // SELECT2 SEARCHABLE DROPDOWN INITIALIZATION
+        $('.js-example-basic-single').select2();
         /**
          * MEMBERSHIP RELATED SCRIPTS
          */
@@ -251,6 +255,26 @@
          * SERVICE CONNECTION SCRIPTS
          */
         $('#organizationNo').hide();
+
+        /**
+         * METERING DASH AND MENU COUNTER
+         * */
+        $.ajax({
+            url : '/home/get-unassigned-meters',
+            type: "GET",
+            dataType : "json",
+            success : function(response) {
+                // $.each(response, function(index, element) {
+                //     console.log(response[index]['id']);
+                // });
+                console.log(response.length);
+                $('#metering-unassigned').text(response.length);
+                $('#assign-badge-count').text(response.length);
+            },
+            error : function(error) {
+                alert(error);
+            }
+        });
     });
 
     /**

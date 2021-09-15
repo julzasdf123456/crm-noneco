@@ -1,3 +1,9 @@
+@php
+    
+use Illuminate\Support\Facades\Auth;
+
+@endphp
+
 <!-- MEMBERSHIP MENU -->
 @canany(['Super Admin', 'view membership'])
     <li class="nav-item has-treeview">
@@ -100,6 +106,18 @@
                     </a>
                 </li>
             @endcanany
+
+            @if (Auth::user()->hasRole('Metering Personnel'))
+            <li class="nav-item">
+                <a href="{{ route('serviceConnectionMtrTrnsfrmrs.assigning') }}"
+                class="nav-link {{ Request::is('serviceConnectionMtrTrnsfrmrs.assigning') ? 'active' : '' }}">
+                    <i class="fas fa-tachometer-alt nav-icon"></i>
+                    <p>Assign Meters
+                        <span id="assign-badge-count" class="right badge badge-danger">0</span>
+                    </p>
+                </a>
+            </li>
+            @endif
 
             @canany(['Super Admin', 'sc settings'])
             <li class="nav-item">
@@ -244,5 +262,13 @@
         </ul>
     </li>
 @endcan
+
+
+<li class="nav-item">
+    <a href="{{ route('serviceAccounts.index') }}"
+       class="nav-link {{ Request::is('serviceAccounts*') ? 'active' : '' }}">
+        <p>Service Accounts</p>
+    </a>
+</li>
 
 

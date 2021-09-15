@@ -31,7 +31,7 @@
                 <div class="icon">
                     <i class="fas fa-users"></i>
                 </div>
-                <a href="" data-toggle="modal" data-target="#approved-modal" class="small-box-footer">Show More <i class="fas fa-arrow-circle-right"></i></a>
+                <a href="" id="show-received" data-toggle="modal" data-target="#approved-modal" class="small-box-footer">Show More <i class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
 
@@ -80,6 +80,45 @@
         </div>     
         
     </div>
+
+    {{-- OTHERS --}}
+    <div class="row">
+        <div class="col-md-6 col-lg-6">
+            <div class="card">
+                <div class="card-header border-0">
+                    <div class="d-flex justify-content-between">
+                        <h3 class="card-title">Inspection Report</h3>
+                        <a href="javascript:void(0);">View Report</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex">
+                        <p class="d-flex flex-column">
+                            <span>Number of Inspections</span>
+                        </p>
+                        <p class="ml-auto d-flex flex-column text-right">
+                            <span class="text-muted">Current Uninspected Applications</span>
+                        </p>
+                    </div>
+                    <!-- /.d-flex -->
+  
+                    <div class="position-relative mb-4"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
+                        <canvas id="sales-chart" height="200" style="display: block; width: 764px; height: 200px;" width="764" class="chartjs-render-monitor"></canvas>
+                    </div>
+  
+                    {{-- <div class="d-flex flex-row justify-content-end">
+                        <span class="mr-2">
+                            <i class="fas fa-square text-primary"></i> This year
+                        </span>
+    
+                        <span>
+                            <i class="fas fa-square text-gray"></i> Last year
+                        </span>
+                    </div> --}}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -89,7 +128,7 @@
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Approved Applicants</h4>
+                <h4 class="modal-title" id="modal-title">Approved Applicants</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
@@ -149,21 +188,7 @@
         });
         
         // METERING DASH
-        $.ajax({
-            url : '/home/get-unassigned-meters',
-            type: "GET",
-            dataType : "json",
-            success : function(response) {
-                // $.each(response, function(index, element) {
-                //     console.log(response[index]['id']);
-                // });
-                console.log(response.length);
-                $('#metering-unassigned').text(response.length);
-            },
-            error : function(error) {
-                alert(error);
-            }
-        });
+        // METERING DASH IS MOVED TO app.blade.php
 
         // FOR ENERGIZATION
         $.ajax({
@@ -184,6 +209,7 @@
 
         // LOAD CONTENT FOR APPROVED
         $('#show-approved').on('click', function() {
+            $('#modal-title').text('Approved Applications');
             $.ajax({
                 url : '/home/get-approved-service-connections',
                 type: "GET",
@@ -200,5 +226,105 @@
                 }
             });
         });
+
+        $('#show-received').on('click', function() {
+            $('#modal-title').text('New Applications');
+            $.ajax({
+                url : '/home/get-new-service-connections',
+                type: "GET",
+                dataType : "json",
+                success : function(response) {
+                    $('#approved-table tbody tr').remove();
+                    $.each(response, function(index, element) {
+                        console.log(response[index]['id']);
+                        $('#approved-table tbody').append('<tr><td><a href="/serviceConnections/' + response[index]["id"] + '">' + response[index]['id'] + '</a></td><td>' + response[index]['ServiceAccountName'] + '</td><td>' + response[index]['Barangay'] + ', ' + response[index]['Town'] + '</td></tr>');
+                    });
+                },
+                error : function(error) {
+                    alert(error);
+                }
+            });
+        });
+
+        // CHART
+        $.ajax({
+            url : '/home/get-inspection-report',
+                type: "GET",
+                dataType : "json",
+                success : function(response) {
+                    var labels = [];
+                    var data = [];
+                    $.each(response, function(index, element) {
+                        labels.push(response[index]['name']);
+                        data.push(response[index]['Total']);
+                    });
+
+                    // DISPLAY QUERY TO CHART
+                    'use strict'
+
+                    var ticksStyle = {
+                        fontColor: '#495057',
+                        fontStyle: 'bold'
+                    }
+
+                    var mode = 'index'
+                    var intersect = true
+                    var $salesChart = $('#sales-chart')
+                    // eslint-disable-next-line no-unused-vars
+                    var salesChart = new Chart($salesChart, {
+                        type: 'bar',
+                        data: {
+                        labels: labels,
+                        datasets: [
+                                {
+                                    backgroundColor: '#007bff',
+                                    borderColor: '#007bff',
+                                    data: data
+                                },
+                            ]
+                        },
+                        options: {
+                            maintainAspectRatio: false,
+                            tooltips: {
+                                mode: mode,
+                                intersect: intersect
+                            },
+                            hover: {
+                                mode: mode,
+                                intersect: intersect
+                            },
+                            legend: {
+                                display: false
+                            },
+                            scales: {
+                                yAxes: [{
+                                    // display: false,
+                                    gridLines: {
+                                        display: true,
+                                        lineWidth: '4px',
+                                        color: 'rgba(0, 0, 0, .2)',
+                                        zeroLineColor: 'transparent'
+                                    },
+                                    ticks: $.extend({
+                                        beginAtZero: true,
+                                    }, ticksStyle)
+                                }],
+                                xAxes: [{
+                                    display: true,
+                                    gridLines: {
+                                        display: false
+                                    },
+                                    ticks: ticksStyle
+                                }]
+                            }
+                        }
+                    })
+                },
+                error : function(error) {
+                    alert(error);
+                }
+        })
+
+        
     </script>
 @endpush

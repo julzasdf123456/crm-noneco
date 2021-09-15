@@ -1,0 +1,136 @@
+<?php
+
+namespace App\Models;
+
+use Eloquent as Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+/**
+ * Class ServiceAccounts
+ * @package App\Models
+ * @version September 13, 2021, 11:26 am PST
+ *
+ * @property string $ServiceAccountName
+ * @property string $Town
+ * @property string $Barangay
+ * @property string $Purok
+ * @property string $AccountType
+ * @property string $AccountStatus
+ * @property string $ContactNumber
+ * @property string $EmailAddress
+ * @property string $ServiceConnectionId
+ * @property string $MeterDetailsId
+ * @property string $TransformerDetailsId
+ * @property string $PoleNumber
+ * @property string $AreaCode
+ * @property string $BlockCode
+ * @property string $SequenceCode
+ * @property string $Feeder
+ * @property string $ComputeType
+ * @property string $Organization
+ * @property string $OrganizationParentAccount
+ * @property string $GPSMeter
+ */
+class ServiceAccounts extends Model
+{
+    // use SoftDeletes;
+
+    use HasFactory;
+
+    public $table = 'Billing_ServiceAccounts';
+    
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = 'updated_at';
+
+
+    protected $dates = ['deleted_at'];
+
+    protected $primaryKey = 'id';
+
+    public $incrementing = false;
+
+    public $fillable = [
+        'ServiceAccountName',
+        'Town',
+        'Barangay',
+        'Purok',
+        'AccountType',
+        'AccountStatus',
+        'ContactNumber',
+        'EmailAddress',
+        'ServiceConnectionId',
+        'MeterDetailsId',
+        'TransformerDetailsId',
+        'PoleNumber',
+        'AreaCode',
+        'BlockCode',
+        'SequenceCode',
+        'Feeder',
+        'ComputeType',
+        'Organization',
+        'OrganizationParentAccount',
+        'GPSMeter'
+    ];
+
+    /**
+     * The attributes that should be casted to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'id' => 'string',
+        'ServiceAccountName' => 'string',
+        'Town' => 'string',
+        'Barangay' => 'string',
+        'Purok' => 'string',
+        'AccountType' => 'string',
+        'AccountStatus' => 'string',
+        'ContactNumber' => 'string',
+        'EmailAddress' => 'string',
+        'ServiceConnectionId' => 'string',
+        'MeterDetailsId' => 'string',
+        'TransformerDetailsId' => 'string',
+        'PoleNumber' => 'string',
+        'AreaCode' => 'string',
+        'BlockCode' => 'string',
+        'SequenceCode' => 'string',
+        'Feeder' => 'string',
+        'ComputeType' => 'string',
+        'Organization' => 'string',
+        'OrganizationParentAccount' => 'string',
+        'GPSMeter' => 'string'
+    ];
+
+    /**
+     * Validation rules
+     *
+     * @var array
+     */
+    public static $rules = [
+        'ServiceAccountName' => 'required|string|max:600',
+        'Town' => 'nullable|string|max:50',
+        'Barangay' => 'nullable|string|max:50',
+        'Purok' => 'nullable|string|max:200',
+        'AccountType' => 'nullable|string|max:100',
+        'AccountStatus' => 'nullable|string|max:50',
+        'ContactNumber' => 'nullable|string|max:60',
+        'EmailAddress' => 'nullable|string|max:60',
+        'ServiceConnectionId' => 'nullable|string|max:30',
+        'MeterDetailsId' => 'nullable|string|max:50',
+        'TransformerDetailsId' => 'nullable|string|max:50',
+        'PoleNumber' => 'nullable|string|max:255',
+        'AreaCode' => 'nullable|string|max:50',
+        'BlockCode' => 'nullable|string|max:50',
+        'SequenceCode' => 'nullable|string|max:50',
+        'Feeder' => 'nullable|string|max:50',
+        'ComputeType' => 'nullable|string|max:20',
+        'Organization' => 'nullable|string|max:30',
+        'OrganizationParentAccount' => 'nullable|string|max:30',
+        'GPSMeter' => 'nullable|string|max:50',
+        'created_at' => 'nullable',
+        'updated_at' => 'nullable'
+    ];
+
+    
+}
