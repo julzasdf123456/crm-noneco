@@ -69,7 +69,7 @@ class ServiceConnectionInspectionsController extends AppBaseController
 
         $serviceConnection = ServiceConnections::find($input['ServiceConnectionId']);
 
-        if ($serviceConnection->AccountApplicationType == 'Permanent') {
+        if ($serviceConnection->LoadCategory == 'below 5kVa') {
             $serviceConnection->Status = 'For Inspection';
 
             // CREATE Timeframes

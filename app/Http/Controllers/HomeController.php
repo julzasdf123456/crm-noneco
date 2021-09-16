@@ -114,7 +114,7 @@ class HomeController extends Controller
                         'users.name',
                         DB::raw("(SELECT COUNT(x.id) FROM CRM_ServiceConnections x 
                         LEFT JOIN CRM_ServiceConnectionInspections y ON x.id=y.ServiceConnectionId
-                        WHERE x.Status='Received' AND x.Trash IS NULL AND y.Inspector=users.id) AS Total")    
+                        WHERE x.Status='For Inspection' AND x.Trash IS NULL AND y.Inspector=users.id) AS Total")    
                     ])
                     ->get();
 

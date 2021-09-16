@@ -17,6 +17,7 @@ class ServiceAccountsController extends AppBaseController
 
     public function __construct(ServiceAccountsRepository $serviceAccountsRepo)
     {
+        $this->middleware('auth');
         $this->serviceAccountsRepository = $serviceAccountsRepo;
     }
 

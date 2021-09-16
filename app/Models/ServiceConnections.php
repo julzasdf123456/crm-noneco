@@ -76,6 +76,8 @@ class ServiceConnections extends Model
         'EnergizationOrderIssued',
         'DateTimeOfEnergizationIssue',
         'StationCrewAssigned',
+        'LoadCategory',
+        'TemporaryDurationInMonths',
     ];
 
     /**
@@ -111,6 +113,8 @@ class ServiceConnections extends Model
         'EnergizationOrderIssued' => 'string',
         'DateTimeOfEnergizationIssue' => 'datetime',
         'StationCrewAssigned' => 'string',
+        'LoadCategory' => 'string',
+        'TemporaryDurationInMonths' => 'string',
     ];
 
     /**
@@ -148,6 +152,8 @@ class ServiceConnections extends Model
         'EnergizationOrderIssued' => 'nullable|string',
         'DateTimeOfEnergizationIssue' => 'nullable',
         'StationCrewAssigned' => 'nullable|string',
+        'LoadCategory' => 'nullable|string',
+        'TemporaryDurationInMonths' => 'nullable|string',
     ];
 
     public static function getAccountCount($consumerId) {

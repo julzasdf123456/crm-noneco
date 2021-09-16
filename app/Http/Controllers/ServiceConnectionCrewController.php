@@ -17,6 +17,7 @@ class ServiceConnectionCrewController extends AppBaseController
 
     public function __construct(ServiceConnectionCrewRepository $serviceConnectionCrewRepo)
     {
+        $this->middleware('auth');
         $this->serviceConnectionCrewRepository = $serviceConnectionCrewRepo;
     }
 

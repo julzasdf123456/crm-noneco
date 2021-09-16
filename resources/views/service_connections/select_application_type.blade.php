@@ -44,7 +44,7 @@
                                     <input class="form-check-input" type="radio" name="type" value="Large Load">
                                     <label class="form-check-label">Large Load</label>
                                 </div>
-                              </div>
+                            </div>
                         </div>
 
                     </div>

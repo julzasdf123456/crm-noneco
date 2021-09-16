@@ -9,11 +9,11 @@ use App\Models\IDGenerator;
 @if($cond == 'new') 
     <input type="hidden" name="id" id="Membership_Id" value="{{ IDGenerator::generateID() }}">
 
-    <!-- Accountapplicationtype Field -->
+    <!-- Connectionapplicationtype Field -->
     <div class="form-group col-sm-12">
         <div class="row">
             <div class="col-lg-3 col-md-5">
-                {!! Form::label('AccountApplicationType', 'Energization Classification') !!}
+                {!! Form::label('ConnectionApplicationType', 'Application for: ') !!}
             </div>
 
             <div class="col-lg-9 col-md-7">
@@ -21,7 +21,138 @@ use App\Models\IDGenerator;
                     <div class="input-group-prepend">
                         <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
                     </div>
-                    {!! Form::text('AccountApplicationType', $accountType, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255, 'readonly' => 'true']) !!}
+                    <div class="radio-group-horizontal">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="ConnectionApplicationType" value="New Installation" checked>
+                            <label class="form-check-label">New Installation</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="ConnectionApplicationType" value="Rewiring">
+                            <label class="form-check-label">Rewiring</label>
+                        </div>
+                    </div>   
+                </div>
+            </div>
+        </div>  
+    </div>
+
+    <!-- Accountapplicationtype Field -->
+    <div class="form-group col-sm-12">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('AccountApplicationType', 'Application Type') !!}
+            </div>
+
+            <div class="col-lg-9 col-md-7"> 
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
+                    </div>
+
+                    <div class="radio-group-horizontal">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="AccountApplicationType" value="Permanent">
+                            <label class="form-check-label">Permanent</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="AccountApplicationType" value="Temporary">
+                            <label class="form-check-label">Temporary</label>
+                        </div>
+                    </div>                    
+                </div>
+            </div>
+        </div>  
+    </div>
+
+    @push('page_scripts')
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('#duration').hide();
+                $('#TemporaryDurationInMonths').val('');
+            });
+            $("input[name='AccountApplicationType']").change(function() {
+                if (this.value == 'Permanent') {
+                    // alert('Permanent');
+                    $('#duration').hide();
+                    $('#TemporaryDurationInMonths').val('');
+                } else {
+                    // alert('Temporary');
+                    $('#duration').show();
+                    $('#TemporaryDurationInMonths').val('3');
+                }
+            });
+        </script>
+    @endpush
+
+    {{-- Temporary Duration Field --}}
+    <div class="form-group col-sm-12" id="duration">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('TemporaryDurationInMonths', 'Duration (in Months)') !!}
+            </div>
+    
+            <div class="col-lg-9 col-md-7">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                    </div>
+                    {!! Form::text('TemporaryDurationInMonths', null, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255]) !!}
+                </div>
+            </div>
+        </div> 
+    </div>
+
+    <!-- Accounttype Field -->
+    <div class="form-group col-sm-12">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('AccountType', 'Classification of Service') !!}
+            </div>
+
+            <div class="col-lg-9 col-md-7">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
+                    </div>
+
+                    <div class="radio-group-horizontal">
+                        @if ($accountTypes != null)
+                            @foreach ($accountTypes as $item)
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="AccountType" value="{{ $item->id }}">
+                                <label class="form-check-label">{{ $item->AccountType }}</label>
+                            </div>
+                            @endforeach
+                        @endif
+                    </div> 
+                </div>
+            </div>
+        </div>  
+    </div>
+
+    <!-- Accountapplicationtype Field -->
+    <div class="form-group col-sm-12">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('LoadCategory', 'Projected Load') !!}
+            </div>
+
+            <div class="col-lg-9 col-md-7"> 
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
+                    </div>
+
+                    <div class="radio-group-horizontal">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="LoadCategory" value="below 5kVa" checked>
+                            <label class="form-check-label">Below 5KVA</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="LoadCategory" value="above 5kVa">
+                            <label class="form-check-label">Above 5KVA</label>
+                        </div>
+                    </div>                    
                 </div>
             </div>
         </div>  
@@ -30,43 +161,18 @@ use App\Models\IDGenerator;
     <input type="hidden" name="id" id="Membership_Id" value="{{ $serviceConnections->id }}">
 @endif
 
+@push('page_scripts')
+    <script type="text/javascript">
+        $('#DateOfApplication').datetimepicker({
+            format: 'YYYY-MM-DD',
+            useCurrent: true,
+            sideBySide: true
+        })
+    </script>
+@endpush
 
-
-<!-- Connectionapplicationtype Field -->
-<div class="form-group col-sm-12">
-    <div class="row">
-        <div class="col-lg-3 col-md-5">
-            {!! Form::label('ConnectionApplicationType', 'Application Type') !!}
-        </div>
-
-        <div class="col-lg-9 col-md-7">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
-                </div>
-                {!! Form::select('ConnectionApplicationType', ['New Installation' => 'New Installation', 'Rewiring' => 'Rewiring', 'Street Lighting' => 'Street Lighting'], $cond=='new' ? '' : $serviceConnections->ConnectionApplicationType, ['class' => 'form-control']) !!}
-            </div>
-        </div>
-    </div>  
-</div>
-
-<!-- BuildingType Field -->
-<div class="form-group col-sm-12">
-    <div class="row">
-        <div class="col-lg-3 col-md-5">
-            {!! Form::label('BuildingType', 'Building Type') !!}
-        </div>
-
-        <div class="col-lg-9 col-md-7">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-tools"></i></span>
-                </div>
-                {!! Form::select('BuildingType', ['Concrete' => 'Concrete', 'Non-Concrete' => 'Non-Concrete', 'Special Lighting' => 'Special Lighting'], $cond=='new' ? '' : $serviceConnections->BuildingType, ['class' => 'form-control']) !!}
-            </div>
-        </div>
-    </div>  
-</div>
+<div class="divider"></div>
+<br>
 
 <!-- Memberconsumerid Field -->
 <div class="form-group col-sm-12">
@@ -85,37 +191,6 @@ use App\Models\IDGenerator;
         </div>
     </div> 
 </div>
-
-<!-- Dateofapplication Field -->
-<div class="form-group col-sm-12">
-    <div class="row">
-        <div class="col-lg-3 col-md-5">
-            {!! Form::label('DateOfApplication', 'Date of Application') !!}
-        </div>
-
-        <div class="col-lg-9 col-md-7">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-clock"></i></span>
-                </div>
-                    {!! Form::text('DateOfApplication', $cond=='new' ? date('Y-m-d') : $serviceConnections->DateOfApplication, ['class' => 'form-control','id'=>'DateOfApplication']) !!}
-            </div>
-        </div>
-    </div> 
-</div>
-
-@push('page_scripts')
-    <script type="text/javascript">
-        $('#DateOfApplication').datetimepicker({
-            format: 'YYYY-MM-DD',
-            useCurrent: true,
-            sideBySide: true
-        })
-    </script>
-@endpush
-
-<div class="divider"></div>
-<br>
 
 <!-- Serviceaccountname Field -->
 <div class="form-group col-sm-12">
@@ -246,24 +321,6 @@ use App\Models\IDGenerator;
 <div class="divider"></div>
 <br>
 
-<!-- Accounttype Field -->
-<div class="form-group col-sm-12">
-    <div class="row">
-        <div class="col-lg-3 col-md-5">
-            {!! Form::label('AccountType', 'Account Type') !!}
-        </div>
-
-        <div class="col-lg-9 col-md-7">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
-                </div>
-                {!! Form::select('AccountType', $accountTypes, $cond=='new' ? '' : $serviceConnections->AccountType, ['class' => 'form-control']) !!}
-            </div>
-        </div>
-    </div>  
-</div>
-
 <!-- Accountorganization Field -->
 <div class="form-group col-sm-12">
     <div class="row">
@@ -329,6 +386,43 @@ use App\Models\IDGenerator;
         </div>
     </div>  
 </div>
+
+<!-- BuildingType Field -->
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('BuildingType', 'Building Type') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-tools"></i></span>
+                </div>
+                {!! Form::select('BuildingType', ['Concrete' => 'Concrete', 'Non-Concrete' => 'Non-Concrete', 'Special Lighting' => 'Special Lighting'], $cond=='new' ? '' : $serviceConnections->BuildingType, ['class' => 'form-control']) !!}
+            </div>
+        </div>
+    </div>  
+</div>
+
+<!-- Dateofapplication Field -->
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('DateOfApplication', 'Date of Application') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                </div>
+                    {!! Form::text('DateOfApplication', $cond=='new' ? date('Y-m-d') : $serviceConnections->DateOfApplication, ['class' => 'form-control','id'=>'DateOfApplication']) !!}
+            </div>
+        </div>
+    </div> 
+</div>
+
 
 <!-- Isnihe Field -->
 <input type="hidden" name="IsNIHE" value="NO">

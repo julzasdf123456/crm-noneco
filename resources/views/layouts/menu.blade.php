@@ -89,6 +89,16 @@ use Illuminate\Support\Facades\Auth;
         <ul class="nav nav-treeview">
             @canany(['Super Admin', 'sc view'])
                 <li class="nav-item">
+                    <a href="{{ route('serviceConnections.dashboard') }}"
+                    class="nav-link {{ Request::is('serviceConnections.dashboard*') ? 'active' : '' }}">
+                        <i class="fas fa-chart-line nav-icon"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+            @endcanany
+
+            @canany(['Super Admin', 'sc view'])
+                <li class="nav-item">
                     <a href="{{ route('serviceConnections.index') }}"
                     class="nav-link {{ Request::is('serviceConnections*') ? 'active' : '' }}">
                         <i class="fas fa-bolt nav-icon"></i>
@@ -179,6 +189,67 @@ use Illuminate\Support\Facades\Auth;
     </li>
 @endcanany
 
+{{-- SERVICE ACCOUNTS --}}
+@canany(['Super Admin'])
+    <li class="nav-item has-treeview">
+        <a href="#" class="nav-link">
+            <lord-icon
+                src="https://cdn.lordicon.com/cjieiyzp.json"
+                trigger="hover"
+                colors="primary:#ffffff,secondary:#ffffff"
+                stroke="100"
+                style="width:22px;height:22px">
+            </lord-icon>
+            <p>
+                Service Accounts
+                <i class="fas fa-angle-left right"></i>
+            </p>
+        </a>
+        <ul class="nav nav-treeview">
+            <li class="nav-item">
+                <a href="{{ route('serviceAccounts.index') }}"
+                   class="nav-link {{ Request::is('serviceAccounts*') ? 'active' : '' }}">                   
+                   <i class="fas fa-user-circle nav-icon"></i><p>Service Accounts</p>
+                </a>
+            </li>
+        </ul>
+    </li>
+@endcanany
+
+{{-- MATERIALS AND STRUCTURES --}}
+@canany(['Super Admin'])
+    <li class="nav-item has-treeview">
+        <a href="#" class="nav-link">
+            <lord-icon
+                src="https://cdn.lordicon.com/xawkzoxm.json"
+                trigger="hover"
+                colors="primary:#ffffff,secondary:#ffffff"
+                stroke="100"
+                style="width:22px;height:22px">
+            </lord-icon>
+            <p>
+                Materials and Structures
+                <i class="fas fa-angle-left right"></i>
+            </p>
+        </a>
+        <ul class="nav nav-treeview">
+            <li class="nav-item">
+                <a href="{{ route('structures.index') }}"
+                   class="nav-link {{ Request::is('structures*') ? 'active' : '' }}">
+                   <i class="fas fa-draw-polygon nav-icon"></i><p>Structures</p>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('materialAssets.index') }}"
+                   class="nav-link {{ Request::is('materialAssets*') ? 'active' : '' }}">
+                   <i class="fas fa-plug nav-icon"></i><p>Material Assets</p>
+                </a>
+            </li>
+        </ul>
+    </li>
+@endcanany
+
 <!-- EXTRAS MENU -->
 @canany(['Super Admin', 'create membership', 'sc create'])
     <li class="nav-item has-treeview">
@@ -262,13 +333,4 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
-
-
-<li class="nav-item">
-    <a href="{{ route('serviceAccounts.index') }}"
-       class="nav-link {{ Request::is('serviceAccounts*') ? 'active' : '' }}">
-        <p>Service Accounts</p>
-    </a>
-</li>
-
 

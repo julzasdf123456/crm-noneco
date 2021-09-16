@@ -51,6 +51,10 @@ class ServiceConnectionsController extends AppBaseController
             ->with('serviceConnections', $serviceConnections);
     }
 
+    public function dashboard() {
+        return view('/service_connections/dashboard');
+    }
+
     /**
      * Show the form for creating a new ServiceConnections.
      *
@@ -217,7 +221,7 @@ class ServiceConnectionsController extends AppBaseController
 
         $memberConsumer = null;
 
-        $accountTypes = ServiceConnectionAccountTypes::orderBy('id')->pluck('AccountType', 'id');
+        $accountTypes = ServiceConnectionAccountTypes::orderBy('id')->get();
 
         $crew = ServiceConnectionCrew::orderBy('StationName')->pluck('StationName', 'id');
 
@@ -376,7 +380,7 @@ class ServiceConnectionsController extends AppBaseController
                                                 <h4>' . MemberConsumers::serializeMemberName($row) . '</h4>
                                                 <p class="text-muted" style="margin-bottom: 0;">ID: ' . $row->ConsumerId . '</p>
                                                 <p class="text-muted" style="margin-bottom: 0;">' . $row->Barangay . ', ' . $row->Town  . '</p>
-                                                <a href="' . route('serviceConnections.select-application-type', [$row->ConsumerId]) . '" class="btn btn-sm btn-primary" style="margin-top: 5px;">Proceed</a>
+                                                <a href="' . route('serviceConnections.create_new', [$row->ConsumerId]) . '" class="btn btn-sm btn-primary" style="margin-top: 5px;">Proceed</a>
                                             </div>     
                                         </div> 
 
@@ -407,7 +411,7 @@ class ServiceConnectionsController extends AppBaseController
         }
     }
 
-    public function createNew($consumerId, $accountType) {
+    public function createNew($consumerId) {
         $towns = Towns::orderBy('Town')->pluck('Town', 'id');
 
         $memberConsumer = DB::table('CRM_MemberConsumers')
@@ -441,11 +445,11 @@ class ServiceConnectionsController extends AppBaseController
 
         $cond = 'new';
 
-        $accountTypes = ServiceConnectionAccountTypes::orderBy('id')->pluck('AccountType', 'id');
+        $accountTypes = ServiceConnectionAccountTypes::orderBy('id')->get();
 
         $crew = ServiceConnectionCrew::orderBy('StationName')->pluck('StationName', 'id');
 
-        return view('/service_connections/create_new', ['memberConsumer' => $memberConsumer, 'cond' => $cond, 'towns' => $towns, 'accountTypes' => $accountTypes, 'crew' => $crew, 'accountType' => $accountType]);
+        return view('/service_connections/create_new', ['memberConsumer' => $memberConsumer, 'cond' => $cond, 'towns' => $towns, 'accountTypes' => $accountTypes, 'crew' => $crew]);
     }
 
     public function fetchserviceconnections(Request $request) {

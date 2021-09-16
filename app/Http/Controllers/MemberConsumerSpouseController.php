@@ -19,6 +19,7 @@ class MemberConsumerSpouseController extends AppBaseController
 
     public function __construct(MemberConsumerSpouseRepository $memberConsumerSpouseRepo)
     {
+        $this->middleware('auth');
         $this->memberConsumerSpouseRepository = $memberConsumerSpouseRepo;
     }
 
