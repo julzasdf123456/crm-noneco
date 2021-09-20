@@ -5,11 +5,11 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>Structures</h1>
+                    <h1>Bill Of Materials Matrices</h1>
                 </div>
                 <div class="col-sm-6">
                     <a class="btn btn-primary float-right"
-                       href="{{ route('structures.create') }}">
+                       href="{{ route('billOfMaterialsMatrices.create') }}">
                         Add New
                     </a>
                 </div>
@@ -25,7 +25,7 @@
 
         <div class="card">
             <div class="card-body p-0">
-                @include('structures.table')
+                @include('bill_of_materials_matrices.table')
 
                 <div class="card-footer clearfix">
                     <div class="float-right">
@@ -33,8 +33,8 @@
                     </div>
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
 
 @endsection

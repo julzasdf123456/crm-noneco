@@ -78,6 +78,7 @@ class ServiceConnections extends Model
         'StationCrewAssigned',
         'LoadCategory',
         'TemporaryDurationInMonths',
+        'LongSpan'
     ];
 
     /**
@@ -115,6 +116,7 @@ class ServiceConnections extends Model
         'StationCrewAssigned' => 'string',
         'LoadCategory' => 'string',
         'TemporaryDurationInMonths' => 'string',
+        'LongSpan' => 'string'
     ];
 
     /**
@@ -154,6 +156,7 @@ class ServiceConnections extends Model
         'StationCrewAssigned' => 'nullable|string',
         'LoadCategory' => 'nullable|string',
         'TemporaryDurationInMonths' => 'nullable|string',
+        'LongSpan' => 'nullable|string',
     ];
 
     public static function getAccountCount($consumerId) {

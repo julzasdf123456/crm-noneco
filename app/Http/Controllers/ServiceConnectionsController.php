@@ -20,6 +20,8 @@ use App\Models\IDGenerator;
 use App\Models\ServiceConnectionChecklistsRep;
 use App\Models\ServiceConnectionChecklists;
 use App\Models\ServiceConnectionCrew;
+use App\Models\ServiceConnectionLgLoadInsp;
+use App\Models\StructureAssignments;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Flash;
@@ -104,7 +106,7 @@ class ServiceConnectionsController extends AppBaseController
         $serviceConnections = DB::table('CRM_ServiceConnections')
             ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
             ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
-            ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
             ->join('CRM_ServiceConnectionCrew', 'CRM_ServiceConnections.StationCrewAssigned', '=', 'CRM_ServiceConnectionCrew.id')
             ->select('CRM_ServiceConnections.id as id',
                         'CRM_ServiceConnections.AccountCount as AccountCount', 
@@ -121,6 +123,7 @@ class ServiceConnectionsController extends AppBaseController
                         'CRM_ServiceConnections.Notes as Notes', 
                         'CRM_ServiceConnections.ORNumber as ORNumber', 
                         'CRM_ServiceConnections.Sitio as Sitio', 
+                        'CRM_ServiceConnections.LoadCategory as LoadCategory', 
                         'CRM_ServiceConnections.DateTimeOfEnergization as DateTimeOfEnergization', 
                         'CRM_ServiceConnections.DateTimeLinemenArrived as DateTimeLinemenArrived', 
                         'CRM_Towns.Town as Town',
@@ -460,7 +463,6 @@ class ServiceConnectionsController extends AppBaseController
                 $data = DB::table('CRM_ServiceConnections')
                     ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
                     ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
-                    ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
                     ->select('CRM_ServiceConnections.id as ConsumerId',
                                     'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
                                     'CRM_ServiceConnections.Status as Status',
@@ -470,7 +472,6 @@ class ServiceConnectionsController extends AppBaseController
                                     'CRM_ServiceConnections.AccountCount as AccountCount',  
                                     'CRM_ServiceConnections.Sitio as Sitio', 
                                     'CRM_Towns.Town as Town',
-                                    'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
                                     'CRM_Barangays.Barangay as Barangay')
                     ->where(function ($query) {
                                         $query->where('CRM_ServiceConnections.Trash', 'No')
@@ -485,7 +486,6 @@ class ServiceConnectionsController extends AppBaseController
                 $data = DB::table('CRM_ServiceConnections')
                     ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
                     ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
-                    ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
                     ->select('CRM_ServiceConnections.id as ConsumerId',
                                     'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
                                     'CRM_ServiceConnections.Status as Status',
@@ -495,7 +495,6 @@ class ServiceConnectionsController extends AppBaseController
                                     'CRM_ServiceConnections.AccountCount as AccountCount',  
                                     'CRM_ServiceConnections.Sitio as Sitio', 
                                     'CRM_Towns.Town as Town',
-                                    'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
                                     'CRM_Barangays.Barangay as Barangay')
                     ->where(function ($query) {
                                         $query->where('CRM_ServiceConnections.Trash', 'No')
@@ -531,7 +530,6 @@ class ServiceConnectionsController extends AppBaseController
                                                 <p class="text-muted" style="margin-bottom: 0;">Date of Application: <strong>' . date('F d, Y', strtotime($row->DateOfApplication)) . '</strong></p>
                                                 <p class="text-muted" style="margin-bottom: 0;">AccountCount: <strong>' . $row->AccountCount . '</strong></p>
                                                 <p class="text-muted" style="margin-bottom: 0;">Status: <strong>' . $row->Status . '</strong></p>
-                                                <p class="text-muted" style="margin-bottom: 0;">Account Type: <strong>' . $row->AccountType . '</strong></p>
                                             </div>     
                                         </div>
                                     </div>
@@ -831,5 +829,123 @@ class ServiceConnectionsController extends AppBaseController
         $scUpdate->save();
 
         return view('/service_connections/print_order', ['serviceConnection' => $serviceConnections, 'serviceConnectionInspections' => $serviceConnectionInspections, 'serviceConnectionMeter' => $serviceConnectionMeter]);
+    }
+
+    public function largeLoadInspections() {
+        $serviceConnections = DB::table('CRM_ServiceConnections')
+                    ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+                    ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')                    
+                    ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')  
+                    ->where('CRM_ServiceConnections.Status', 'Forwarded To Planning')
+                    ->where(function ($query) {
+                        $query->where('Trash', 'No')
+                            ->orWhereNull('Trash');
+                    })
+                    ->select('CRM_ServiceConnections.id as id',
+                        'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                        'CRM_ServiceConnections.Status as Status', 
+                        'CRM_ServiceConnections.Sitio as Sitio', 
+                        'CRM_Towns.Town as Town',
+                        'CRM_ServiceConnections.LoadCategory as LoadCategory', 
+                        'CRM_ServiceConnections.LongSpan as LongSpan', 
+                        'CRM_Barangays.Barangay as Barangay')
+                    ->orderBy('CRM_ServiceConnections.ServiceAccountName')
+                    ->get();
+
+        return view('/service_connections/large_load_inspections', ['serviceConnections' => $serviceConnections]);
+    }
+
+    public function largeLoadInspectionUpdate(Request $request) {
+        if (request()->ajax()) {
+            // ADD INSPECTION DATA
+            $largeLoadInspections = new ServiceConnectionLgLoadInsp;
+
+            $largeLoadInspections->id = IDGenerator::generateID();
+            $largeLoadInspections->ServiceConnectionId = $request['ServiceConnectionId'];
+            $largeLoadInspections->Assessment = $request['Assessment'];
+            $largeLoadInspections->DateOfInspection = $request['DateOfInspection'];
+            $largeLoadInspections->Notes = $largeLoadInspections['Notes'];
+
+            $largeLoadInspections->save();
+
+            // UPDATE SERVICE CONNECTION STATUS
+            $serviceConnection = ServiceConnections::find($request['ServiceConnectionId']);
+
+            $serviceConnection->Status = 'For BoM';
+
+            $serviceConnection->save();
+
+            // CREATE Timeframes
+            $timeFrame = new ServiceConnectionTimeframes;
+            $timeFrame->id = IDGenerator::generateID();
+            $timeFrame->ServiceConnectionId = $request['ServiceConnectionId'];
+            $timeFrame->UserId = Auth::id();
+            $timeFrame->Status = $request['Assessment'];
+            $timeFrame->Notes = '(Power load inspection) See inspection log # <a href="' . route('serviceConnectionLgLoadInsps.show', [$largeLoadInspections->id]) . '">' . $largeLoadInspections->id . '</a> for further details';
+            $timeFrame->save();
+
+            return response()->json([ 'success' => true ]);
+        }
+    }
+
+    public function bomIndex() {
+        $serviceConnections = DB::table('CRM_ServiceConnections')
+                    ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+                    ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')                    
+                    ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')  
+                    ->where('CRM_ServiceConnections.Status', 'For BoM')
+                    ->where(function ($query) {
+                        $query->where('Trash', 'No')
+                            ->orWhereNull('Trash');
+                    })
+                    ->select('CRM_ServiceConnections.id as id',
+                        'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                        'CRM_ServiceConnections.Status as Status', 
+                        'CRM_ServiceConnections.Sitio as Sitio', 
+                        'CRM_Towns.Town as Town',
+                        'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
+                        'CRM_Barangays.Barangay as Barangay')
+                    ->orderBy('CRM_ServiceConnections.ServiceAccountName')
+                    ->get();
+
+        return view('/service_connections/bom_index', ['serviceConnections' => $serviceConnections]);
+    }
+
+    public function bomAssigning($scId) {
+        $serviceConnection = DB::table('CRM_ServiceConnections')
+            ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+            ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->select('CRM_ServiceConnections.ServiceAccountName',
+                    'CRM_ServiceConnections.id',
+                    'CRM_ServiceConnections.Sitio',
+                    'CRM_ServiceConnections.ContactNumber',
+                    'CRM_ServiceConnections.BuildingType',
+                    'CRM_ServiceConnections.DateOfApplication',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->where('CRM_ServiceConnections.id', $scId)
+            ->first();
+
+            $billOfMaterials = DB::table('CRM_BillOfMaterialsMatrix')
+                ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
+                ->leftJoin('CRM_Structures', 'CRM_BillOfMaterialsMatrix.StructureId', '=', 'CRM_Structures.id')    
+                ->select('CRM_MaterialAssets.id',
+                        'CRM_MaterialAssets.Description',
+                        'CRM_MaterialAssets.Amount',
+                        DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
+                        DB::raw('(CAST(CRM_MaterialAssets.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
+                ->whereIn('CRM_Structures.Data', function($query)  use ($scId) {
+                    $query->select('StructureId')
+                        ->from('CRM_StructureAssignments')
+                        ->where('ServiceConnectionId', $scId);
+                })
+                ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.Amount', 'CRM_MaterialAssets.id')
+                ->orderBy('CRM_MaterialAssets.Description')
+                ->get();   
+
+        $structuresAssigned = StructureAssignments::where('ServiceConnectionId', $scId)->orderBy('StructureId')->get();
+            
+        return view('/service_connections/bom_assigning', ['serviceConnection' => $serviceConnection, 'structuresAssigned' => $structuresAssigned, 'billOfMaterials' => $billOfMaterials]);
     }
 }

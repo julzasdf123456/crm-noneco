@@ -7,6 +7,8 @@ use App\Http\Requests\UpdateStructuresRequest;
 use App\Repositories\StructuresRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
+use App\Models\Structures;
+use Illuminate\Support\Facades\DB;
 use Flash;
 use Response;
 
@@ -75,13 +77,24 @@ class StructuresController extends AppBaseController
     {
         $structures = $this->structuresRepository->find($id);
 
+        $materials = DB::table('CRM_MaterialsMatrix')
+            ->leftJoin('CRM_MaterialAssets', 'CRM_MaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
+            ->select('CRM_MaterialsMatrix.id as id',
+                    'CRM_MaterialAssets.id as NeaCode',
+                    'CRM_MaterialAssets.Description as Description', 
+                    'CRM_MaterialAssets.Amount as Rate',
+                    'CRM_MaterialsMatrix.Quantity as Quantity')
+            ->where('CRM_MaterialsMatrix.StructureId', $id)
+            ->orderBy('CRM_MaterialAssets.Description')
+            ->get();
+
         if (empty($structures)) {
             Flash::error('Structures not found');
 
             return redirect(route('structures.index'));
         }
 
-        return view('structures.show')->with('structures', $structures);
+        return view('structures.show', ['structures' => $structures, 'materials' => $materials]);
     }
 
     /**
@@ -153,5 +166,13 @@ class StructuresController extends AppBaseController
         Flash::success('Structures deleted successfully.');
 
         return redirect(route('structures.index'));
+    }
+
+    public function getStructuresJson(Request $request) {
+        if (request()->ajax()) {
+            $data = Structures::all();
+
+            echo json_encode($data);
+        }
     }
 }

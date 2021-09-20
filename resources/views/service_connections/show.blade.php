@@ -33,7 +33,7 @@ use Illuminate\Support\Facades\Auth;
         <div class="row">
             <div class="col-md-4 col-lg-4">
                 {{-- APPLICATON DETAILS --}}
-                <div class="card card-primary card-outline">
+                <div class="card {{ $serviceConnections->LoadCategory == 'above 5kVa' ? 'card-danger' : 'card-primary' }} card-outline">
                     <div class="card-body box-profile">
                         <div class="text-center">
                             <img class="profile-user-img img-fluid img-circle" src="../../dist/img/user4-128x128.jpg" alt="User profile picture">

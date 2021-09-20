@@ -157,6 +157,34 @@ use App\Models\IDGenerator;
             </div>
         </div>  
     </div>
+
+    <!-- LongSpan Field -->
+    <div class="form-group col-sm-12">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('LongSpan', 'Spanning') !!}
+            </div>
+
+            <div class="col-lg-9 col-md-7"> 
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
+                    </div>
+
+                    <div class="radio-group-horizontal">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="LongSpan" value="Yes" >
+                            <label class="form-check-label">Above 70 meters</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="LongSpan" value="No" checked>
+                            <label class="form-check-label">Below 70 meters</label>
+                        </div>
+                    </div>                    
+                </div>
+            </div>
+        </div>  
+    </div>
 @else 
     <input type="hidden" name="id" id="Membership_Id" value="{{ $serviceConnections->id }}">
 @endif
