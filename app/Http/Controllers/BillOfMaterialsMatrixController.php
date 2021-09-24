@@ -9,8 +9,14 @@ use App\Http\Controllers\AppBaseController;
 use App\Models\ServiceConnections;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Models\BillOfMaterialsMatrix;
+use App\Models\MaterialsMatrix;
 use App\Exports\BillOfMaterialsExport;
+use App\Models\TransformersAssignedMatrix;
+use App\Models\StructureAssignments;
+use App\Models\Structures;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\IDGenerator;
 use Flash;
 use Response;
 
@@ -21,6 +27,7 @@ class BillOfMaterialsMatrixController extends AppBaseController
 
     public function __construct(BillOfMaterialsMatrixRepository $billOfMaterialsMatrixRepo)
     {
+        $this->middleware('auth');
         $this->billOfMaterialsMatrixRepository = $billOfMaterialsMatrixRepo;
     }
 
@@ -243,11 +250,112 @@ class BillOfMaterialsMatrixController extends AppBaseController
                         DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
                         DB::raw('(CAST(CRM_MaterialAssets.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
                 ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $scId)
+                ->whereNull('CRM_BillOfMaterialsMatrix.StructureType')
                 ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.Amount', 'CRM_MaterialAssets.id')
                 ->orderBy('CRM_MaterialAssets.Description')
                 ->get();  
 
             echo json_encode($billOfMaterials);
         }        
+    }
+
+    public function getBillOfMaterialsBrackets(Request $request) {
+        if ($request->ajax()) {
+            $scId = $request['scId'];
+            $billOfMaterials = DB::table('CRM_BillOfMaterialsMatrix')
+                ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
+                ->leftJoin('CRM_Structures', 'CRM_BillOfMaterialsMatrix.StructureId', '=', 'CRM_Structures.id')    
+                ->select('CRM_MaterialAssets.id',
+                        'CRM_MaterialAssets.Description',
+                        'CRM_MaterialAssets.Amount',
+                        DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
+                        DB::raw('(CAST(CRM_MaterialAssets.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
+                ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $scId)
+                ->where('CRM_BillOfMaterialsMatrix.StructureType', 'A_DT')
+                ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.Amount', 'CRM_MaterialAssets.id')
+                ->orderBy('CRM_MaterialAssets.Description')
+                ->get(); 
+
+            echo json_encode($billOfMaterials);
+        }        
+    }
+
+    public function insertTransformerBracket(Request $request) {
+        if ($request->ajax()) {
+            // QUERY TOTAL QUANTITY OF TRANSFORMER ASSIGNED
+            $transformers = TransformersAssignedMatrix::where('ServiceConnectionId', $request['ServiceConnectionId'])
+                                ->where('Type', 'Transformer')
+                                ->get();
+            $totalTrans = $request['Quantity'];
+
+            // SAVE TO STRUCTURE ASSIGNMENTS FIRST
+            $structureCore = Structures::find($request['StructureId']);
+
+            $structure  = new StructureAssignments;
+            $structure->id = IDGenerator::generateID();
+            $structure->ServiceConnectionId = $request['ServiceConnectionId'];
+            $structure->StructureId = $structureCore->Data;
+            $structure->Quantity = $totalTrans;
+            $structure->Type = 'A_DT'; // TRANSFORMER 
+            $structure->save();
+
+            // QUERY MATERIALS INSIDE STRUCTURE
+            $materials = MaterialsMatrix::where('StructureId', $request['StructureId'])->get();
+            if ($materials != null) {
+                foreach ($materials as $item) {
+                    // INSERT TO BillOfMaterialsMatrix
+                    $bracket = new BillOfMaterialsMatrix;
+                    $bracket->id = IDGenerator::generateID();
+                    $bracket->ServiceConnectionId = $request['ServiceConnectionId'];
+                    $bracket->StructureAssigningId = $structure->id;
+                    $bracket->StructureId = $request['StructureId'];
+                    $bracket->MaterialsId = $item->MaterialsId;
+                    $bracket->Quantity = ($totalTrans * intval($item->Quantity));
+                    $bracket->StructureType = 'A_DT'; // BRACKET TYPE
+                    $bracket->save();
+                }
+            }
+            
+            return json_encode(['response' => 'ok']);
+        }
+    }
+
+    public function insertPole(Request $request) {
+        if ($request->ajax()) {
+            $pole = new BillOfMaterialsMatrix;
+            $pole->id = IDGenerator::generateID();
+            $pole->ServiceConnectionId = $request['ServiceConnectionId'];
+            $pole->MaterialsId = $request['MaterialsId'];
+            $pole->Quantity = $request['Quantity'];
+            $pole->StructureType = 'POLE'; // FOR POLES
+            $pole->save();
+
+            return json_encode(['response' => 'ok']);
+        }
+    }
+
+    public function fetchPoles(Request $request) {
+        if ($request->ajax()) {
+            $poleAssigned = DB::table('CRM_BillOfMaterialsMatrix')
+                ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')  
+                ->select('CRM_BillOfMaterialsMatrix.id',
+                        'CRM_MaterialAssets.Description',
+                        'CRM_MaterialAssets.Amount',
+                        'CRM_BillOfMaterialsMatrix.Quantity')
+                ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $request['ServiceConnectionId'])
+                ->where('CRM_BillOfMaterialsMatrix.StructureType', 'POLE')
+                ->orderBy('CRM_MaterialAssets.Description')
+                ->get(); 
+
+            return json_encode($poleAssigned);
+        }
+    }
+
+    public function deletePole(Request $request) {
+        if ($request->ajax()) {
+            BillOfMaterialsMatrix::find($request['id'])->delete(); 
+
+            return json_encode(['response' => 'deleted']);
+        }
     }
 }

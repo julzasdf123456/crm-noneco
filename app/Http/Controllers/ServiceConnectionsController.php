@@ -22,6 +22,9 @@ use App\Models\ServiceConnectionChecklists;
 use App\Models\ServiceConnectionCrew;
 use App\Models\ServiceConnectionLgLoadInsp;
 use App\Models\StructureAssignments;
+use App\Models\Structures;
+use App\Models\BillsOfMaterialsSummary;
+use App\Models\PoleIndex;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Flash;
@@ -833,8 +836,8 @@ class ServiceConnectionsController extends AppBaseController
 
     public function largeLoadInspections() {
         $serviceConnections = DB::table('CRM_ServiceConnections')
-                    ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
-                    ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')                    
+                    ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')                    
                     ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')  
                     ->where('CRM_ServiceConnections.Status', 'Forwarded To Planning')
                     ->where(function ($query) {
@@ -856,7 +859,7 @@ class ServiceConnectionsController extends AppBaseController
     }
 
     public function largeLoadInspectionUpdate(Request $request) {
-        if (request()->ajax()) {
+        if ($request->ajax()) {
             // ADD INSPECTION DATA
             $largeLoadInspections = new ServiceConnectionLgLoadInsp;
 
@@ -913,9 +916,9 @@ class ServiceConnectionsController extends AppBaseController
 
     public function bomAssigning($scId) {
         $serviceConnection = DB::table('CRM_ServiceConnections')
-            ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
-            ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
-            ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+            ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
             ->select('CRM_ServiceConnections.ServiceAccountName',
                     'CRM_ServiceConnections.id',
                     'CRM_ServiceConnections.Sitio',
@@ -927,7 +930,111 @@ class ServiceConnectionsController extends AppBaseController
             ->where('CRM_ServiceConnections.id', $scId)
             ->first();
 
-            $billOfMaterials = DB::table('CRM_BillOfMaterialsMatrix')
+        $billOfMaterials = DB::table('CRM_BillOfMaterialsMatrix')
+            ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
+            ->leftJoin('CRM_Structures', 'CRM_BillOfMaterialsMatrix.StructureId', '=', 'CRM_Structures.id')    
+            ->select('CRM_MaterialAssets.id',
+                    'CRM_MaterialAssets.Description',
+                    'CRM_MaterialAssets.Amount',
+                    DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
+                    DB::raw('(CAST(CRM_MaterialAssets.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
+            ->whereIn('CRM_Structures.Data', function($query)  use ($scId) {
+                $query->select('StructureId')
+                    ->from('CRM_StructureAssignments')
+                    ->where('ServiceConnectionId', $scId);
+            })
+            ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.Amount', 'CRM_MaterialAssets.id')
+            ->orderBy('CRM_MaterialAssets.Description')
+            ->get();   
+
+        $structuresAssigned = StructureAssignments::where('ServiceConnectionId', $scId)->orderBy('StructureId')->get();
+            
+        return view('/service_connections/bom_assigning', ['serviceConnection' => $serviceConnection, 'structuresAssigned' => $structuresAssigned, 'billOfMaterials' => $billOfMaterials]);
+    }
+
+    public function forwardToTransformerAssigning($scId) {
+        $serviceConnection = ServiceConnections::find($scId);
+
+        $serviceConnection->Status = 'For Transformer and Pole Assigning';
+
+        $serviceConnection->save();
+
+        // CREATE Timeframes
+        $timeFrame = new ServiceConnectionTimeframes;
+        $timeFrame->id = IDGenerator::generateID();
+        $timeFrame->ServiceConnectionId = $scId;
+        $timeFrame->UserId = Auth::id();
+        $timeFrame->Status = 'Bill of Materials Assigned';
+        $timeFrame->save();
+
+        // CREATE Timeframes
+        $timeFrame = new ServiceConnectionTimeframes;
+        $timeFrame->id = IDGenerator::generateID();
+        $timeFrame->ServiceConnectionId = $scId;
+        $timeFrame->UserId = Auth::id();
+        $timeFrame->Status = 'For Transformer and Pole Assigning';
+        $timeFrame->save();
+
+        return redirect(route('serviceConnections.transformer-assigning', [$scId]));
+    }
+
+    public function transformerIndex() {
+        $serviceConnections = DB::table('CRM_ServiceConnections')
+                    ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')                    
+                    ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')  
+                    ->where('CRM_ServiceConnections.Status', 'For Transformer and Pole Assigning')
+                    ->where(function ($query) {
+                        $query->where('Trash', 'No')
+                            ->orWhereNull('Trash');
+                    })
+                    ->select('CRM_ServiceConnections.id as id',
+                        'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                        'CRM_ServiceConnections.Status as Status', 
+                        'CRM_ServiceConnections.Sitio as Sitio', 
+                        'CRM_Towns.Town as Town',
+                        'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
+                        'CRM_Barangays.Barangay as Barangay')
+                    ->orderBy('CRM_ServiceConnections.ServiceAccountName')
+                    ->get();
+
+        return view('/service_connections/transformer_index', ['serviceConnections' => $serviceConnections]);
+    }
+
+    public function transformerAssigning($scId) {
+        $serviceConnection = DB::table('CRM_ServiceConnections')
+            ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+            ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->select('CRM_ServiceConnections.ServiceAccountName',
+                    'CRM_ServiceConnections.id',
+                    'CRM_ServiceConnections.Sitio',
+                    'CRM_ServiceConnections.ContactNumber',
+                    'CRM_ServiceConnections.BuildingType',
+                    'CRM_ServiceConnections.DateOfApplication',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->where('CRM_ServiceConnections.id', $scId)
+            ->first();
+
+        $transformerIndex = DB::table('CRM_TransformerIndex')
+            ->leftJoin('CRM_MaterialAssets', 'CRM_TransformerIndex.NEACode', '=', 'CRM_MaterialAssets.id')
+            ->select('CRM_MaterialAssets.*',
+                    'CRM_TransformerIndex.id as IndexId')
+            ->get();
+
+        $transformerMatrix = DB::table('CRM_TransformersAssignedMatrix')
+            ->leftJoin('CRM_MaterialAssets', 'CRM_TransformersAssignedMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
+            ->select('CRM_TransformersAssignedMatrix.id',
+                    'CRM_MaterialAssets.Description',
+                    'CRM_MaterialAssets.Amount',
+                    'CRM_TransformersAssignedMatrix.Quantity')
+            ->where('CRM_TransformersAssignedMatrix.ServiceConnectionId', $scId)
+            ->get();
+
+        $structureBrackets = Structures::where('Type', 'A_DT')->get();
+
+        $bracketsAssigned = DB::table('CRM_BillOfMaterialsMatrix')
                 ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
                 ->leftJoin('CRM_Structures', 'CRM_BillOfMaterialsMatrix.StructureId', '=', 'CRM_Structures.id')    
                 ->select('CRM_MaterialAssets.id',
@@ -935,17 +1042,178 @@ class ServiceConnectionsController extends AppBaseController
                         'CRM_MaterialAssets.Amount',
                         DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
                         DB::raw('(CAST(CRM_MaterialAssets.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
-                ->whereIn('CRM_Structures.Data', function($query)  use ($scId) {
-                    $query->select('StructureId')
-                        ->from('CRM_StructureAssignments')
-                        ->where('ServiceConnectionId', $scId);
-                })
+                ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $scId)
+                ->where('CRM_BillOfMaterialsMatrix.StructureType', 'A_DT')
                 ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.Amount', 'CRM_MaterialAssets.id')
                 ->orderBy('CRM_MaterialAssets.Description')
-                ->get();   
+                ->get(); 
 
-        $structuresAssigned = StructureAssignments::where('ServiceConnectionId', $scId)->orderBy('StructureId')->get();
+        return view('/service_connections/transformer_assigning', ['serviceConnection' => $serviceConnection, 'transformerIndex' => $transformerIndex, 'transformerMatrix' => $transformerMatrix, 'structureBrackets' => $structureBrackets, 'bracketsAssigned' => $bracketsAssigned]);
+    }
+
+    public function poleAssigning($scId) {
+        $serviceConnection = DB::table('CRM_ServiceConnections')
+            ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+            ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->select('CRM_ServiceConnections.ServiceAccountName',
+                    'CRM_ServiceConnections.id',
+                    'CRM_ServiceConnections.Sitio',
+                    'CRM_ServiceConnections.ContactNumber',
+                    'CRM_ServiceConnections.BuildingType',
+                    'CRM_ServiceConnections.DateOfApplication',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->where('CRM_ServiceConnections.id', $scId)
+            ->first();
+
+        $poleIndex = DB::table('CRM_PoleIndex')
+            ->leftJoin('CRM_MaterialAssets', 'CRM_PoleIndex.NEACode', '=', 'CRM_MaterialAssets.id')
+            ->select('CRM_MaterialAssets.*',
+                    'CRM_PoleIndex.id as IndexId',
+                    'CRM_PoleIndex.Type as Type')
+            ->get();
+
+        $poleAssigned = DB::table('CRM_BillOfMaterialsMatrix')
+            ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')  
+            ->select('CRM_BillOfMaterialsMatrix.id',
+                    'CRM_MaterialAssets.Description',
+                    'CRM_MaterialAssets.Amount',
+                    'CRM_BillOfMaterialsMatrix.Quantity')
+            ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $scId)
+            ->where('CRM_BillOfMaterialsMatrix.StructureType', 'POLE')
+            ->orderBy('CRM_MaterialAssets.Description')
+            ->get(); 
+
+        return view('/service_connections/pole_assigning', ['serviceConnection' => $serviceConnection, 'poleIndex' => $poleIndex, 'poleAssigned' => $poleAssigned]);
+    }
+
+    public function quotationSummary($scId) {
+        $serviceConnection = DB::table('CRM_ServiceConnections')
+            ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+            ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->join('CRM_ServiceConnectionCrew', 'CRM_ServiceConnections.StationCrewAssigned', '=', 'CRM_ServiceConnectionCrew.id')
+            ->select('CRM_ServiceConnections.id as id',
+                        'CRM_ServiceConnections.AccountCount as AccountCount', 
+                        'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                        'CRM_ServiceConnections.DateOfApplication as DateOfApplication', 
+                        'CRM_ServiceConnections.ContactNumber as ContactNumber', 
+                        'CRM_ServiceConnections.EmailAddress as EmailAddress',  
+                        'CRM_ServiceConnections.AccountApplicationType as AccountApplicationType', 
+                        'CRM_ServiceConnections.AccountOrganization as AccountOrganization', 
+                        'CRM_ServiceConnections.AccountApplicationType as AccountApplicationType', 
+                        'CRM_ServiceConnections.ConnectionApplicationType as ConnectionApplicationType',
+                        'CRM_ServiceConnections.MemberConsumerId as MemberConsumerId',
+                        'CRM_ServiceConnections.Status as Status',  
+                        'CRM_ServiceConnections.Notes as Notes', 
+                        'CRM_ServiceConnections.ORNumber as ORNumber', 
+                        'CRM_ServiceConnections.Sitio as Sitio', 
+                        'CRM_ServiceConnections.LoadCategory as LoadCategory', 
+                        'CRM_ServiceConnections.DateTimeOfEnergization as DateTimeOfEnergization', 
+                        'CRM_ServiceConnections.DateTimeLinemenArrived as DateTimeLinemenArrived', 
+                        'CRM_Towns.Town as Town',
+                        'CRM_Barangays.Barangay as Barangay',
+                        'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
+                        'CRM_ServiceConnectionCrew.StationName as StationName',
+                        'CRM_ServiceConnectionCrew.CrewLeader as CrewLeader',
+                        'CRM_ServiceConnections.TemporaryDurationInMonths as TemporaryDurationInMonths',
+                        'CRM_ServiceConnectionCrew.Members as Members')
+        ->where('CRM_ServiceConnections.id', $scId)
+        ->where(function ($query) {
+            $query->where('CRM_ServiceConnections.Trash', 'No')
+                ->orWhereNull('CRM_ServiceConnections.Trash');
+        })
+        ->first(); 
+
+        $materials = DB::table('CRM_BillOfMaterialsMatrix')
+                ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')   
+                ->select('CRM_MaterialAssets.id',
+                        'CRM_MaterialAssets.Description',
+                        'CRM_MaterialAssets.Amount',
+                        DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
+                        DB::raw('(CAST(CRM_MaterialAssets.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS Cost'))
+                ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $scId)
+                // ->where('CRM_BillOfMaterialsMatrix.StructureType', 'A_DT')
+                ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.Amount', 'CRM_MaterialAssets.id')
+                ->orderBy('CRM_MaterialAssets.Description')
+                ->get(); 
+
+        $transformers = DB::table('CRM_TransformersAssignedMatrix')
+                ->leftJoin('CRM_MaterialAssets', 'CRM_TransformersAssignedMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
+                ->select('CRM_MaterialAssets.id',
+                        'CRM_TransformersAssignedMatrix.id as TransformerId',
+                        'CRM_MaterialAssets.Description',
+                        'CRM_MaterialAssets.Amount',
+                        'CRM_TransformersAssignedMatrix.Quantity',
+                        'CRM_TransformersAssignedMatrix.Type')
+                ->where('CRM_TransformersAssignedMatrix.ServiceConnectionId', $scId)
+                ->get();
+
+        $structures = StructureAssignments::where('ServiceConnectionId', $scId)->get();
+
+        $billOfMaterialsSummary = BillsOfMaterialsSummary::where('ServiceConnectionId', $scId)->first();
+        if ($billOfMaterialsSummary == null) {
+            $billOfMaterialsSummary = new BillsOfMaterialsSummary;
+            $billOfMaterialsSummary->id = IDGenerator::generateID();
+            $billOfMaterialsSummary->ServiceConnectionId = $scId;
+            $billOfMaterialsSummary->TransformerLaborCostPercentage = '0.035';
+            $billOfMaterialsSummary->MaterialLaborCostPercentage = '0.35';
+            $billOfMaterialsSummary->HandlingCostPercentage = '0.30';
+            $billOfMaterialsSummary->MonthDuration = $serviceConnection->TemporaryDurationInMonths;
+
+            // CALCULATE SUB-TOTAL
+            $subTtl = 0.0;
+            foreach($materials as $items) { // materials total
+                $subTtl += floatval($items->Cost);
+            }
+            foreach($transformers as $items) { 
+                if ($items->Type != 'Transformer') {
+                    $subTtl += floatval($items->Quantity) * floatval($items->Amount);
+                }
+            }
+
+            // transformer sub total
+            $transSoloTtl = 0.0;
+            foreach($transformers as $items) { 
+                if ($items->Type == 'Transformer') {
+                    $transSoloTtl += floatval($items->Quantity) * floatval($items->Amount);
+                }                
+            }
+
+            // sub total
+            $billOfMaterialsSummary->SubTotal = $subTtl + $transSoloTtl;
+
+            // transformer total
+            $billOfMaterialsSummary->TransformerTotal = $transSoloTtl;
+
+            // transformer labor cost
+            $billOfMaterialsSummary->TransformerLaborCost = $transSoloTtl * floatval($billOfMaterialsSummary->TransformerLaborCostPercentage);
+
+            // materials labor cost            
+            $billOfMaterialsSummary->MaterialLaborCost = $subTtl * floatval($billOfMaterialsSummary->MaterialLaborCostPercentage);
+
+            // total labor cost except handling (just transformer and material labor costs)
+            $billOfMaterialsSummary->LaborCost = floatval($billOfMaterialsSummary->TransformerLaborCost) + floatval($billOfMaterialsSummary->MaterialLaborCost);
+
+            // handling labor cost            
+            $billOfMaterialsSummary->HandlingCost = floatval($billOfMaterialsSummary->LaborCost) * floatval($billOfMaterialsSummary->HandlingCostPercentage);
+
+            // overall total
+            $billOfMaterialsSummary->Total = floatval($billOfMaterialsSummary->SubTotal) +
+                                            floatval($billOfMaterialsSummary->HandlingCost) +
+                                            floatval($billOfMaterialsSummary->LaborCost);
             
-        return view('/service_connections/bom_assigning', ['serviceConnection' => $serviceConnection, 'structuresAssigned' => $structuresAssigned, 'billOfMaterials' => $billOfMaterials]);
+            $billOfMaterialsSummary->save();
+        }
+
+        return view('/service_connections/quotation_summary', [
+                'serviceConnection' => $serviceConnection, 
+                'materials' => $materials, 
+                'transformers' => $transformers, 
+                'billOfMaterialsSummary' => $billOfMaterialsSummary,
+                'structures' => $structures,
+            ]
+        );
     }
 }

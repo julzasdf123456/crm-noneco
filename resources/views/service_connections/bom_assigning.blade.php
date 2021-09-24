@@ -133,7 +133,8 @@
                 </div>
 
                 <div class="card-footer">
-                    <a href="" class="btn btn-primary">Submit and Forward to Transformer and Pole Assigning <i class="fas fa-arrow-alt-circle-right" style="margin-left: 5px;"></i></a>
+                    <a href="{{ route('serviceConnections.forward-to-transformer-assigning', [$serviceConnection->id]) }}" class="btn btn-primary">Next <i class="fas fa-arrow-alt-circle-right" style="margin-left: 5px;"></i></a>
+                    <i class="text-muted" style="margin-left: 15px;">Transformer Assigning</i>
                 </div>
             </div>
         </div>

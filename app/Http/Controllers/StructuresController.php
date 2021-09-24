@@ -175,4 +175,13 @@ class StructuresController extends AppBaseController
             echo json_encode($data);
         }
     }
+
+    public function getStructuresByType(Request $request) {
+        if (request()->ajax()) {
+            $data = Structures::where('Type', $request['Type'])->get();
+
+            echo json_encode($data);
+        }
+    }
+
 }

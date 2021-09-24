@@ -18,105 +18,156 @@
     </div>
 </div>
 
-<div class="content">
-    <p><i>Below 5KVA</i></p>
-    <div class="row">        
-        {{-- DASHBOARD COUNTER --}}
-        <div class="col-lg-3 col-6">
-            <div class="small-box bg-info">
-                <div class="inner">
-                    <h3 id="for-inspection-count">...</h3>
-
-                    <p>Received Applicants For Inspection</p>
-                </div>
-                <div class="icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <a href="" id="show-received" data-toggle="modal" data-target="#approved-modal" class="small-box-footer">Show More <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-        </div>
-
-        {{-- APPROVED --}}
-        <div class="col-lg-3 col-6">
-            <div class="small-box bg-info" title="Applicants that are approved during the inspection and are yet to pay the fees.">
-                <div class="inner">
-                    <h3 id="approved-count">...</h3>
-
-                    <p>Approved Applicants</p>
-                </div>
-                <div class="icon">
-                    <i class="fas fa-user-check"></i>
-                </div>
-                <a href="" id="show-approved" data-toggle="modal" data-target="#approved-modal"  class="small-box-footer">Show More <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-        </div>
-
-        {{-- METERING DASH --}}
-        <div class="col-lg-3 col-6">
-            <div class="small-box bg-info" title="Already paid applications without metering data yet.">
-                <div class="inner">
-                    <h3 id="metering-unassigned">...</h3>
-
-                    <p>Unassigned Meters</p>
-                </div>
-                <div class="icon">
-                    <i class="fas fa-tachometer-alt"></i>
-                </div>
-                <a href="{{ route('serviceConnectionMtrTrnsfrmrs.assigning') }}" class="small-box-footer">Show More <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-        </div>
-
-        {{-- ENERGIZATION DASH --}}
-        <div class="col-lg-3 col-6">
-            <div class="small-box bg-info">
-                <div class="inner">
-                    <h3 id="energization-count">...</h3>
-
-                    <p>Applications For Energization</p>
-                </div>
-                <div class="icon">
-                    <i class="fas fa-charging-station"></i>
-                </div>
-                <a href="{{ route('serviceConnections.energization') }}" class="small-box-footer">Show More <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-        </div>  
-    </div>
-
-    <p><i>Above 5KVA (Power/Large Loads)</i></p>
-    <div class="row">
-        {{-- POWER LOAD FOR INSPECTIONS  --}}
-        <div class="col-lg-3 col-6">
-            <div class="small-box bg-danger">
-                <div class="inner">
-                    <h3 id="large-load-inspections-count">...</h3>
-
-                    <p>Applications for Inspection</p>
-                </div>
-                <div class="icon">
-                    <i class="fas fa-industry"></i>
-                </div>
-                <a href="{{ route('serviceConnections.large-load-inspections') }}" class="small-box-footer">Show More <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-        </div>
-
-        {{-- POWER LOAD FOR BOM  --}}
-        <div class="col-lg-3 col-6">
-            <div class="small-box bg-danger">
-                <div class="inner">
-                    <h3 id="large-load-bom-count">...</h3>
-
-                    <p>Applications for BoM and Quotation</p>
-                </div>
-                <div class="icon">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                </div>
-                <a href="{{ route('serviceConnections.bom-index') }}" class="small-box-footer">Show More <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-        </div>
-    </div>
-
+<div class="content">   
     {{-- OTHERS --}}
     <div class="row">
+        <div class="col-md-12 col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Process Flow Monitoring</span>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {{-- FOR CONNECTS --}}
+                    <div style="width: 100%; position: absolute;" id="main"></div>
+            
+                    <div class="row no-gutters">
+                        {{-- RECEIVING --}}
+                        <div class="col-md-4 offset-md-3 col-lg-3 offset-lg-4" id="receivedDash" style="margin-bottom: 20px;">
+                            <div class="small-box bg-info" style="margin: 0px;">
+                                <div class="inner">
+                                    <h3></h3>
+            
+                                    <p>Receiving of Applications</p>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <div class="col-md-12 col-lg-12">
+                            <div class="row no-gutters">
+                                <div class="col-md-4 offset-md-1 col-lg-3 offset-lg-1">
+                                    <div class="row no-gutters">
+                                        {{-- DASHBOARD COUNTER --}}
+                                        <div class="col-lg-12" id="inspectionDash" style="margin-top: 30px;">
+                                            <div class="small-box bg-info" style="margin: 0px;">
+                                                <div class="inner">
+                                                    <h3 id="for-inspection-count">...</h3>
+            
+                                                    <p>Applicants For Inspection</p>
+                                                </div>
+                                                <div class="icon">
+                                                    <i class="fas fa-users"></i>
+                                                </div>
+                                                <a href="" id="show-received" data-toggle="modal" data-target="#approved-modal" class="small-box-footer">Show More <i class="fas fa-arrow-circle-right"></i></a>
+                                            </div>
+                                        </div>
+            
+                                        {{-- APPROVED --}}
+                                        <div class="col-lg-12" id="approvedDash" style="margin-top: 30px;">
+                                            <div class="small-box bg-info" title="Applicants that are approved during the inspection and are yet to pay the fees."  style="margin: 0px;">
+                                                <div class="inner">
+                                                    <h3 id="approved-count">...</h3>
+            
+                                                    <p>Approved Applicants</p>
+                                                </div>
+                                                <div class="icon">
+                                                    <i class="fas fa-user-check"></i>
+                                                </div>
+                                                <a href="" id="show-approved" data-toggle="modal" data-target="#approved-modal"  class="small-box-footer">Show More <i class="fas fa-arrow-circle-right"></i></a>
+                                            </div>
+                                        </div>
+            
+                                        {{-- METERING DASH --}}
+                                        <div class="col-lg-12" id="meteringDash" style="margin-top: 30px;">
+                                            <div class="small-box bg-info"  style="margin: 0px;" title="Already paid applications without metering data yet.">
+                                                <div class="inner">
+                                                    <h3 id="metering-unassigned">...</h3>
+            
+                                                    <p>Unassigned Meters</p>
+                                                </div>
+                                                <div class="icon">
+                                                    <i class="fas fa-tachometer-alt"></i>
+                                                </div>
+                                                <a href="{{ route('serviceConnectionMtrTrnsfrmrs.assigning') }}" class="small-box-footer">Show More <i class="fas fa-arrow-circle-right"></i></a>
+                                            </div>
+                                        </div>
+            
+                                        {{-- ENERGIZATION DASH --}}
+                                        <div class="col-lg-12" id="energizationDash" style="margin-top: 30px;">
+                                            <div class="small-box bg-info" style="margin: 0px;">
+                                                <div class="inner">
+                                                    <h3 id="energization-count">...</h3>
+            
+                                                    <p>Applications For Energization</p>
+                                                </div>
+                                                <div class="icon">
+                                                    <i class="fas fa-charging-station"></i>
+                                                </div>
+                                                <a href="{{ route('serviceConnections.energization') }}" class="small-box-footer">Show More <i class="fas fa-arrow-circle-right"></i></a>
+                                            </div>
+                                        </div> 
+                                    </div> 
+                                </div>
+            
+                                <div class="col-md-4 offset-md-4 col-lg-3 offset-lg-3">
+                                    <div class="row no-gutters">
+                                        {{-- POWER LOAD FOR INSPECTIONS  --}}
+                                        <div class="col-lg-12" id="powerLoadInspectionDash" style="margin-top: 30px;">
+                                            <div class="small-box bg-danger"  style="margin: 0px;">
+                                                <div class="inner">
+                                                    <h3 id="large-load-inspections-count">...</h3>
+            
+                                                    <p>Applications for Inspection (+5kva)</p>
+                                                </div>
+                                                <div class="icon">
+                                                    <i class="fas fa-industry"></i>
+                                                </div>
+                                                <a href="{{ route('serviceConnections.large-load-inspections') }}" class="small-box-footer">Show More <i class="fas fa-arrow-circle-right"></i></a>
+                                            </div>
+                                        </div>
+            
+                                        {{-- POWER LOAD FOR BOM  --}}
+                                        <div class="col-lg-12" id="bomDash" style="margin-top: 30px;">
+                                            <div class="small-box bg-danger"  style="margin: 0px;">
+                                                <div class="inner">
+                                                    <h3 id="large-load-bom-count">...</h3>
+            
+                                                    <p>Applications for BoM and Quotation</p>
+                                                </div>
+                                                <div class="icon">
+                                                    <i class="fas fa-file-invoice-dollar"></i>
+                                                </div>
+                                                <a href="{{ route('serviceConnections.bom-index') }}" class="small-box-footer">Show More <i class="fas fa-arrow-circle-right"></i></a>
+                                            </div>
+                                        </div>
+
+                                        {{-- POWER LOAD FOR TRANSFORMER AND POLE  --}}
+                                        <div class="col-lg-12" id="transformerDash" style="margin-top: 30px;">
+                                            <div class="small-box bg-danger"  style="margin: 0px;">
+                                                <div class="inner">
+                                                    <h3 id="large-load-transformer-count">...</h3>
+            
+                                                    <p>Applications for Transformer and Pole Tagging</p>
+                                                </div>
+                                                <div class="icon">
+                                                    <i class="fas fa-car-battery"></i>
+                                                </div>
+                                                <a href="{{ route('serviceConnections.transformer-index') }}" class="small-box-footer">Show More <i class="fas fa-arrow-circle-right"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>                
+                                </div>       
+                            </div>
+                        </div>    
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="col-md-6 col-lg-6">
             <div class="card">
                 <div class="card-header border-0">
@@ -190,6 +241,22 @@
 
 @push('page_scripts')
     <script type="text/javascript">
+        $("#main").HTMLSVGconnect({
+            stroke: "#787878",
+            strokeWidth: 4,
+            orientation: "auto",
+            paths: [
+                { start: "#receivedDash", end: "#inspectionDash"},
+                { start: "#inspectionDash", end: "#approvedDash"},
+                { start: "#receivedDash", end: "#powerLoadInspectionDash"},
+                { start: "#approvedDash", end: "#meteringDash"},
+                { start: "#meteringDash", end: "#energizationDash"},
+                { start: "#powerLoadInspectionDash", end: "#bomDash"},
+                { start: "#bomDash", end: "#transformerDash"},
+                { start: "#transformerDash", end: "#inspectionDash"},
+            ]
+        });
+
         // NEW CONNECTIONS DASH
         $.ajax({
             url : '/home/get-new-service-connections',
@@ -274,6 +341,21 @@
                 // });
                 console.log(response.length);
                 $('#large-load-bom-count').text(response.length);
+            },
+            error : function(error) {
+                // alert(error);
+                console.log('Server error!');
+            }
+        });
+
+        // FOR LARGE LOAD TRANSFORMERS
+        $.ajax({
+            url : '/home/get-transformer-large-load',
+            type: "GET",
+            dataType : "json",
+            success : function(response) {
+                console.log(response.length);
+                $('#large-load-transformer-count').text(response.length);
             },
             error : function(error) {
                 // alert(error);
@@ -400,8 +482,6 @@
                     // alert(error);
                     console.log('Server error!');
                 }
-        })
-
-        
+        })        
     </script>
 @endpush

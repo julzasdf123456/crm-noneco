@@ -27,6 +27,20 @@
 	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.3/themes/hot-sneaks/jquery-ui.css" />
 
     <style>
+        .no-pads {
+            margin-right: 0 !important;
+            margin-left: 0 !important;
+            margin-bottom: 0 !important;
+            margin-right: 0 !important;
+
+            > .col,
+            > [class*="col-"] {
+                padding-right: 0 !important;
+                padding-left: 0 !important;
+                padding-top: 0 !important;
+                padding-bottom: 0 !important;
+            }
+        }
         .divider {
             width: 100%;
             margin: 10px auto;
@@ -176,7 +190,11 @@
 
 <script src="https://adminlte.io/themes/v3/plugins/chart.js/Chart.min.js"></script>
 
+<script src="https://www.jqueryscript.net/demo/jQuery-Plugin-To-Connect-HTML-Elements-with-Lines-HTML-SVG-Connect/jquery.html-svg-connect.js"></script>
+
 <script>
+
+    
     $(function () {
         bsCustomFileInput.init();
     });
@@ -200,7 +218,10 @@
 
     // APPLICATION JS
     $(document).ready(function() {
-        // SELECT2 SEARCHABLE DROPDOWN INITIALIZATION
+        
+
+        
+
         /**
          * MEMBERSHIP RELATED SCRIPTS
          */

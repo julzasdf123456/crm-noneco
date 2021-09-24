@@ -163,4 +163,25 @@ class HomeController extends Controller
             echo json_encode($data);
         }
     }
+
+    public function fetchTransformerLargeLoad(Request $request) {
+        if ($request->ajax()) {            
+            $data = DB::table('CRM_ServiceConnections')
+                    ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+                    ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+                    ->where('CRM_ServiceConnections.Status', 'For Transformer and Pole Assigning')
+                    ->where(function ($query) {
+                        $query->where('Trash', 'No')
+                            ->orWhereNull('Trash');
+                    })
+                    ->select('CRM_ServiceConnections.id as id',
+                        'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName', 
+                        'CRM_Towns.Town as Town',
+                        'CRM_Barangays.Barangay as Barangay',)
+                    ->orderBy('CRM_ServiceConnections.ServiceAccountName')
+                    ->get();
+
+            echo json_encode($data);
+        }
+    }
 }

@@ -7,20 +7,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * Class StructureAssignments
+ * Class TransformerIndex
  * @package App\Models
- * @version September 17, 2021, 9:58 am PST
+ * @version September 21, 2021, 9:21 am PST
  *
- * @property string $ServiceConnectionId
- * @property string $StructureId
+ * @property string $NEACode
  */
-class StructureAssignments extends Model
+class TransformerIndex extends Model
 {
     // use SoftDeletes;
 
     use HasFactory;
 
-    public $table = 'CRM_StructureAssignments';
+    public $table = 'CRM_TransformerIndex';
     
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
@@ -34,10 +33,8 @@ class StructureAssignments extends Model
 
     public $fillable = [
         'id',
-        'ServiceConnectionId',
-        'StructureId',
-        'Quantity',
-        'Type'
+        'NEACode',
+        'LinkFuseCode',
     ];
 
     /**
@@ -47,10 +44,8 @@ class StructureAssignments extends Model
      */
     protected $casts = [
         'id' => 'string',
-        'ServiceConnectionId' => 'string',
-        'StructureId' => 'string',
-        'Quantity' => 'string',
-        'Type' => 'string'
+        'NEACode' => 'string',
+        'LinkFuseCode' => 'string'
     ];
 
     /**
@@ -59,13 +54,11 @@ class StructureAssignments extends Model
      * @var array
      */
     public static $rules = [
-        'id' => 'nullable|string',
-        'ServiceConnectionId' => 'nullable|string|max:255',
-        'StructureId' => 'nullable|string|max:255',
+        'id' => 'string',
+        'NEACode' => 'nullable|string|max:255',
         'created_at' => 'nullable',
         'updated_at' => 'nullable',
-        'Quantity' => 'nullable|string',
-        'Type' => 'nullable|string',
+        'LinkFuseCode' => 'string|nullable',
     ];
 
     

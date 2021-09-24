@@ -7,23 +7,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * Class BillOfMaterialsMatrix
+ * Class TransformersAssignedMatrix
  * @package App\Models
- * @version September 17, 2021, 3:39 pm PST
+ * @version September 21, 2021, 10:05 am PST
  *
  * @property string $ServiceConnectionId
- * @property string $StructureAssigningId
- * @property string $StructureId
  * @property string $MaterialsId
  * @property string $Quantity
  */
-class BillOfMaterialsMatrix extends Model
+class TransformersAssignedMatrix extends Model
 {
     // use SoftDeletes;
 
     use HasFactory;
 
-    public $table = 'CRM_BillOfMaterialsMatrix';
+    public $table = 'CRM_TransformersAssignedMatrix';
     
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
@@ -38,11 +36,9 @@ class BillOfMaterialsMatrix extends Model
     public $fillable = [
         'id',
         'ServiceConnectionId',
-        'StructureAssigningId',
-        'StructureId',
         'MaterialsId',
         'Quantity',
-        'StructureType'
+        'Type',
     ];
 
     /**
@@ -53,11 +49,9 @@ class BillOfMaterialsMatrix extends Model
     protected $casts = [
         'id' => 'string',
         'ServiceConnectionId' => 'string',
-        'StructureAssigningId' => 'string',
-        'StructureId' => 'string',
         'MaterialsId' => 'string',
         'Quantity' => 'string',
-        'StructureType' => 'string',
+        'Type' => 'string'
     ];
 
     /**
@@ -66,15 +60,13 @@ class BillOfMaterialsMatrix extends Model
      * @var array
      */
     public static $rules = [
-        'id' => 'nullable|string',
+        'id' => 'string',
         'ServiceConnectionId' => 'nullable|string|max:255',
-        'StructureAssigningId' => 'nullable|string|max:255',
-        'StructureId' => 'nullable|string|max:255',
         'MaterialsId' => 'nullable|string|max:255',
         'Quantity' => 'nullable|string|max:255',
         'created_at' => 'nullable',
         'updated_at' => 'nullable',
-        'StructureType' => 'nullable|string',
+        'Type' => 'nullable|string',
     ];
 
     

@@ -8,14 +8,7 @@ use Illuminate\Support\Facades\Auth;
 @canany(['Super Admin', 'view membership'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
-            <lord-icon
-                src="https://cdn.lordicon.com/imamsnbq.json"
-                trigger="loop-on-hover"
-                delay="500"
-                stroke="100"
-                colors="primary:#ffffff,secondary:#ffffff"
-                style="width:23px;height:23px">
-            </lord-icon>
+            <i class="fas fa-users nav-icon"></i>
             <p>
                 Membership
                 <i class="fas fa-angle-left right"></i>
@@ -74,13 +67,7 @@ use Illuminate\Support\Facades\Auth;
 @canany(['Super Admin', 'sc view'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
-            <lord-icon
-                src="https://cdn.lordicon.com/dbsklakl.json"
-                trigger="hover"
-                colors="primary:#ffffff,secondary:#ffffff"
-                stroke="100"
-                style="width:23px;height:23px">
-            </lord-icon>
+            <i class="fas fa-plug nav-icon"></i>
             <p>
                 Service Connections
                 <i class="fas fa-angle-left right"></i>
@@ -193,13 +180,7 @@ use Illuminate\Support\Facades\Auth;
 @canany(['Super Admin'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
-            <lord-icon
-                src="https://cdn.lordicon.com/cjieiyzp.json"
-                trigger="hover"
-                colors="primary:#ffffff,secondary:#ffffff"
-                stroke="100"
-                style="width:22px;height:22px">
-            </lord-icon>
+            <i class="fas fa-file-invoice-dollar nav-icon"></i>
             <p>
                 Service Accounts
                 <i class="fas fa-angle-left right"></i>
@@ -220,13 +201,7 @@ use Illuminate\Support\Facades\Auth;
 @canany(['Super Admin'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
-            <lord-icon
-                src="https://cdn.lordicon.com/xawkzoxm.json"
-                trigger="hover"
-                colors="primary:#ffffff,secondary:#ffffff"
-                stroke="100"
-                style="width:22px;height:22px">
-            </lord-icon>
+            <i class="fas fa-toolbox nav-icon"></i>
             <p>
                 Materials and Structures
                 <i class="fas fa-angle-left right"></i>
@@ -246,6 +221,20 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-plug nav-icon"></i><p>Material Assets</p>
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a href="{{ route('transformerIndices.index') }}"
+                   class="nav-link {{ Request::is('transformerIndices*') ? 'active' : '' }}">
+                   <i class="fas fa-car-battery nav-icon"></i><p>Transformer Index</p>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('poleIndices.index') }}"
+                   class="nav-link {{ Request::is('poleIndices*') ? 'active' : '' }}">
+                   <i class="fas fa-cross nav-icon"></i><p>Pole Index</p>
+                </a>
+            </li>
         </ul>
     </li>
 @endcanany
@@ -254,13 +243,7 @@ use Illuminate\Support\Facades\Auth;
 @canany(['Super Admin', 'create membership', 'sc create'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
-            <lord-icon
-                src="https://cdn.lordicon.com/jvucoldz.json"
-                trigger="hover"
-                colors="primary:#ffffff,secondary:#ffffff"
-                stroke="100"
-                style="width:23px;height:23px">
-            </lord-icon>
+            <i class="fas fa-ellipsis-v nav-icon"></i>
             <p>
                 Extras
                 <i class="fas fa-angle-left right"></i>
@@ -296,13 +279,7 @@ use Illuminate\Support\Facades\Auth;
 @can('Super Admin')
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
-            <lord-icon
-                src="https://cdn.lordicon.com/huwchbks.json"
-                trigger="hover"
-                colors="primary:#ffffff,secondary:#ffffff"
-                stroke="100"
-                style="width:23px;height:23px">
-            </lord-icon>
+            <i class="fas fa-shield-alt nav-icon"></i>
             <p>
                 Administrator
                 <i class="fas fa-angle-left right"></i>

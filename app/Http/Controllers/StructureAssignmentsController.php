@@ -22,6 +22,7 @@ class StructureAssignmentsController extends AppBaseController
 
     public function __construct(StructureAssignmentsRepository $structureAssignmentsRepo)
     {
+        $this->middleware('auth');
         $this->structureAssignmentsRepository = $structureAssignmentsRepo;
     }
 
@@ -160,7 +161,7 @@ class StructureAssignmentsController extends AppBaseController
         // Flash::success('Structure Assignments deleted successfully.');
 
         // return redirect(route('structureAssignments.index'));
-        return json_encode(['response' => 'success']);
+        echo json_encode(['response' => 'success']);
     }
 
     public function insertStructureAssignment(Request $request) {
@@ -178,8 +179,6 @@ class StructureAssignmentsController extends AppBaseController
 
             $materials = MaterialsMatrix::where('StructureId', $structureCore->id)->get();
 
-            
-
             // SAVE TO BillOfMaterialsMatrix
             $materials = MaterialsMatrix::where('StructureId', $structureCore->id)->get();
 
@@ -195,6 +194,33 @@ class StructureAssignmentsController extends AppBaseController
             }           
 
             return json_encode($structure);
+        }
+    }
+
+    public function deleteBrackets(Request $request) {
+        if ($request->ajax()) {
+            StructureAssignments::where('ServiceConnectionId', $request['ServiceConnectionId'])
+                ->where('Type', 'A_DT')
+                ->delete();
+            BillOfMaterialsMatrix::where('ServiceConnectionId', $request['ServiceConnectionId'])
+                ->where('StructureType', 'A_DT')
+                ->delete();
+
+            return json_encode(['response' => true]);
+        }
+    }
+
+    public function getBracketStructure(Request $request) {
+        if ($request->ajax()) {
+            $structure = StructureAssignments::where('ServiceConnectionId', $request['ServiceConnectionId'])
+                ->where('Type', 'A_DT')
+                ->first();
+
+            if ($structure != null) {
+                return json_encode(['Structure' => $structure->StructureId]);
+            } else {
+                return json_encode(['Structure' => ""]);
+            }            
         }
     }
 }

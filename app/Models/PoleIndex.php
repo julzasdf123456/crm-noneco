@@ -7,20 +7,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * Class StructureAssignments
+ * Class PoleIndex
  * @package App\Models
- * @version September 17, 2021, 9:58 am PST
+ * @version September 22, 2021, 11:55 am PST
  *
- * @property string $ServiceConnectionId
- * @property string $StructureId
+ * @property string $NEACode
+ * @property string $Type
  */
-class StructureAssignments extends Model
+class PoleIndex extends Model
 {
     // use SoftDeletes;
 
     use HasFactory;
 
-    public $table = 'CRM_StructureAssignments';
+    public $table = 'CRM_PoleIndex';
     
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
@@ -34,9 +34,7 @@ class StructureAssignments extends Model
 
     public $fillable = [
         'id',
-        'ServiceConnectionId',
-        'StructureId',
-        'Quantity',
+        'NEACode',
         'Type'
     ];
 
@@ -47,9 +45,7 @@ class StructureAssignments extends Model
      */
     protected $casts = [
         'id' => 'string',
-        'ServiceConnectionId' => 'string',
-        'StructureId' => 'string',
-        'Quantity' => 'string',
+        'NEACode' => 'string',
         'Type' => 'string'
     ];
 
@@ -59,13 +55,11 @@ class StructureAssignments extends Model
      * @var array
      */
     public static $rules = [
-        'id' => 'nullable|string',
-        'ServiceConnectionId' => 'nullable|string|max:255',
-        'StructureId' => 'nullable|string|max:255',
+        'id' => 'string',
+        'NEACode' => 'nullable|string|max:255',
+        'Type' => 'nullable|string|max:255',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable',
-        'Quantity' => 'nullable|string',
-        'Type' => 'nullable|string',
+        'updated_at' => 'nullable'
     ];
 
     
