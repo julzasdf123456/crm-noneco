@@ -166,16 +166,17 @@ class StructureAssignmentsController extends AppBaseController
 
     public function insertStructureAssignment(Request $request) {
         if (request()->ajax()) {
+            // Query Structures
+            $structureCore = Structures::where('Data', $request['Structure'])->first();
+
             // SAVE TO STRUCTURE ASSIGNMENTS FIRST
             $structure  = new StructureAssignments;
             $structure->id = IDGenerator::generateID();
             $structure->ServiceConnectionId = $request['ServiceConnectionId'];
             $structure->StructureId = $request['Structure'];
             $structure->Quantity = $request['Quantity'];
+            $structure->ConAssGrouping = Structures::groupConAss($structureCore->Type);
             $structure->save();
-
-            // Query Structures
-            $structureCore = Structures::where('Data', $request['Structure'])->first();
 
             $materials = MaterialsMatrix::where('StructureId', $structureCore->id)->get();
 

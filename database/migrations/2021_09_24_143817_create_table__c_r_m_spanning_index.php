@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTableCRMStructureAssignments extends Migration
+class CreateTableCRMSpanningIndex extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,15 @@ class CreateTableCRMStructureAssignments extends Migration
      */
     public function up()
     {
-        Schema::create('CRM_StructureAssignments', function (Blueprint $table) {
-            $table->string('id');
+        Schema::create('CRM_SpanningIndex', function (Blueprint $table) {
+            $table->string('id')->unsigned();
             $table->primary('id');
-            $table->string('ServiceConnectionId')->nullable();
-            $table->string('StructureId')->nullable();
-            $table->string('Quantity')->nullable();
+            $table->string('NeaCode')->nullable();
+            $table->string('Structure')->nullable();
+            $table->string('Description')->nullable();
+            $table->string('Size')->nullable();
             $table->string('Type')->nullable();
-            $table->string('ConAssGrouping', 50)->nullable();
+            $table->string('SpliceNeaCode')->nullable();
             $table->timestamps();
         });
     }
@@ -32,6 +33,6 @@ class CreateTableCRMStructureAssignments extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('CRM_StructureAssignments');
+        Schema::dropIfExists('CRM_SpanningIndex');
     }
 }

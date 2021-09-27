@@ -23,7 +23,9 @@ use App\Models\ServiceConnectionCrew;
 use App\Models\ServiceConnectionLgLoadInsp;
 use App\Models\StructureAssignments;
 use App\Models\Structures;
+use App\Models\MaterialAssets;
 use App\Models\BillsOfMaterialsSummary;
+use App\Models\SpanningData;
 use App\Models\PoleIndex;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -930,6 +932,8 @@ class ServiceConnectionsController extends AppBaseController
             ->where('CRM_ServiceConnections.id', $scId)
             ->first();
 
+        $materials = MaterialAssets::orderBy('Description')->get();
+
         $billOfMaterials = DB::table('CRM_BillOfMaterialsMatrix')
             ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
             ->leftJoin('CRM_Structures', 'CRM_BillOfMaterialsMatrix.StructureId', '=', 'CRM_Structures.id')    
@@ -938,18 +942,21 @@ class ServiceConnectionsController extends AppBaseController
                     'CRM_MaterialAssets.Amount',
                     DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
                     DB::raw('(CAST(CRM_MaterialAssets.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
-            ->whereIn('CRM_Structures.Data', function($query)  use ($scId) {
-                $query->select('StructureId')
-                    ->from('CRM_StructureAssignments')
-                    ->where('ServiceConnectionId', $scId);
-            })
+            ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $scId)
+            ->whereNull('CRM_BillOfMaterialsMatrix.StructureType')
             ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.Amount', 'CRM_MaterialAssets.id')
             ->orderBy('CRM_MaterialAssets.Description')
-            ->get();   
+            ->get(); 
 
-        $structuresAssigned = StructureAssignments::where('ServiceConnectionId', $scId)->orderBy('StructureId')->get();
+        $structuresAssigned = StructureAssignments::where('ServiceConnectionId', $scId)
+            ->whereNotIn('ConAssGrouping', ['9', '1', '3'])            
+            ->orderBy('StructureId')->get();
             
-        return view('/service_connections/bom_assigning', ['serviceConnection' => $serviceConnection, 'structuresAssigned' => $structuresAssigned, 'billOfMaterials' => $billOfMaterials]);
+        return view('/service_connections/bom_assigning', ['serviceConnection' => $serviceConnection, 
+                            'structuresAssigned' => $structuresAssigned, 
+                            'billOfMaterials' => $billOfMaterials,
+                            'materials' => $materials
+                        ]);
     }
 
     public function forwardToTransformerAssigning($scId) {
@@ -1150,7 +1157,14 @@ class ServiceConnectionsController extends AppBaseController
                 ->where('CRM_TransformersAssignedMatrix.ServiceConnectionId', $scId)
                 ->get();
 
-        $structures = StructureAssignments::where('ServiceConnectionId', $scId)->get();
+        $structures = DB::table('CRM_StructureAssignments')
+            ->leftJoin('CRM_Structures', 'CRM_StructureAssignments.StructureId', '=', 'CRM_Structures.Data')
+            ->select('CRM_Structures.id as id',
+                    'CRM_StructureAssignments.StructureId',
+                    DB::raw('SUM(CAST(CRM_StructureAssignments.Quantity AS Integer)) AS Quantity'))
+            ->where('ServiceConnectionId', $scId)
+            ->groupBy('CRM_Structures.id', 'CRM_StructureAssignments.StructureId')
+            ->get();
 
         $billOfMaterialsSummary = BillsOfMaterialsSummary::where('ServiceConnectionId', $scId)->first();
         if ($billOfMaterialsSummary == null) {
@@ -1215,5 +1229,43 @@ class ServiceConnectionsController extends AppBaseController
                 'structures' => $structures,
             ]
         );
+    }
+
+    public function spanningAssigning($scId) {
+        $serviceConnection = DB::table('CRM_ServiceConnections')
+            ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+            ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->select('CRM_ServiceConnections.ServiceAccountName',
+                    'CRM_ServiceConnections.id',
+                    'CRM_ServiceConnections.Sitio',
+                    'CRM_ServiceConnections.ContactNumber',
+                    'CRM_ServiceConnections.BuildingType',
+                    'CRM_ServiceConnections.DateOfApplication',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->where('CRM_ServiceConnections.id', $scId)
+            ->first();
+
+        $billOfMaterials = DB::table('CRM_BillOfMaterialsMatrix')
+            ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')   
+            ->select('CRM_MaterialAssets.id',
+                    'CRM_MaterialAssets.Description',
+                    'CRM_MaterialAssets.Amount',
+                    DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
+                    DB::raw('(CAST(CRM_MaterialAssets.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
+            ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $scId)
+            ->where('CRM_BillOfMaterialsMatrix.StructureType', 'SPANNING')
+            ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.Amount', 'CRM_MaterialAssets.id')
+            ->orderBy('CRM_MaterialAssets.Description')
+            ->get(); 
+        
+        $spanningData = SpanningData::where('ServiceConnectionId', $scId)->first();
+
+        return view('/service_connections/spanning_assigning', [
+            'serviceConnection' => $serviceConnection,
+            'billOfMaterials' => $billOfMaterials,
+            'spanningData' => $spanningData
+        ]);
     }
 }

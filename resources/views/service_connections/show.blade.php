@@ -148,6 +148,11 @@ use Illuminate\Support\Facades\Auth;
                                     style="width:28px;height:28px">
                                 </lord-icon>
                                 Payment Invoice</a></li>
+                            @if ($serviceConnections->LoadCategory == 'above 5kVa')
+                            <li class="nav-item"><a class="nav-link" href="#bom" data-toggle="tab">
+                                <i class="fas fa-toolbox"></i>
+                                Bill of Materials</a></li>
+                            @endif
                         </ul>
                     </div>
 
@@ -167,6 +172,10 @@ use Illuminate\Support\Facades\Auth;
 
                             <div class="tab-pane" id="invoice">
                                 @include('service_connections.invoice')
+                            </div>
+                            
+                            <div class="tab-pane" id="bom">
+                                @include('service_connections.bom_details')
                             </div>
                         </div>
                     </div>

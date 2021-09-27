@@ -37,7 +37,8 @@ class StructureAssignments extends Model
         'ServiceConnectionId',
         'StructureId',
         'Quantity',
-        'Type'
+        'Type',
+        'ConAssGrouping'
     ];
 
     /**
@@ -50,7 +51,8 @@ class StructureAssignments extends Model
         'ServiceConnectionId' => 'string',
         'StructureId' => 'string',
         'Quantity' => 'string',
-        'Type' => 'string'
+        'Type' => 'string',
+        'ConAssGrouping' => 'string',
     ];
 
     /**
@@ -66,6 +68,7 @@ class StructureAssignments extends Model
         'updated_at' => 'nullable',
         'Quantity' => 'nullable|string',
         'Type' => 'nullable|string',
+        'ConAssGrouping' => 'string|nullable',
     ];
 
     

@@ -121,7 +121,7 @@
                             
                         </div>
                         <div class="card-footer">
-                            {!! Form::submit('Save', ['class' => 'btn btn-primary']) !!}
+                            {!! Form::submit('Apply', ['class' => 'btn btn-sm btn-primary']) !!}
                         </div>
                         {!! Form::close() !!}
                     </div>
@@ -137,12 +137,14 @@
                                     <th>Quantity</th>
                                 </thead>
                                 <tbody>
-                                    @foreach ($structures as $item)
-                                        <tr>
-                                            <td>{{ $item->StructureId }}</td>
-                                            <td>{{ $item->Quantity }}</td>
-                                        </tr>
-                                    @endforeach
+                                    @if ($structures != null)
+                                        @foreach ($structures as $item)
+                                            <tr>
+                                                <td><a href="{{ route('structures.show', [$item->id]) }}">{{ $item->StructureId }}</a></td>
+                                                <td>{{ $item->Quantity }}</td>
+                                            </tr>
+                                        @endforeach
+                                    @endif                                    
                                 </tbody>
                                 
                             </table>
@@ -162,7 +164,7 @@
                     </div>
 
                     <div class="table-body">
-                        <table class="table table-sm">
+                        <table class="table table-sm table-hover">
                             <thead>
                                 <th>NEA Code</th>
                                 <th>Description</th>

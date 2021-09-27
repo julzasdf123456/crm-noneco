@@ -2,14 +2,16 @@
     <table class="table" id="materialAssets-table">
         <thead>
         <tr>
+            <th>NEA Code</th>
             <th>Description</th>
-        <th>Amount</th>
+            <th>Amount</th>
             <th colspan="3">Action</th>
         </tr>
         </thead>
         <tbody>
         @foreach($materialAssets as $materialAssets)
             <tr>
+                <td>{{ $materialAssets->id }}</td>
                 <td>{{ $materialAssets->Description }}</td>
             <td>{{ $materialAssets->Amount }}</td>
                 <td width="120">

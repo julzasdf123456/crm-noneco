@@ -10,7 +10,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h4 class="m-0">Bill of Materials Assigning</h4>
+                    <p class="m-0"><strong><span class="badge-lg bg-warning">Step 2</span></strong>Bill of Materials Assigning</p>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -61,7 +61,7 @@
                     </span>
                 </div>
                 <div class="card-body table-responsive p-0">
-                    <table class="table" id="strucures-table">
+                    <table class="table table-sm" id="strucures-table">
                         <thead>
                             <th>Structure</th>
                             <th width="30%">Project Requirement Quantity</th>
@@ -92,18 +92,19 @@
                     <span class="card-title">Materials Assigned</span>
 
                     <div class="card-tools">
-                        <a href="{{ route('billOfMaterialsMatrices.download-bill-of-materials', [$serviceConnection->id]) }}" class="btn btn-tool text-success" title="Download Excel File"><i class="fas fa-download"></i></a>
+                        <button class="btn btn-tool text-success" title="Add Custom Material"  data-toggle="modal" data-target="#modal-default"><i class="fas fa-plus"></i></button>
                         <button class="btn btn-tool" title="Print"><i class="fas fa-print"></i></button>
                     </div>
                 </div>
                 <div class="card-body table-responsive p-0">
-                    <table class="table" id="materials-table">
+                    <table class="table table-sm" id="materials-table">
                         <thead>
                             <th>NEA Code</th>
                             <th>Description</th>
                             <th class="text-right">Unit Cost</th>
                             <th class="text-right">Project Requirements</th>
                             <th class="text-right">Extended Cost</th>
+                            <th width="8%" class="text-center"></th>
                         </thead>
                         <tbody>
                             @php
@@ -116,6 +117,9 @@
                                     <td class="text-right">{{ number_format($item->Amount, 2) }}</td>
                                     <td class="text-right">{{ $item->ProjectRequirements }}</td>
                                     <td class="text-right">{{ number_format($item->ExtendedCost, 2) }}</td>
+                                    <td class="text-right">
+                                        <button title="Delete {{ $item->Description }}" id="delete-{{ $item->id }}" onclick="deleteMaterial('{{ $item->id }}')" class="btn btn-sm text-danger"><i class="fas fa-trash"></i></button>
+                                    </td>
                                 </tr>
                                 @php
                                     $total += doubleval($item->ExtendedCost);
@@ -127,6 +131,7 @@
                                 <td></td>
                                 <td></td>
                                 <td class="text-right"><strong>{{ number_format($total, 2) }}</strong></td>
+                                <td></td>
                             </tr>
                         </tbody>
                     </table>
@@ -136,6 +141,46 @@
                     <a href="{{ route('serviceConnections.forward-to-transformer-assigning', [$serviceConnection->id]) }}" class="btn btn-primary">Next <i class="fas fa-arrow-alt-circle-right" style="margin-left: 5px;"></i></a>
                     <i class="text-muted" style="margin-left: 15px;">Transformer Assigning</i>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- MODAL FOR ADDING MATERIALS --}}
+<div class="modal fade" id="modal-default" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Custom Material</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="materials-data">
+                    <input type="hidden" name="_token" id="csrfMaterial" value="{{Session::token()}}">
+
+                    <input type="hidden" class="form-control" name="ServiceConnectionId" id="ServiceConnectionId" value="{{ $serviceConnection->id }}">
+
+                    <div class="form-group">
+                        <label>New Material</label>
+                        <select class="form-control select2" style="width: 100%;" name="MaterialsId" id="MaterialsId">
+                            @foreach ($materials as $item)
+                                <option value="{{ $item->id }}">{{ $item->Description }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Quantity">Quantity</label>
+                        <input type="number" name="Quantity" id="Quantity" value="1" class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                {{-- <button type="button" class="btn btn-primary" id="submit">Save changes</button> --}}
+                <input type="submit" value="Add" id="submit" class="btn btn-primary">
             </div>
         </div>
     </div>
@@ -191,10 +236,11 @@
                                                             '</tr>'); 
 
                         fetchAllMaterials($('#scId').text());
-                                 
+                        // location.reload();
                     },
                     error : function(error) {
                         console.log(error);
+                        location.reload();
                     }
                 });  
             }
@@ -225,6 +271,9 @@
                             '<td class="text-right">' + Number(parseFloat(data[index]['Amount']).toFixed(2)).toLocaleString() + '</td>' +
                             '<td class="text-right">' + data[index]['ProjectRequirements'] + '</td>' + 
                             '<td class="text-right">' + Number(parseFloat(data[index]['ExtendedCost']).toFixed(2)).toLocaleString() + '</td>' +
+                            '<td class="text-right">' +
+                                '<button title=\'Delete ' + data[index]['Description'] + '\' id="delete-' + data[index]['id'] + '" onclick="deleteMaterial(\'' + data[index]['id'] + '\')" class="btn btn-sm text-danger"><i class="fas fa-trash"></i></button>' +
+                            '</td>' +
                         '</tr>'
                     );
                     total += parseFloat(data[index]['ExtendedCost']);
@@ -237,11 +286,13 @@
                         '<td></td>' +
                         '<td></td>' +
                         '<td class="text-right"><strong>' + Number(total.toFixed(2)).toLocaleString() + '</strong></td>' +
+                        '<td></td>' +
                     '</tr>'
                 );
             },
             error : function(error) {
                 console.log(console.error());
+                location.reload();
             }
         }); 
     }
@@ -260,11 +311,61 @@
                 },
                 error : function(error) {
                     console.log(error);
+                    location.reload();
                     // alert("Error deleting structure " + error);
                 }
             });  
             $('#' + id).remove();
         }
     } 
+
+    function deleteMaterial(neacode) {
+        if (confirm('Are you sure you want to delete this material?')) {
+            $.ajax({
+                url : '/bill_of_materials_matrices/delete-material/',
+                type: "GET",
+                data: {
+                    ServiceConnectionId: $('#scId').text(),
+                    MaterialsId : neacode
+                },
+                success : function(data) {
+                    fetchAllMaterials($('#scId').text());
+                },
+                error : function(error) {
+                    console.log(error);
+                    location.reload();
+                    // alert("Error deleting structure " + error);
+                }
+            });  
+        }
+    }
+
+    $('#submit').on('click', function(e) {
+        e.preventDefault();
+        var scId = $('#ServiceConnectionId').val();
+        var neaCode = $('#MaterialsId').val();
+        var qty = $('#Quantity').val();
+
+        $.ajax({
+            url : '/bill_of_materials_matrices/add-custom-material',
+            type: "POST",
+            data : {
+                _token : $('#csrfMaterial').val(),
+                ServiceConnectionId : scId,
+                MaterialsId : neaCode,
+                Quantity : qty
+            },
+            success : function(response) {
+                $('#materials-data').trigger('reset');
+                $('#modal-default').modal('hide'); 
+                fetchAllMaterials(scId);               
+            },
+            error : function(error) {
+                $('#materials-data').trigger('reset');
+                $('#modal-default').modal('hide'); 
+                alert("Error adding structures to row! Contact support immediately.");
+            }
+        });
+    });
     </script>
 @endpush

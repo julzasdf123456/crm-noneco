@@ -26,6 +26,10 @@
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
 	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.3/themes/hot-sneaks/jquery-ui.css" />
 
+
+    <link rel="stylesheet" href="https://adminlte.io/themes/v3/plugins/select2/css/select2.min.css">
+    <link rel="stylesheet" href="https://adminlte.io/themes/v3/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+
     <style>
         .no-pads {
             margin-right: 0 !important;
@@ -192,8 +196,9 @@
 
 <script src="https://www.jqueryscript.net/demo/jQuery-Plugin-To-Connect-HTML-Elements-with-Lines-HTML-SVG-Connect/jquery.html-svg-connect.js"></script>
 
-<script>
+<script src="https://adminlte.io/themes/v3/plugins/select2/js/select2.full.min.js"></script>
 
+<script>
     
     $(function () {
         bsCustomFileInput.init();
@@ -218,10 +223,10 @@
 
     // APPLICATION JS
     $(document).ready(function() {
-        
 
-        
-
+        $('.select2').select2({
+            theme: 'bootstrap4'
+        })
         /**
          * MEMBERSHIP RELATED SCRIPTS
          */

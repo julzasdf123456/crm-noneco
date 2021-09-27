@@ -58,7 +58,7 @@
                                         <td>{{ ServiceConnections::getAddress($item) }}</td>
                                         <td>{{ $item->AccountType }}</td>
                                         <td>
-                                            <a href="{{ route('serviceConnections.bom-assigning', [$item->id]) }}" class="text-danger" title="Assign Structure and Bill of Materials"><i class="fas fa-edit"></i></a>
+                                            <a href="{{ route('serviceConnections.spanning-assigning', [$item->id]) }}" class="text-danger" title="Assign Structure and Bill of Materials"><i class="fas fa-edit"></i></a>
                                         </td>
                                     </tr>
                                 @endforeach                                

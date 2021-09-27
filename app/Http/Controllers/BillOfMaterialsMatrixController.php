@@ -15,6 +15,7 @@ use App\Exports\BillOfMaterialsExport;
 use App\Models\TransformersAssignedMatrix;
 use App\Models\StructureAssignments;
 use App\Models\Structures;
+use App\Models\SpanningData;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\IDGenerator;
 use Flash;
@@ -356,6 +357,216 @@ class BillOfMaterialsMatrixController extends AppBaseController
             BillOfMaterialsMatrix::find($request['id'])->delete(); 
 
             return json_encode(['response' => 'deleted']);
+        }
+    }
+
+    public function deleteMaterial(Request $request) {
+        if ($request->ajax()) {
+            BillOfMaterialsMatrix::where('ServiceConnectionId', $request['ServiceConnectionId'])
+                        ->where('MaterialsId', $request['MaterialsId'])    
+                        ->whereNull('StructureType')        
+                        ->delete();
+
+            return json_encode(['response' => true]);
+        }
+    }
+
+    public function addCustomMaterial(Request $request) {
+        if ($request->ajax()) {
+            $material = new BillOfMaterialsMatrix;
+            $material->id = IDGenerator::generateID();
+            $material->ServiceConnectionId = $request['ServiceConnectionId'];
+            $material->MaterialsId = $request['MaterialsId'];
+            $material->Quantity = $request['Quantity'];
+            $material->save();
+
+            return json_encode(['response' => true]);
+        }
+    }
+
+    public function insertSpanningMaterials(Request $request) {
+        if ($request->ajax()) {
+            BillOfMaterialsMatrix::where('ServiceConnectionId', $request['data'][0]['svcId'])
+                        ->where('StructureType', 'SPAN')
+                        ->delete();
+
+            StructureAssignments::where('ServiceConnectionId', $request['data'][0]['svcId'])
+                        ->where('ConAssGrouping', '9')
+                        ->delete();
+
+            foreach($request['data'] as $item) {
+                $spanData = DB::table('CRM_SpanningIndex')
+                    ->leftJoin('CRM_MaterialAssets', 'CRM_SpanningIndex.NeaCode', '=', 'CRM_MaterialAssets.id')
+                    ->where('CRM_SpanningIndex.Size', $item['size'])
+                    ->where('CRM_SpanningIndex.Type', $item['type'])
+                    ->select('CRM_MaterialAssets.id',
+                            'CRM_SpanningIndex.Structure',
+                            'CRM_SpanningIndex.Description',
+                            'CRM_MaterialAssets.Amount',
+                            'CRM_SpanningIndex.SpliceNeaCode')
+                    ->first();
+
+                // INSERT TO SpanninData
+                $spanning = SpanningData::where('ServiceConnectionId', $item['svcId'])->first();
+                if ($spanning == null) { // CREATE NEW
+                    $spanning = new SpanningData;
+                    $spanning->id = IDGenerator::generateID();
+                    $spanning->ServiceConnectionId = $item['svcId'];
+
+                    if ($item['line'] == 'primary') {
+                        $spanning->PrimarySpan = $item['span'];
+                        $spanning->PrimarySize = $item['size'];
+                        $spanning->PrimaryType = $item['type'];
+                    } elseif ($item['line'] == 'neutral') {
+                        $spanning->NeutralSpan = $item['span'];
+                        $spanning->NeutralSize = $item['size'];
+                        $spanning->NeutralType = $item['type'];
+                    } elseif ($item['line'] == 'secondary') {
+                        $spanning->SecondarySpan = $item['span'];
+                        $spanning->SecondarySize = $item['size'];
+                        $spanning->SecondaryType = $item['type'];
+                    }
+
+                    $spanning->save();
+                } else { // UPDATE
+                    if ($item['line'] == 'primary') {
+                        $spanning->PrimarySpan = $item['span'];
+                        $spanning->PrimarySize = $item['size'];
+                        $spanning->PrimaryType = $item['type'];
+                    } elseif ($item['line'] == 'neutral') {
+                        $spanning->NeutralSpan = $item['span'];
+                        $spanning->NeutralSize = $item['size'];
+                        $spanning->NeutralType = $item['type'];
+                    } elseif ($item['line'] == 'secondary') {
+                        $spanning->SecondarySpan = $item['span'];
+                        $spanning->SecondarySize = $item['size'];
+                        $spanning->SecondaryType = $item['type'];
+                    }
+
+                    $spanning->save();
+                }
+
+                if ($spanData != null) {
+                    // SAVE TO StructureAssignments
+                    $structureAssignments = new StructureAssignments;
+                    $structureAssignments->id = IDGenerator::generateID();
+                    $structureAssignments->ServiceConnectionId = $item['svcId'];
+                    $structureAssignments->StructureId = $spanData->Structure;
+                    $structureAssignments->Quantity = 1000 * floatval($item['span']);
+                    $structureAssignments->ConAssGrouping = '9';
+                    $structureAssignments->save();
+
+                    // SAVE TO BillsOfMaterialsMatrix
+                    $billOfMaterialsMatrix = new BillOfMaterialsMatrix;
+                    $billOfMaterialsMatrix->id = IDGenerator::generateID();
+                    $billOfMaterialsMatrix->ServiceConnectionId = $item['svcId'];
+                    $billOfMaterialsMatrix->MaterialsId = $spanData->id;
+                    $billOfMaterialsMatrix->Quantity = 1000 * floatval($item['span']);
+                    $billOfMaterialsMatrix->StructureType = 'SPAN';
+                    $billOfMaterialsMatrix->save();
+
+                    // SAVE Splice Data if There's any
+                    if ($spanData->SpliceNeaCode != null) {
+                        // SAVE TO BillsOfMaterialsMatrix
+                        $billOfMaterialsMatrixSplice = new BillOfMaterialsMatrix;
+                        $billOfMaterialsMatrixSplice->id = IDGenerator::generateID();
+                        $billOfMaterialsMatrixSplice->ServiceConnectionId = $item['svcId'];
+                        $billOfMaterialsMatrixSplice->MaterialsId = $spanData->SpliceNeaCode;
+                        $billOfMaterialsMatrixSplice->Quantity = '1';
+                        $billOfMaterialsMatrixSplice->StructureType = 'SPAN';
+                        $billOfMaterialsMatrixSplice->save();
+                    }
+                }
+            }
+
+            return json_encode(['response' => true]);
+        }
+    }
+
+    public function fetchSpanMaterials(Request $request) {
+        if ($request->ajax()) {
+            $billOfMaterials = DB::table('CRM_BillOfMaterialsMatrix')
+                ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id') 
+                ->select('CRM_MaterialAssets.id',
+                        'CRM_MaterialAssets.Description',
+                        'CRM_MaterialAssets.Amount',
+                        DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
+                        DB::raw('(CAST(CRM_MaterialAssets.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
+                ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $request['scId'])
+                ->where('CRM_BillOfMaterialsMatrix.StructureType', 'SPAN')
+                ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.Amount', 'CRM_MaterialAssets.id')
+                ->orderBy('CRM_MaterialAssets.Description')
+                ->get(); 
+
+            echo json_encode($billOfMaterials);
+        }
+    }
+
+    public function deleteSpanMaterial(Request $request) {
+        if ($request->ajax()) {
+            BillOfMaterialsMatrix::where('ServiceConnectionId', $request['ServiceConnectionId'])
+                        ->where('MaterialsId', $request['MaterialsId'])    
+                        ->where('StructureType', 'SPAN')        
+                        ->delete();
+
+            return json_encode(['response' => true]);
+        }
+    }
+
+    public function insertSDWMaterials(Request $request) {
+        if ($request->ajax()) {
+            $spanData = DB::table('CRM_SpanningIndex')
+                    ->leftJoin('CRM_MaterialAssets', 'CRM_SpanningIndex.NeaCode', '=', 'CRM_MaterialAssets.id')
+                    ->where('CRM_SpanningIndex.Size', $request['Size'])
+                    ->where('CRM_SpanningIndex.Type', $request['Type'])
+                    ->select('CRM_MaterialAssets.id',
+                            'CRM_SpanningIndex.Structure',
+                            'CRM_SpanningIndex.Description',
+                            'CRM_MaterialAssets.Amount',)
+                    ->first();
+
+            $structureAssignments = StructureAssignments::where('StructureId', $spanData->Structure)->first();
+            if ($structureAssignments != null) {
+                StructureAssignments::where('StructureId', $spanData->Structure)->delete();
+            }
+
+                // INSERT TO SpanninData
+            $spanning = SpanningData::where('ServiceConnectionId', $request['ServiceConnectionId'])->first();
+            if ($spanning == null) { // CREATE NEW
+                $spanning = new SpanningData;
+                $spanning->id = IDGenerator::generateID();
+                $spanning->ServiceConnectionId = $request['ServiceConnectionId'];
+
+                $spanning->SDWSpan = $request['Span'];
+                $spanning->SDWSize = $request['Size'];
+                $spanning->SDWType = $request['Type'];
+
+                $spanning->save();
+            } else { // UPDATE
+                $spanning->SDWSpan = $request['Span'];
+                $spanning->SDWSize = $request['Size'];
+                $spanning->SDWType = $request['Type'];
+
+                $spanning->save();
+            }
+
+            // SAVE TO StructureAssignments
+            $structureAssignments = new StructureAssignments;
+            $structureAssignments->id = IDGenerator::generateID();
+            $structureAssignments->ServiceConnectionId = $request['ServiceConnectionId'];
+            $structureAssignments->StructureId = $spanData->Structure;
+            $structureAssignments->Quantity = 1000 * floatval($request['Span']);
+            $structureAssignments->ConAssGrouping = '9';
+            $structureAssignments->save();
+
+            // SAVE TO BillsOfMaterialsMatrix
+            $billOfMaterialsMatrix = new BillOfMaterialsMatrix;
+            $billOfMaterialsMatrix->id = IDGenerator::generateID();
+            $billOfMaterialsMatrix->ServiceConnectionId = $request['ServiceConnectionId'];
+            $billOfMaterialsMatrix->MaterialsId = $spanData->id;
+            $billOfMaterialsMatrix->Quantity = 1000 * floatval($request['Span']);
+            $billOfMaterialsMatrix->StructureType = 'SPAN';
+            $billOfMaterialsMatrix->save();
         }
     }
 }

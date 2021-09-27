@@ -62,5 +62,25 @@ class Structures extends Model
         'updated_at' => 'nullable'
     ];
 
-    
+    public static function groupConAss($type) {
+        if ($type == 'ANC_F' | $type == 'GUY_E') {
+            return '6';
+        } elseif ($type == 'A_DT' | $type == 'DT_R') {
+            return '3';
+        } elseif ($type == 'PPT') {
+            return '2';
+        } elseif ($type == 'SEC_J' | $type == 'SEC_M3') {
+            return '7';
+        } elseif ($type == 'SVC_K') {
+            return '8';
+        } elseif ($type == 'GND_M2') {
+            return '4';
+        } elseif ($type == 'MISC') {
+            return '5';
+        } elseif ($type == null) {
+            return '1'; // POLES
+        } else {
+            return '9'; // Spanning
+        }
+    }
 }

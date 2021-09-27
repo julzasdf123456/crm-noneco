@@ -16,7 +16,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h4 class="m-0">Pole Assigning</h4>
+                    <p class="m-0"><strong><span class="badge-lg bg-warning">Step 4</span></strong>Pole Assigning</p>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -41,7 +41,7 @@
         </div>
         <div class="col-sm-4 invoice-col">
             <br>
-            <b >Account: </b><span id="scId">{{ $serviceConnection->id }}</span>
+            <b >Account: </b><span id="scId"><a href="{{ route('serviceConnections.show', [$serviceConnection->id]) }}">{{ $serviceConnection->id }}</a></span>
         </div>
     </div>
 

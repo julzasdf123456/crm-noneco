@@ -235,6 +235,13 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-cross nav-icon"></i><p>Pole Index</p>
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a href="{{ route('spanningIndices.index') }}"
+                   class="nav-link {{ Request::is('spanningIndices*') ? 'active' : '' }}">
+                   <i class="fas fa-network-wired nav-icon"></i><p>Spanning Index</p>
+                </a>
+            </li>
         </ul>
     </li>
 @endcanany
@@ -310,4 +317,5 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
+
 
