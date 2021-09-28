@@ -22,6 +22,7 @@ class CreateTableCRMBillOfMaterialsMatrix extends Migration
             $table->string('StructureType')->nullable(); // FOR BRACKETS
             $table->string('MaterialsId')->nullable();
             $table->string('Quantity')->nullable();
+            $table->string('Amount')->nullable();
             $table->timestamps();
         });
     }

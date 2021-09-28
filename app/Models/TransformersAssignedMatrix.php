@@ -39,6 +39,7 @@ class TransformersAssignedMatrix extends Model
         'MaterialsId',
         'Quantity',
         'Type',
+        'Amount',
     ];
 
     /**
@@ -51,7 +52,8 @@ class TransformersAssignedMatrix extends Model
         'ServiceConnectionId' => 'string',
         'MaterialsId' => 'string',
         'Quantity' => 'string',
-        'Type' => 'string'
+        'Type' => 'string',
+        'Amount' => 'string'
     ];
 
     /**
@@ -67,6 +69,7 @@ class TransformersAssignedMatrix extends Model
         'created_at' => 'nullable',
         'updated_at' => 'nullable',
         'Type' => 'nullable|string',
+        'Amount' => 'nullable|string',
     ];
 
     

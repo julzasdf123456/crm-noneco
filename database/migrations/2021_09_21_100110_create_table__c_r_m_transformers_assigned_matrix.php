@@ -19,6 +19,7 @@ class CreateTableCRMTransformersAssignedMatrix extends Migration
             $table->string('ServiceConnectionId')->nullable();
             $table->string('MaterialsId')->nullable(); // TRANSFORMER NEA CODE
             $table->string('Quantity')->nullable();
+            $table->string('Amount')->nullable();
             $table->timestamps();
         });
     }

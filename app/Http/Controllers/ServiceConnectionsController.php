@@ -939,12 +939,12 @@ class ServiceConnectionsController extends AppBaseController
             ->leftJoin('CRM_Structures', 'CRM_BillOfMaterialsMatrix.StructureId', '=', 'CRM_Structures.id')    
             ->select('CRM_MaterialAssets.id',
                     'CRM_MaterialAssets.Description',
-                    'CRM_MaterialAssets.Amount',
+                    'CRM_BillOfMaterialsMatrix.Amount',
                     DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
-                    DB::raw('(CAST(CRM_MaterialAssets.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
+                    DB::raw('(CAST(CRM_BillOfMaterialsMatrix.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
             ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $scId)
             ->whereNull('CRM_BillOfMaterialsMatrix.StructureType')
-            ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.Amount', 'CRM_MaterialAssets.id')
+            ->groupBy('CRM_MaterialAssets.Description', 'CRM_BillOfMaterialsMatrix.Amount', 'CRM_MaterialAssets.id')
             ->orderBy('CRM_MaterialAssets.Description')
             ->get(); 
 
@@ -1137,12 +1137,12 @@ class ServiceConnectionsController extends AppBaseController
                 ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')   
                 ->select('CRM_MaterialAssets.id',
                         'CRM_MaterialAssets.Description',
-                        'CRM_MaterialAssets.Amount',
+                        'CRM_BillOfMaterialsMatrix.Amount',
                         DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
-                        DB::raw('(CAST(CRM_MaterialAssets.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS Cost'))
+                        DB::raw('(CAST(CRM_BillOfMaterialsMatrix.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS Cost'))
                 ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $scId)
                 // ->where('CRM_BillOfMaterialsMatrix.StructureType', 'A_DT')
-                ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.Amount', 'CRM_MaterialAssets.id')
+                ->groupBy('CRM_MaterialAssets.Description', 'CRM_BillOfMaterialsMatrix.Amount', 'CRM_MaterialAssets.id')
                 ->orderBy('CRM_MaterialAssets.Description')
                 ->get(); 
 
@@ -1164,6 +1164,13 @@ class ServiceConnectionsController extends AppBaseController
                     DB::raw('SUM(CAST(CRM_StructureAssignments.Quantity AS Integer)) AS Quantity'))
             ->where('ServiceConnectionId', $scId)
             ->groupBy('CRM_Structures.id', 'CRM_StructureAssignments.StructureId')
+            ->get();
+
+        $conAss = DB::table('CRM_StructureAssignments')
+            ->where('ServiceConnectionId', $scId)
+            ->select('ConAssGrouping', 'StructureId', 'Quantity')
+            ->groupBy('StructureId', 'ConAssGrouping', 'Quantity')
+            ->orderBy('ConAssGrouping')
             ->get();
 
         $billOfMaterialsSummary = BillsOfMaterialsSummary::where('ServiceConnectionId', $scId)->first();
@@ -1227,6 +1234,7 @@ class ServiceConnectionsController extends AppBaseController
                 'transformers' => $transformers, 
                 'billOfMaterialsSummary' => $billOfMaterialsSummary,
                 'structures' => $structures,
+                'conAss' => $conAss
             ]
         );
     }

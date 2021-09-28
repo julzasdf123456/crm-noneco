@@ -11,6 +11,7 @@ use App\Models\MaterialsMatrix;
 use App\Models\Structures;
 use App\Models\IDGenerator;
 use App\Models\BillOfMaterialsMatrix;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Flash;
 use Response;
@@ -178,10 +179,14 @@ class StructureAssignmentsController extends AppBaseController
             $structure->ConAssGrouping = Structures::groupConAss($structureCore->Type);
             $structure->save();
 
-            $materials = MaterialsMatrix::where('StructureId', $structureCore->id)->get();
+            // $materials = MaterialsMatrix::where('StructureId', $structureCore->id)->get();
 
             // SAVE TO BillOfMaterialsMatrix
-            $materials = MaterialsMatrix::where('StructureId', $structureCore->id)->get();
+            $materials = DB::table('CRM_MaterialsMatrix')
+                ->leftJoin('CRM_MaterialAssets', 'CRM_MaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
+                ->where('CRM_MaterialsMatrix.StructureId', $structureCore->id)
+                ->select('*')
+                ->get();
 
             foreach($materials as $item) {
                 $billsOfMaterialsIndex = new BillOfMaterialsMatrix;
@@ -190,6 +195,7 @@ class StructureAssignmentsController extends AppBaseController
                 $billsOfMaterialsIndex->StructureAssigningId = $structure->id;
                 $billsOfMaterialsIndex->StructureId = $item->StructureId;
                 $billsOfMaterialsIndex->MaterialsId = $item->MaterialsId;
+                $billsOfMaterialsIndex->Amount = $item->Amount;
                 $billsOfMaterialsIndex->Quantity = (intval($item->Quantity) * intval($request['Quantity'])) . '';
                 $billsOfMaterialsIndex->save();
             }           

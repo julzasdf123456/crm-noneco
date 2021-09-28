@@ -162,6 +162,13 @@ class TransformersAssignedMatrixController extends AppBaseController
 
     public function createAjax(Request $request) {
         if ($request->ajax()) {
+            $materials = DB::table('CRM_TransformerIndex')
+                ->leftJoin('CRM_MaterialAssets', 'CRM_TransformerIndex.NEACode', '=', 'CRM_MaterialAssets.id')
+                ->where('CRM_TransformerIndex.NEACode', $request['MaterialsId'])
+                ->select('*')
+                ->first();
+
+
             // ADD TRANSFORMER
             $transformerMatrix = new TransformersAssignedMatrix;
             $transformerMatrix->id = IDGenerator::generateID();
@@ -169,17 +176,24 @@ class TransformersAssignedMatrixController extends AppBaseController
             $transformerMatrix->MaterialsId = $request['MaterialsId'];
             $transformerMatrix->Quantity = $request['Quantity'];
             $transformerMatrix->Type = 'Transformer';
+            $transformerMatrix->Amount = $materials->Amount;
             $transformerMatrix->save();
 
             // ADD FUSELINK IF THERE IS ANY
             $transformerIndex = TransformerIndex::find($request['TransformerId']);
             if ($transformerIndex != null) {
                 if ($transformerIndex->LinkFuseCode != null) {
+                    $materials = DB::table('CRM_MaterialAssets')
+                        ->where('CRM_MaterialAssets.id', $transformerIndex->LinkFuseCode)
+                        ->select('*')
+                        ->first();
+
                     $linkFuse = new TransformersAssignedMatrix;
                     $linkFuse->id = IDGenerator::generateID();
                     $linkFuse->ServiceConnectionId = $request['ServiceConnectionId'];
                     $linkFuse->MaterialsId = $transformerIndex->LinkFuseCode;
                     $linkFuse->Quantity = $request['Quantity'];
+                    $linkFuse->Amount = $materials->Amount;
                     $linkFuse->Type = 'Fuse';
                     $linkFuse->save();
                 }
@@ -195,7 +209,7 @@ class TransformersAssignedMatrixController extends AppBaseController
                 ->leftJoin('CRM_MaterialAssets', 'CRM_TransformersAssignedMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
                 ->select('CRM_TransformersAssignedMatrix.id',
                         'CRM_MaterialAssets.Description',
-                        'CRM_MaterialAssets.Amount',
+                        'CRM_TransformersAssignedMatrix.Amount',
                         'CRM_TransformersAssignedMatrix.Quantity')
                 ->where('CRM_TransformersAssignedMatrix.ServiceConnectionId', $request['ServiceConnectionId'])
                 ->get();

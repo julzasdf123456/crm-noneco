@@ -240,7 +240,7 @@
                     },
                     error : function(error) {
                         console.log(error);
-                        location.reload();
+                        // location.reload();
                     }
                 });  
             }

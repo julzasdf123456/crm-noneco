@@ -1,5 +1,6 @@
 @php
     use App\Models\ServiceConnections;
+    use Illuminate\Support\Facades\DB;
 @endphp
 @extends('layouts.app')
 
@@ -23,14 +24,15 @@
 
     <ul class="nav nav-tabs" id="custom-content-below-tab" role="tablist">
         <li class="nav-item">
-            <a class="nav-link active" id="custom-content-below-home-tab" data-toggle="pill" href="#materials" role="tab" aria-controls="custom-content-below-home" aria-selected="true">Material Summary</a>
+            <a class="nav-link" id="custom-content-below-home-tab" data-toggle="pill" href="#materials" role="tab" aria-controls="custom-content-below-home" aria-selected="true">Material Summary</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="custom-content-below-profile-tab" data-toggle="pill" href="#construction" role="tab" aria-controls="custom-content-below-profile" aria-selected="false">Construction Summary</a>
+            <a class="nav-link active" id="custom-content-below-profile-tab" data-toggle="pill" href="#construction" role="tab" aria-controls="custom-content-below-profile" aria-selected="false">Construction Summary</a>
         </li>
     </ul>
     <div class="tab-content" id="custom-content-below-tabContent">
-        <div class="tab-pane fade active show" id="materials" role="tabpanel" aria-labelledby="custom-content-below-home-tab">
+        {{-- Bills of Materials --}}
+        <div class="tab-pane fade show" id="materials" role="tabpanel" aria-labelledby="custom-content-below-home-tab">
             <div class="row">
                 <div class="col-md-12 col-lg-12">
                     <div class="row">
@@ -248,10 +250,39 @@
                 </div>
             </div>
         </div>
+        {{-- Construction Assets --}}
         <div class="tab-pane fade active show" id="construction" role="tabpanel" aria-labelledby="custom-content-below-home-tab">
+            <table class="table table-sm">
+                <thead>
+                    <th>Item</th>
+                    <th>Description</th>
+                    <th class="text-right">Quantity</th>
+                    <th class="text-right">Labor Cost</th>
+                </thead>
+                <tbody>
+                    @if ($conAss != null)
+                        @foreach ($conAss as $item)
+                            <tr>
+                                <td>{{ $item->ConAssGrouping }}</td>
+                                <td>{{ $item->StructureId }}</td>
+                                <td class="text-right">{{ $item->Quantity }}</td>
+                                <td class="text-right">
+                                    @php
+                                        $laborCost = DB::table('CRM_BillOfMaterialsMatrix')
+                                            ->leftJoin('CRM_Structures', 'CRM_BillOfMaterialsMatrix.StructureId', '=', 'CRM_Structures.id')
+                                            ->select(DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity as Integer) * CAST(CRM_BillOfMaterialsMatrix.Amount as Decimal)) AS Cost'))
+                                            ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $serviceConnection->id)
+                                            ->where('CRM_Structures.Data', $item->StructureId)
+                                            ->first();
+                                    @endphp
+                                    {{ number_format($laborCost->Cost, 2) }}
+                                </td>
+                            </tr>
+                        @endforeach                        
+                    @endif
+                </tbody>
+            </table>
         </div>
-    </div>
-
-    
+    </div>    
 </div>
 @endsection

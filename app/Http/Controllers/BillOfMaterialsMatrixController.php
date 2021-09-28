@@ -247,12 +247,12 @@ class BillOfMaterialsMatrixController extends AppBaseController
                 ->leftJoin('CRM_Structures', 'CRM_BillOfMaterialsMatrix.StructureId', '=', 'CRM_Structures.id')    
                 ->select('CRM_MaterialAssets.id',
                         'CRM_MaterialAssets.Description',
-                        'CRM_MaterialAssets.Amount',
+                        'CRM_BillOfMaterialsMatrix.Amount',
                         DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
-                        DB::raw('(CAST(CRM_MaterialAssets.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
+                        DB::raw('(CAST(CRM_BillOfMaterialsMatrix.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
                 ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $scId)
                 ->whereNull('CRM_BillOfMaterialsMatrix.StructureType')
-                ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.Amount', 'CRM_MaterialAssets.id')
+                ->groupBy('CRM_MaterialAssets.Description', 'CRM_BillOfMaterialsMatrix.Amount', 'CRM_MaterialAssets.id')
                 ->orderBy('CRM_MaterialAssets.Description')
                 ->get();  
 
@@ -268,12 +268,12 @@ class BillOfMaterialsMatrixController extends AppBaseController
                 ->leftJoin('CRM_Structures', 'CRM_BillOfMaterialsMatrix.StructureId', '=', 'CRM_Structures.id')    
                 ->select('CRM_MaterialAssets.id',
                         'CRM_MaterialAssets.Description',
-                        'CRM_MaterialAssets.Amount',
+                        'CRM_BillOfMaterialsMatrix.Amount',
                         DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
-                        DB::raw('(CAST(CRM_MaterialAssets.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
+                        DB::raw('(CAST(CRM_BillOfMaterialsMatrix.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
                 ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $scId)
                 ->where('CRM_BillOfMaterialsMatrix.StructureType', 'A_DT')
-                ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.Amount', 'CRM_MaterialAssets.id')
+                ->groupBy('CRM_MaterialAssets.Description', 'CRM_BillOfMaterialsMatrix.Amount', 'CRM_MaterialAssets.id')
                 ->orderBy('CRM_MaterialAssets.Description')
                 ->get(); 
 
@@ -298,10 +298,16 @@ class BillOfMaterialsMatrixController extends AppBaseController
             $structure->StructureId = $structureCore->Data;
             $structure->Quantity = $totalTrans;
             $structure->Type = 'A_DT'; // TRANSFORMER 
+            $structure->ConAssGrouping = Structures::groupConAss($structureCore->Type);
             $structure->save();
 
             // QUERY MATERIALS INSIDE STRUCTURE
-            $materials = MaterialsMatrix::where('StructureId', $request['StructureId'])->get();
+            $materials = DB::table('CRM_MaterialsMatrix')
+                ->leftJoin('CRM_MaterialAssets', 'CRM_MaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
+                ->where('CRM_MaterialsMatrix.StructureId', $structureCore->id)
+                ->select('*')
+                ->get();
+
             if ($materials != null) {
                 foreach ($materials as $item) {
                     // INSERT TO BillOfMaterialsMatrix
@@ -311,6 +317,7 @@ class BillOfMaterialsMatrixController extends AppBaseController
                     $bracket->StructureAssigningId = $structure->id;
                     $bracket->StructureId = $request['StructureId'];
                     $bracket->MaterialsId = $item->MaterialsId;
+                    $bracket->Amount = $item->Amount;
                     $bracket->Quantity = ($totalTrans * intval($item->Quantity));
                     $bracket->StructureType = 'A_DT'; // BRACKET TYPE
                     $bracket->save();
@@ -323,11 +330,18 @@ class BillOfMaterialsMatrixController extends AppBaseController
 
     public function insertPole(Request $request) {
         if ($request->ajax()) {
+            $materials = DB::table('CRM_PoleIndex')
+                ->leftJoin('CRM_MaterialAssets', 'CRM_PoleIndex.NEACode', '=', 'CRM_MaterialAssets.id')
+                ->where('CRM_PoleIndex.NEACode', $request['MaterialsId'])
+                ->select('*')
+                ->first();
+
             $pole = new BillOfMaterialsMatrix;
             $pole->id = IDGenerator::generateID();
             $pole->ServiceConnectionId = $request['ServiceConnectionId'];
             $pole->MaterialsId = $request['MaterialsId'];
             $pole->Quantity = $request['Quantity'];
+            $pole->Amount = $materials->Amount;
             $pole->StructureType = 'POLE'; // FOR POLES
             $pole->save();
 
@@ -403,6 +417,7 @@ class BillOfMaterialsMatrixController extends AppBaseController
                             'CRM_SpanningIndex.Structure',
                             'CRM_SpanningIndex.Description',
                             'CRM_MaterialAssets.Amount',
+                            'CRM_SpanningIndex.id as SpanId',
                             'CRM_SpanningIndex.SpliceNeaCode')
                     ->first();
 
@@ -460,9 +475,12 @@ class BillOfMaterialsMatrixController extends AppBaseController
                     $billOfMaterialsMatrix = new BillOfMaterialsMatrix;
                     $billOfMaterialsMatrix->id = IDGenerator::generateID();
                     $billOfMaterialsMatrix->ServiceConnectionId = $item['svcId'];
+                    $billOfMaterialsMatrix->StructureAssigningId = $structureAssignments->id;
+                    $billOfMaterialsMatrix->StructureId = $spanData->SpanId;
                     $billOfMaterialsMatrix->MaterialsId = $spanData->id;
                     $billOfMaterialsMatrix->Quantity = 1000 * floatval($item['span']);
                     $billOfMaterialsMatrix->StructureType = 'SPAN';
+                    $billOfMaterialsMatrix->Amount = $spanData->Amount;
                     $billOfMaterialsMatrix->save();
 
                     // SAVE Splice Data if There's any
@@ -470,10 +488,13 @@ class BillOfMaterialsMatrixController extends AppBaseController
                         // SAVE TO BillsOfMaterialsMatrix
                         $billOfMaterialsMatrixSplice = new BillOfMaterialsMatrix;
                         $billOfMaterialsMatrixSplice->id = IDGenerator::generateID();
+                        $billOfMaterialsMatrixSplice->StructureAssigningId = $structureAssignments->id;
                         $billOfMaterialsMatrixSplice->ServiceConnectionId = $item['svcId'];
                         $billOfMaterialsMatrixSplice->MaterialsId = $spanData->SpliceNeaCode;
+                        $billOfMaterialsMatrixSplice->StructureId = $spanData->SpanId;
                         $billOfMaterialsMatrixSplice->Quantity = '1';
                         $billOfMaterialsMatrixSplice->StructureType = 'SPAN';
+                        $billOfMaterialsMatrixSplice->Amount = $spanData->Amount;
                         $billOfMaterialsMatrixSplice->save();
                     }
                 }
@@ -489,12 +510,12 @@ class BillOfMaterialsMatrixController extends AppBaseController
                 ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id') 
                 ->select('CRM_MaterialAssets.id',
                         'CRM_MaterialAssets.Description',
-                        'CRM_MaterialAssets.Amount',
+                        'CRM_BillOfMaterialsMatrix.Amount',
                         DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
-                        DB::raw('(CAST(CRM_MaterialAssets.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
+                        DB::raw('(CAST(CRM_BillOfMaterialsMatrix.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
                 ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $request['scId'])
                 ->where('CRM_BillOfMaterialsMatrix.StructureType', 'SPAN')
-                ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.Amount', 'CRM_MaterialAssets.id')
+                ->groupBy('CRM_MaterialAssets.Description', 'CRM_BillOfMaterialsMatrix.Amount', 'CRM_MaterialAssets.id')
                 ->orderBy('CRM_MaterialAssets.Description')
                 ->get(); 
 
@@ -521,6 +542,7 @@ class BillOfMaterialsMatrixController extends AppBaseController
                     ->where('CRM_SpanningIndex.Type', $request['Type'])
                     ->select('CRM_MaterialAssets.id',
                             'CRM_SpanningIndex.Structure',
+                            'CRM_SpanningIndex.id as SpanId',
                             'CRM_SpanningIndex.Description',
                             'CRM_MaterialAssets.Amount',)
                     ->first();
@@ -563,9 +585,12 @@ class BillOfMaterialsMatrixController extends AppBaseController
             $billOfMaterialsMatrix = new BillOfMaterialsMatrix;
             $billOfMaterialsMatrix->id = IDGenerator::generateID();
             $billOfMaterialsMatrix->ServiceConnectionId = $request['ServiceConnectionId'];
+            $billOfMaterialsMatrix->StructureAssigningId = $structureAssignments->id;
             $billOfMaterialsMatrix->MaterialsId = $spanData->id;
+            $billOfMaterialsMatrix->StructureId = $spanData->SpanId;
             $billOfMaterialsMatrix->Quantity = 1000 * floatval($request['Span']);
             $billOfMaterialsMatrix->StructureType = 'SPAN';
+            $billOfMaterialsMatrix->Amount = $spanData->Amount;
             $billOfMaterialsMatrix->save();
         }
     }

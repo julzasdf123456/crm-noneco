@@ -42,7 +42,8 @@ class BillOfMaterialsMatrix extends Model
         'StructureId',
         'MaterialsId',
         'Quantity',
-        'StructureType'
+        'StructureType',
+        'Amount',
     ];
 
     /**
@@ -58,6 +59,7 @@ class BillOfMaterialsMatrix extends Model
         'MaterialsId' => 'string',
         'Quantity' => 'string',
         'StructureType' => 'string',
+        'Amount' => 'string',
     ];
 
     /**
@@ -75,6 +77,7 @@ class BillOfMaterialsMatrix extends Model
         'created_at' => 'nullable',
         'updated_at' => 'nullable',
         'StructureType' => 'nullable|string',
+        'Amount' => 'nullable|string'
     ];
 
     

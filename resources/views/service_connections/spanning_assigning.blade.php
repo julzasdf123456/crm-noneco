@@ -248,7 +248,7 @@
                         },
                         error : function(error) {
                             console.log(error);
-                            location.reload();
+                            // location.reload();
                         }
                     });
                 } else {
@@ -272,7 +272,7 @@
                     },
                     error : function(error) {
                         console.log(error);
-                        location.reload();
+                        // location.reload();
                     }
                 });
             });
@@ -361,7 +361,7 @@
                 },
                 error : function(error) {
                     console.log(console.error());
-                    location.reload();
+                    // location.reload();
                 }
             }); 
         }
