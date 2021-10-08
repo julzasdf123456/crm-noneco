@@ -90,6 +90,18 @@
                     <input type="hidden" class="form-control" name="ServiceConnectionId" id="ServiceConnectionId" value="">
 
                     <div class="form-group">
+                        <label>Options</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="Options" value="Transformer Only">
+                            <label class="form-check-label">Transformer Installation Only</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="Options" value="Underbuilt Only">
+                            <label class="form-check-label">Underbuilt Construction Only</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label>Assessment</label>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="Assessment" value="Approved" checked>
@@ -146,6 +158,7 @@
                 var assessment = $('input[name="Assessment"]:checked').val();
                 var inspectionDate = $("#DateOfInspection").val();
                 var notes = $('#Notes').val();
+                var options = $('input[name="Options"]:checked').val();
 
                 if (jQuery.isEmptyObject(inspectionDate) || jQuery.isEmptyObject(assessment)) {                    
                     $('#error-message').show();
@@ -161,6 +174,7 @@
                             Assessment : assessment,
                             DateOfInspection : inspectionDate,
                             Notes : notes,
+                            Options : options,
                         },
                         // dataType : 'json',
                         success : function(data) {

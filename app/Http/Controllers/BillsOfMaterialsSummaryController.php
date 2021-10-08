@@ -131,12 +131,18 @@ class BillsOfMaterialsSummaryController extends AppBaseController
 
             // RECALCULATE TransformerLaborCost BASED ON NEW TransformerLaborCostPercentage
             $request['TransformerLaborCost'] = floatval($boMSummary->TransformerTotal) * floatval($request['TransformerLaborCostPercentage']);
+
+            $request['LaborCost'] = floatval($boMSummary->MaterialLaborCost) + floatval($request['TransformerLaborCost']);
         } else {
             if ($request['ExcludeTransformerLaborCost'] == 'Yes') {
                 $request['TransformerLaborCost'] = null;
+
+                $request['LaborCost'] = $boMSummary->MaterialLaborCost;
             } else {
                 // RECALCULATE TransformerLaborCost BASED ON NEW TransformerLaborCostPercentage
                 $request['TransformerLaborCost'] = floatval($boMSummary->TransformerTotal) * floatval($request['TransformerLaborCostPercentage']);
+
+                $request['LaborCost'] = floatval($boMSummary->MaterialLaborCost) + floatval($request['TransformerLaborCost']);                
             }          
         }
 

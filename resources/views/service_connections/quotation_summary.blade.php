@@ -1,6 +1,6 @@
 @php
     use App\Models\ServiceConnections;
-    use Illuminate\Support\Facades\DB;
+    use App\Models\IDGenerator;
 @endphp
 @extends('layouts.app')
 
@@ -22,17 +22,24 @@
         </div>
     </div>
 
+    <span style="margin-bottom: 10px;">
+        <a href="{{ route('serviceConnections.forward-to-verficaation', [$serviceConnection->id]) }}" class="btn btn-success">Finish <i class="fas fa-check-circle"></i></a> 
+        <i class="text-muted" style="margin-left: 15px;">Finish and forward to Verification</i>
+    </span>
+
+    <div class="divider"></div>
+
     <ul class="nav nav-tabs" id="custom-content-below-tab" role="tablist">
         <li class="nav-item">
-            <a class="nav-link" id="custom-content-below-home-tab" data-toggle="pill" href="#materials" role="tab" aria-controls="custom-content-below-home" aria-selected="true">Material Summary</a>
+            <a class="nav-link active" id="custom-content-below-home-tab" data-toggle="pill" href="#materials" role="tab" aria-controls="custom-content-below-home" aria-selected="true">Material Summary</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active" id="custom-content-below-profile-tab" data-toggle="pill" href="#construction" role="tab" aria-controls="custom-content-below-profile" aria-selected="false">Construction Summary</a>
+            <a class="nav-link" id="custom-content-below-profile-tab" data-toggle="pill" href="#construction" role="tab" aria-controls="custom-content-below-profile" aria-selected="false">Construction Summary</a>
         </li>
     </ul>
     <div class="tab-content" id="custom-content-below-tabContent">
         {{-- Bills of Materials --}}
-        <div class="tab-pane fade show" id="materials" role="tabpanel" aria-labelledby="custom-content-below-home-tab">
+        <div class="tab-pane fade active show" id="materials" role="tabpanel" aria-labelledby="custom-content-below-home-tab">
             <div class="row">
                 <div class="col-md-12 col-lg-12">
                     <div class="row">
@@ -47,8 +54,7 @@
                                 <h4 class="text-center p-0">Bill of Materials</h4>
                             </div>
                         </div>
-                    </div>
-                    
+                    </div>                    
                 </div>
 
                 <div class="col-lg-3 col-md-4">
@@ -251,37 +257,86 @@
             </div>
         </div>
         {{-- Construction Assets --}}
-        <div class="tab-pane fade active show" id="construction" role="tabpanel" aria-labelledby="custom-content-below-home-tab">
-            <table class="table table-sm">
-                <thead>
-                    <th>Item</th>
-                    <th>Description</th>
-                    <th class="text-right">Quantity</th>
-                    <th class="text-right">Labor Cost</th>
-                </thead>
-                <tbody>
-                    @if ($conAss != null)
-                        @foreach ($conAss as $item)
-                            <tr>
-                                <td>{{ $item->ConAssGrouping }}</td>
-                                <td>{{ $item->StructureId }}</td>
-                                <td class="text-right">{{ $item->Quantity }}</td>
-                                <td class="text-right">
-                                    @php
-                                        $laborCost = DB::table('CRM_BillOfMaterialsMatrix')
-                                            ->leftJoin('CRM_Structures', 'CRM_BillOfMaterialsMatrix.StructureId', '=', 'CRM_Structures.id')
-                                            ->select(DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity as Integer) * CAST(CRM_BillOfMaterialsMatrix.Amount as Decimal)) AS Cost'))
-                                            ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $serviceConnection->id)
-                                            ->where('CRM_Structures.Data', $item->StructureId)
-                                            ->first();
-                                    @endphp
-                                    {{ number_format($laborCost->Cost, 2) }}
-                                </td>
-                            </tr>
-                        @endforeach                        
-                    @endif
-                </tbody>
-            </table>
+        <div class="tab-pane fade show" id="construction" role="tabpanel" aria-labelledby="custom-content-below-home-tab">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+                        <div class="header">
+                            <p class="text-center p-0" style="margin: 0;"><strong>{{ env("APP_COMPANY") }}</strong></p>
+                            <p class="text-center p-0">{{ env("APP_ADDRESS") }}</p>
+
+                            <h4 class="text-center p-0">Bill of Materials</h4>
+                        </div>                  
+                    </div>
+                </div>
+                <table class="table table-sm">
+                    <thead>
+                        <th width="8%" class="text-center">Item</th>
+                        <th >Description</th>
+                        <th class="text-right">Quantity</th>
+                    </thead>
+                    <tbody>
+                        @if ($poles != null)
+                            @php
+                                $poleInc = 1;
+                            @endphp
+                            @foreach ($poles as $item)
+                                <tr>
+                                    <td width="8%" class="text-center">
+                                        @php
+                                            if ($poleInc < 2) {
+                                                echo IDGenerator::numberToRomanRepresentation($poleInc);
+                                            }
+                                            $poleInc++;
+                                        @endphp
+                                    </td>
+                                    <td>{{ $item->Description }}</td>
+                                    <td class="text-right">{{ $item->ProjectRequirements }}</td>
+                                </tr>
+                            @endforeach                           
+                        @endif
+
+                        @if ($conAss != null)
+                            @php
+                                $i = 1;
+                                $first = null;
+                                $rank = count($poles) > 0 ? 2 : 1;
+                            @endphp
+                            @foreach ($conAss as $item)
+                                <tr>
+                                    <td width="8%" class="text-center">
+                                        @php
+                                            if ($i < 2) {
+                                                $first = $item->ConAssGrouping;
+                                                echo IDGenerator::numberToRomanRepresentation($rank);
+                                                $rank += 1;
+                                            }
+
+                                            if ($item->ConAssGrouping != $first) { 
+                                                echo IDGenerator::numberToRomanRepresentation($rank);
+                                                $rank += 1;                                                                                          
+                                            } 
+
+                                            $first = $item->ConAssGrouping;     
+                                            
+                                            $i++;
+                                        @endphp
+                                    </td>
+                                    <td>                                        
+                                        {{ $item->StructureId }}
+                                        @php
+                                            if ($item->Type == 'A_DT') {
+                                                echo 'Transformer';
+                                            }
+                                        @endphp
+                                    </td>
+                                    <td class="text-right">{{ $item->Quantity }}</td>
+                                </tr>
+                            @endforeach                        
+                        @endif
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>    
 </div>

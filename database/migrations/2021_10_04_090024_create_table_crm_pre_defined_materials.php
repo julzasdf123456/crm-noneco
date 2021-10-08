@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTableCRMServiceConnectionLargeLoadInspections extends Migration
+class CreateTableCrmPreDefinedMaterials extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,15 @@ class CreateTableCRMServiceConnectionLargeLoadInspections extends Migration
      */
     public function up()
     {
-        Schema::create('CRM_LargeLoadInspections', function (Blueprint $table) {
+        Schema::create('CRM_PreDefinedMaterials', function (Blueprint $table) {
             $table->string('id')->unsigned();
             $table->primary('id');
-            $table->string('ServiceConnectionId')->nullable();
-            $table->string('Assessment')->nullable(); // Approved, Re-Inspection
-            $table->date('DateOfInspection')->nullable();
+            $table->string('NEACode', 50)->nullable();
+            $table->string('Quantity', 20)->nullable();
             $table->string('Options')->nullable();
+            $table->string('ApplicationType')->nullable();
             $table->string('Notes', 1000)->nullable();
+            $table->string('LaborPercentage', 50)->nullable();
             $table->timestamps();
         });
     }
@@ -32,6 +33,6 @@ class CreateTableCRMServiceConnectionLargeLoadInspections extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('CRM_LargeLoadInspections');
+        Schema::dropIfExists('CRM_PreDefinedMaterials');
     }
 }

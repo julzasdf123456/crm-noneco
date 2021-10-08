@@ -46,7 +46,7 @@
                                     <th>ID</th>
                                     <th>Service Account Name</th>
                                     <th>Address</th>
-                                    <th>Account Type</th>
+                                    <th>Application Type</th>
                                     <th width="35"></th>
                                 </tr>
                             </thead>
@@ -56,9 +56,18 @@
                                         <td><a href="{{ route('serviceConnections.show', [$item->id]) }}">{{ $item->id }}</a></td>
                                         <td>{{ $item->ServiceAccountName }}</td>
                                         <td>{{ ServiceConnections::getAddress($item) }}</td>
-                                        <td>{{ $item->AccountType }}</td>
                                         <td>
-                                            <a href="{{ route('serviceConnections.spanning-assigning', [$item->id]) }}" class="text-danger" title="Assign Structure and Bill of Materials"><i class="fas fa-edit"></i></a>
+                                            {{ $item->AccountApplicationType }}
+                                            @if ($item->Options != null)
+                                                ({{ $item->Options }})
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($item->Options == null)
+                                                <a href="{{ route('serviceConnections.spanning-assigning', [$item->id]) }}" class="text-danger" title="Assign Structure and Bill of Materials"><i class="fas fa-edit"></i></a>
+                                            @else
+                                                <a href="{{ route('serviceConnections.largeload-predefined-materials', [$item->id, $item->Options]) }}" class="text-danger" title="Assign Structure and Bill of Materials"><i class="fas fa-edit"></i></a>
+                                            @endif                                            
                                         </td>
                                     </tr>
                                 @endforeach                                

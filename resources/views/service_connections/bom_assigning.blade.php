@@ -15,7 +15,10 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="/">Home</a></li>
-                        <li class="breadcrumb-item active">Bill of Materials Assigning</li>
+                        <li class="breadcrumb-item active"><a class="text-muted" href="{{ route('serviceConnections.spanning-assigning', [$serviceConnection->id]) }}">Spanning</a></li>
+                        <li class="breadcrumb-item"><a class="btn btn-success btn-sm" href="{{ route('serviceConnections.bom-assigning', [$serviceConnection->id]) }}" class="text-muted">Bill of Materials</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('serviceConnections.transformer-assigning', [$serviceConnection->id]) }}" class="text-muted">Transformer</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('serviceConnections.pole-assigning', [$serviceConnection->id]) }}" class="text-muted">Pole</a></li>
                     </ol>
                 </div>
             </div>
@@ -49,7 +52,12 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <input type="hidden" name="_token" id="csrf" value="{{Session::token()}}">
-                                <input class="form-control" id="autosuggest" placeholder="Type a structure">
+                                {{-- <input class="form-control" id="autosuggest" placeholder="Type a structure"> --}}
+                                <select class="form-control select2" style="width: 100%;" name="structures" id="structures">
+                                    @foreach ($structures as $item)
+                                        <option value="{{ $item->Data }}">{{ $item->Data }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-md-3">
                                 <input class="form-control" type="number" id="qty"  placeholder="Quantity">
@@ -191,29 +199,10 @@
 @push('page_scripts')
     <script type="text/javascript">
 
-    var structures = [];
-    $.ajax({
-        url : '/structures/get-structures-json',
-        type: "GET",
-        dataType : "json",
-        success : function(response) {
-            $.each(response, function(index, element) {
-                structures.push({ label : response[index]['Data'], value : response[index]['Data'] });
-            });
-            
-        },
-        error : function(error) {
-            alert("Error adding structures to row! Contact support immediately.");
-        }
-    });
-
     $(document).ready(function() {        
-        $('#autosuggest').autocomplete({
-            source: structures
-        })
 
         $('#add-structure').on('click', function() {
-            if (jQuery.isEmptyObject($('#autosuggest').val()) | jQuery.isEmptyObject($('#qty').val())) {
+            if (jQuery.isEmptyObject($('#qty').val())) {
                 alert('Please fill in the fields to continue!');
             } else {
                 $.ajax({
@@ -222,7 +211,7 @@
                     data : {
                         _token : $('#csrf').val(),
                         ServiceConnectionId : $('#scId').text(),
-                        Structure : $('#autosuggest').val(),
+                        Structure : $('#structures').val(),
                         Quantity : $('#qty').val(),
                     },
                     success : function(response) {
@@ -240,7 +229,7 @@
                     },
                     error : function(error) {
                         console.log(error);
-                        // location.reload();
+                        alert('Error inserting material! Contact tech support for assistance.')
                     }
                 });  
             }

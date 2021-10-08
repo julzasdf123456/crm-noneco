@@ -14,14 +14,17 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="/">Home</a></li>
-                        <li class="breadcrumb-item active">Spanning</li>
+                        <li class="breadcrumb-item"><a href="/" class="text-muted">Home</a></li>
+                        <li class="breadcrumb-item active"><a class="btn btn-success btn-sm" href="{{ route('serviceConnections.spanning-assigning', [$serviceConnection->id]) }}">Spanning</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('serviceConnections.bom-assigning', [$serviceConnection->id]) }}" class="text-muted">Bill of Materials</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('serviceConnections.transformer-assigning', [$serviceConnection->id]) }}" class="text-muted">Transformer</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('serviceConnections.pole-assigning', [$serviceConnection->id]) }}" class="text-muted">Pole</a></li>
                     </ol>
                 </div>
             </div>
         </div>
     </div>
-
+    
     <div class="row invoice-info">
         <div class="col-sm-4 invoice-col">
             <address>
@@ -35,7 +38,7 @@
         </div>
         <div class="col-sm-4 invoice-col">
             <br>
-            <b >Account: </b><span id="scId">{{ $serviceConnection->id }}</span>
+            <b >Account: </b><span id="scId"><a href="{{ route('serviceConnections.show', [$serviceConnection->id]) }}">{{ $serviceConnection->id }}</a></span>
         </div>
     </div>
 

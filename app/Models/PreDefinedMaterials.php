@@ -7,22 +7,23 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * Class ServiceConnectionLgLoadInsp
+ * Class PreDefinedMaterials
  * @package App\Models
- * @version September 15, 2021, 4:41 pm PST
+ * @version October 4, 2021, 9:07 am PST
  *
- * @property string $ServiceConnectionId
- * @property string $Assessment
- * @property string $DateOfInspection
+ * @property string $NEACode
+ * @property string $Quantity
+ * @property string $Options
+ * @property string $ApplicationType
  * @property string $Notes
  */
-class ServiceConnectionLgLoadInsp extends Model
+class PreDefinedMaterials extends Model
 {
     // use SoftDeletes;
 
     use HasFactory;
 
-    public $table = 'CRM_LargeLoadInspections';
+    public $table = 'CRM_PreDefinedMaterials';
     
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
@@ -36,11 +37,12 @@ class ServiceConnectionLgLoadInsp extends Model
 
     public $fillable = [
         'id',
-        'ServiceConnectionId',
-        'Assessment',
-        'DateOfInspection',
-        'Notes',
+        'NEACode',
+        'Quantity',
         'Options',
+        'ApplicationType',
+        'Notes',
+        'LaborPercentage',
     ];
 
     /**
@@ -50,11 +52,12 @@ class ServiceConnectionLgLoadInsp extends Model
      */
     protected $casts = [
         'id' => 'string',
-        'ServiceConnectionId' => 'string',
-        'Assessment' => 'string',
-        'DateOfInspection' => 'date',
-        'Notes' => 'string',
+        'NEACode' => 'string',
+        'Quantity' => 'string',
         'Options' => 'string',
+        'ApplicationType' => 'string',
+        'Notes' => 'string',
+        'LaborPercentage' => 'string',
     ];
 
     /**
@@ -64,13 +67,14 @@ class ServiceConnectionLgLoadInsp extends Model
      */
     public static $rules = [
         'id' => 'string',
-        'ServiceConnectionId' => 'nullable|string|max:255',
-        'Assessment' => 'nullable|string|max:255',
-        'DateOfInspection' => 'nullable',
+        'NEACode' => 'nullable|string|max:50',
+        'Quantity' => 'nullable|string|max:20',
+        'Options' => 'nullable|string|max:255',
+        'ApplicationType' => 'nullable|string|max:255',
         'Notes' => 'nullable|string|max:1000',
         'created_at' => 'nullable',
         'updated_at' => 'nullable',
-        'Options' => 'string|nullable'
+        'LaborPercentage' => 'nullable|string',
     ];
 
     

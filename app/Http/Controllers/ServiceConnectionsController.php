@@ -27,6 +27,8 @@ use App\Models\MaterialAssets;
 use App\Models\BillsOfMaterialsSummary;
 use App\Models\SpanningData;
 use App\Models\PoleIndex;
+use App\Models\PreDefinedMaterials;
+use App\Models\PreDefinedMaterialsMatrix;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Flash;
@@ -188,7 +190,58 @@ class ServiceConnectionsController extends AppBaseController
                 ->orderByDesc('created_at')
                 ->get();
 
+        $billOfMaterialsSummary = BillsOfMaterialsSummary::where('ServiceConnectionId', $id)->first();
+
+        $structures = DB::table('CRM_StructureAssignments')
+            ->leftJoin('CRM_Structures', 'CRM_StructureAssignments.StructureId', '=', 'CRM_Structures.Data')
+            ->select('CRM_Structures.id as id',
+                    'CRM_StructureAssignments.StructureId',
+                    DB::raw('SUM(CAST(CRM_StructureAssignments.Quantity AS Integer)) AS Quantity'))
+            ->where('ServiceConnectionId', $id)
+            ->groupBy('CRM_Structures.id', 'CRM_StructureAssignments.StructureId')
+            ->get();
+
+        $conAss = DB::table('CRM_StructureAssignments')
+            ->where('ServiceConnectionId', $id)
+            ->select('ConAssGrouping', 'StructureId', 'Quantity', 'Type')
+            ->groupBy('StructureId', 'ConAssGrouping', 'Quantity', 'Type')
+            ->orderBy('ConAssGrouping')
+            ->get();
+
+        $materials = DB::table('CRM_BillOfMaterialsMatrix')
+            ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')   
+            ->select('CRM_MaterialAssets.id',
+                    'CRM_MaterialAssets.Description',
+                    'CRM_BillOfMaterialsMatrix.Amount',
+                    DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
+                    DB::raw('(CAST(CRM_BillOfMaterialsMatrix.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS Cost'))
+            ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $id)
+            // ->where('CRM_BillOfMaterialsMatrix.StructureType', 'A_DT')
+            ->groupBy('CRM_MaterialAssets.Description', 'CRM_BillOfMaterialsMatrix.Amount', 'CRM_MaterialAssets.id')
+            ->orderBy('CRM_MaterialAssets.Description')
+            ->get();
         
+        $poles = DB::table('CRM_BillOfMaterialsMatrix')
+                ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')   
+                ->select('CRM_MaterialAssets.id',
+                        'CRM_MaterialAssets.Description',
+                        DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),)
+                ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $id)
+                ->where('CRM_BillOfMaterialsMatrix.StructureType', 'POLE')
+                ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.id')
+                ->orderBy('CRM_MaterialAssets.Description')
+                ->get();
+
+        $transformers = DB::table('CRM_TransformersAssignedMatrix')
+                ->leftJoin('CRM_MaterialAssets', 'CRM_TransformersAssignedMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
+                ->select('CRM_MaterialAssets.id',
+                        'CRM_TransformersAssignedMatrix.id as TransformerId',
+                        'CRM_MaterialAssets.Description',
+                        'CRM_MaterialAssets.Amount',
+                        'CRM_TransformersAssignedMatrix.Quantity',
+                        'CRM_TransformersAssignedMatrix.Type')
+                ->where('CRM_TransformersAssignedMatrix.ServiceConnectionId', $id)
+                ->get();
 
         if (empty($serviceConnections)) {
             Flash::error('Service Connections not found');
@@ -209,7 +262,13 @@ class ServiceConnectionsController extends AppBaseController
                                                 'totalTransactions' => $totalTransactions,
                                                 'timeFrame' => $timeFrame,
                                                 'serviceConnectionChecklistsRep' => $serviceConnectionChecklistsRep,
-                                                'serviceConnectionChecklists' => $serviceConnectionChecklists]);
+                                                'serviceConnectionChecklists' => $serviceConnectionChecklists,
+                                                'billOfMaterialsSummary' => $billOfMaterialsSummary,
+                                                'structures' => $structures,
+                                                'conAss' => $conAss,
+                                                'materials' => $materials,
+                                                'poles' => $poles,
+                                                'transformers' => $transformers]);
     }
 
     /**
@@ -869,7 +928,8 @@ class ServiceConnectionsController extends AppBaseController
             $largeLoadInspections->ServiceConnectionId = $request['ServiceConnectionId'];
             $largeLoadInspections->Assessment = $request['Assessment'];
             $largeLoadInspections->DateOfInspection = $request['DateOfInspection'];
-            $largeLoadInspections->Notes = $largeLoadInspections['Notes'];
+            $largeLoadInspections->Notes = $request['Notes'];
+            $largeLoadInspections->Options = $request['Options'];
 
             $largeLoadInspections->save();
 
@@ -898,6 +958,7 @@ class ServiceConnectionsController extends AppBaseController
                     ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
                     ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')                    
                     ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')  
+                    ->leftJoin('CRM_LargeLoadInspections', 'CRM_ServiceConnections.id', '=', 'CRM_LargeLoadInspections.ServiceConnectionId')
                     ->where('CRM_ServiceConnections.Status', 'For BoM')
                     ->where(function ($query) {
                         $query->where('Trash', 'No')
@@ -907,9 +968,11 @@ class ServiceConnectionsController extends AppBaseController
                         'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
                         'CRM_ServiceConnections.Status as Status', 
                         'CRM_ServiceConnections.Sitio as Sitio', 
+                        'CRM_ServiceConnections.AccountApplicationType as AccountApplicationType', 
                         'CRM_Towns.Town as Town',
                         'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
-                        'CRM_Barangays.Barangay as Barangay')
+                        'CRM_Barangays.Barangay as Barangay',
+                        'CRM_LargeLoadInspections.Options')
                     ->orderBy('CRM_ServiceConnections.ServiceAccountName')
                     ->get();
 
@@ -934,6 +997,8 @@ class ServiceConnectionsController extends AppBaseController
 
         $materials = MaterialAssets::orderBy('Description')->get();
 
+        $structures = Structures::orderBy('Data')->get();
+
         $billOfMaterials = DB::table('CRM_BillOfMaterialsMatrix')
             ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
             ->leftJoin('CRM_Structures', 'CRM_BillOfMaterialsMatrix.StructureId', '=', 'CRM_Structures.id')    
@@ -955,7 +1020,8 @@ class ServiceConnectionsController extends AppBaseController
         return view('/service_connections/bom_assigning', ['serviceConnection' => $serviceConnection, 
                             'structuresAssigned' => $structuresAssigned, 
                             'billOfMaterials' => $billOfMaterials,
-                            'materials' => $materials
+                            'materials' => $materials,
+                            'structures' => $structures,
                         ]);
     }
 
@@ -1144,7 +1210,18 @@ class ServiceConnectionsController extends AppBaseController
                 // ->where('CRM_BillOfMaterialsMatrix.StructureType', 'A_DT')
                 ->groupBy('CRM_MaterialAssets.Description', 'CRM_BillOfMaterialsMatrix.Amount', 'CRM_MaterialAssets.id')
                 ->orderBy('CRM_MaterialAssets.Description')
-                ->get(); 
+                ->get();
+                
+        $poles = DB::table('CRM_BillOfMaterialsMatrix')
+                ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')   
+                ->select('CRM_MaterialAssets.id',
+                        'CRM_MaterialAssets.Description',
+                        DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),)
+                ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $scId)
+                ->where('CRM_BillOfMaterialsMatrix.StructureType', 'POLE')
+                ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.id')
+                ->orderBy('CRM_MaterialAssets.Description')
+                ->get();
 
         $transformers = DB::table('CRM_TransformersAssignedMatrix')
                 ->leftJoin('CRM_MaterialAssets', 'CRM_TransformersAssignedMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
@@ -1168,8 +1245,8 @@ class ServiceConnectionsController extends AppBaseController
 
         $conAss = DB::table('CRM_StructureAssignments')
             ->where('ServiceConnectionId', $scId)
-            ->select('ConAssGrouping', 'StructureId', 'Quantity')
-            ->groupBy('StructureId', 'ConAssGrouping', 'Quantity')
+            ->select('ConAssGrouping', 'StructureId', 'Quantity', 'Type')
+            ->groupBy('StructureId', 'ConAssGrouping', 'Quantity', 'Type')
             ->orderBy('ConAssGrouping')
             ->get();
 
@@ -1234,7 +1311,8 @@ class ServiceConnectionsController extends AppBaseController
                 'transformers' => $transformers, 
                 'billOfMaterialsSummary' => $billOfMaterialsSummary,
                 'structures' => $structures,
-                'conAss' => $conAss
+                'conAss' => $conAss,
+                'poles' => $poles,
             ]
         );
     }
@@ -1275,5 +1353,127 @@ class ServiceConnectionsController extends AppBaseController
             'billOfMaterials' => $billOfMaterials,
             'spanningData' => $spanningData
         ]);
+    }
+
+    public function forwardToVerification($scId) {
+        $serviceConnection = ServiceConnections::find($scId);
+        $serviceConnection->Status = 'Received';
+        $serviceConnection->save();
+
+        // CREATE Timeframes
+        $timeFrame = new ServiceConnectionTimeframes;
+        $timeFrame->id = IDGenerator::generateID();
+        $timeFrame->ServiceConnectionId = $scId;
+        $timeFrame->UserId = Auth::id();
+        $timeFrame->Status = 'Forwarded for Verfication';
+        $timeFrame->Notes = 'Forwarded to ISD for Verfication';
+        $timeFrame->save();
+
+        return redirect(route('serviceConnections.show', [$scId]));
+    }
+
+    public function largeLoadPredefinedMaterials($scId, $options) {
+        $serviceConnection = DB::table('CRM_ServiceConnections')
+            ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+            ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')            
+            ->leftJoin('CRM_LargeLoadInspections', 'CRM_ServiceConnections.id', '=', 'CRM_LargeLoadInspections.ServiceConnectionId')
+            ->select('CRM_ServiceConnections.ServiceAccountName',
+                    'CRM_ServiceConnections.id',
+                    'CRM_ServiceConnections.Sitio',
+                    'CRM_ServiceConnections.ContactNumber',
+                    'CRM_ServiceConnections.BuildingType',
+                    'CRM_ServiceConnections.DateOfApplication',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'CRM_ServiceConnections.AccountApplicationType',
+                    'CRM_ServiceConnections.TemporaryDurationInMonths',
+                    'CRM_LargeLoadInspections.Options')
+            ->where('CRM_ServiceConnections.id', $scId)
+            ->first();
+
+        $materials = MaterialAssets::orderBy('Description')->get();
+
+        if ($serviceConnection->AccountApplicationType == 'Temporary' && $serviceConnection->Options == 'Transformer Only') {
+            $preDefMaterials = DB::table('CRM_PreDefinedMaterials')
+            ->leftJoin('CRM_MaterialAssets', 'CRM_PreDefinedMaterials.NEACode', '=', 'CRM_MaterialAssets.id')
+            ->where('CRM_PreDefinedMaterials.Options', $options)
+            ->where('CRM_PreDefinedMaterials.ApplicationType', $serviceConnection->AccountApplicationType)
+            ->select('CRM_PreDefinedMaterials.id',
+                    'CRM_PreDefinedMaterials.NEACode',
+                    'CRM_MaterialAssets.Description',
+                    'CRM_MaterialAssets.Amount',
+                    'CRM_PreDefinedMaterials.Quantity',
+                    'CRM_PreDefinedMaterials.LaborPercentage',
+                    DB::raw('(CAST(CRM_MaterialAssets.Amount AS DECIMAL(9,2)) * CAST(CRM_PreDefinedMaterials.Quantity AS DECIMAL(9,2)) * 0.15 * ' . floatval($serviceConnection->TemporaryDurationInMonths) . ') AS Cost'),
+                    DB::raw('(CAST(CRM_MaterialAssets.Amount AS DECIMAL(9,2)) * CAST(CRM_PreDefinedMaterials.Quantity AS DECIMAL(9,2)) * CAST(CRM_PreDefinedMaterials.LaborPercentage AS DECIMAL(9,4))) AS LaborCost'))
+            ->get();
+        } else {
+            $preDefMaterials = DB::table('CRM_PreDefinedMaterials')
+            ->leftJoin('CRM_MaterialAssets', 'CRM_PreDefinedMaterials.NEACode', '=', 'CRM_MaterialAssets.id')
+            ->where('CRM_PreDefinedMaterials.Options', $options)
+            ->where('CRM_PreDefinedMaterials.ApplicationType', $serviceConnection->AccountApplicationType)
+            ->select('CRM_PreDefinedMaterials.id',
+                    'CRM_PreDefinedMaterials.NEACode',
+                    'CRM_MaterialAssets.Description',
+                    'CRM_MaterialAssets.Amount',
+                    'CRM_PreDefinedMaterials.Quantity',
+                    'CRM_PreDefinedMaterials.LaborPercentage',
+                    DB::raw('(CAST(CRM_MaterialAssets.Amount AS DECIMAL(9,2)) * CAST(CRM_PreDefinedMaterials.Quantity AS DECIMAL(9,2))) AS Cost'),
+                    DB::raw('(CAST(CRM_MaterialAssets.Amount AS DECIMAL(9,2)) * CAST(CRM_PreDefinedMaterials.Quantity AS DECIMAL(9,2)) * CAST(CRM_PreDefinedMaterials.LaborPercentage AS DECIMAL(9,4))) AS LaborCost'))
+            ->get();
+        }
+
+        if ($preDefMaterials != null) {
+            $preDef = PreDefinedMaterialsMatrix::where('ServiceConnectionId', $scId)
+                            ->get();
+            
+            if (count($preDef) < 1) {
+                // SAVE PRE DEFINED MATERIALS
+                foreach($preDefMaterials as $item) {
+                    $preDef = PreDefinedMaterialsMatrix::where('ServiceConnectionId', $scId)
+                                ->where('NEACode', $item->NEACode)
+                                ->first();
+                    if ($preDef == null) {
+                        $preDef = new PreDefinedMaterialsMatrix;
+                        $preDef->id = IDGenerator::generateID();
+                        $preDef->ServiceConnectionId = $scId;
+                        $preDef->NEACode = $item->NEACode;
+                        $preDef->Description = $item->Description;
+                        $preDef->Quantity = $item->Quantity;
+                        $preDef->Options = $options;
+                        $preDef->ApplicationType = $serviceConnection->AccountApplicationType;
+                        $preDef->Cost = $item->Cost;
+                        $preDef->LaborCost = $item->LaborCost;
+                        $preDef->Amount = $item->Amount;
+                        $preDef->LaborPercentage = $item->LaborPercentage;
+                        $preDef->save();
+                    } else {
+                        $preDef->ServiceConnectionId = $scId;
+                        $preDef->NEACode = $item->NEACode;
+                        $preDef->Description = $item->Description;
+                        $preDef->Quantity = $item->Quantity;
+                        $preDef->Options = $options;
+                        $preDef->ApplicationType = $serviceConnection->AccountApplicationType;
+                        $preDef->Cost = $item->Cost;
+                        $preDef->LaborCost = $item->LaborCost;
+                        $preDef->Amount = $item->Amount;
+                        $preDef->LaborPercentage = $item->LaborPercentage;
+                        $preDef->save();
+                    }                
+                }
+            }            
+        }
+
+        $preDef = PreDefinedMaterialsMatrix::where('ServiceConnectionId', $scId)
+                            ->get();
+
+        return view('/service_connections/largeload_predefined_materials', 
+            [
+                'serviceConnection' => $serviceConnection,
+                'materials' => $materials,
+                'preDefMaterials' => $preDefMaterials,
+                'preDef' => $preDef,
+            ]);
     }
 }

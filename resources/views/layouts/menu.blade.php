@@ -242,6 +242,13 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-network-wired nav-icon"></i><p>Spanning Index</p>
                 </a>
             </li>
+            
+            <li class="nav-item">
+                <a href="{{ route('preDefinedMaterials.index') }}"
+                class="nav-link {{ Request::is('preDefinedMaterials*') ? 'active' : '' }}">
+                    <i class="fas fa-plug nav-icon"></i><p>Pre-Defined Materials</p>
+                </a>
+            </li>
         </ul>
     </li>
 @endcanany

@@ -51,7 +51,7 @@ use App\Models\IDGenerator;
 
                     <div class="radio-group-horizontal">
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="AccountApplicationType" value="Permanent">
+                            <input class="form-check-input" type="radio" name="AccountApplicationType" value="Permanent" checked>
                             <label class="form-check-label">Permanent</label>
                         </div>
                         <div class="form-check">

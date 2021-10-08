@@ -16,6 +16,7 @@ use App\Models\TransformersAssignedMatrix;
 use App\Models\StructureAssignments;
 use App\Models\Structures;
 use App\Models\SpanningData;
+use App\Models\MaterialAssets;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\IDGenerator;
 use Flash;
@@ -387,12 +388,17 @@ class BillOfMaterialsMatrixController extends AppBaseController
 
     public function addCustomMaterial(Request $request) {
         if ($request->ajax()) {
-            $material = new BillOfMaterialsMatrix;
-            $material->id = IDGenerator::generateID();
-            $material->ServiceConnectionId = $request['ServiceConnectionId'];
-            $material->MaterialsId = $request['MaterialsId'];
-            $material->Quantity = $request['Quantity'];
-            $material->save();
+            $sourceMat = MaterialAssets::find($request['MaterialsId']);
+
+            if ($sourceMat != null) {
+                $material = new BillOfMaterialsMatrix;
+                $material->id = IDGenerator::generateID();
+                $material->ServiceConnectionId = $request['ServiceConnectionId'];
+                $material->MaterialsId = $request['MaterialsId'];
+                $material->Quantity = $request['Quantity'];
+                $material->Amount = $sourceMat->Amount;
+                $material->save();
+            } 
 
             return json_encode(['response' => true]);
         }

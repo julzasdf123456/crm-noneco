@@ -27,7 +27,10 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="/">Home</a></li>
-                        <li class="breadcrumb-item active">Transformer Assigning</li>
+                        <li class="breadcrumb-item active"><a class="text-muted" href="{{ route('serviceConnections.spanning-assigning', [$serviceConnection->id]) }}">Spanning</a></li>
+                        <li class="breadcrumb-item"><a class="text-muted" href="{{ route('serviceConnections.bom-assigning', [$serviceConnection->id]) }}" class="text-muted">Bill of Materials</a></li>
+                        <li class="breadcrumb-item"><a class="btn btn-success btn-sm" href="{{ route('serviceConnections.transformer-assigning', [$serviceConnection->id]) }}" class="text-muted">Transformer</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('serviceConnections.pole-assigning', [$serviceConnection->id]) }}" class="text-muted">Pole</a></li>
                     </ol>
                 </div>
             </div>
@@ -127,7 +130,7 @@
                 <div class="card-header">
                     <span class="card-title">Assigned Transformer</span>
                     <div class="card-tools">
-                        <a href="#">Consumer Has Transformer Already <i class="fas fa-info-circle"></i></a>
+                        <a href="{{ route('serviceConnections.pole-assigning', [$serviceConnection->id]) }}">Consumer Has Transformer Already <i class="fas fa-info-circle"></i></a>
                     </div>
                 </div>
                 <div class="card-body table-responsive p-0">
