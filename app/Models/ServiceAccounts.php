@@ -43,7 +43,6 @@ class ServiceAccounts extends Model
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
-
     protected $dates = ['deleted_at'];
 
     protected $primaryKey = 'id';
@@ -51,6 +50,7 @@ class ServiceAccounts extends Model
     public $incrementing = false;
 
     public $fillable = [
+        'id',
         'ServiceAccountName',
         'Town',
         'Barangay',
@@ -70,7 +70,9 @@ class ServiceAccounts extends Model
         'ComputeType',
         'Organization',
         'OrganizationParentAccount',
-        'GPSMeter'
+        'GPSMeter',
+        'OldAccountNo',
+        'UserId'
     ];
 
     /**
@@ -99,7 +101,10 @@ class ServiceAccounts extends Model
         'ComputeType' => 'string',
         'Organization' => 'string',
         'OrganizationParentAccount' => 'string',
-        'GPSMeter' => 'string'
+        'GPSMeter' => 'string',
+        'AccountCount' => 'string',
+        'OldAccountNo' => 'string',
+        'UserId' => 'string',
     ];
 
     /**
@@ -108,6 +113,7 @@ class ServiceAccounts extends Model
      * @var array
      */
     public static $rules = [
+        'id' => 'string',
         'ServiceAccountName' => 'required|string|max:600',
         'Town' => 'nullable|string|max:50',
         'Barangay' => 'nullable|string|max:50',
@@ -129,7 +135,10 @@ class ServiceAccounts extends Model
         'OrganizationParentAccount' => 'nullable|string|max:30',
         'GPSMeter' => 'nullable|string|max:50',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'AccountCount' => 'nullable|string',
+        'OldAccountNo' => 'nullable|string',
+        'UserId' => 'nullable|string',
     ];
 
     

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\ServiceConnectionInspectionsAPI;
 use App\Http\Controllers\API\TelleringController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\ServiceConnectionsEnergization;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,12 +18,16 @@ use App\Http\Controllers\API\UserController;
 |
 */
 
+// VERIFIES
 // DOWNLOAD DATA
 Route::get('get-service-connections/', [ServiceConnectionInspectionsAPI::class, 'getServiceConnections']);
 Route::get('get-service-inspections/', [ServiceConnectionInspectionsAPI::class, 'getServiceInspections']);
 Route::post('update-service-inspections/', [ServiceConnectionInspectionsAPI::class, 'updateServiceInspections']);
 
 Route::get('get-payment-queues/', [TelleringController::class, 'fetchApprovedServiceConnections']);
+
+// FOR ENERGIZATION ON CREW
+Route::get('get-for-energization-data', [ServiceConnectionsEnergization::class, 'getForEnergizationData']);
 
 Route::post('login', [UserController::class, 'login']);
 

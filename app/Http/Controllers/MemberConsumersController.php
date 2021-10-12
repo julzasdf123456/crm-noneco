@@ -337,4 +337,8 @@ class MemberConsumersController extends AppBaseController
 
         return view('/member_consumers/assess_checklists', ['memberConsumers' => $memberConsumers, 'checklist' => $checklist]);
     }
+
+    public function captureImage($id) {
+        return view('/member_consumers/capture_image', ['id' => $id]);
+    }
 }

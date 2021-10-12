@@ -190,7 +190,16 @@ use Illuminate\Support\Facades\Auth;
             <li class="nav-item">
                 <a href="{{ route('serviceAccounts.index') }}"
                    class="nav-link {{ Request::is('serviceAccounts*') ? 'active' : '' }}">                   
-                   <i class="fas fa-user-circle nav-icon"></i><p>Service Accounts</p>
+                   <i class="fas fa-user-circle nav-icon"></i><p>Active Accounts</p>
+                </a>
+            </li>
+            <li class="nav-header">                
+                Others 
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('serviceAccounts.pending-accounts') }}"
+                   class="nav-link {{ Request::is('serviceAccounts.pending-accounts*') ? 'active' : '' }}">                   
+                   <i class="fas fa-user-alt-slash nav-icon"></i><p>Pending Accounts</p>
                 </a>
             </li>
         </ul>
@@ -324,5 +333,6 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
+
 
 

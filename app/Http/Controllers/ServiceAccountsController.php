@@ -7,6 +7,8 @@ use App\Http\Requests\UpdateServiceAccountsRequest;
 use App\Repositories\ServiceAccountsRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
+use App\Models\ServiceConnections;
+use Illuminate\Support\Facades\DB;
 use Flash;
 use Response;
 
@@ -153,5 +155,40 @@ class ServiceAccountsController extends AppBaseController
         Flash::success('Service Accounts deleted successfully.');
 
         return redirect(route('serviceAccounts.index'));
+    }
+
+    public function pendingAccounts() {
+        $serviceConnections = DB::table('CRM_ServiceConnections')
+            ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+            ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->select('CRM_ServiceConnections.id as id',
+                            'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                            'CRM_ServiceConnections.Status as Status',
+                            'CRM_ServiceConnections.DateOfApplication as DateOfApplication', 
+                            'CRM_ServiceConnections.ContactNumber as ContactNumber', 
+                            'CRM_ServiceConnections.EmailAddress as EmailAddress',  
+                            'CRM_ServiceConnections.AccountCount as AccountCount',  
+                            'CRM_ServiceConnections.Sitio as Sitio', 
+                            'CRM_Towns.Town as Town',
+                            'CRM_Barangays.Barangay as Barangay')
+            ->where(function ($query) {
+                                $query->where('CRM_ServiceConnections.Trash', 'No')
+                                    ->orWhereNull('CRM_ServiceConnections.Trash');
+                            })  
+            ->where('Status', 'Energized')          
+            ->orderBy('CRM_ServiceConnections.ServiceAccountName')
+            ->get();
+
+        return view('/service_accounts/pending_accounts', ['serviceConnections' => $serviceConnections]);
+    }
+
+    public function accountMigration($id) {
+        $serviceConnection = ServiceConnections::find($id);
+
+        return view('/service_accounts/account_migration',
+            [
+                'serviceConnection' => $serviceConnection,
+            ]
+        );
     }
 }

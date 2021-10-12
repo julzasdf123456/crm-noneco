@@ -36,10 +36,10 @@ use Illuminate\Support\Facades\Auth;
                 <div class="card {{ $serviceConnections->LoadCategory == 'above 5kVa' ? 'card-danger' : 'card-primary' }} card-outline">
                     <div class="card-body box-profile">
                         <div class="text-center">
-                            <img class="profile-user-img img-fluid img-circle" src="../../dist/img/user4-128x128.jpg" alt="User profile picture">
+                            <img id="prof-img" class="profile-user-img img-fluid img-circle" src="" alt="User profile picture">
                         </div>
 
-                        <h3 class="profile-username text-center">{{ $serviceConnections->ServiceAccountName }}</h3>
+                        <h3 title="Go to Membership Profile" class="profile-username text-center"><a href="{{ route('memberConsumers.show', [$serviceConnections->MemberConsumerId]) }}">{{ $serviceConnections->ServiceAccountName }}</a></h3>
                         <p class="text-muted text-center">{{ $serviceConnections->id }} ({{ $serviceConnections->AccountApplicationType }})</p>
 
                         <hr>
@@ -79,25 +79,11 @@ use Illuminate\Support\Facades\Auth;
 
                         @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Service Connection Assessor'])) 
                             <a href="{{ route('serviceConnections.edit', [$serviceConnections->id]) }}" class="text-warning" title="Edit service connection details">
-                                <lord-icon
-                                    src="https://cdn.lordicon.com/puvaffet.json"
-                                    trigger="loop"
-                                    delay="1500"
-                                    colors="primary:#121331,secondary:#08a88a"
-                                    stroke="100"
-                                    style="width:28px;height:28px">
-                                </lord-icon>
+                                <i class="fas fa-pen"></i>
                             </a>
 
                             <a href="{{ route('serviceConnections.move-to-trash', [$serviceConnections->id]) }}" class="text-danger float-right" title="Move to trash">
-                                <lord-icon
-                                    src="https://cdn.lordicon.com/gsqxdxog.json"
-                                    trigger="loop"
-                                    delay="1500"
-                                    colors="primary:#c71f16,secondary:#c71f16"
-                                    stroke="100"
-                                    style="width:28px;height:28px">
-                                </lord-icon>
+                                <i class="fas fa-trash"></i>
                             </a>                            
                         @endif
                         
@@ -184,3 +170,22 @@ use Illuminate\Support\Facades\Auth;
         </div>
     </div>
 @endsection
+
+@push('page_scripts')
+    <script>
+        $(document).ready(function() {
+            // LOAD IMAGE
+            $.ajax({
+                url : '/member_consumer_images/get-image/' + "{{ $serviceConnections->MemberConsumerId }}",
+                type : 'GET',
+                success : function(result) {
+                    var data = JSON.parse(result)
+                    $('#prof-img').attr('src', data['img'])
+                },
+                error : function(error) {
+                    console.log(error);
+                }
+            })
+        });
+    </script>
+@endpush

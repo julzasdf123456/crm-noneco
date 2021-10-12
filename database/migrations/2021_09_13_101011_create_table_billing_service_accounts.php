@@ -25,6 +25,7 @@ class CreateTableBillingServiceAccounts extends Migration
             $table->string('ContactNumber', 60)->nullable();
             $table->string('EmailAddress', 60)->nullable();
             $table->string('ServiceConnectionId', 30)->nullable();
+            $table->string('AccountCount', 10)->nullable();
             // METER READER
             $table->string('MeterDetailsId', 50)->nullable();
             $table->string('TransformerDetailsId', 50)->nullable();
@@ -46,6 +47,11 @@ class CreateTableBillingServiceAccounts extends Migration
             $table->string('SeniorCitizen', 50)->nullable(); // Yes, No
             $table->string('Locked', 50)->nullable(); // Yes, No
             $table->timestamps();
+
+            // OLD Data
+            $table->string('OldAccountNo', 50)->nullable();
+
+            $table->string('UserId', 50)->nullable();
         });
     }
 
