@@ -21,8 +21,8 @@ class ServiceConnectionInspectionsAPI extends Controller {
             ->select('CRM_ServiceConnections.*')
             ->where('CRM_ServiceConnections.Status', "For Inspection")
             ->where(function($query) {
-                $query->where('CRM_ServiceConnectionInspections.Status', "For Inspection")
-                    ->orWhere('CRM_ServiceConnectionInspections.Status', "For Re-Inspection");
+                $query->where('CRM_ServiceConnections.Status', "For Inspection")
+                    ->orWhere('CRM_ServiceConnections.Status', "For Re-Inspection");
             })
             ->where(function ($query) {
                 $query->where('CRM_ServiceConnections.Trash', 'No')
@@ -44,8 +44,8 @@ class ServiceConnectionInspectionsAPI extends Controller {
             ->select('CRM_ServiceConnectionInspections.*')
             ->where('CRM_ServiceConnections.Status', "For Inspection")
             ->where(function($query) {
-                $query->where('CRM_ServiceConnectionInspections.Status', "For Inspection")
-                    ->orWhere('CRM_ServiceConnectionInspections.Status', "For Re-Inspection");
+                $query->where('CRM_ServiceConnections.Status', "For Inspection")
+                    ->orWhere('CRM_ServiceConnections.Status', "For Re-Inspection");
             })
             ->where(function ($query) {
                 $query->where('CRM_ServiceConnections.Trash', 'No')
@@ -104,7 +104,7 @@ class ServiceConnectionInspectionsAPI extends Controller {
             $timeFrame->ServiceConnectionId = $request['ServiceConnectionId'];
             $timeFrame->UserId = $request['Inspector'];
             $timeFrame->Status = 'Approved';
-            $timeFrame->Notes = 'Inspection approved';
+            $timeFrame->Notes = 'Inspection approved and is waiting for payment';
             $timeFrame->save();
 
             return response()->json(['ok' => 'ok'], $this->successStatus);

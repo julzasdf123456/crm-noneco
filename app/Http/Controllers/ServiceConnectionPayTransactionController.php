@@ -167,9 +167,9 @@ class ServiceConnectionPayTransactionController extends AppBaseController
 
     public function createStepFour($scId) {
         $serviceConnection = DB::table('CRM_ServiceConnections')
-            ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
-            ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
-            ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+            ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
             ->select('CRM_ServiceConnections.ServiceAccountName',
                     'CRM_ServiceConnections.id',
                     'CRM_ServiceConnections.Sitio',

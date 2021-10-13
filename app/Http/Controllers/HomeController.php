@@ -49,7 +49,10 @@ class HomeController extends Controller
             $data = DB::table('CRM_ServiceConnections')
                     ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
                     ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
-                    ->where('CRM_ServiceConnections.Status', 'Received')
+                    ->where(function($query) {
+                        $query->where('CRM_ServiceConnections.Status', "For Inspection")
+                            ->orWhere('CRM_ServiceConnections.Status', "For Re-Inspection");
+                    })
                     ->where(function ($query) {
                         $query->where('Trash', 'No')
                             ->orWhereNull('Trash');

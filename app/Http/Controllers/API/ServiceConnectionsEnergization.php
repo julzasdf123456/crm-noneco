@@ -23,7 +23,7 @@ class ServiceConnectionsEnergization extends Controller {
                     ->orWhereNull('CRM_ServiceConnections.Trash');
             })
             ->whereIn('CRM_ServiceConnections.id', DB::table('CRM_ServiceConnectionMeterAndTransformer')->pluck('ServiceConnectionId'))
-            ->select('CRM_ServiceConnectionInspections.*')
+            ->select('CRM_ServiceConnections.*')
             ->orderBy('CRM_ServiceConnections.ServiceAccountName')
             ->get();
 

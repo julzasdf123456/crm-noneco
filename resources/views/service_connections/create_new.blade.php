@@ -34,7 +34,7 @@
                     <div class="card-body">
 
                         <div class="row">
-                            <input type="hidden" name="Status" value="RECEIVED">
+                            <input type="hidden" name="Status" value="For Inspection">
 
                             @include('service_connections.fields')
                         </div>

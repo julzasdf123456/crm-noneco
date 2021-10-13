@@ -6,6 +6,7 @@ use App\Http\Controllers\API\ServiceConnectionInspectionsAPI;
 use App\Http\Controllers\API\TelleringController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\ServiceConnectionsEnergization;
+use App\Http\Controllers\API\OtherData;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +29,9 @@ Route::get('get-payment-queues/', [TelleringController::class, 'fetchApprovedSer
 
 // FOR ENERGIZATION ON CREW
 Route::get('get-for-energization-data', [ServiceConnectionsEnergization::class, 'getForEnergizationData']);
+
+Route::get('get-towns', [OtherData::class, 'getTowns']);
+Route::get('get-barangays', [OtherData::class, 'getBarangays']);
 
 Route::post('login', [UserController::class, 'login']);
 

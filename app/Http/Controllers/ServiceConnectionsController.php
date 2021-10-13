@@ -1357,7 +1357,7 @@ class ServiceConnectionsController extends AppBaseController
 
     public function forwardToVerification($scId) {
         $serviceConnection = ServiceConnections::find($scId);
-        $serviceConnection->Status = 'Received';
+        $serviceConnection->Status = 'For Inspection';
         $serviceConnection->save();
 
         // CREATE Timeframes

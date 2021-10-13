@@ -191,9 +191,9 @@ class ServiceConnectionMtrTrnsfrmrController extends AppBaseController
     public function assigning() {
         if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Metering Personnel'])) {
             $serviceConnections = DB::table('CRM_ServiceConnections')
-                        ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
-                        ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
-                        ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+                        ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+                        ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
                         ->select('CRM_ServiceConnections.id as id',
                                         'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
                                         'CRM_ServiceConnections.Status as Status',
@@ -207,6 +207,10 @@ class ServiceConnectionMtrTrnsfrmrController extends AppBaseController
                                         'CRM_Barangays.Barangay as Barangay')
                         ->whereNotNull('CRM_ServiceConnections.ORNumber')
                         ->whereNotIn('CRM_ServiceConnections.id', DB::table('CRM_ServiceConnectionMeterAndTransformer')->pluck('ServiceConnectionId'))
+                        ->where(function ($query) {
+                            $query->where('CRM_ServiceConnections.Trash', 'No')
+                                ->orWhereNull('CRM_ServiceConnections.Trash');
+                        })
                         ->orderBy('CRM_ServiceConnections.ServiceAccountName')
                         ->get();
 
