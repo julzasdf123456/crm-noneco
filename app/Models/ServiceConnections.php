@@ -73,6 +73,8 @@ class ServiceConnections extends Model
         'Trash',
         'ORNumber',
         'ORDate',
+        'DateTimeLinemenArrived',
+        'DateTimeOfEnergization',
         'EnergizationOrderIssued',
         'DateTimeOfEnergizationIssue',
         'StationCrewAssigned',
