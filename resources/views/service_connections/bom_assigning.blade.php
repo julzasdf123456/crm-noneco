@@ -209,7 +209,7 @@
                     url : '/structure_assignments/insert-structure-assignment',
                     type: "POST",
                     data : {
-                        _token : $('#csrf').val(),
+                        _token : "{{ csrf_token() }}",
                         ServiceConnectionId : $('#scId').text(),
                         Structure : $('#structures').val(),
                         Quantity : $('#qty').val(),

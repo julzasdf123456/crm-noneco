@@ -60,3 +60,6 @@ You can also check out our other paid products on [CodeCanyon](https://codecanyo
 - [Contact Us](https://infyom.com/contact-us)
 
 - to Run: php artisan serve --host 192.168.0.124 --port 80
+
+### Project Config
+- In table CRM_MemberConsumerImages Manually "HexImage - Text" to database;

@@ -3,17 +3,16 @@
 @section('content')
     <section class="content-header">
         <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1>Service Accounts</h1>
+            {!! Form::open(['route' => 'serviceAccounts.index', 'method' => 'GET']) !!}
+                <div class="row mb-2">
+                    <div class="col-md-6 offset-md-3">
+                        <input type="text" class="form-control" placeholder="Search" name="params" value="{{ old('params') }}">
+                    </div>
+                    <div class="col-md-3">
+                        {!! Form::submit('Search', ['class' => 'btn btn-primary']) !!}
+                    </div>
                 </div>
-                <div class="col-sm-6">
-                    <a class="btn btn-primary float-right"
-                       href="{{ route('serviceAccounts.create') }}">
-                        Add New
-                    </a>
-                </div>
-            </div>
+            {!! Form::close() !!}
         </div>
     </section>
 
@@ -23,18 +22,7 @@
 
         <div class="clearfix"></div>
 
-        <div class="card">
-            <div class="card-body p-0">
-                @include('service_accounts.table')
-
-                <div class="card-footer clearfix">
-                    <div class="float-right">
-                        
-                    </div>
-                </div>
-            </div>
-
-        </div>
+        @include('service_accounts.table')
     </div>
 
 @endsection

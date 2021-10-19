@@ -758,10 +758,10 @@ class ServiceConnectionsController extends AppBaseController
     public function energization() {
         if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Energization Clerk'])) {
             $serviceConnections = DB::table('CRM_ServiceConnections')
-                        ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
-                        ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
-                        ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')                        
-                        ->join('CRM_ServiceConnectionCrew', 'CRM_ServiceConnections.StationCrewAssigned', '=', 'CRM_ServiceConnectionCrew.id')
+                        ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+                        ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')                        
+                        ->leftJoin('CRM_ServiceConnectionCrew', 'CRM_ServiceConnections.StationCrewAssigned', '=', 'CRM_ServiceConnectionCrew.id')
                         ->select('CRM_ServiceConnections.id as id',
                                         'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
                                         'CRM_ServiceConnections.Status as Status',
@@ -842,9 +842,9 @@ class ServiceConnectionsController extends AppBaseController
 
     public function printOrder($id) {
         $serviceConnections = DB::table('CRM_ServiceConnections')
-            ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
-            ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
-            ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
             ->select('CRM_ServiceConnections.id as id',
                         'CRM_ServiceConnections.AccountCount as AccountCount', 
                         'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
@@ -916,7 +916,9 @@ class ServiceConnectionsController extends AppBaseController
                     ->orderBy('CRM_ServiceConnections.ServiceAccountName')
                     ->get();
 
-        return view('/service_connections/large_load_inspections', ['serviceConnections' => $serviceConnections]);
+        $accountTypes = ServiceConnectionAccountTypes::orderBy('id')->get();
+
+        return view('/service_connections/large_load_inspections', ['serviceConnections' => $serviceConnections, 'accountTypes' => $accountTypes]);
     }
 
     public function largeLoadInspectionUpdate(Request $request) {
@@ -937,6 +939,7 @@ class ServiceConnectionsController extends AppBaseController
             $serviceConnection = ServiceConnections::find($request['ServiceConnectionId']);
 
             $serviceConnection->Status = 'For BoM';
+            $serviceConnection->AccountType = $request['AccountType'];
 
             $serviceConnection->save();
 
@@ -1475,5 +1478,9 @@ class ServiceConnectionsController extends AppBaseController
                 'preDefMaterials' => $preDefMaterials,
                 'preDef' => $preDef,
             ]);
+    }
+
+    public function fleetMonitor() {
+        return view('/service_connections/fleet_monitor');
     }
 }

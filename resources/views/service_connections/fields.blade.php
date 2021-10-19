@@ -102,7 +102,7 @@ use App\Models\IDGenerator;
         </div> 
     </div>
 
-    <!-- Accounttype Field -->
+    {{-- <!-- Accounttype Field -->
     <div class="form-group col-sm-12">
         <div class="row">
             <div class="col-lg-3 col-md-5">
@@ -128,7 +128,7 @@ use App\Models\IDGenerator;
                 </div>
             </div>
         </div>  
-    </div>
+    </div> --}}
 
     <!-- Accountapplicationtype Field -->
     <div class="form-group col-sm-12">

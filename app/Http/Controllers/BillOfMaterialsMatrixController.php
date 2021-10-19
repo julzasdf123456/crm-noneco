@@ -294,7 +294,7 @@ class BillOfMaterialsMatrixController extends AppBaseController
             $structureCore = Structures::find($request['StructureId']);
 
             $structure  = new StructureAssignments;
-            $structure->id = IDGenerator::generateID();
+            $structure->id = IDGenerator::generateRandString();
             $structure->ServiceConnectionId = $request['ServiceConnectionId'];
             $structure->StructureId = $structureCore->Data;
             $structure->Quantity = $totalTrans;
@@ -313,7 +313,7 @@ class BillOfMaterialsMatrixController extends AppBaseController
                 foreach ($materials as $item) {
                     // INSERT TO BillOfMaterialsMatrix
                     $bracket = new BillOfMaterialsMatrix;
-                    $bracket->id = IDGenerator::generateID();
+                    $bracket->id = IDGenerator::generateRandString();
                     $bracket->ServiceConnectionId = $request['ServiceConnectionId'];
                     $bracket->StructureAssigningId = $structure->id;
                     $bracket->StructureId = $request['StructureId'];
@@ -431,7 +431,7 @@ class BillOfMaterialsMatrixController extends AppBaseController
                 $spanning = SpanningData::where('ServiceConnectionId', $item['svcId'])->first();
                 if ($spanning == null) { // CREATE NEW
                     $spanning = new SpanningData;
-                    $spanning->id = IDGenerator::generateID();
+                    $spanning->id = IDGenerator::generateRandString();
                     $spanning->ServiceConnectionId = $item['svcId'];
 
                     if ($item['line'] == 'primary') {
@@ -470,7 +470,7 @@ class BillOfMaterialsMatrixController extends AppBaseController
                 if ($spanData != null) {
                     // SAVE TO StructureAssignments
                     $structureAssignments = new StructureAssignments;
-                    $structureAssignments->id = IDGenerator::generateID();
+                    $structureAssignments->id = IDGenerator::generateRandString();
                     $structureAssignments->ServiceConnectionId = $item['svcId'];
                     $structureAssignments->StructureId = $spanData->Structure;
                     $structureAssignments->Quantity = 1000 * floatval($item['span']);
@@ -479,7 +479,7 @@ class BillOfMaterialsMatrixController extends AppBaseController
 
                     // SAVE TO BillsOfMaterialsMatrix
                     $billOfMaterialsMatrix = new BillOfMaterialsMatrix;
-                    $billOfMaterialsMatrix->id = IDGenerator::generateID();
+                    $billOfMaterialsMatrix->id = IDGenerator::generateRandString();
                     $billOfMaterialsMatrix->ServiceConnectionId = $item['svcId'];
                     $billOfMaterialsMatrix->StructureAssigningId = $structureAssignments->id;
                     $billOfMaterialsMatrix->StructureId = $spanData->SpanId;
@@ -493,7 +493,7 @@ class BillOfMaterialsMatrixController extends AppBaseController
                     if ($spanData->SpliceNeaCode != null) {
                         // SAVE TO BillsOfMaterialsMatrix
                         $billOfMaterialsMatrixSplice = new BillOfMaterialsMatrix;
-                        $billOfMaterialsMatrixSplice->id = IDGenerator::generateID();
+                        $billOfMaterialsMatrixSplice->id = IDGenerator::generateRandString();
                         $billOfMaterialsMatrixSplice->StructureAssigningId = $structureAssignments->id;
                         $billOfMaterialsMatrixSplice->ServiceConnectionId = $item['svcId'];
                         $billOfMaterialsMatrixSplice->MaterialsId = $spanData->SpliceNeaCode;

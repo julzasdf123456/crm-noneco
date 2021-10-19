@@ -189,15 +189,27 @@ class StructureAssignmentsController extends AppBaseController
                 ->get();
 
             foreach($materials as $item) {
-                $billsOfMaterialsIndex = new BillOfMaterialsMatrix;
-                $billsOfMaterialsIndex->id = IDGenerator::generateID();
-                $billsOfMaterialsIndex->ServiceConnectionId = $request['ServiceConnectionId'];
-                $billsOfMaterialsIndex->StructureAssigningId = $structure->id;
-                $billsOfMaterialsIndex->StructureId = $item->StructureId;
-                $billsOfMaterialsIndex->MaterialsId = $item->MaterialsId;
-                $billsOfMaterialsIndex->Amount = $item->Amount;
-                $billsOfMaterialsIndex->Quantity = (intval($item->Quantity) * intval($request['Quantity'])) . '';
-                $billsOfMaterialsIndex->save();
+                try {
+                    $billsOfMaterialsIndex = new BillOfMaterialsMatrix;
+                    $billsOfMaterialsIndex->id = IDGenerator::generateRandString(25);
+                    $billsOfMaterialsIndex->ServiceConnectionId = $request['ServiceConnectionId'];
+                    $billsOfMaterialsIndex->StructureAssigningId = $structure->id;
+                    $billsOfMaterialsIndex->StructureId = $item->StructureId;
+                    $billsOfMaterialsIndex->MaterialsId = $item->MaterialsId;
+                    $billsOfMaterialsIndex->Amount = $item->Amount;
+                    $billsOfMaterialsIndex->Quantity = (intval($item->Quantity) * intval($request['Quantity'])) . '';
+                    $billsOfMaterialsIndex->save();
+                } catch (Exception $e) {
+                    $billsOfMaterialsIndex = new BillOfMaterialsMatrix;
+                    $billsOfMaterialsIndex->id = IDGenerator::generateRandString(25);
+                    $billsOfMaterialsIndex->ServiceConnectionId = $request['ServiceConnectionId'];
+                    $billsOfMaterialsIndex->StructureAssigningId = $structure->id;
+                    $billsOfMaterialsIndex->StructureId = $item->StructureId;
+                    $billsOfMaterialsIndex->MaterialsId = $item->MaterialsId;
+                    $billsOfMaterialsIndex->Amount = $item->Amount;
+                    $billsOfMaterialsIndex->Quantity = (intval($item->Quantity) * intval($request['Quantity'])) . '';
+                    $billsOfMaterialsIndex->save();
+                }                
             }           
 
             return json_encode($structure);

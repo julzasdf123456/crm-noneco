@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class IDGenerator extends Model
 {
@@ -26,5 +27,9 @@ class IDGenerator extends Model
             }
         }
         return $returnValue;
+    }
+
+    public static function generateRandString($numbers = 30) {
+        return Str::random($numbers);
     }
 }

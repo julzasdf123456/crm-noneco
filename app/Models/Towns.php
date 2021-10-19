@@ -29,9 +29,12 @@ class Towns extends Model
 
     protected $dates = ['deleted_at'];
 
+    protected $primaryKey = 'id';
 
+    public $incrementing = false;
 
     public $fillable = [
+        'id',
         'Town',
         'District',
         'Station'
@@ -43,7 +46,7 @@ class Towns extends Model
      * @var array
      */
     protected $casts = [
-        'id' => 'integer',
+        'id' => 'string',
         'Town' => 'string',
         'District' => 'string',
         'Station' => 'string'

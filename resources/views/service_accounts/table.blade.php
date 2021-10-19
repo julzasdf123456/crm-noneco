@@ -1,61 +1,24 @@
-<div class="table-responsive">
-    <table class="table" id="serviceAccounts-table">
-        <thead>
-        <tr>
-            <th>Serviceaccountname</th>
-        <th>Town</th>
-        <th>Barangay</th>
-        <th>Purok</th>
-        <th>Accounttype</th>
-        <th>Accountstatus</th>
-        <th>Contactnumber</th>
-        <th>Emailaddress</th>
-        <th>Serviceconnectionid</th>
-        <th>Meterdetailsid</th>
-        <th>Transformerdetailsid</th>
-        <th>Polenumber</th>
-        <th>Areacode</th>
-        <th>Blockcode</th>
-        <th>Sequencecode</th>
-        <th>Feeder</th>
-        <th>Computetype</th>
-        <th>Organization</th>
-        <th>Organizationparentaccount</th>
-        <th>Gpsmeter</th>
-            <th colspan="3">Action</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach($serviceAccounts as $serviceAccounts)
+<table class="table table-hover">
+    <thead>
+        <th>Account Number</th>
+        <th>Service Account Name</th>
+        <th>Address</th>
+        <th></th>
+    </thead>
+    <tbody>
+        @foreach ($serviceAccounts as $item)
             <tr>
-                <td>{{ $serviceAccounts->ServiceAccountName }}</td>
-            <td>{{ $serviceAccounts->Town }}</td>
-            <td>{{ $serviceAccounts->Barangay }}</td>
-            <td>{{ $serviceAccounts->Purok }}</td>
-            <td>{{ $serviceAccounts->AccountType }}</td>
-            <td>{{ $serviceAccounts->AccountStatus }}</td>
-            <td>{{ $serviceAccounts->ContactNumber }}</td>
-            <td>{{ $serviceAccounts->EmailAddress }}</td>
-            <td>{{ $serviceAccounts->ServiceConnectionId }}</td>
-            <td>{{ $serviceAccounts->MeterDetailsId }}</td>
-            <td>{{ $serviceAccounts->TransformerDetailsId }}</td>
-            <td>{{ $serviceAccounts->PoleNumber }}</td>
-            <td>{{ $serviceAccounts->AreaCode }}</td>
-            <td>{{ $serviceAccounts->BlockCode }}</td>
-            <td>{{ $serviceAccounts->SequenceCode }}</td>
-            <td>{{ $serviceAccounts->Feeder }}</td>
-            <td>{{ $serviceAccounts->ComputeType }}</td>
-            <td>{{ $serviceAccounts->Organization }}</td>
-            <td>{{ $serviceAccounts->OrganizationParentAccount }}</td>
-            <td>{{ $serviceAccounts->GPSMeter }}</td>
+                <td>{{ $item->id }}</td>
+                <td>{{ $item->ServiceAccountName }}</td>                
+                <td>{{ $item->Barangay }}, {{ $item->Town }}</td>
                 <td width="120">
-                    {!! Form::open(['route' => ['serviceAccounts.destroy', $serviceAccounts->id], 'method' => 'delete']) !!}
+                    {!! Form::open(['route' => ['serviceAccounts.destroy', $item->id], 'method' => 'delete']) !!}
                     <div class='btn-group'>
-                        <a href="{{ route('serviceAccounts.show', [$serviceAccounts->id]) }}"
+                        <a href="{{ route('serviceAccounts.show', [$item->id]) }}"
                            class='btn btn-default btn-xs'>
                             <i class="far fa-eye"></i>
                         </a>
-                        <a href="{{ route('serviceAccounts.edit', [$serviceAccounts->id]) }}"
+                        <a href="{{ route('serviceAccounts.edit', [$item->id]) }}"
                            class='btn btn-default btn-xs'>
                             <i class="far fa-edit"></i>
                         </a>
@@ -64,7 +27,9 @@
                     {!! Form::close() !!}
                 </td>
             </tr>
+            
         @endforeach
-        </tbody>
-    </table>
-</div>
+    </tbody>
+</table>
+
+{{ $serviceAccounts->links() }}

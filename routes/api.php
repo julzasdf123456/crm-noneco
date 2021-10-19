@@ -30,6 +30,8 @@ Route::get('get-payment-queues/', [TelleringController::class, 'fetchApprovedSer
 // FOR ENERGIZATION ON CREW
 Route::get('get-for-energization-data', [ServiceConnectionsEnergization::class, 'getForEnergizationData']);
 Route::get('get-inspections-for-energization-data', [ServiceConnectionsEnergization::class, 'getInspectionsForEnergizationData']);
+Route::post('update-energized', [ServiceConnectionsEnergization::class, 'updateEnergized']);
+Route::post('create-timeframes', [ServiceConnectionsEnergization::class, 'createTimeFrames']);
 
 Route::get('get-towns', [OtherData::class, 'getTowns']);
 Route::get('get-barangays', [OtherData::class, 'getBarangays']);

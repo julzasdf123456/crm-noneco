@@ -163,6 +163,26 @@ use Illuminate\Support\Facades\Auth;
                 </ul>
             </li>
             @endcanany
+
+            @canany(['Super Admin', 'sc view'])
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <p>
+                        Others
+                        <i class="fas fa-angle-left right"></i>
+                    </p>
+                </a>
+                <ul class="nav nav-treeview" style="display: none;">
+                    <li class="nav-item">
+                        <a href="{{ route('serviceConnections.fleet-monitor') }}"
+                        class="nav-link {{ Request::is('serviceConnections.fleet-monitor*') ? 'active' : '' }}">
+                        <i class="fas fa-street-view nav-icon"></i><p>Fleet Monitoring</p>
+                        </a>
+                    </li>
+
+                </ul>
+            </li>
+            @endcanany
             
             @canany(['Super Admin', 'sc delete'])
             <li class="nav-item">
@@ -174,6 +194,28 @@ use Illuminate\Support\Facades\Auth;
             @endcanany
         </ul>
     </li>
+@endcanany
+
+{{-- TICKETS --}}
+@canany(['Super Admin'])
+    <li class="nav-item has-treeview">
+        <a href="#" class="nav-link">
+            <i class="fas fa-ambulance nav-icon"></i>
+            <p>
+                Tickets
+                <i class="fas fa-angle-left right"></i>
+            </p>
+        </a>
+        <ul class="nav nav-treeview">
+            <li class="nav-item">
+                <a href="{{ route('tickets.index') }}"
+                class="nav-link {{ Request::is('tickets*') ? 'active' : '' }}">
+                    <i class="fas fa-clipboard-list nav-icon"></i><p>All Tickets</p>
+                </a>
+            </li>
+        </ul>
+    </li>
+    
 @endcanany
 
 {{-- SERVICE ACCOUNTS --}}
@@ -333,6 +375,9 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
+
+
+
 
 
 

@@ -113,6 +113,23 @@
                         </div>
                     </div>
 
+                    <!-- Accounttype Field -->
+                    <div class="form-group">
+                        <label>Application Establishment Type</label>
+                        <div class="form-check">
+                            <div class="radio-group">
+                                @if ($accountTypes != null)
+                                    @foreach ($accountTypes as $item)
+                                    <div class="form-check">
+                                        <input id="{{ $item->id }}" class="form-check-input" type="radio" name="AccountType" value="{{ $item->id }}">
+                                        <label  for="{{ $item->id }}" class="form-check-label">{{ $item->AccountType }}</label>
+                                    </div>
+                                    @endforeach
+                                @endif
+                            </div> 
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="EnergizationDate">Date and Time of Inspection</label>
                         <input type="text" name="DateOfInspection" id="DateOfInspection" value="" class="form-control">
@@ -159,6 +176,7 @@
                 var inspectionDate = $("#DateOfInspection").val();
                 var notes = $('#Notes').val();
                 var options = $('input[name="Options"]:checked').val();
+                var accountType = $('input[name="AccountType"]:checked').val();
 
                 if (jQuery.isEmptyObject(inspectionDate) || jQuery.isEmptyObject(assessment)) {                    
                     $('#error-message').show();
@@ -173,6 +191,7 @@
                             ServiceConnectionId : svcId,
                             Assessment : assessment,
                             DateOfInspection : inspectionDate,
+                            AccountType : accountType,
                             Notes : notes,
                             Options : options,
                         },
