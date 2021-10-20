@@ -1,5 +1,7 @@
 
-
+@php
+    use App\Models\TicketsRepository;
+@endphp
 <div class="form-group col-sm-12">
     <div class="row">
         <div class="col-lg-3 col-md-5">
@@ -7,7 +9,7 @@
         </div>
 
         <div class="col-lg-9 col-md-7">
-            <div class="input-group">
+            <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-user-circle"></i></span>
                 </div>
@@ -25,7 +27,7 @@
         </div>
 
         <div class="col-lg-9 col-md-7">
-            <div class="input-group">
+            <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                 </div>
@@ -43,7 +45,7 @@
         </div>
 
         <div class="col-lg-9 col-md-7">
-            <div class="input-group">
+            <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                 </div>
@@ -61,7 +63,7 @@
         </div>
 
         <div class="col-lg-9 col-md-7">
-            <div class="input-group">
+            <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                 </div>
@@ -71,137 +73,216 @@
     </div> 
 </div>
 
+<!-- Contactnumber Field -->
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('ContactNumber', 'Contactnumber:') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                </div>
+                {!! Form::text('ContactNumber', null, ['class' => 'form-control','maxlength' => 100,'maxlength' => 100, 'placeholder' => 'Contact Number']) !!}
+            </div>
+        </div>
+    </div> 
+</div>
+
 <div class="divider"></div>
 <br>
 
 <!-- Ticket Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('Ticket', 'Ticket:') !!}
-    {!! Form::text('Ticket', null, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255]) !!}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('Ticket', 'Ticket Type:') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                </div>
+                <select class="custom-select select2"  name="Ticket">
+                    @foreach ($parentTickets as $items)
+                        <optgroup label="{{ $items->Name }}">
+                            @php
+                                $tickets = TicketsRepository::where('ParentTicket', $items->id)->orderBy('Name')->get();
+                            @endphp
+                            @foreach ($tickets as $item)
+                                <option value="{{ $item->id }}">{{ $item->Name }}</option>
+                            @endforeach
+                        </optgroup>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+    </div> 
 </div>
 
 <!-- Reason Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('Reason', 'Reason:') !!}
-    {!! Form::text('Reason', null, ['class' => 'form-control','maxlength' => 2000,'maxlength' => 2000]) !!}
-</div>
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('Reason', 'Reason:') !!}
+        </div>
 
-<!-- Contactnumber Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('ContactNumber', 'Contactnumber:') !!}
-    {!! Form::text('ContactNumber', null, ['class' => 'form-control','maxlength' => 100,'maxlength' => 100]) !!}
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-file-video"></i></span>
+                </div>
+                {!! Form::textarea('Reason', null, ['class' => 'form-control','maxlength' => 2000,'maxlength' => 2000, 'placeholder' => 'Reason', 'rows' => 2]) !!}
+            </div>
+        </div>
+    </div> 
 </div>
 
 <!-- Reportedby Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('ReportedBy', 'Reportedby:') !!}
-    {!! Form::text('ReportedBy', null, ['class' => 'form-control','maxlength' => 200,'maxlength' => 200]) !!}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('ReportedBy', 'Reportedby:') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-user-check"></i></span>
+                </div>
+                {!! Form::text('ReportedBy', null, ['class' => 'form-control','maxlength' => 200,'maxlength' => 200, 'placeholder' => 'Personnel who reported']) !!}
+            </div>
+        </div>
+    </div> 
 </div>
 
+<div class="divider"></div>
+<br>
+
 <!-- Ornumber Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('ORNumber', 'Ornumber:') !!}
-    {!! Form::text('ORNumber', null, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255]) !!}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('ORNumber', 'Ornumber:') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-money-check"></i></span>
+                </div>
+                {!! Form::text('ORNumber', null, ['class' => 'form-control','maxlength' => 200,'maxlength' => 200, 'placeholder' => 'OR Number']) !!}
+            </div>
+        </div>
+    </div> 
 </div>
 
 <!-- Ordate Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('ORDate', 'Ordate:') !!}
-    {!! Form::text('ORDate', null, ['class' => 'form-control','id'=>'ORDate']) !!}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('ORDate', 'Ordate:') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-money-check"></i></span>
+                </div>
+                {!! Form::text('ORDate', null, ['class' => 'form-control', 'placeholder' => 'OR Date']) !!}
+            </div>
+        </div>
+    </div> 
 </div>
 
 @push('page_scripts')
     <script type="text/javascript">
         $('#ORDate').datetimepicker({
-            format: 'YYYY-MM-DD HH:mm:ss',
+            format: 'YYYY-MM-DD',
             useCurrent: true,
             sideBySide: true
         })
     </script>
 @endpush
 
-<!-- Geolocation Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('GeoLocation', 'Geolocation:') !!}
-    {!! Form::text('GeoLocation', null, ['class' => 'form-control','maxlength' => 60,'maxlength' => 60]) !!}
-</div>
+<div class="divider"></div>
+<br>
+
+{{-- GEOLOCATION IS FETCHED FROM SERVICE ACCOUNTS --}}
 
 <!-- Neighbor1 Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('Neighbor1', 'Neighbor1:') !!}
-    {!! Form::text('Neighbor1', null, ['class' => 'form-control','maxlength' => 500,'maxlength' => 500]) !!}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('Neighbor1', 'Neighbor1:') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-street-view"></i></span>
+                </div>
+                {!! Form::text('Neighbor1', null, ['class' => 'form-control', 'placeholder' => 'Neighbor 1']) !!}
+            </div>
+        </div>
+    </div> 
 </div>
 
 <!-- Neighbor2 Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('Neighbor2', 'Neighbor2:') !!}
-    {!! Form::text('Neighbor2', null, ['class' => 'form-control','maxlength' => 500,'maxlength' => 500]) !!}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('Neighbor2', 'Neighbor2:') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-street-view"></i></span>
+                </div>
+                {!! Form::text('Neighbor2', null, ['class' => 'form-control', 'placeholder' => 'Neighbor 2']) !!}
+            </div>
+        </div>
+    </div> 
+</div>
+
+<!-- Crewassigned Field -->
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('CrewAssigned', 'Crew Assigned:') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-hard-hat"></i></span>
+                </div>
+                {!! Form::select('CrewAssigned', $crew, null, ['class' => 'form-control',]) !!}
+            </div>
+        </div>
+    </div>    
 </div>
 
 <!-- Notes Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('Notes', 'Notes:') !!}
-    {!! Form::text('Notes', null, ['class' => 'form-control','maxlength' => 2000,'maxlength' => 2000]) !!}
-</div>
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('Notes', 'Notes:') !!}
+        </div>
 
-<!-- Status Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('Status', 'Status:') !!}
-    {!! Form::text('Status', null, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255]) !!}
-</div>
-
-<!-- Datetimedownloaded Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('DateTimeDownloaded', 'Datetimedownloaded:') !!}
-    {!! Form::text('DateTimeDownloaded', null, ['class' => 'form-control','id'=>'DateTimeDownloaded']) !!}
-</div>
-
-@push('page_scripts')
-    <script type="text/javascript">
-        $('#DateTimeDownloaded').datetimepicker({
-            format: 'YYYY-MM-DD HH:mm:ss',
-            useCurrent: true,
-            sideBySide: true
-        })
-    </script>
-@endpush
-
-<!-- Datetimelinemanarrived Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('DateTimeLinemanArrived', 'Datetimelinemanarrived:') !!}
-    {!! Form::text('DateTimeLinemanArrived', null, ['class' => 'form-control','id'=>'DateTimeLinemanArrived']) !!}
-</div>
-
-@push('page_scripts')
-    <script type="text/javascript">
-        $('#DateTimeLinemanArrived').datetimepicker({
-            format: 'YYYY-MM-DD HH:mm:ss',
-            useCurrent: true,
-            sideBySide: true
-        })
-    </script>
-@endpush
-
-<!-- Datetimelinemanexecuted Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('DateTimeLinemanExecuted', 'Datetimelinemanexecuted:') !!}
-    {!! Form::text('DateTimeLinemanExecuted', null, ['class' => 'form-control','id'=>'DateTimeLinemanExecuted']) !!}
-</div>
-
-@push('page_scripts')
-    <script type="text/javascript">
-        $('#DateTimeLinemanExecuted').datetimepicker({
-            format: 'YYYY-MM-DD HH:mm:ss',
-            useCurrent: true,
-            sideBySide: true
-        })
-    </script>
-@endpush
-
-<!-- Crewassigned Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('CrewAssigned', 'Crewassigned:') !!}
-    {!! Form::text('CrewAssigned', null, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255]) !!}
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-file-video"></i></span>
+                </div>
+                {!! Form::textarea('Notes', null, ['class' => 'form-control','maxlength' => 2000,'maxlength' => 2000, 'placeholder' => 'Notes/Remarks', 'rows' => 2]) !!}
+            </div>
+        </div>
+    </div> 
 </div>
 
 <p id="Def_Brgy" style="display: none;">{{ $serviceAccount==null ? '' : $serviceAccount->BarangayId }}</p>

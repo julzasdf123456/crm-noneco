@@ -9,6 +9,7 @@ use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Towns;
+use App\Models\ServiceConnectionCrew;
 use App\Models\Barangays;
 use Flash;
 use Response;
@@ -220,9 +221,34 @@ class TicketsController extends AppBaseController
 
         $towns = Towns::orderBy('Town')->pluck('Town', 'id');
 
+        // TICKETS MATRIX
+        $parentTickets = DB::table('CRM_TicketsRepository')->whereNull('ParentTicket')->orderBy('Name   ')->get();
+
+        $crew = ServiceConnectionCrew::orderBy('StationName')->pluck('StationName', 'id');
+
+        $history = DB::table('CRM_Tickets')
+                        ->leftJoin('CRM_TicketsRepository', 'CRM_Tickets.Ticket', '=', 'CRM_TicketsRepository.id')
+                        ->leftJoin('CRM_Towns', 'CRM_Tickets.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'CRM_Tickets.Barangay', '=', 'CRM_Barangays.id')
+                        ->where('CRM_Tickets.AccountNumber', $id)
+                        ->select('CRM_Tickets.ConsumerName', 
+                            'CRM_Tickets.id',
+                            'CRM_Towns.Town',
+                            'CRM_Barangays.Barangay',
+                            'CRM_TicketsRepository.Name',
+                            'CRM_TicketsRepository.ParentTicket',
+                            'CRM_Tickets.created_at',
+                            'CRM_Tickets.Reason',
+                            'CRM_Tickets.Status',)
+                        ->orderByDesc('CRM_Tickets.created_at')
+                        ->get();
+
         return view('tickets.create',   [
             'serviceAccount' => $serviceAccount,
             'towns' => $towns,
+            'parentTickets' => $parentTickets,
+            'crew' => $crew,
+            'history' => $history,
         ]);
     }
 }

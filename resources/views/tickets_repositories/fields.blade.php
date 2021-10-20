@@ -12,24 +12,20 @@
 
 <!-- Parentticket Field -->
 <div class="form-group col-sm-6">
-    {!! Form::label('ParentTicket', 'Parentticket:') !!}
-    {!! Form::text('ParentTicket', null, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255]) !!}
+    {!! Form::label('ParentTicket', 'Parent Ticket:') !!}
+    {!! Form::select('ParentTicket', $parentReps, $ticketsRepository->ParentTicket, ['class' => 'form-control', 'placeholder' => 'This is a parent ticket']) !!}
 </div>
 
 <!-- Type Field -->
 <div class="form-group col-sm-6">
     {!! Form::label('Type', 'Type:') !!}
-    {!! Form::text('Type', null, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255]) !!}
+    {!! Form::select('ParentTicket', ['Request' => 'Request', 'Complain' => 'Complain'], $ticketsRepository->Type, ['class' => 'form-control', 'placeholder' => 'This is a parent ticket']) !!}
 </div>
 
 <!-- Kpscategory Field -->
 <div class="form-group col-sm-6">
-    {!! Form::label('KPSCategory', 'Kpscategory:') !!}
-    {!! Form::text('KPSCategory', null, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255]) !!}
+    {!! Form::label('KPSCategory', 'KPS Category:') !!}
+    {!! Form::number('KPSCategory', null, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255]) !!}
 </div>
 
-<!-- Kpsissue Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('KPSIssue', 'Kpsissue:') !!}
-    {!! Form::text('KPSIssue', null, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255]) !!}
-</div>
+<input type="hidden" value="2021" name="KPSIssue">

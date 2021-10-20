@@ -7,6 +7,8 @@ use App\Http\Requests\UpdateTicketsRepositoryRequest;
 use App\Repositories\TicketsRepositoryRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
+use App\Models\TicketsRepository;
+use Illuminate\Support\Facades\DB;
 use Flash;
 use Response;
 
@@ -30,7 +32,7 @@ class TicketsRepositoryController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $ticketsRepositories = $this->ticketsRepositoryRepository->all();
+        $ticketsRepositories = DB::table('CRM_TicketsRepository')->whereNull('ParentTicket')->get();
 
         return view('tickets_repositories.index')
             ->with('ticketsRepositories', $ticketsRepositories);
@@ -95,13 +97,15 @@ class TicketsRepositoryController extends AppBaseController
     {
         $ticketsRepository = $this->ticketsRepositoryRepository->find($id);
 
+        $parentReps = TicketsRepository::whereNull('ParentTicket')->pluck('Name', 'id');
+
         if (empty($ticketsRepository)) {
             Flash::error('Tickets Repository not found');
 
             return redirect(route('ticketsRepositories.index'));
         }
 
-        return view('tickets_repositories.edit')->with('ticketsRepository', $ticketsRepository);
+        return view('tickets_repositories.edit', ['ticketsRepository' => $ticketsRepository, 'parentReps' => $parentReps]);
     }
 
     /**

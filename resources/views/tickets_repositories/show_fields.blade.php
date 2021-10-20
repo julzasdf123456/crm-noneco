@@ -28,9 +28,3 @@
     <p>{{ $ticketsRepository->KPSCategory }}</p>
 </div>
 
-<!-- Kpsissue Field -->
-<div class="col-sm-12">
-    {!! Form::label('KPSIssue', 'Kpsissue:') !!}
-    <p>{{ $ticketsRepository->KPSIssue }}</p>
-</div>
-

@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>Tickets Repositories</h1>
+                    <h4>Ticket Types</h4>
                 </div>
                 <div class="col-sm-6">
                     <a class="btn btn-primary float-right"
@@ -23,18 +23,7 @@
 
         <div class="clearfix"></div>
 
-        <div class="card">
-            <div class="card-body p-0">
-                @include('tickets_repositories.table')
-
-                <div class="card-footer clearfix">
-                    <div class="float-right">
-                        
-                    </div>
-                </div>
-            </div>
-
-        </div>
+        @include('tickets_repositories.table')
     </div>
 
 @endsection
