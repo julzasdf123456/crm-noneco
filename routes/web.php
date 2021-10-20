@@ -236,4 +236,10 @@ Route::get('/member_consumer_images/get-image/{id}', [App\Http\Controllers\Membe
 Route::resource('memberConsumerImages', App\Http\Controllers\MemberConsumerImagesController::class);
 
 
+Route::get('/tickets/create-select', [App\Http\Controllers\TicketsController::class, 'createSelect'])->name('tickets.create-select');
+Route::get('/tickets/get-create-ajax', [App\Http\Controllers\TicketsController::class, 'getCreateAjax'])->name('tickets.get-create-ajax');
+Route::get('/tickets/create-new/{id}', [App\Http\Controllers\TicketsController::class, 'createNew'])->name('tickets.create-new');
 Route::resource('tickets', App\Http\Controllers\TicketsController::class);
+
+
+Route::resource('ticketsRepositories', App\Http\Controllers\TicketsRepositoryController::class);

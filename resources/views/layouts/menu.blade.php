@@ -209,8 +209,23 @@ use Illuminate\Support\Facades\Auth;
         <ul class="nav nav-treeview">
             <li class="nav-item">
                 <a href="{{ route('tickets.index') }}"
-                class="nav-link {{ Request::is('tickets*') ? 'active' : '' }}">
+                class="nav-link {{ Request::is('tickets.index*') ? 'active' : '' }}">
                     <i class="fas fa-clipboard-list nav-icon"></i><p>All Tickets</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('tickets.create-select') }}"
+                class="nav-link {{ Request::is('tickets.create-select*') ? 'active' : '' }}">
+                    <i class="fas fa-plus-circle nav-icon"></i><p>New Ticket</p>
+                </a>
+            </li>
+            <li class="nav-header">                
+                Settings and Others 
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('ticketsRepositories.index') }}"
+                   class="nav-link {{ Request::is('ticketsRepositories*') ? 'active' : '' }}">
+                   <i class="fas fa-check-circle nav-icon"></i><p>Ticket Types</p>
                 </a>
             </li>
         </ul>
@@ -375,8 +390,6 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
-
-
 
 
 

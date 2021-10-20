@@ -7,6 +7,9 @@ use App\Http\Requests\UpdateTicketsRequest;
 use App\Repositories\TicketsRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\Towns;
+use App\Models\Barangays;
 use Flash;
 use Response;
 
@@ -17,6 +20,7 @@ class TicketsController extends AppBaseController
 
     public function __construct(TicketsRepository $ticketsRepo)
     {
+        $this->middleware('auth');
         $this->ticketsRepository = $ticketsRepo;
     }
 
@@ -152,5 +156,73 @@ class TicketsController extends AppBaseController
         Flash::success('Tickets deleted successfully.');
 
         return redirect(route('tickets.index'));
+    }
+
+    public function createSelect() {
+        return view('/tickets/create_select');
+    }
+
+    public function getCreateAjax(Request $request) {
+        if ($request->ajax()) {
+            if ($request['params'] == null) {
+                $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                            ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                            ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                            ->take(25)
+                            ->get();
+            } else {
+                $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                            ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                            ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                            ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                            ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                            ->get();
+            }
+
+            $output = "";
+
+            foreach($serviceAccounts as $item) {
+                $output .= '<tr>' .
+                        '<td>' . $item->id . '</td>' .
+                        '<td>' . $item->ServiceAccountName . '</td>' .
+                        '<td>' . $item->Barangay . ', ' . $item->Town . '</td>' .
+                        '<td>' . 
+                            '<a href="' . route("tickets.create-new", [$item->id]) . '"><i class="fas fa-arrow-alt-circle-right"></i></a>' .
+                        '</td>' .
+                    '</tr>';
+            }
+            
+            return response()->json($output, 200);
+        }
+    }
+
+    public function createNew($id) { // id is account number
+        if ($id != null) {
+            $serviceAccount = DB::table('Billing_ServiceAccounts')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->select('Billing_ServiceAccounts.ServiceAccountName', 
+                    'Billing_ServiceAccounts.id', 
+                    'CRM_Towns.Town', 
+                    'CRM_Barangays.Barangay', 
+                    'Billing_ServiceAccounts.Town as TownId',
+                    'Billing_ServiceAccounts.Barangay as BarangayId',
+                    'Billing_ServiceAccounts.Purok')
+                ->where('Billing_ServiceAccounts.id', $id)
+                ->first();
+        } else {
+            $serviceAccount = null;
+        }
+
+        $towns = Towns::orderBy('Town')->pluck('Town', 'id');
+
+        return view('tickets.create',   [
+            'serviceAccount' => $serviceAccount,
+            'towns' => $towns,
+        ]);
     }
 }

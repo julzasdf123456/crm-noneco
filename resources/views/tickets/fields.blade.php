@@ -1,32 +1,78 @@
-<!-- Accountnumber Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('AccountNumber', 'Accountnumber:') !!}
-    {!! Form::text('AccountNumber', null, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255]) !!}
-</div>
 
-<!-- Consumername Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('ConsumerName', 'Consumername:') !!}
-    {!! Form::text('ConsumerName', null, ['class' => 'form-control','maxlength' => 500,'maxlength' => 500]) !!}
+
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('ConsumerName', 'Consumer name:') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-user-circle"></i></span>
+                </div>
+                {!! Form::text('ConsumerName', $serviceAccount==null ? '' : $serviceAccount->ServiceAccountName, ['class' => 'form-control','maxlength' => 500,'maxlength' => 500, 'placeholder' => 'Consumer Name']) !!}
+            </div>
+        </div>  
+    </div> 
 </div>
 
 <!-- Town Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('Town', 'Town:') !!}
-    {!! Form::text('Town', null, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255]) !!}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('Town', 'Town') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                </div>
+                {!! Form::select('Town', $towns, $serviceAccount==null ? '' : $serviceAccount->TownId, ['class' => 'form-control']) !!}
+            </div>
+        </div>
+    </div>    
 </div>
 
 <!-- Barangay Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('Barangay', 'Barangay:') !!}
-    {!! Form::text('Barangay', null, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255]) !!}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('Barangay', 'Barangay') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                </div>
+                {!! Form::select('Barangay', [], null, ['class' => 'form-control',]) !!}
+            </div>
+        </div>
+    </div>    
 </div>
 
 <!-- Sitio Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('Sitio', 'Sitio:') !!}
-    {!! Form::text('Sitio', null, ['class' => 'form-control','maxlength' => 800,'maxlength' => 800]) !!}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('Purok', 'Sitio') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                </div>
+                {!! Form::text('Purok', $serviceAccount==null ? '' : $serviceAccount->Purok, ['class' => 'form-control','maxlength' => 1000,'maxlength' => 1000, 'placeholder' => 'Sitio']) !!}
+            </div>
+        </div>
+    </div> 
 </div>
+
+<div class="divider"></div>
+<br>
 
 <!-- Ticket Field -->
 <div class="form-group col-sm-6">
@@ -152,14 +198,10 @@
     </script>
 @endpush
 
-<!-- Userid Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('UserId', 'Userid:') !!}
-    {!! Form::text('UserId', null, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255]) !!}
-</div>
-
 <!-- Crewassigned Field -->
 <div class="form-group col-sm-6">
     {!! Form::label('CrewAssigned', 'Crewassigned:') !!}
     {!! Form::text('CrewAssigned', null, ['class' => 'form-control','maxlength' => 255,'maxlength' => 255]) !!}
 </div>
+
+<p id="Def_Brgy" style="display: none;">{{ $serviceAccount==null ? '' : $serviceAccount->BarangayId }}</p>
