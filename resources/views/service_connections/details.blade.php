@@ -1,3 +1,6 @@
+@php
+    use App\Models\ServiceConnectionChecklists;
+@endphp
 <div class="row">
     {{-- CHECKLISTS --}}
     <div class="col-lg-6 col-md-6">
@@ -5,7 +8,8 @@
             <div class="card-header border-0">
                 <h3 class="card-title">Requirements Checklist</h3>
                 <div class="card-tools">
-                    <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>           
+                    <a class="btn btn-tool" href="{{ route('serviceConnections.assess-checklists', [$serviceConnections->id]) }}"><i class="fas fa-pen"></i></a>
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>           
                 </div>
             </div>
 
@@ -40,18 +44,27 @@
                                         <span class="text">{{ $item->Checklist }}</span>
 
                                         <div class="tools">
-                                            <a href="{{ route('serviceConnections.update-checklists', [$serviceConnections->id]) }}"><i class="fas fa-edit"></i></a>
+                                            <a href="{{ route('serviceConnections.assess-checklists', [$serviceConnections->id]) }}"><i class="fas fa-edit"></i></a>
                                         </div>
                                     </li>
                                 @else
                                     {{-- IF COMPLIED --}}
+                                    @php
+                                        // FETCH CHECKLIST RECORD IF THERE'S ALREADY AN EXISTING RECORD
+                                        $checkListRecord = ServiceConnectionChecklists::where('ServiceConnectionId', $serviceConnections->id)
+                                            ->where('ChecklistId', $item->id)
+                                            ->first();
+                                    @endphp
                                     <li class="">
                                         <span class="handle ui-sortable-handle">
                                         </span>
                                         <div class="icheck-primary d-inline ml-2">
                                             <i class="fas fa-check text-success"></i>
                                         </div>
-                                        <span class="text">{{ $item->Checklist }}</span>
+                                        <span class="text">
+                                            {{ $item->Checklist }}
+                                            (<a href="{{ route('serviceConnectionChecklists.download-file', [$serviceConnections->id, $item->Checklist, $checkListRecord->Notes]) }}" target="_blank">{{ $checkListRecord->Notes }}</a>)
+                                        </span>
                                     </li>
                                 @endif
                             @endforeach

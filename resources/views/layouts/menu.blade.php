@@ -164,6 +164,69 @@ use Illuminate\Support\Facades\Auth;
             </li>
             @endcanany
 
+            {{-- MATERIALS AND STRUCTURES --}}
+            @canany(['Super Admin'])
+            <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-toolbox nav-icon"></i>
+                    <p>
+                        Mat. & Structures
+                        <i class="fas fa-angle-left right"></i>
+                    </p>
+                </a>
+                <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                        <a href="{{ route('structures.index') }}"
+                        class="nav-link {{ Request::is('structures*') ? 'active' : '' }}">
+                        <i class="fas fa-draw-polygon nav-icon"></i><p>Structures</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('materialAssets.index') }}"
+                        class="nav-link {{ Request::is('materialAssets*') ? 'active' : '' }}">
+                        <i class="fas fa-plug nav-icon"></i><p>Material Assets</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('transformerIndices.index') }}"
+                        class="nav-link {{ Request::is('transformerIndices*') ? 'active' : '' }}">
+                        <i class="fas fa-car-battery nav-icon"></i><p>Transformer Index</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('poleIndices.index') }}"
+                        class="nav-link {{ Request::is('poleIndices*') ? 'active' : '' }}">
+                        <i class="fas fa-cross nav-icon"></i><p>Pole Index</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('spanningIndices.index') }}"
+                        class="nav-link {{ Request::is('spanningIndices*') ? 'active' : '' }}">
+                        <i class="fas fa-network-wired nav-icon"></i><p>Spanning Index</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('specialEquipmentMaterials.index') }}"
+                        class="nav-link {{ Request::is('specialEquipmentMaterials*') ? 'active' : '' }}">
+                            <i class="fas fa-tachometer-alt nav-icon"></i><p>Special Eq. Materials</p>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a href="{{ route('preDefinedMaterials.index') }}"
+                        class="nav-link {{ Request::is('preDefinedMaterials*') ? 'active' : '' }}">
+                            <i class="fas fa-plug nav-icon"></i><p>Pre-Defined Materials</p>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            @endcanany
+
             @canany(['Super Admin', 'sc view'])
             <li class="nav-item">
                 <a href="#" class="nav-link">
@@ -269,62 +332,6 @@ use Illuminate\Support\Facades\Auth;
     </li>
 @endcanany
 
-{{-- MATERIALS AND STRUCTURES --}}
-@canany(['Super Admin'])
-    <li class="nav-item has-treeview">
-        <a href="#" class="nav-link">
-            <i class="fas fa-toolbox nav-icon"></i>
-            <p>
-                Materials and Structures
-                <i class="fas fa-angle-left right"></i>
-            </p>
-        </a>
-        <ul class="nav nav-treeview">
-            <li class="nav-item">
-                <a href="{{ route('structures.index') }}"
-                   class="nav-link {{ Request::is('structures*') ? 'active' : '' }}">
-                   <i class="fas fa-draw-polygon nav-icon"></i><p>Structures</p>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a href="{{ route('materialAssets.index') }}"
-                   class="nav-link {{ Request::is('materialAssets*') ? 'active' : '' }}">
-                   <i class="fas fa-plug nav-icon"></i><p>Material Assets</p>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a href="{{ route('transformerIndices.index') }}"
-                   class="nav-link {{ Request::is('transformerIndices*') ? 'active' : '' }}">
-                   <i class="fas fa-car-battery nav-icon"></i><p>Transformer Index</p>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a href="{{ route('poleIndices.index') }}"
-                   class="nav-link {{ Request::is('poleIndices*') ? 'active' : '' }}">
-                   <i class="fas fa-cross nav-icon"></i><p>Pole Index</p>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a href="{{ route('spanningIndices.index') }}"
-                   class="nav-link {{ Request::is('spanningIndices*') ? 'active' : '' }}">
-                   <i class="fas fa-network-wired nav-icon"></i><p>Spanning Index</p>
-                </a>
-            </li>
-            
-            <li class="nav-item">
-                <a href="{{ route('preDefinedMaterials.index') }}"
-                class="nav-link {{ Request::is('preDefinedMaterials*') ? 'active' : '' }}">
-                    <i class="fas fa-plug nav-icon"></i><p>Pre-Defined Materials</p>
-                </a>
-            </li>
-        </ul>
-    </li>
-@endcanany
-
 <!-- EXTRAS MENU -->
 @canany(['Super Admin', 'create membership', 'sc create'])
     <li class="nav-item has-treeview">
@@ -396,4 +403,5 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
+
 

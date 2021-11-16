@@ -25,6 +25,7 @@
                         <li class="breadcrumb-item"><a class="text-muted" href="{{ route('serviceConnections.bom-assigning', [$serviceConnection->id]) }}" class="text-muted">Bill of Materials</a></li>
                         <li class="breadcrumb-item"><a class="text-muted" href="{{ route('serviceConnections.transformer-assigning', [$serviceConnection->id]) }}" class="text-muted">Transformer</a></li>
                         <li class="breadcrumb-item"><a class="btn btn-success btn-sm" href="{{ route('serviceConnections.pole-assigning', [$serviceConnection->id]) }}" class="text-muted">Pole</a></li>
+                        <li class="breadcrumb-item"><a class="text-muted" href="{{ route('serviceConnections.metering-equipment-assigning', [$serviceConnection->id]) }}" class="text-muted">Special Equipment</a></li>
                     </ol>
                 </div>
             </div>
@@ -181,8 +182,10 @@
                 </div>
 
                 <div class="card-footer">
-                    <a href="{{ route('serviceConnections.quotation-summary', [$serviceConnection->id]) }}" class="btn btn-primary">Next <i class="fas fa-arrow-alt-circle-right" style="margin-left: 5px;"></i></a>
-                    <i class="text-muted" style="margin-left: 15px;">Finalize Quotation and BoM</i>
+                    {{-- <a href="{{ route('serviceConnections.quotation-summary', [$serviceConnection->id]) }}" class="btn btn-primary">Next <i class="fas fa-arrow-alt-circle-right" style="margin-left: 5px;"></i></a> --}}
+                    <a href="{{ route('serviceConnections.metering-equipment-assigning', [$serviceConnection->id]) }}" class="btn btn-primary">Next <i class="fas fa-arrow-alt-circle-right" style="margin-left: 5px;"></i></a>
+                    {{-- <i class="text-muted" style="margin-left: 15px;">Finalize Quotation and BoM</i> --}}
+                    <i class="text-muted" style="margin-left: 15px;">Special Equipment Assigning</i>
                 </div>
             </div>
         </div>

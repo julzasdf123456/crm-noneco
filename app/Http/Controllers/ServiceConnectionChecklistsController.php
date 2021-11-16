@@ -12,6 +12,7 @@ use App\Models\ServiceConnectionChecklistsRep;
 use App\Models\IDGenerator;
 use App\Models\ServiceConnectionTimeframes;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Flash;
 use Response;
 
@@ -147,6 +148,8 @@ class ServiceConnectionChecklistsController extends AppBaseController
     {
         $serviceConnectionChecklists = $this->serviceConnectionChecklistsRepository->find($id);
 
+        $checklistsRep = ServiceConnectionChecklistsRep::where('id', $serviceConnectionChecklists->ChecklistId)->first();
+
         if (empty($serviceConnectionChecklists)) {
             Flash::error('Service Connection Checklists not found');
 
@@ -155,9 +158,14 @@ class ServiceConnectionChecklistsController extends AppBaseController
 
         $this->serviceConnectionChecklistsRepository->delete($id);
 
+        if ($checklistsRep != null) {
+            // DELETE FILE
+            Storage::deleteDirectory('public/documents/' . $serviceConnectionChecklists->ServiceConnectionId . '/' . $checklistsRep->Checklist);
+        }
+
         Flash::success('Service Connection Checklists deleted successfully.');
 
-        return redirect(route('serviceConnectionChecklists.index'));
+        return redirect(route('serviceConnections.assess-checklists', [$serviceConnectionChecklists->ServiceConnectionId]));
     }
 
     public function complyChecklists($id, Request $request) {
@@ -206,5 +214,49 @@ class ServiceConnectionChecklistsController extends AppBaseController
 
             return redirect(route('serviceConnections.show', [$id]));
         }
+    }
+
+    public function saveFileAndComplyChecklist(Request $request) {
+        if ($request->ajax()) {
+
+            if ($files = $request->file('file')) {
+            
+                $path = $request->file->storeAs('public/documents/' . $request['scId'] . '/' . $request['folder'], $request->file->getClientOriginalName() . '.' . $request->file->extension());
+        
+                $scChecklists = new ServiceConnectionChecklists;
+                $scChecklists->id = IDGenerator::generateID();
+                $scChecklists->ServiceConnectionId = $request['scId'];
+                $scChecklists->ChecklistId = $request['checklistId'];
+                $scChecklists->Notes = $request->file->getClientOriginalName() . '.' . $request->file->extension();
+
+                $scChecklists->save();
+                    
+                return response()->json([
+                    "success" => true,
+                    "file" => $path
+                ]);
+        
+            } else {
+                return response()->json([
+                    "success" => false,
+                    "file" => ''
+              ]);
+            }
+        }
+    }
+
+    public function assessChecklistCompletion($scId) {
+        $checklists = ServiceConnectionChecklists::where('ServiceConnectionId', $scId)->get();
+        $checklistsRep = ServiceConnectionChecklistsRep::all();
+
+        if (count($checklists) == count($checklistsRep)) {
+            return redirect(route('serviceConnectionInspections.create-step-two', [$scId]));
+        } else {
+            return redirect(route('serviceConnections.show', [$scId]));
+        }
+    }
+
+    public function downloadFile($scId, $folder, $file) {
+        return response()->file(public_path('storage\\documents\\' . $scId . '\\' . $folder . '\\' . $file));
     }
 }

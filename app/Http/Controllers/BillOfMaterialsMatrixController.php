@@ -600,4 +600,42 @@ class BillOfMaterialsMatrixController extends AppBaseController
             $billOfMaterialsMatrix->save();
         }
     }
+
+    public function insertSpecialEquipment(Request $request) {
+        if ($request->ajax()) {
+            $materials = DB::table('CRM_SpecialEquipmentMaterials')
+                ->leftJoin('CRM_MaterialAssets', 'CRM_SpecialEquipmentMaterials.NEACode', '=', 'CRM_MaterialAssets.id')
+                ->where('CRM_SpecialEquipmentMaterials.NEACode', $request['MaterialsId'])
+                ->select('*')
+                ->first();
+
+            $pole = new BillOfMaterialsMatrix;
+            $pole->id = IDGenerator::generateID();
+            $pole->ServiceConnectionId = $request['ServiceConnectionId'];
+            $pole->MaterialsId = $request['MaterialsId'];
+            $pole->Quantity = $request['Quantity'];
+            $pole->Amount = $materials->Amount;
+            $pole->StructureType = 'SPEC_EQUIP'; // FOR POLES
+            $pole->save();
+
+            return json_encode(['response' => 'ok']);
+        }
+    }
+
+    public function fetchEquipments(Request $request) {
+        if ($request->ajax()) {
+            $equipmentAssigned = DB::table('CRM_BillOfMaterialsMatrix')
+                ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')  
+                ->select('CRM_BillOfMaterialsMatrix.id',
+                        'CRM_MaterialAssets.Description',
+                        'CRM_MaterialAssets.Amount',
+                        'CRM_BillOfMaterialsMatrix.Quantity')
+                ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $request['ServiceConnectionId'])
+                ->where('CRM_BillOfMaterialsMatrix.StructureType', 'SPEC_EQUIP')
+                ->orderBy('CRM_MaterialAssets.Description')
+                ->get(); 
+
+            return json_encode($equipmentAssigned);
+        }
+    }
 }

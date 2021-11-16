@@ -94,6 +94,11 @@ class ServiceConnectionsController extends AppBaseController
         $timeFrame->UserId = Auth::id();
         $timeFrame->Status = 'Received';
         $timeFrame->save();
+        
+        // CREATE FOLDER FIRST
+        if (!file_exists('/CRM_FILES//' . $input['id'])) {
+            mkdir('/CRM_FILES//' . $input['id'], 0777, true);
+        }
 
         Flash::success('Service Connections saved successfully.');
 
@@ -1356,6 +1361,46 @@ class ServiceConnectionsController extends AppBaseController
             'serviceConnection' => $serviceConnection,
             'billOfMaterials' => $billOfMaterials,
             'spanningData' => $spanningData
+        ]);
+    }
+
+    public function meteringEquipmentAssigning($scId) {
+        $serviceConnection = DB::table('CRM_ServiceConnections')
+            ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+            ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->select('CRM_ServiceConnections.ServiceAccountName',
+                    'CRM_ServiceConnections.id',
+                    'CRM_ServiceConnections.Sitio',
+                    'CRM_ServiceConnections.ContactNumber',
+                    'CRM_ServiceConnections.BuildingType',
+                    'CRM_ServiceConnections.DateOfApplication',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->where('CRM_ServiceConnections.id', $scId)
+            ->first();
+
+        $specialEquipmentIndex = DB::table('CRM_SpecialEquipmentMaterials')
+            ->leftJoin('CRM_MaterialAssets', 'CRM_SpecialEquipmentMaterials.NEACode', '=', 'CRM_MaterialAssets.id')
+            ->select('CRM_MaterialAssets.*',
+                    'CRM_SpecialEquipmentMaterials.id as IndexId')
+            ->get();
+
+        $equipmentAssigned = DB::table('CRM_BillOfMaterialsMatrix')
+            ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')  
+            ->select('CRM_BillOfMaterialsMatrix.id',
+                    'CRM_MaterialAssets.Description',
+                    'CRM_MaterialAssets.Amount',
+                    'CRM_BillOfMaterialsMatrix.Quantity')
+            ->where('CRM_BillOfMaterialsMatrix.ServiceConnectionId', $scId)
+            ->where('CRM_BillOfMaterialsMatrix.StructureType', 'SPEC_EQUIP')
+            ->orderBy('CRM_MaterialAssets.Description')
+            ->get(); 
+
+        return view('/service_connections/metering_equipment_assigning', [
+            'serviceConnection' => $serviceConnection,
+            'specialEquipmentIndex' => $specialEquipmentIndex,
+            'equipmentAssigned' => $equipmentAssigned,
         ]);
     }
 
