@@ -44,6 +44,7 @@ class CreateTableCRMServiceConnections extends Migration
             $table->string('LoadCategory', 50)->nullable();
             $table->string('TemporaryDurationInMonths', 50)->nullable();
             $table->string('LongSpan', 50)->nullable(); // YES - if SDW is more than 70 meters, NO - if otherwise 
+            $table->string('Office')->nullable();
             $table->timestamps();
         });
     }

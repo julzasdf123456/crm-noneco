@@ -239,7 +239,18 @@ Route::resource('memberConsumerImages', App\Http\Controllers\MemberConsumerImage
 Route::get('/tickets/create-select', [App\Http\Controllers\TicketsController::class, 'createSelect'])->name('tickets.create-select');
 Route::get('/tickets/get-create-ajax', [App\Http\Controllers\TicketsController::class, 'getCreateAjax'])->name('tickets.get-create-ajax');
 Route::get('/tickets/create-new/{id}', [App\Http\Controllers\TicketsController::class, 'createNew'])->name('tickets.create-new');
+Route::get('/tickets/fetch-tickets', [App\Http\Controllers\TicketsController::class, 'fetchTickets'])->name('tickets.fetch-tickets');
+Route::get('/tickets/print-ticket/{id}', [App\Http\Controllers\TicketsController::class, 'printTicket'])->name('tickets.print-ticket');
+Route::get('/tickets/trash', [App\Http\Controllers\TicketsController::class, 'trash'])->name('tickets.trash');
+Route::get('/tickets/restore-ticket/{id}', [App\Http\Controllers\TicketsController::class, 'restoreTicket'])->name('tickets.restore-ticket');
+Route::post('/tickets/update-date-filed', [App\Http\Controllers\TicketsController::class, 'updateDateFiled'])->name('tickets.update-date-filed');
+Route::post('/tickets/update-date-downloaded', [App\Http\Controllers\TicketsController::class, 'updateDateDownloaded'])->name('tickets.update-date-downloaded');
+Route::post('/tickets/update-date-arrival', [App\Http\Controllers\TicketsController::class, 'updateDateArrival'])->name('tickets.update-date-arrival');
+Route::post('/tickets/update-execution', [App\Http\Controllers\TicketsController::class, 'updateExecution'])->name('tickets.update-execution');
 Route::resource('tickets', App\Http\Controllers\TicketsController::class);
 
 
 Route::resource('ticketsRepositories', App\Http\Controllers\TicketsRepositoryController::class);
+
+
+Route::resource('ticketLogs', App\Http\Controllers\TicketLogsController::class);

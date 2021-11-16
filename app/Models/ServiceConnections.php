@@ -48,8 +48,6 @@ class ServiceConnections extends Model
 
     protected $dates = ['deleted_at'];
 
-
-
     public $fillable = [
         'id',
         'MemberConsumerId',
@@ -80,7 +78,8 @@ class ServiceConnections extends Model
         'StationCrewAssigned',
         'LoadCategory',
         'TemporaryDurationInMonths',
-        'LongSpan'
+        'LongSpan',
+        'Office',
     ];
 
     /**
@@ -118,7 +117,8 @@ class ServiceConnections extends Model
         'StationCrewAssigned' => 'string',
         'LoadCategory' => 'string',
         'TemporaryDurationInMonths' => 'string',
-        'LongSpan' => 'string'
+        'LongSpan' => 'string',
+        'Office' => 'string',
     ];
 
     /**
@@ -159,6 +159,7 @@ class ServiceConnections extends Model
         'LoadCategory' => 'nullable|string',
         'TemporaryDurationInMonths' => 'nullable|string',
         'LongSpan' => 'nullable|string',
+        'Office' => 'nullable|string',
     ];
 
     public static function getAccountCount($consumerId) {

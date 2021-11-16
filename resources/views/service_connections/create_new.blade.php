@@ -36,6 +36,8 @@
                         <div class="row">
                             <input type="hidden" name="Status" value="For Inspection">
 
+                            <input type="hidden" name="Office" value="{{ env("APP_LOCATION") }}">
+
                             @include('service_connections.fields')
                         </div>
 

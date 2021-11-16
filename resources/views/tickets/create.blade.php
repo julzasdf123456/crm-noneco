@@ -36,6 +36,8 @@
 
                             <input type="hidden" value="Received" name="Status">
 
+                            <input type="hidden" value="{{ env("APP_LOCATION") }}" name="Office">
+
                             @if ($serviceAccount != null)  
                                 <input type="hidden" value="{{ $serviceAccount->id }}" name="AccountNumber">
                             @endif  

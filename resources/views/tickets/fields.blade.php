@@ -2,40 +2,77 @@
 @php
     use App\Models\TicketsRepository;
 @endphp
-<div class="form-group col-sm-12">
-    <div class="row">
-        <div class="col-lg-3 col-md-5">
-            {!! Form::label('ConsumerName', 'Consumer name:') !!}
-        </div>
-
-        <div class="col-lg-9 col-md-7">
-            <div class="input-group input-group-sm">
-                <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-user-circle"></i></span>
-                </div>
-                {!! Form::text('ConsumerName', $serviceAccount==null ? '' : $serviceAccount->ServiceAccountName, ['class' => 'form-control','maxlength' => 500,'maxlength' => 500, 'placeholder' => 'Consumer Name']) !!}
+@if ($cond == 'new')
+    <div class="form-group col-sm-12">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('ConsumerName', 'Consumer name:') !!}
             </div>
-        </div>  
-    </div> 
-</div>
 
-<!-- Town Field -->
-<div class="form-group col-sm-12">
-    <div class="row">
-        <div class="col-lg-3 col-md-5">
-            {!! Form::label('Town', 'Town') !!}
-        </div>
-
-        <div class="col-lg-9 col-md-7">
-            <div class="input-group input-group-sm">
-                <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+            <div class="col-lg-9 col-md-7">
+                <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-user-circle"></i></span>
+                    </div>
+                    {!! Form::text('ConsumerName', $serviceAccount==null ? '' : $serviceAccount->ServiceAccountName, ['class' => 'form-control','maxlength' => 500,'maxlength' => 500, 'placeholder' => 'Consumer Name']) !!}
                 </div>
-                {!! Form::select('Town', $towns, $serviceAccount==null ? '' : $serviceAccount->TownId, ['class' => 'form-control']) !!}
+            </div>  
+        </div> 
+    </div>
+
+    <!-- Town Field -->
+    <div class="form-group col-sm-12">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('Town', 'Town') !!}
             </div>
-        </div>
-    </div>    
-</div>
+
+            <div class="col-lg-9 col-md-7">
+                <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                    </div>
+                    {!! Form::select('Town', $towns, $serviceAccount==null ? '' : $serviceAccount->TownId, ['class' => 'form-control']) !!}
+                </div>
+            </div>
+        </div>    
+    </div>
+@else
+    <div class="form-group col-sm-12">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('ConsumerName', 'Consumer name:') !!}
+            </div>
+
+            <div class="col-lg-9 col-md-7">
+                <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-user-circle"></i></span>
+                    </div>
+                    {!! Form::text('ConsumerName', $tickets->ConsumerName, ['class' => 'form-control','maxlength' => 500,'maxlength' => 500, 'placeholder' => 'Consumer Name']) !!}
+                </div>
+            </div>  
+        </div> 
+    </div>
+
+    <!-- Town Field -->
+    <div class="form-group col-sm-12">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('Town', 'Town') !!}
+            </div>
+
+            <div class="col-lg-9 col-md-7">
+                <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                    </div>
+                    {!! Form::select('Town', $towns, $tickets->Town, ['class' => 'form-control']) !!}
+                </div>
+            </div>
+        </div>    
+    </div>
+@endif
 
 <!-- Barangay Field -->
 <div class="form-group col-sm-12">
@@ -55,23 +92,44 @@
     </div>    
 </div>
 
-<!-- Sitio Field -->
-<div class="form-group col-sm-12">
-    <div class="row">
-        <div class="col-lg-3 col-md-5">
-            {!! Form::label('Purok', 'Sitio') !!}
-        </div>
 
-        <div class="col-lg-9 col-md-7">
-            <div class="input-group input-group-sm">
-                <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                </div>
-                {!! Form::text('Purok', $serviceAccount==null ? '' : $serviceAccount->Purok, ['class' => 'form-control','maxlength' => 1000,'maxlength' => 1000, 'placeholder' => 'Sitio']) !!}
+@if ($cond == 'new')
+    <!-- Sitio Field -->
+    <div class="form-group col-sm-12">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('Sitio', 'Sitio') !!}
             </div>
-        </div>
-    </div> 
-</div>
+
+            <div class="col-lg-9 col-md-7">
+                <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                    </div>
+                    {!! Form::text('Sitio', $serviceAccount==null ? '' : $serviceAccount->Purok, ['class' => 'form-control','maxlength' => 1000,'maxlength' => 1000, 'placeholder' => 'Sitio']) !!}
+                </div>
+            </div>
+        </div> 
+    </div>
+@else
+    <!-- Sitio Field -->
+    <div class="form-group col-sm-12">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('Purok', 'Sitio') !!}
+            </div>
+
+            <div class="col-lg-9 col-md-7">
+                <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                    </div>
+                    {!! Form::text('Sitio', $tickets->Sitio, ['class' => 'form-control','maxlength' => 1000,'maxlength' => 1000, 'placeholder' => 'Sitio']) !!}
+                </div>
+            </div>
+        </div> 
+    </div>
+@endif
 
 <!-- Contactnumber Field -->
 <div class="form-group col-sm-12">
@@ -110,9 +168,9 @@
                     @foreach ($parentTickets as $items)
                         <optgroup label="{{ $items->Name }}">
                             @php
-                                $tickets = TicketsRepository::where('ParentTicket', $items->id)->orderBy('Name')->get();
+                                $ticketsRep = TicketsRepository::where('ParentTicket', $items->id)->orderBy('Name')->get();
                             @endphp
-                            @foreach ($tickets as $item)
+                            @foreach ($ticketsRep as $item)
                                 <option value="{{ $item->id }}">{{ $item->Name }}</option>
                             @endforeach
                         </optgroup>
@@ -285,4 +343,8 @@
     </div> 
 </div>
 
-<p id="Def_Brgy" style="display: none;">{{ $serviceAccount==null ? '' : $serviceAccount->BarangayId }}</p>
+@if ($cond == 'new')
+    <p id="Def_Brgy" style="display: none;">{{ $serviceAccount==null ? '' : $serviceAccount->BarangayId }}</p>
+@else
+    <p id="Def_Brgy" style="display: none;">{{ $tickets->Barangay }}</p> 
+@endif

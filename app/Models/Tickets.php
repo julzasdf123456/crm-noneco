@@ -73,7 +73,9 @@ class Tickets extends Model
         'DateTimeLinemanArrived',
         'DateTimeLinemanExecuted',
         'UserId',
-        'CrewAssigned'
+        'CrewAssigned',
+        'Trash',
+        'Office',
     ];
 
     /**
@@ -103,7 +105,9 @@ class Tickets extends Model
         'DateTimeLinemanArrived' => 'datetime',
         'DateTimeLinemanExecuted' => 'datetime',
         'UserId' => 'string',
-        'CrewAssigned' => 'string'
+        'CrewAssigned' => 'string',
+        'Trash' => 'string',
+        'Office' => 'string',
     ];
 
     /**
@@ -135,8 +139,16 @@ class Tickets extends Model
         'UserId' => 'nullable|string|max:255',
         'CrewAssigned' => 'nullable|string|max:255',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'Trash' => 'nullable|string',
+        'Office' => 'nullable|string',
     ];
 
-    
+    public static function getAddress($ticket) {
+        if ($ticket->Sitio==null && ($ticket->Barangay!=null && $ticket->Town!=null)) {
+            return $ticket->Barangay . ', ' . $ticket->Town;
+        } elseif($ticket->Sitio!=null && ($ticket->Barangay!=null && $ticket->Town!=null)) {
+            return $ticket->Sitio . ', ' . $ticket->Barangay . ', ' . $ticket->Town;
+        }
+    }
 }

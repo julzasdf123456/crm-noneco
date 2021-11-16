@@ -9,7 +9,10 @@
                         <input autofocus type="text" class="form-control" placeholder="Search account" id="params" value="{{ old('params') }}">
                     </div>
                     <div class="col-md-3">
-                        <button class="btn btn-info"><i class="fas fa-search"></i></button>                   
+                        <button id="searchBtn" class="btn btn-info"><i class="fas fa-search"></i></button>                   
+                    </div>
+                    <div id="loader" class="spinner-border text-info gone" role="status">
+                        <span class="sr-only">Loading...</span>
                     </div>
                 </div>
             </div>
@@ -47,7 +50,8 @@
 
         $(document).ready(function() {
             $('#params').keyup(delay(function(e) {
-                $.ajax({
+                $('#loader').removeClass('gone');
+                var aSearch = $.ajax({
                     url : '/tickets/get-create-ajax',
                     type : 'GET',
                     data : {
@@ -57,13 +61,49 @@
                         $('#search-table tbody tr').remove();
 
                         $('#search-table tbody').append(response);
+
+                        $('#loader').addClass('gone');
+                    },
+                    beforeSend : function() {
+                        if (aSearch != null) {
+                            aSearch.abort();
+                            $('#loader').removeClass('gone');
+                        }
                     },
                     error : function(error) {
                         alert(error)
-                        console.log(error)
+                        $('#loader').addClass('gone');
                     }
                 });
-            }, 200));
+            }, 250));    
+
+            $('#searchBtn').on('click',delay(function(e) {
+                $('#loader').removeClass('gone');
+                var aSearch = $.ajax({
+                    url : '/tickets/get-create-ajax',
+                    type : 'GET',
+                    data : {
+                        params :$('#params').val(),
+                    },
+                    success : function(response) {
+                        $('#search-table tbody tr').remove();
+
+                        $('#search-table tbody').append(response);
+
+                        $('#loader').addClass('gone');
+                    },
+                    beforeSend : function() {
+                        if (aSearch != null) {
+                            aSearch.abort();
+                            $('#loader').removeClass('gone');
+                        }
+                    },
+                    error : function(error) {
+                        alert(error)
+                        $('#loader').addClass('gone');
+                    }
+                });
+            }, 250));  
         });
     </script>
 @endpush

@@ -88,6 +88,10 @@
             margin-left: 20px;
             margin-right: 20px;
         }
+
+        .gone {
+            display: none;
+        }
     </style>
 
     @yield('third_party_stylesheets')

@@ -228,6 +228,12 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-check-circle nav-icon"></i><p>Ticket Types</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('tickets.trash') }}"
+                   class="nav-link {{ Request::is('tickets.trash*') ? 'active' : '' }}">
+                   <i class="fas fa-trash nav-icon"></i><p>Trash</p>
+                </a>
+            </li>
         </ul>
     </li>
     
@@ -390,7 +396,4 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
-
-
-
 

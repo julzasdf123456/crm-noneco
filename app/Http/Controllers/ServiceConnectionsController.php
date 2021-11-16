@@ -128,6 +128,7 @@ class ServiceConnectionsController extends AppBaseController
                         'CRM_ServiceConnections.MemberConsumerId as MemberConsumerId',
                         'CRM_ServiceConnections.Status as Status',  
                         'CRM_ServiceConnections.Notes as Notes', 
+                        'CRM_ServiceConnections.Office', 
                         'CRM_ServiceConnections.ORNumber as ORNumber', 
                         'CRM_ServiceConnections.Sitio as Sitio', 
                         'CRM_ServiceConnections.LoadCategory as LoadCategory', 
@@ -525,8 +526,8 @@ class ServiceConnectionsController extends AppBaseController
             
             if ($query != '' ) {
                 $data = DB::table('CRM_ServiceConnections')
-                    ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
-                    ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+                    ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
                     ->select('CRM_ServiceConnections.id as ConsumerId',
                                     'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
                                     'CRM_ServiceConnections.Status as Status',
@@ -548,8 +549,8 @@ class ServiceConnectionsController extends AppBaseController
                     ->get();
             } else {
                 $data = DB::table('CRM_ServiceConnections')
-                    ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
-                    ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+                    ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
                     ->select('CRM_ServiceConnections.id as ConsumerId',
                                     'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
                                     'CRM_ServiceConnections.Status as Status',

@@ -74,8 +74,13 @@ use Illuminate\Support\Facades\Auth;
 
                         <hr>
 
-                        <strong><i class="far fa-file-alt mr-1"></i> Notes</strong>
+                        <strong><i class="fas fa-file-alt mr-1"></i> Notes</strong>
                         <p class="text-muted">{{ $serviceConnections->Notes}}</p>
+
+                        <hr>
+
+                        <strong><i class="fas fa-warehouse mr-1"></i> Office Registered</strong>
+                        <p class="text-muted">{{ $serviceConnections->Office}}</p>
 
                         @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Service Connection Assessor'])) 
                             <a href="{{ route('serviceConnections.edit', [$serviceConnections->id]) }}" class="text-warning" title="Edit service connection details">

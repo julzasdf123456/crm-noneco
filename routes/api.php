@@ -7,6 +7,8 @@ use App\Http\Controllers\API\TelleringController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\ServiceConnectionsEnergization;
 use App\Http\Controllers\API\OtherData;
+use App\Http\Controllers\API\TicketrepositoriesController;
+use App\Http\Controllers\API\TicketsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,8 +37,14 @@ Route::post('create-timeframes', [ServiceConnectionsEnergization::class, 'create
 
 Route::get('get-towns', [OtherData::class, 'getTowns']);
 Route::get('get-barangays', [OtherData::class, 'getBarangays']);
+Route::get('get-all-crew', [OtherData::class, 'getAllCrew']);
 
 Route::post('login', [UserController::class, 'login']);
+
+// TICKETS
+Route::get('get-ticket-types', [TicketrepositoriesController::class, 'getTicketTypes']);
+Route::get('get-downloadable-tickets', [TicketsController::class, 'getDownloadableTickets']);
+Route::get('update-downloaded-status', [TicketsController::class, 'updateDownloadedStatus']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

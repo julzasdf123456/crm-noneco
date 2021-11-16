@@ -37,6 +37,8 @@ class CreateTableCRMTickets extends Migration
             $table->datetime('DateTimeLinemanExecuted')->nullable();
             $table->string('UserId')->nullable();
             $table->string('CrewAssigned')->nullable();
+            $table->string('Trash')->nullable();
+            $table->string('Office')->nullable();
             $table->timestamps();
         });
     }

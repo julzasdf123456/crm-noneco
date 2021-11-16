@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <h1>Edit Tickets</h1>
+                    <h1>Edit Ticket Logs</h1>
                 </div>
             </div>
         </div>
@@ -14,20 +14,20 @@
     <div class="content px-3">
 
         @include('adminlte-templates::common.errors')
-        
+
         <div class="card">
 
-            {!! Form::model($tickets, ['route' => ['tickets.update', $tickets->id], 'method' => 'patch']) !!}
+            {!! Form::model($ticketLogs, ['route' => ['ticketLogs.update', $ticketLogs->id], 'method' => 'patch']) !!}
 
             <div class="card-body">
                 <div class="row">
-                    @include('tickets.fields')
+                    @include('ticket_logs.fields')
                 </div>
             </div>
 
             <div class="card-footer">
                 {!! Form::submit('Save', ['class' => 'btn btn-primary']) !!}
-                <a href="{{ route('tickets.index') }}" class="btn btn-default">Cancel</a>
+                <a href="{{ route('ticketLogs.index') }}" class="btn btn-default">Cancel</a>
             </div>
 
             {!! Form::close() !!}
