@@ -14,6 +14,7 @@ use App\Models\Towns;
 use App\Models\MemberConsumers;
 use App\Models\MemberConsumerChecklistsRep;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Flash;
 use Response;
 
@@ -60,7 +61,15 @@ class MemberConsumersController extends AppBaseController
         
         $cond = 'new';
 
-        return view('member_consumers.create', ['memberConsumers' => $memberConsumers, 'types' => $types, 'cond' => $cond, 'barangays' => $barangays, 'towns' => $towns]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['create membership', 'sc create', 'Super Admin'])) {
+            return view('member_consumers.create', ['memberConsumers' => $memberConsumers, 'types' => $types, 'cond' => $cond, 'barangays' => $barangays, 'towns' => $towns]);
+        } else {
+            return abort(403, "You're not authorized to create a membership application.");
+        }
+        
     }
 
     /**
@@ -134,7 +143,16 @@ class MemberConsumersController extends AppBaseController
             return redirect(route('memberConsumers.index'));
         }
         
-        return view('member_consumers.show', ['memberConsumers' => $memberConsumers, 'memberConsumerSpouse' => $memberConsumerSpouse]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['view membership', 'Super Admin'])) {
+            return view('member_consumers.show', ['memberConsumers' => $memberConsumers, 'memberConsumerSpouse' => $memberConsumerSpouse]);
+        } else {
+            return abort(403, "You're not authorized to access this page.");
+        }
+
+        
     }
 
     /**
@@ -162,7 +180,15 @@ class MemberConsumersController extends AppBaseController
             return redirect(route('memberConsumers.index'));
         }
 
-        return view('member_consumers.edit', ['memberConsumers' => $memberConsumers, 'types' => $types, 'cond' => $cond, 'barangays' => $barangays, 'towns' => $towns]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['update membership', 'sc update', 'Super Admin'])) {
+            return view('member_consumers.edit', ['memberConsumers' => $memberConsumers, 'types' => $types, 'cond' => $cond, 'barangays' => $barangays, 'towns' => $towns]);
+        } else {
+            return abort(403, "You're not authorized to update a membership application.");
+        }
+
     }
 
     /**
@@ -201,19 +227,26 @@ class MemberConsumersController extends AppBaseController
      */
     public function destroy($id)
     {
-        $memberConsumers = $this->memberConsumersRepository->find($id);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['delete membership', 'sc delete', 'Super Admin'])) {
+            $memberConsumers = $this->memberConsumersRepository->find($id);
 
-        if (empty($memberConsumers)) {
-            Flash::error('Member Consumers not found');
+            if (empty($memberConsumers)) {
+                Flash::error('Member Consumers not found');
+
+                return redirect(route('memberConsumers.index'));
+            }
+
+            $this->memberConsumersRepository->delete($id);
+
+            Flash::success('Member Consumers deleted successfully.');
 
             return redirect(route('memberConsumers.index'));
-        }
-
-        $this->memberConsumersRepository->delete($id);
-
-        Flash::success('Member Consumers deleted successfully.');
-
-        return redirect(route('memberConsumers.index'));
+        } else {
+            return abort(403, "You're not authorized to delete a membership application.");
+        }        
     }
 
     public function fetchmemberconsumer(Request $request) {
@@ -335,10 +368,26 @@ class MemberConsumersController extends AppBaseController
 
         $checklist = MemberConsumerChecklistsRep::all();
 
-        return view('/member_consumers/assess_checklists', ['memberConsumers' => $memberConsumers, 'checklist' => $checklist]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['create membership', 'sc create', 'Super Admin'])) {
+            return view('/member_consumers/assess_checklists', ['memberConsumers' => $memberConsumers, 'checklist' => $checklist]);
+        } else {
+            return abort(403, "You're not authorized to create a membership application.");
+        }
+        
     }
 
     public function captureImage($id) {
-        return view('/member_consumers/capture_image', ['id' => $id]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['update membership', 'sc update', 'Super Admin'])) {
+            return view('/member_consumers/capture_image', ['id' => $id]);
+        } else {
+            return abort(403, "You're not authorized to update a membership application.");
+        }
+        
     }
 }

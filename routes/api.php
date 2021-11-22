@@ -46,6 +46,9 @@ Route::get('get-ticket-types', [TicketrepositoriesController::class, 'getTicketT
 Route::get('get-downloadable-tickets', [TicketsController::class, 'getDownloadableTickets']);
 Route::get('update-downloaded-status', [TicketsController::class, 'updateDownloadedStatus']);
 
+// IMAGES
+Route::post('save-uploaded-images', [ServiceConnectionsEnergization::class, 'saveUploadedImages']);
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });

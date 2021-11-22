@@ -49,7 +49,14 @@ class ServiceConnectionMtrTrnsfrmrController extends AppBaseController
      */
     public function create()
     {
-        return view('service_connection_mtr_trnsfrmrs.create');
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['create membership', 'sc create', 'create metering data', 'Super Admin'])) {
+            return view('service_connection_mtr_trnsfrmrs.create');
+        } else {
+            return abort(403, "You're not authorized to create a service connection application.");
+        }  
     }
 
     /**
@@ -117,7 +124,15 @@ class ServiceConnectionMtrTrnsfrmrController extends AppBaseController
             return redirect(route('serviceConnectionMtrTrnsfrmrs.index'));
         }
 
-        return view('service_connection_mtr_trnsfrmrs.edit')->with('serviceConnectionMtrTrnsfrmr', $serviceConnectionMtrTrnsfrmr);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['update membership', 'sc update', 'update metering data', 'Super Admin'])) {
+            return view('service_connection_mtr_trnsfrmrs.edit')->with('serviceConnectionMtrTrnsfrmr', $serviceConnectionMtrTrnsfrmr);
+        } else {
+            return abort(403, "You're not authorized to create a service connection application.");
+        } 
+        
     }
 
     /**
@@ -185,7 +200,14 @@ class ServiceConnectionMtrTrnsfrmrController extends AppBaseController
 
         $serviceConnectionMtrTrnsfrmr = null;
 
-        return view('/service_connection_mtr_trnsfrmrs/create_step_three', ['serviceConnection' => $serviceConnection, 'serviceConnectionMtrTrnsfrmr' => $serviceConnectionMtrTrnsfrmr]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['create membership', 'sc create', 'create metering data', 'Super Admin'])) {
+            return view('/service_connection_mtr_trnsfrmrs/create_step_three', ['serviceConnection' => $serviceConnection, 'serviceConnectionMtrTrnsfrmr' => $serviceConnectionMtrTrnsfrmr]);
+        } else {
+            return abort(403, "You're not authorized to create a service connection application.");
+        }         
     }
 
     public function assigning() {

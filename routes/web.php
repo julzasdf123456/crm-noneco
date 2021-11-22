@@ -263,3 +263,6 @@ Route::resource('ticketLogs', App\Http\Controllers\TicketLogsController::class);
 
 Route::post('/special_equipment_materials/create-material', [App\Http\Controllers\SpecialEquipmentMaterialsController::class, 'createEquipment']);
 Route::resource('specialEquipmentMaterials', App\Http\Controllers\SpecialEquipmentMaterialsController::class);
+
+
+Route::resource('serviceConnectionImages', App\Http\Controllers\ServiceConnectionImagesController::class);

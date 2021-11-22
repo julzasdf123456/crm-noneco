@@ -69,7 +69,7 @@
                                                 <tr>
                                                     <td>{{ $permission->name }}</td>
                                                     <td>
-                                                        <a href="{{ route('users.remove_permission', ['id' => $users->id, 'permission' => $permission->name]) }}" class="btn btn-link btn-xs text-danger" title="Remove permission">
+                                                        <a href="{{ route('users.remove_permission', [$users->id, $permission->name]) }}" class="btn btn-link btn-xs text-danger" title="Remove permission">
                                                             <i class="fas fa-trash"></i>
                                                         </a>
                                                     </td>

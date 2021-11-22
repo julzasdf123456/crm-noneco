@@ -90,7 +90,7 @@ class UsersController extends AppBaseController
 
         $userModel = User::find($id);
 
-        $userPermissions = $userModel->getPermissionsViaRoles();
+        $userPermissions = $userModel->getAllPermissions();
 
         if (empty($users)) {
             Flash::error('Users not found');

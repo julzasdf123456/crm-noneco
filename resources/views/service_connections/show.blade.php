@@ -101,49 +101,25 @@ use Illuminate\Support\Facades\Auth;
                     <div class="card-header p-2">
                         <ul class="nav nav-pills">
                             <li class="nav-item"><a class="nav-link active" href="#logs" data-toggle="tab">
-                                <lord-icon
-                                    src="https://cdn.lordicon.com/tdrtiskw.json"
-                                    trigger="loop"
-                                    delay="800"
-                                    colors="primary:#ffffff,secondary:#ffffff"
-                                    stroke="100"
-                                    style="width:28px;height:28px">
-                                </lord-icon>
+                                <i class="fas fa-info-circle"></i>
                                 Details and Logs</a></li>
                             <li class="nav-item"><a class="nav-link" href="#verification" data-toggle="tab">
-                                <lord-icon
-                                    src="https://cdn.lordicon.com/nocovwne.json"
-                                    trigger="loop"
-                                    delay="800"
-                                    colors="primary:#ffffff,secondary:#ffffff"
-                                    stroke="100"
-                                    style="width:28px;height:28px">
+                                <i class="fas fa-clipboard-check"></i>
                                 </lord-icon>Verification</a></li>
                             <li class="nav-item"><a class="nav-link" href="#metering" data-toggle="tab">
-                                <lord-icon
-                                    src="https://cdn.lordicon.com/dbsklakl.json"
-                                    trigger="loop"
-                                    colors="primary:#ffffff,secondary:#ffffff"
-                                    stroke="100"
-                                    delay="800"
-                                    style="width:28px;height:28px">
-                                </lord-icon>
+                                <i class="fas fa-tachometer-alt"></i>
                                 Metering and Transformer</a></li>
                             <li class="nav-item"><a class="nav-link" href="#invoice" data-toggle="tab">
-                                <lord-icon
-                                    src="https://cdn.lordicon.com/huwchbks.json"
-                                    trigger="loop"
-                                    stroke="100"
-                                    delay="800"
-                                    colors="primary:#ffffff,secondary:#ffffff"
-                                    style="width:28px;height:28px">
-                                </lord-icon>
+                                <i class="fas fa-file-invoice-dollar"></i>
                                 Payment Invoice</a></li>
                             @if ($serviceConnections->LoadCategory == 'above 5kVa')
                             <li class="nav-item"><a class="nav-link" href="#bom" data-toggle="tab">
                                 <i class="fas fa-toolbox"></i>
                                 Bill of Materials</a></li>
                             @endif
+                            <li class="nav-item"><a class="nav-link" href="#photos" data-toggle="tab">
+                                <i class="fas fa-file-image"></i>
+                                Photos</a></li>
                         </ul>
                     </div>
 
@@ -167,6 +143,10 @@ use Illuminate\Support\Facades\Auth;
                             
                             <div class="tab-pane" id="bom">
                                 @include('service_connections.bom_details')
+                            </div>
+
+                            <div class="tab-pane" id="photos">
+                                @include("service_connections.photos")
                             </div>
                         </div>
                     </div>

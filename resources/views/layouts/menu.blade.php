@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Auth;
 
 @endphp
 
+<li class="nav-header">CRM</li>
 <!-- MEMBERSHIP MENU -->
 @canany(['Super Admin', 'view membership'])
     <li class="nav-item has-treeview">
@@ -302,6 +303,7 @@ use Illuminate\Support\Facades\Auth;
     
 @endcanany
 
+<li class="nav-header">BILLING</li>
 {{-- SERVICE ACCOUNTS --}}
 @canany(['Super Admin'])
     <li class="nav-item has-treeview">
@@ -332,6 +334,7 @@ use Illuminate\Support\Facades\Auth;
     </li>
 @endcanany
 
+<li class="nav-header">MISCELLANEOUS</li>
 <!-- EXTRAS MENU -->
 @canany(['Super Admin', 'create membership', 'sc create'])
     <li class="nav-item has-treeview">
@@ -368,6 +371,7 @@ use Illuminate\Support\Facades\Auth;
     </li>
 @endcanany
 
+<li class="nav-header">ADMINISTRATIVE</li>
 <!-- ADMIN MENU -->
 @can('Super Admin')
     <li class="nav-item has-treeview">
@@ -403,5 +407,7 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
+
+
 
 

@@ -71,7 +71,15 @@ class ServiceConnectionsController extends AppBaseController
      */
     public function create()
     {
-        return view('service_connections.create');
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['create membership', 'sc create', 'Super Admin'])) {
+            return view('service_connections.create');
+        } else {
+            return abort(403, "You're not authorized to create a service connection application.");
+        }
+        
     }
 
     /**
@@ -259,7 +267,11 @@ class ServiceConnectionsController extends AppBaseController
         
         $serviceConnectionChecklists = ServiceConnectionChecklists::where('ServiceConnectionId', $id)->pluck('ChecklistId')->all();
 
-        return view('service_connections.show', ['serviceConnections' => $serviceConnections, 
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['view membership', 'sc view', 'Super Admin'])) {
+            return view('service_connections.show', ['serviceConnections' => $serviceConnections, 
                                                 'serviceConnectionInspections' => $serviceConnectionInspections, 
                                                 'serviceConnectionMeter' => $serviceConnectionMeter, 
                                                 'serviceConnectionTransactions' => $serviceConnectionTransactions,
@@ -275,6 +287,9 @@ class ServiceConnectionsController extends AppBaseController
                                                 'materials' => $materials,
                                                 'poles' => $poles,
                                                 'transformers' => $transformers]);
+        } else {
+            return abort(403, "You're not authorized to view a service connection application.");
+        }        
     }
 
     /**
@@ -304,7 +319,14 @@ class ServiceConnectionsController extends AppBaseController
             return redirect(route('serviceConnections.index'));
         }
 
-        return view('service_connections.edit', ['serviceConnections' => $serviceConnections, 'cond' => $cond, 'towns' => $towns, 'memberConsumer' => $memberConsumer, 'accountTypes' => $accountTypes, 'crew' => $crew]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['update membership', 'sc update', 'Super Admin'])) {
+            return view('service_connections.edit', ['serviceConnections' => $serviceConnections, 'cond' => $cond, 'towns' => $towns, 'memberConsumer' => $memberConsumer, 'accountTypes' => $accountTypes, 'crew' => $crew]);
+        } else {
+            return abort(403, "You're not authorized to update a service connection application.");
+        }         
     }
 
     /**
@@ -344,27 +366,48 @@ class ServiceConnectionsController extends AppBaseController
      */
     public function destroy($id)
     {
-        $serviceConnections = $this->serviceConnectionsRepository->find($id);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['delete membership', 'sc delete', 'Super Admin'])) {
+            $serviceConnections = $this->serviceConnectionsRepository->find($id);
 
-        if (empty($serviceConnections)) {
-            Flash::error('Service Connections not found');
+            if (empty($serviceConnections)) {
+                Flash::error('Service Connections not found');
+
+                return redirect(route('serviceConnections.index'));
+            }
+
+            $this->serviceConnectionsRepository->delete($id);
+
+            Flash::success('Service Connections deleted successfully.');
 
             return redirect(route('serviceConnections.index'));
-        }
-
-        $this->serviceConnectionsRepository->delete($id);
-
-        Flash::success('Service Connections deleted successfully.');
-
-        return redirect(route('serviceConnections.index'));
+        } else {
+            return abort(403, "You're not authorized to delete a service connection application.");
+        }          
     }
 
     public function selectMembership() {
-        return view('/service_connections/selectmembership');
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['create membership', 'sc create', 'Super Admin'])) {
+            return view('/service_connections/selectmembership');
+        } else {
+            return abort(403, "You're not authorized to create a service connection application.");
+        }
     }
 
     public function selectApplicationType($consumerId) {
-        return view('/service_connections/select_application_type', ['consumerId' => $consumerId]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['create membership', 'sc create', 'Super Admin'])) {
+            return view('/service_connections/select_application_type', ['consumerId' => $consumerId]);
+        } else {
+            return abort(403, "You're not authorized to create a service connection application.");
+        }        
     }
 
     public function relayApplicationType($consumerId, Request $request) {
@@ -522,7 +565,14 @@ class ServiceConnectionsController extends AppBaseController
 
         $crew = ServiceConnectionCrew::orderBy('StationName')->pluck('StationName', 'id');
 
-        return view('/service_connections/create_new', ['memberConsumer' => $memberConsumer, 'cond' => $cond, 'towns' => $towns, 'accountTypes' => $accountTypes, 'crew' => $crew]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['create membership', 'sc create', 'Super Admin'])) {
+            return view('/service_connections/create_new', ['memberConsumer' => $memberConsumer, 'cond' => $cond, 'towns' => $towns, 'accountTypes' => $accountTypes, 'crew' => $crew]);
+        } else {
+            return abort(403, "You're not authorized to create a service connection application.");
+        }        
     }
 
     public function fetchserviceconnections(Request $request) {
@@ -625,7 +675,14 @@ class ServiceConnectionsController extends AppBaseController
 
         $checklist = ServiceConnectionChecklistsRep::all();
 
-        return view('/service_connections/assess_checklists', ['serviceConnections' => $serviceConnections, 'checklist' => $checklist]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['create membership', 'sc create', 'Super Admin'])) {
+            return view('/service_connections/assess_checklists', ['serviceConnections' => $serviceConnections, 'checklist' => $checklist]);
+        } else {
+            return abort(403, "You're not authorized to create/update a service connection application.");
+        }        
     }
 
     public function updateChecklists($id) {
@@ -635,21 +692,42 @@ class ServiceConnectionsController extends AppBaseController
 
         $checklistCompleted = ServiceConnectionChecklists::where('ServiceConnectionId', $id)->pluck('ChecklistId')->all();
 
-        return view('/service_connections/update_checklists', ['serviceConnections' => $serviceConnections, 'checklist' => $checklist, 'checklistCompleted' => $checklistCompleted]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['update membership', 'sc update', 'Super Admin'])) {
+            return view('/service_connections/update_checklists', ['serviceConnections' => $serviceConnections, 'checklist' => $checklist, 'checklistCompleted' => $checklistCompleted]);
+        } else {
+            return abort(403, "You're not authorized to create/update a service connection application.");
+        }         
     }
 
     public function moveToTrash($id) {
-        $serviceConnections = $this->serviceConnectionsRepository->find($id);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['delete membership', 'sc delete', 'Super Admin'])) {
+            $serviceConnections = $this->serviceConnectionsRepository->find($id);
 
-        $serviceConnections->Trash = 'Yes';
-
-        $serviceConnections->save();
-
-        return redirect(route('serviceConnections.index'));
+            $serviceConnections->Trash = 'Yes';
+    
+            $serviceConnections->save();
+    
+            return redirect(route('serviceConnections.index'));
+        } else {
+            return abort(403, "You're not authorized to delete a service connection application.");
+        }          
     }
 
     public function trash() {
-        return view('/service_connections/trash');
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['delete membership', 'sc delete', 'Super Admin'])) {
+            return view('/service_connections/trash');
+        } else {
+            return abort(403, "You're not authorized to delete a service connection application.");
+        }         
     }
 
     public function fetchserviceconnectiontrash(Request $request) {
@@ -752,17 +830,24 @@ class ServiceConnectionsController extends AppBaseController
     }
 
     public function restore($id) {
-        $serviceConnections = $this->serviceConnectionsRepository->find($id);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['delete membership', 'sc delete', 'Super Admin'])) {
+            $serviceConnections = $this->serviceConnectionsRepository->find($id);
 
-        $serviceConnections->Trash = null;
+            $serviceConnections->Trash = null;
 
-        $serviceConnections->save();
+            $serviceConnections->save();
 
-        return redirect(route('serviceConnections.trash'));
+            return redirect(route('serviceConnections.trash'));
+        } else {
+            return abort(403, "You're not authorized to delete a service connection application.");
+        }         
     }
 
     public function energization() {
-        if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Energization Clerk'])) {
+        if (Auth::user()->hasAnyPermission(['sc update energization', 'sc update', 'Super Admin'])) {
             $serviceConnections = DB::table('CRM_ServiceConnections')
                         ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
                         ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
@@ -898,7 +983,14 @@ class ServiceConnectionsController extends AppBaseController
         $scUpdate->DateTimeOfEnergizationIssue = date('Y-m-d H:i:s');
         $scUpdate->save();
 
-        return view('/service_connections/print_order', ['serviceConnection' => $serviceConnections, 'serviceConnectionInspections' => $serviceConnectionInspections, 'serviceConnectionMeter' => $serviceConnectionMeter]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['create membership', 'sc update energization', 'sc create', 'Super Admin'])) {
+            return view('/service_connections/print_order', ['serviceConnection' => $serviceConnections, 'serviceConnectionInspections' => $serviceConnectionInspections, 'serviceConnectionMeter' => $serviceConnectionMeter]);
+        } else {
+            return abort(403, "You're not authorized to print an energization order.");
+        }         
     }
 
     public function largeLoadInspections() {
@@ -924,7 +1016,14 @@ class ServiceConnectionsController extends AppBaseController
 
         $accountTypes = ServiceConnectionAccountTypes::orderBy('id')->get();
 
-        return view('/service_connections/large_load_inspections', ['serviceConnections' => $serviceConnections, 'accountTypes' => $accountTypes]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['sc powerload update', 'sc powerload view', 'Super Admin'])) {
+            return view('/service_connections/large_load_inspections', ['serviceConnections' => $serviceConnections, 'accountTypes' => $accountTypes]);
+        } else {
+            return abort(403, "You're not authorized to view power load inspections.");
+        }           
     }
 
     public function largeLoadInspectionUpdate(Request $request) {
@@ -985,7 +1084,14 @@ class ServiceConnectionsController extends AppBaseController
                     ->orderBy('CRM_ServiceConnections.ServiceAccountName')
                     ->get();
 
-        return view('/service_connections/bom_index', ['serviceConnections' => $serviceConnections]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['sc powerload update', 'sc powerload view', 'Super Admin'])) {
+            return view('/service_connections/bom_index', ['serviceConnections' => $serviceConnections]);
+        } else {
+            return abort(403, "You're not authorized to view power load inspections.");
+        }         
     }
 
     public function bomAssigning($scId) {
@@ -1026,12 +1132,20 @@ class ServiceConnectionsController extends AppBaseController
             ->whereNotIn('ConAssGrouping', ['9', '1', '3'])            
             ->orderBy('StructureId')->get();
             
-        return view('/service_connections/bom_assigning', ['serviceConnection' => $serviceConnection, 
-                            'structuresAssigned' => $structuresAssigned, 
-                            'billOfMaterials' => $billOfMaterials,
-                            'materials' => $materials,
-                            'structures' => $structures,
-                        ]);
+        
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['sc powerload update', 'sc powerload view', 'Super Admin'])) {
+            return view('/service_connections/bom_assigning', ['serviceConnection' => $serviceConnection, 
+                'structuresAssigned' => $structuresAssigned, 
+                'billOfMaterials' => $billOfMaterials,
+                'materials' => $materials,
+                'structures' => $structures,
+            ]);
+        } else {
+            return abort(403, "You're not authorized to update power load inspections.");
+        }         
     }
 
     public function forwardToTransformerAssigning($scId) {
@@ -1057,7 +1171,14 @@ class ServiceConnectionsController extends AppBaseController
         $timeFrame->Status = 'For Transformer and Pole Assigning';
         $timeFrame->save();
 
-        return redirect(route('serviceConnections.transformer-assigning', [$scId]));
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['sc powerload update', 'sc powerload view', 'Super Admin'])) {
+            return redirect(route('serviceConnections.transformer-assigning', [$scId]));
+        } else {
+            return abort(403, "You're not authorized to update power load inspections.");
+        } 
     }
 
     public function transformerIndex() {
@@ -1080,7 +1201,14 @@ class ServiceConnectionsController extends AppBaseController
                     ->orderBy('CRM_ServiceConnections.ServiceAccountName')
                     ->get();
 
-        return view('/service_connections/transformer_index', ['serviceConnections' => $serviceConnections]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['sc powerload update', 'sc powerload view', 'Super Admin'])) {
+            return view('/service_connections/transformer_index', ['serviceConnections' => $serviceConnections]);
+        } else {
+            return abort(403, "You're not authorized to update view load inspections.");
+        }         
     }
 
     public function transformerAssigning($scId) {
@@ -1130,7 +1258,14 @@ class ServiceConnectionsController extends AppBaseController
                 ->orderBy('CRM_MaterialAssets.Description')
                 ->get(); 
 
-        return view('/service_connections/transformer_assigning', ['serviceConnection' => $serviceConnection, 'transformerIndex' => $transformerIndex, 'transformerMatrix' => $transformerMatrix, 'structureBrackets' => $structureBrackets, 'bracketsAssigned' => $bracketsAssigned]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['sc powerload update', 'sc powerload view', 'Super Admin'])) {
+            return view('/service_connections/transformer_assigning', ['serviceConnection' => $serviceConnection, 'transformerIndex' => $transformerIndex, 'transformerMatrix' => $transformerMatrix, 'structureBrackets' => $structureBrackets, 'bracketsAssigned' => $bracketsAssigned]);
+        } else {
+            return abort(403, "You're not authorized to update update load inspections.");
+        }         
     }
 
     public function poleAssigning($scId) {
@@ -1167,7 +1302,15 @@ class ServiceConnectionsController extends AppBaseController
             ->orderBy('CRM_MaterialAssets.Description')
             ->get(); 
 
-        return view('/service_connections/pole_assigning', ['serviceConnection' => $serviceConnection, 'poleIndex' => $poleIndex, 'poleAssigned' => $poleAssigned]);
+
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['sc powerload update', 'sc powerload view', 'Super Admin'])) {
+            return view('/service_connections/pole_assigning', ['serviceConnection' => $serviceConnection, 'poleIndex' => $poleIndex, 'poleAssigned' => $poleAssigned]);
+        } else {
+            return abort(403, "You're not authorized to update update load inspections.");
+        }         
     }
 
     public function quotationSummary($scId) {
@@ -1357,11 +1500,18 @@ class ServiceConnectionsController extends AppBaseController
         
         $spanningData = SpanningData::where('ServiceConnectionId', $scId)->first();
 
-        return view('/service_connections/spanning_assigning', [
-            'serviceConnection' => $serviceConnection,
-            'billOfMaterials' => $billOfMaterials,
-            'spanningData' => $spanningData
-        ]);
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['sc powerload update', 'sc powerload view', 'Super Admin'])) {
+            return view('/service_connections/spanning_assigning', [
+                'serviceConnection' => $serviceConnection,
+                'billOfMaterials' => $billOfMaterials,
+                'spanningData' => $spanningData
+            ]);
+        } else {
+            return abort(403, "You're not authorized to update update load inspections.");
+        }         
     }
 
     public function meteringEquipmentAssigning($scId) {
@@ -1397,28 +1547,43 @@ class ServiceConnectionsController extends AppBaseController
             ->orderBy('CRM_MaterialAssets.Description')
             ->get(); 
 
-        return view('/service_connections/metering_equipment_assigning', [
-            'serviceConnection' => $serviceConnection,
-            'specialEquipmentIndex' => $specialEquipmentIndex,
-            'equipmentAssigned' => $equipmentAssigned,
-        ]);
+
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['sc powerload update', 'sc powerload view', 'Super Admin'])) {
+            return view('/service_connections/metering_equipment_assigning', [
+                'serviceConnection' => $serviceConnection,
+                'specialEquipmentIndex' => $specialEquipmentIndex,
+                'equipmentAssigned' => $equipmentAssigned,
+            ]);
+        } else {
+            return abort(403, "You're not authorized to update update load inspections.");
+        }          
     }
 
     public function forwardToVerification($scId) {
-        $serviceConnection = ServiceConnections::find($scId);
-        $serviceConnection->Status = 'For Inspection';
-        $serviceConnection->save();
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['sc powerload update', 'sc powerload view', 'Super Admin'])) {
+            $serviceConnection = ServiceConnections::find($scId);
+            $serviceConnection->Status = 'For Inspection';
+            $serviceConnection->save();
 
-        // CREATE Timeframes
-        $timeFrame = new ServiceConnectionTimeframes;
-        $timeFrame->id = IDGenerator::generateID();
-        $timeFrame->ServiceConnectionId = $scId;
-        $timeFrame->UserId = Auth::id();
-        $timeFrame->Status = 'Forwarded for Verfication';
-        $timeFrame->Notes = 'Forwarded to ISD for Verfication';
-        $timeFrame->save();
+            // CREATE Timeframes
+            $timeFrame = new ServiceConnectionTimeframes;
+            $timeFrame->id = IDGenerator::generateID();
+            $timeFrame->ServiceConnectionId = $scId;
+            $timeFrame->UserId = Auth::id();
+            $timeFrame->Status = 'Forwarded for Verfication';
+            $timeFrame->Notes = 'Forwarded to ISD for Verfication';
+            $timeFrame->save();
 
-        return redirect(route('serviceConnections.show', [$scId]));
+            return redirect(route('serviceConnections.show', [$scId]));
+        } else {
+            return abort(403, "You're not authorized to forward an application.");
+        }        
     }
 
     public function largeLoadPredefinedMaterials($scId, $options) {
@@ -1517,16 +1682,31 @@ class ServiceConnectionsController extends AppBaseController
         $preDef = PreDefinedMaterialsMatrix::where('ServiceConnectionId', $scId)
                             ->get();
 
-        return view('/service_connections/largeload_predefined_materials', 
+
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['sc powerload update', 'sc powerload view', 'Super Admin'])) {
+            return view('/service_connections/largeload_predefined_materials', 
             [
                 'serviceConnection' => $serviceConnection,
                 'materials' => $materials,
                 'preDefMaterials' => $preDefMaterials,
                 'preDef' => $preDef,
             ]);
+        } else {
+            return abort(403, "You're not authorized to update update load inspections.");
+        }         
     }
 
     public function fleetMonitor() {
-        return view('/service_connections/fleet_monitor');
+        /**
+         * ASSESS PERMISSIONS
+         */
+        if(Auth::user()->hasAnyPermission(['sc view', 'sc powerload view', 'view membership', 'view metering data', 'Super Admin'])) {
+            return view('/service_connections/fleet_monitor');
+        } else {
+            return abort(403, "You're not authorized to update update load inspections.");
+        }         
     }
 }
