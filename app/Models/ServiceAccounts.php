@@ -72,7 +72,15 @@ class ServiceAccounts extends Model
         'OrganizationParentAccount',
         'GPSMeter',
         'OldAccountNo',
-        'UserId'
+        'UserId',
+        'MeterReader',
+        'GroupCode',
+        'ForDistribution',
+        'Multiplier',
+        'Coreloss',
+        'Main',
+        'Evat5Percent',
+        'Ewt2Percent',
     ];
 
     /**
@@ -105,6 +113,14 @@ class ServiceAccounts extends Model
         'AccountCount' => 'string',
         'OldAccountNo' => 'string',
         'UserId' => 'string',
+        'MeterReader' => 'string',
+        'GroupCode' => 'string',
+        'ForDistribution' => 'string',
+        'Multiplier' => 'string',
+        'Coreloss' => 'string',
+        'Main' => 'string',
+        'Evat5Percent' => 'string',
+        'Ewt2Percent' => 'string',
     ];
 
     /**
@@ -139,6 +155,14 @@ class ServiceAccounts extends Model
         'AccountCount' => 'nullable|string',
         'OldAccountNo' => 'nullable|string',
         'UserId' => 'nullable|string',
+        'MeterReader' => 'nullable|string',
+        'GroupCode' => 'nullable|string',
+        'ForDistribution' => 'nullable|string',
+        'Multiplier' => 'nullable|string',
+        'Coreloss' => 'nullable|string',
+        'Main' => 'nullable|string',
+        'Evat5Percent' => 'nullable|string',
+        'Ewt2Percent' => 'nullable|string',
     ];
 
     

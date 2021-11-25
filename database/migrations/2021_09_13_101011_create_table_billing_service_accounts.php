@@ -26,8 +26,18 @@ class CreateTableBillingServiceAccounts extends Migration
             $table->string('EmailAddress', 60)->nullable();
             $table->string('ServiceConnectionId', 30)->nullable();
             $table->string('AccountCount', 10)->nullable();
+            // NEW
+            $table->string('MeterReader', 60)->nullable();
+            $table->string('GroupCode', 60)->nullable();
+            $table->string('ForDistribution', 60)->nullable(); // Yes, No
+            $table->string('Multiplier', 10)->nullable();
+            $table->string('Coreloss', 20)->nullable();
+            $table->string('Main', 10)->nullable(); // Yes, No
+            $table->string('Evat5Percent', 10)->nullable(); // Yes, No
+            $table->string('Ewt2Percent', 10)->nullable(); // Yes, No
+
             // METER READER
-            $table->string('MeterDetailsId', 50)->nullable();
+            $table->string('MeterDetailsId', 50)->nullable(); // CURRENT ACTIVE
             $table->string('TransformerDetailsId', 50)->nullable();
             $table->string('PoleNumber', 255)->nullable();
             $table->string('AreaCode', 50)->nullable();
@@ -50,6 +60,7 @@ class CreateTableBillingServiceAccounts extends Migration
 
             // OLD Data
             $table->string('OldAccountNo', 50)->nullable();
+
 
             $table->string('UserId', 50)->nullable();
         });

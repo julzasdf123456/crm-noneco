@@ -266,3 +266,9 @@ Route::resource('specialEquipmentMaterials', App\Http\Controllers\SpecialEquipme
 
 
 Route::resource('serviceConnectionImages', App\Http\Controllers\ServiceConnectionImagesController::class);
+
+
+Route::resource('billingTransformers', App\Http\Controllers\BillingTransformersController::class);
+
+
+Route::resource('billingMeters', App\Http\Controllers\BillingMetersController::class);
