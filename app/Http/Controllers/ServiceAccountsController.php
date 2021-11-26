@@ -11,6 +11,11 @@ use App\Models\ServiceConnections;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
+use App\Models\Towns;
+use App\Models\Barangays;
+use App\Models\ServiceConnectionInspections;
+use App\Models\ServiceConnectionAccountTypes;
+use App\Models\MeterReaders;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Flash;
 use Response;
@@ -202,10 +207,20 @@ class ServiceAccountsController extends AppBaseController
 
     public function accountMigration($id) {
         $serviceConnection = ServiceConnections::find($id);
+        $serviceConnectionInspection = ServiceConnectionInspections::where('ServiceConnectionId', $id)->orderByDesc('created_at')->first();
+        $towns = Towns::where('id', $serviceConnection->Town)->pluck('Town', 'id');
+        $barangays = Barangays::where('TownId', $serviceConnection->Town)->pluck('Barangay', 'id');
+        $accountTypes = ServiceConnectionAccountTypes::all();
+        $meterReaders = MeterReaders::all();
 
         return view('/service_accounts/account_migration',
             [
                 'serviceConnection' => $serviceConnection,
+                'inspection' => $serviceConnectionInspection,
+                'town' => $towns,
+                'barangays' => $barangays,
+                'accountTypes' => $accountTypes,
+                'meterReaders' => $meterReaders,
             ]
         );
     }

@@ -36,7 +36,8 @@ class ServiceConnectionAccountTypes extends Model
     public $fillable = [
         'id',
         'AccountType',
-        'Description'
+        'Description',
+        'Alias'
     ];
 
     /**
@@ -47,7 +48,8 @@ class ServiceConnectionAccountTypes extends Model
     protected $casts = [
         'id' => 'string',
         'AccountType' => 'string',
-        'Description' => 'string'
+        'Description' => 'string',
+        'Alias' => 'string'
     ];
 
     /**
@@ -60,7 +62,8 @@ class ServiceConnectionAccountTypes extends Model
         'AccountType' => 'nullable|string|max:200',
         'Description' => 'nullable|string|max:1000',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'Alias' => 'string'
     ];
 
     

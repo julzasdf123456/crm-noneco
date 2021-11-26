@@ -272,3 +272,6 @@ Route::resource('billingTransformers', App\Http\Controllers\BillingTransformersC
 
 
 Route::resource('billingMeters', App\Http\Controllers\BillingMetersController::class);
+
+
+Route::resource('meterReaders', App\Http\Controllers\MeterReadersController::class);

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTableCRMServiceConnectionAccountTypes extends Migration
+class CreateTableBillingMeterReaders extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,13 @@ class CreateTableCRMServiceConnectionAccountTypes extends Migration
      */
     public function up()
     {
-        Schema::create('CRM_ServiceConnectionAccountTypes', function (Blueprint $table) {
+        Schema::create('Billing_MeterReaders', function (Blueprint $table) {
             $table->string('id')->unsigned();
             $table->primary('id');
-            $table->string('AccountType', 200)->nullable();
-            $table->string('Alias', 10)->nullable();
-            $table->string('Description', 1000)->nullable();
+            $table->string('MeterReaderCode', 30)->nullable();
+            $table->string('UserId', 50)->nullable();
+            $table->string('DeviceMacAddress', 60)->nullable();
+            $table->string('AreaCodeAssignment', 20)->nullable();
             $table->timestamps();
         });
     }
@@ -30,6 +31,6 @@ class CreateTableCRMServiceConnectionAccountTypes extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('CRM_ServiceConnectionAccountTypes');
+        Schema::dropIfExists('Billing_MeterReaders');
     }
 }
