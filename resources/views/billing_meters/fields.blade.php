@@ -1,66 +1,174 @@
-<!-- Serviceaccountid Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('ServiceAccountId', 'Serviceaccountid:') !!}
-    {!! Form::text('ServiceAccountId', null, ['class' => 'form-control','maxlength' => 120,'maxlength' => 120]) !!}
+{{-- Serial Number --}}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <!-- Serialnumber Field -->
+        <div class="col-lg-2 col-md-2">
+            {!! Form::label('SerialNumber', 'Serial No:') !!}
+        </div>
+
+        <div class="col-lg-4 col-md-4">
+            <div class="input-group">
+                {!! Form::text('SerialNumber', $meters != null ? $meter->SerialNumber : ($meterAndTransformer==null ? null : $meterAndTransformer->MeterSerialNumber), ['class' => 'form-control','maxlength' => 100,'maxlength' => 100]) !!}
+            </div>
+        </div>
+
+        <!-- Sealnumber Field -->
+        <div class="col-lg-2 col-md-2">
+            {!! Form::label('SealNumber', 'Seal No:') !!}
+        </div>
+
+        <div class="col-lg-4 col-md-4">
+            <div class="input-group">
+                {!! Form::text('SealNumber', $meters != null ? $meter->SealNumber : ($meterAndTransformer==null ? null : $meterAndTransformer->MeterSealNumber), ['class' => 'form-control','maxlength' => 100,'maxlength' => 100]) !!}
+            </div>
+        </div>
+    </div> 
 </div>
 
-<!-- Serialnumber Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('SerialNumber', 'Serialnumber:') !!}
-    {!! Form::text('SerialNumber', null, ['class' => 'form-control','maxlength' => 100,'maxlength' => 100]) !!}
+{{-- BRAND --}}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <!-- Brand Field -->
+        <div class="col-lg-2 col-md-2">
+            {!! Form::label('Brand', 'Brand:') !!}
+        </div>
+
+        <div class="col-lg-4 col-md-4">
+            <div class="input-group">
+                {!! Form::text('Brand', $meters != null ? $meter->Brand : ($meterAndTransformer==null ? null : $meterAndTransformer->MeterBrand), ['class' => 'form-control','maxlength' => 100,'maxlength' => 100]) !!}
+            </div>
+        </div>
+
+        <!-- Model Field -->
+        <div class="col-lg-2 col-md-2">
+            {!! Form::label('Model', 'Model:') !!}
+        </div>
+
+        <div class="col-lg-4 col-md-4">
+            <div class="input-group">
+                {!! Form::text('Model', $meters != null ? $meter->Model : null, ['class' => 'form-control','maxlength' => 100,'maxlength' => 100]) !!}
+            </div>
+        </div>
+    </div> 
 </div>
 
-<!-- Sealnumber Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('SealNumber', 'Sealnumber:') !!}
-    {!! Form::text('SealNumber', null, ['class' => 'form-control','maxlength' => 120,'maxlength' => 120]) !!}
+{{-- STATUS --}}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <!-- Status Field -->
+        <div class="col-lg-2 col-md-2">
+            {!! Form::label('Status', 'Meter Status:') !!}
+        </div>
+
+        <div class="col-lg-4 col-md-4">
+            <div class="input-group">
+                {!! Form::select('Status', ['FUNCTIONAL' => 'FUNCTIONAL', 'DEFECTIVE' => 'DEFECTIVE'], $meters != null ? $meter->Status : null, ['class' => 'form-control']) !!}
+            </div>
+        </div>
+
+        <!-- Multiplier Field -->
+        <div class="col-lg-2 col-md-2">
+            {!! Form::label('Multiplier', 'Multiplier:') !!}
+        </div>
+
+        <div class="col-lg-4 col-md-4">
+            <div class="input-group">
+                {!! Form::number('Multiplier', $meters != null ? $meter->Multiplier : '1.0', ['class' => 'form-control', 'maxlength' => 10,'maxlength' => 10, 'step' => 'any']) !!}
+            </div>
+        </div>
+    </div> 
 </div>
 
-<!-- Brand Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('Brand', 'Brand:') !!}
-    {!! Form::text('Brand', null, ['class' => 'form-control','maxlength' => 180,'maxlength' => 180]) !!}
+{{-- CONNECTION DATE --}}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <!-- Connectiondate Field -->
+        <div class="col-lg-2 col-md-2">
+            {!! Form::label('ConnectionDate', 'Connection Date:') !!}
+        </div>
+
+        <div class="col-lg-4 col-md-4">
+            <div class="input-group">
+                {!! Form::text('ConnectionDate', $meters != null ? $meter->ConnectionDate : ($serviceConnection != null ? $serviceConnection->DateTimeOfEnergization : null), ['class' => 'form-control','id'=>'ConnectionDate']) !!}
+            </div>
+        </div>
+
+        <!-- Datedisconnected Field -->
+        <div class="col-lg-2 col-md-2">
+            {!! Form::label('DateDisconnected', 'Disconnection Date:') !!}
+        </div>
+
+        <div class="col-lg-4 col-md-4">
+            <div class="input-group">
+                {!! Form::text('DateDisconnected', $meters != null ? $meter->DateDisconnected : null, ['class' => 'form-control','id'=>'DateDisconnected']) !!}
+            </div>
+        </div>
+    </div> 
 </div>
 
-<!-- Model Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('Model', 'Model:') !!}
-    {!! Form::text('Model', null, ['class' => 'form-control','maxlength' => 180,'maxlength' => 180]) !!}
+{{-- READINGS --}}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <!-- InitialReading Field -->
+        <div class="col-lg-2 col-md-2">
+            {!! Form::label('InitialReading', 'Initial Reading:') !!}
+        </div>
+
+        <div class="col-lg-4 col-md-4">
+            <div class="input-group">
+                {!! Form::number('InitialReading', $meters != null ? $meter->InitialReading : '0.0', ['class' => 'form-control', 'step' => 'any']) !!}
+            </div>
+        </div>
+
+        <!-- LatestReading Field -->
+        <div class="col-lg-2 col-md-2">
+            {!! Form::label('LatestReading', 'Latest Reading:') !!}
+        </div>
+
+        <div class="col-lg-4 col-md-4">
+            <div class="input-group">
+                {!! Form::number('LatestReading', $meters != null ? $meter->LatestReading : '0.0', ['class' => 'form-control', 'step' => 'any']) !!}
+            </div>
+        </div>
+    </div> 
 </div>
 
-<!-- Multiplier Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('Multiplier', 'Multiplier:') !!}
-    {!! Form::text('Multiplier', null, ['class' => 'form-control','maxlength' => 10,'maxlength' => 10]) !!}
-</div>
+{{-- TRANSFER --}}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <!-- Latestreadingdate Field -->
+        <div class="col-lg-2 col-md-2">
+            {!! Form::label('LatestReadingDate', 'Latest Reading Date:') !!}
+        </div>
 
-<!-- Status Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('Status', 'Status:') !!}
-    {!! Form::text('Status', null, ['class' => 'form-control','maxlength' => 60,'maxlength' => 60]) !!}
-</div>
+        <div class="col-lg-4 col-md-4">
+            <div class="input-group">
+                {!! Form::text('LatestReadingDate', $meters != null ? $meter->LatestReadingDate : null, ['class' => 'form-control','id'=>'LatestReadingDate']) !!}
+            </div>
+        </div>
 
-<!-- Connectiondate Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('ConnectionDate', 'Connectiondate:') !!}
-    {!! Form::text('ConnectionDate', null, ['class' => 'form-control','id'=>'ConnectionDate']) !!}
+        <!-- Datetransfered Field -->
+        <div class="col-lg-2 col-md-2">
+            {!! Form::label('DateTransfered', 'Date Transfered:') !!}
+        </div>
+
+        <div class="col-lg-4 col-md-4">
+            <div class="input-group">
+                {!! Form::text('DateTransfered', $meters != null ? $meter->DateTransfered : null, ['class' => 'form-control','id'=>'DateTransfered']) !!}
+            </div>
+        </div>
+    </div> 
 </div>
 
 @push('page_scripts')
     <script type="text/javascript">
         $('#ConnectionDate').datetimepicker({
-            format: 'YYYY-MM-DD HH:mm:ss',
+            format: 'YYYY-MM-DD',
             useCurrent: true,
             sideBySide: true
         })
     </script>
 @endpush
-
-<!-- Latestreadingdate Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('LatestReadingDate', 'Latestreadingdate:') !!}
-    {!! Form::text('LatestReadingDate', null, ['class' => 'form-control','id'=>'LatestReadingDate']) !!}
-</div>
 
 @push('page_scripts')
     <script type="text/javascript">
@@ -72,12 +180,6 @@
     </script>
 @endpush
 
-<!-- Datedisconnected Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('DateDisconnected', 'Datedisconnected:') !!}
-    {!! Form::text('DateDisconnected', null, ['class' => 'form-control','id'=>'DateDisconnected']) !!}
-</div>
-
 @push('page_scripts')
     <script type="text/javascript">
         $('#DateDisconnected').datetimepicker({
@@ -87,12 +189,6 @@
         })
     </script>
 @endpush
-
-<!-- Datetransfered Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('DateTransfered', 'Datetransfered:') !!}
-    {!! Form::text('DateTransfered', null, ['class' => 'form-control','id'=>'DateTransfered']) !!}
-</div>
 
 @push('page_scripts')
     <script type="text/javascript">

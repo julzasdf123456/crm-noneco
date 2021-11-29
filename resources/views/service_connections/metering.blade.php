@@ -8,27 +8,13 @@
                 @if($serviceConnectionMeter == null)
                     @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Metering Personnel'])) 
                         <a href="{{ route('serviceConnectionMtrTrnsfrmrs.create-step-three', [$serviceConnections->id]) }}" class="btn btn-sm" title="Add Metering Details">
-                            <lord-icon
-                                src="https://cdn.lordicon.com/mecwbjnp.json"
-                                trigger="loop"
-                                delay="1500"
-                                stroke="100"
-                                colors="primary:#121331,secondary:#08a88a"
-                                style="width:32px;height:32px">
-                            </lord-icon>
+                            <i class="fas fa-pen"></i>
                         </a>
                     @endif                    
                 @else
                     @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Metering Personnel'])) 
                         <a href="{{ route('serviceConnectionMtrTrnsfrmrs.edit', [$serviceConnectionMeter->id]) }}" class="btn btn-sm" title="Update Metering Details">
-                            <lord-icon
-                                src="https://cdn.lordicon.com/wloilxuq.json"
-                                trigger="loop"
-                                delay="1500"
-                                stroke="100"
-                                colors="primary:#121331,secondary:#08a88a"
-                                style="width:32px;height:32px">
-                            </lord-icon>
+                            <i class="fas fa-pen"></i>
                         </a>
                     @endif 
                     
@@ -111,27 +97,13 @@
                 @if($serviceConnectionMeter == null)
                     @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Metering Personnel'])) 
                         <a href="{{ route('serviceConnectionMtrTrnsfrmrs.create-step-three', [$serviceConnections->id]) }}" class="btn btn-sm" title="Add Transformer Details">
-                            <lord-icon
-                                src="https://cdn.lordicon.com/mecwbjnp.json"
-                                trigger="loop"
-                                delay="1500"
-                                stroke="100"
-                                colors="primary:#121331,secondary:#08a88a"
-                                style="width:32px;height:32px">
-                            </lord-icon>
+                            <i class="fas fa-pen"></i>
                         </a>
                     @endif
                 @else
                     @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Metering Personnel'])) 
                         <a href="{{ route('serviceConnectionMtrTrnsfrmrs.edit', [$serviceConnectionMeter->id]) }}" class="btn btn-sm" title="Update Transformer Details">
-                            <lord-icon
-                                src="https://cdn.lordicon.com/wloilxuq.json"
-                                trigger="loop"
-                                delay="1500"
-                                stroke="100"
-                                colors="primary:#121331,secondary:#08a88a"
-                                style="width:32px;height:32px">
-                            </lord-icon>
+                            <i class="fas fa-pen"></i>
                         </a>
                     @endif
                     <button type="button" class="btn btn-sm" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
@@ -147,6 +119,10 @@
                     <tr>
                         <th>Brand</th>
                         <td>{{ $serviceConnectionMeter->TransformerBrand }}</td>
+                    </tr>
+                    <tr>
+                        <th>Serial Number</th>
+                        <td>{{ $serviceConnectionMeter->TransformerNumber }}</td>
                     </tr>
                     <tr>
                         <th>Rating</th>

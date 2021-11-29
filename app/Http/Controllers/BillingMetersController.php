@@ -7,6 +7,8 @@ use App\Http\Requests\UpdateBillingMetersRequest;
 use App\Repositories\BillingMetersRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
+use App\Models\BillingMeters;
+use App\Models\ServiceAccounts;
 use Flash;
 use Response;
 
@@ -57,11 +59,24 @@ class BillingMetersController extends AppBaseController
     {
         $input = $request->all();
 
-        $billingMeters = $this->billingMetersRepository->create($input);
+        $sa = ServiceAccounts::find($input['ServiceAccountId']);
+        $bm = BillingMeters::find($sa->MeterDetailsId);
 
-        Flash::success('Billing Meters saved successfully.');
+        if ($bm != null) {
+            $billingMeters = $this->billingMetersRepository->update($request->all(), $bm->id);
 
-        return redirect(route('billingMeters.index'));
+            return redirect(route('serviceAccounts.account-migration-step-three', [$sa->id]));
+        } else {
+            $billingMeters = $this->billingMetersRepository->create($input);
+
+            if ($sa != null) {
+                $sa->MeterDetailsId = $billingMeters->id;
+                $sa->Multiplier = $billingMeters->Multiplier;
+                $sa->save();
+            }
+
+            return redirect(route('serviceAccounts.account-migration-step-three', [$sa->id]));
+        }
     }
 
     /**

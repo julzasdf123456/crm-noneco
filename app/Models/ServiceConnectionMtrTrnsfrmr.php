@@ -98,7 +98,8 @@ class ServiceConnectionMtrTrnsfrmr extends Model
         'TransformerOwnershipType',
         'TransformerOwnership',
         'TransformerBrand',
-        'TypeOfMetering'
+        'TypeOfMetering',
+        'TransformerNumber'
     ];
 
     /**
@@ -141,6 +142,7 @@ class ServiceConnectionMtrTrnsfrmr extends Model
         'TransformerOwnership' => 'string',
         'TransformerBrand' => 'string',
         'TypeOfMetering' => 'string',
+        'TransformerNumber' => 'string'
     ];
 
     /**
@@ -185,6 +187,7 @@ class ServiceConnectionMtrTrnsfrmr extends Model
         'created_at' => 'nullable',
         'updated_at' => 'nullable',
         'TypeOfMetering' => 'nullable|string',
+        'TransformerNumber' => 'string|nullable'
     ];
 
     

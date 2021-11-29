@@ -53,7 +53,9 @@ class BillingMeters extends Model
         'ConnectionDate',
         'LatestReadingDate',
         'DateDisconnected',
-        'DateTransfered'
+        'DateTransfered',
+        'InitialReading',
+        'LatestReading'
     ];
 
     /**
@@ -73,7 +75,9 @@ class BillingMeters extends Model
         'ConnectionDate' => 'date',
         'LatestReadingDate' => 'datetime',
         'DateDisconnected' => 'date',
-        'DateTransfered' => 'date'
+        'DateTransfered' => 'date',
+        'InitialReading' => 'string',
+        'LatestReading' => 'string'
     ];
 
     /**
@@ -95,7 +99,9 @@ class BillingMeters extends Model
         'DateDisconnected' => 'nullable',
         'DateTransfered' => 'nullable',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'InitialReading' => 'string|nullable',
+        'LatestReading' => 'string|nullable'
     ];
 
     

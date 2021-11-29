@@ -7,7 +7,7 @@
 
         <div class="col-lg-10 col-md-8">
             <div class="input-group">
-                {!! Form::text('OldAccountNo', null, ['class' => 'form-control','maxlength' => 50,'maxlength' => 50]) !!}
+                {!! Form::text('OldAccountNo', $serviceAccount != null ? $serviceAccount->OldAccountNo : null, ['class' => 'form-control','maxlength' => 50,'maxlength' => 50]) !!}
             </div>
         </div>
     </div> 
@@ -22,7 +22,7 @@
 
         <div class="col-lg-9 col-md-7">
             <div class="input-group">
-                {!! Form::text('SequenceCode', null, ['class' => 'form-control','maxlength' => 50,'maxlength' => 50]) !!}
+                {!! Form::text('SequenceCode', $serviceAccount != null ? $serviceAccount->SequenceCode : null, ['class' => 'form-control','maxlength' => 50,'maxlength' => 50]) !!}
             </div>
         </div>
     </div> 
@@ -165,9 +165,20 @@
             {!! Form::label('ForDistribution', 'For Distribution:') !!}
         </div>
 
-        <div class="col-lg-3 col-md-2">
+        <div class="col-lg-1 col-md-1">
             <div class="input-group">
                 {{ Form::checkbox('ForDistribution', 'Yes', false, ['class' => 'custom-checkbox']) }}
+            </div>
+        </div>
+
+        <!-- Senior Citizen Field -->
+        <div class="col-lg-1 col-md-2">
+            {!! Form::label('SeniorCitizen', 'Senior Citizen:') !!}
+        </div>
+
+        <div class="col-lg-1 col-md-1">
+            <div class="input-group">
+                {{ Form::checkbox('SeniorCitizen', 'Yes', false, ['class' => 'custom-checkbox']) }}
             </div>
         </div>
     </div> 

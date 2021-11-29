@@ -7,7 +7,7 @@
             <div class="col-sm-12">
                 <span>
                     <h4 style="display: inline; margin-right: 15px;">Account Migration Wizzard</h4>
-                    <i class="text-muted">Energized service connection accounts for activation</i>
+                    <i class="text-muted">Step 1. Validate Consumer Information</i>
                 </span>
             </div>
         </div>
@@ -46,6 +46,7 @@
                     <input type="hidden" value="{{ $serviceConnection->EmailAddress }}" name="EmailAddress">
                     <input type="hidden" value="{{ $serviceConnection->id }}" name="ServiceConnectionId">
                     <input type="hidden" value="{{ $inspection->GeoMeteringPole }}" name="GPSMeter">
+                    <input type="hidden" value="{{ $serviceConnection->AccountCount }}" name="AccountCount">
 
                     @include('service_accounts.fields')
                 </div>

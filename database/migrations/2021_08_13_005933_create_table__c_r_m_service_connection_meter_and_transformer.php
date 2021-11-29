@@ -45,6 +45,7 @@ class CreateTableCRMServiceConnectionMeterAndTransformer extends Migration
             $table->string('SecuritySealPhaseC', 250)->nullable();
             $table->string('Phase', 80)->nullable();
             $table->string('TransformerQuantity', 20)->nullable();
+            $table->string('TransformerNumber', 150)->nullable();
             $table->string('TransformerRating', 150)->nullable();
             $table->string('TransformerOwnershipType', 150)->nullable();
             $table->string('TransformerOwnership', 150)->nullable();

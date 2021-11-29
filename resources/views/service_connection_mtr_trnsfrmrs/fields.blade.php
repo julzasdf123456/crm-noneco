@@ -146,6 +146,24 @@
     </div> 
 </div>
 
+<!-- TransformerNumber Field -->
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('TransformerNumber', 'Transformer No.') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-charging-station"></i></span>
+                </div>
+                {!! Form::text('TransformerNumber', null, ['class' => 'form-control','maxlength' => 150,'maxlength' => 150, 'placeholder' => 'Transformer Serial Number']) !!}
+            </div>
+        </div>
+    </div> 
+</div>
+
 <!-- Transformerquantity Field -->
 <div class="form-group col-sm-12">
     <div class="row">

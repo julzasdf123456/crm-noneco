@@ -162,6 +162,8 @@ Route::resource('serviceConnectionCrews', App\Http\Controllers\ServiceConnection
 
 Route::get('/service_accounts/pending-accounts/', [App\Http\Controllers\ServiceAccountsController::class, 'pendingAccounts'])->name('serviceAccounts.pending-accounts');
 Route::get('/service_accounts/account-migration/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'accountMigration'])->name('serviceAccounts.account-migration');
+Route::get('/service_accounts/account-migration-step-two/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'accountMigrationStepTwo'])->name('serviceAccounts.account-migration-step-two');
+Route::get('/service_accounts/account-migration-step-three/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'accountMigrationStepThree'])->name('serviceAccounts.account-migration-step-three');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 

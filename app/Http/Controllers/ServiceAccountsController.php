@@ -15,7 +15,10 @@ use App\Models\Towns;
 use App\Models\Barangays;
 use App\Models\ServiceConnectionInspections;
 use App\Models\ServiceConnectionAccountTypes;
+use App\Models\ServiceAccounts;
 use App\Models\MeterReaders;
+use App\Models\BillingMeters;
+use App\Models\ServiceConnectionMtrTrnsfrmr;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Flash;
 use Response;
@@ -82,11 +85,20 @@ class ServiceAccountsController extends AppBaseController
     {
         $input = $request->all();
 
-        $serviceAccounts = $this->serviceAccountsRepository->create($input);
+        $sc = ServiceAccounts::find($input['id']);
 
-        Flash::success('Service Accounts saved successfully.');
+        if ($sc != null) {
+            $serviceAccounts = $this->serviceAccountsRepository->update($request->all(), $sc->id);
 
-        return redirect(route('serviceAccounts.index'));
+            return redirect(route('serviceAccounts.account-migration-step-two', [$input['id']]));
+        } else {
+            $serviceAccounts = $this->serviceAccountsRepository->create($input);
+
+            Flash::success('Service Accounts saved successfully.');
+
+            return redirect(route('serviceAccounts.account-migration-step-two', [$serviceAccounts->id]));
+        }
+        
     }
 
     /**
@@ -207,6 +219,7 @@ class ServiceAccountsController extends AppBaseController
 
     public function accountMigration($id) {
         $serviceConnection = ServiceConnections::find($id);
+        $serviceAccount = ServiceAccounts::where('ServiceConnectionId', $id)->first();
         $serviceConnectionInspection = ServiceConnectionInspections::where('ServiceConnectionId', $id)->orderByDesc('created_at')->first();
         $towns = Towns::where('id', $serviceConnection->Town)->pluck('Town', 'id');
         $barangays = Barangays::where('TownId', $serviceConnection->Town)->pluck('Barangay', 'id');
@@ -221,7 +234,68 @@ class ServiceAccountsController extends AppBaseController
                 'barangays' => $barangays,
                 'accountTypes' => $accountTypes,
                 'meterReaders' => $meterReaders,
+                'serviceAccount' => $serviceAccount,
             ]
         );
+    }
+
+    public function accountMigrationStepTwo($id) {
+        $serviceAccount = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_ServiceAccounts.Purok as Sitio',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.MeterDetailsId')
+            ->where('Billing_ServiceAccounts.id', $id)
+            ->first();
+
+        $serviceConnection = ServiceConnections::find($serviceAccount->ServiceConnectionId);
+        $meters = BillingMeters::find($serviceAccount->MeterDetailsId);
+        $meterAndTransformer = ServiceConnectionMtrTrnsfrmr::where('ServiceConnectionId', $serviceAccount->ServiceConnectionId)->first();
+
+        return view('/service_accounts/account_migration_step_two', [
+            'serviceAccount' => $serviceAccount,
+            'meterAndTransformer' => $meterAndTransformer,
+            'serviceConnection' => $serviceConnection,
+            'meters' => $meters
+        ]);
+    }
+
+    public function accountMigrationStepThree($id) {
+        $serviceAccount = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_ServiceAccounts.Purok as Sitio',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.MeterDetailsId')
+            ->where('Billing_ServiceAccounts.id', $id)
+            ->first();
+
+        $serviceConnection = ServiceConnections::find($serviceAccount->ServiceConnectionId);
+        $meters = BillingMeters::find($serviceAccount->MeterDetailsId);
+        $meterAndTransformer = ServiceConnectionMtrTrnsfrmr::where('ServiceConnectionId', $serviceAccount->ServiceConnectionId)->first();
+
+        return view('/service_accounts/account_migration_step_three', [
+            'serviceAccount' => $serviceAccount,
+            'meterAndTransformer' => $meterAndTransformer,
+            'serviceConnection' => $serviceConnection,
+            'meters' => $meters
+        ]);
     }
 }

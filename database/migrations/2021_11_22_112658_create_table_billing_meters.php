@@ -27,6 +27,8 @@ class CreateTableBillingMeters extends Migration
             $table->datetime('LatestReadingDate')->nullable();
             $table->date('DateDisconnected')->nullable();
             $table->date('DateTransfered')->nullable();
+            $table->string('InitialReading', 30)->nullable();
+            $table->string('LatestReading', 30)->nullable();
             $table->timestamps();
         });
     }
