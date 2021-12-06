@@ -7,6 +7,10 @@ use App\Http\Requests\UpdateBillingTransformersRequest;
 use App\Repositories\BillingTransformersRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
+use App\Models\ServiceAccounts;
+use App\Models\ServiceConnections;
+use Illuminate\Support\Facades\Auth;
+use App\Models\IDGenerator;
 use Flash;
 use Response;
 
@@ -56,12 +60,29 @@ class BillingTransformersController extends AppBaseController
     public function store(CreateBillingTransformersRequest $request)
     {
         $input = $request->all();
-
+        $input['id'] = IDGenerator::generateRandString(30);
         $billingTransformers = $this->billingTransformersRepository->create($input);
 
-        Flash::success('Billing Transformers saved successfully.');
+        // UPDATE SERVICE ACCOUNT
+        $serviceAccount = ServiceAccounts::find($request['ServiceAccountId']);
+        $serviceAccount->Coreloss = $request['Coreloss'];
+        $serviceAccount->UserId = Auth::id();
+        $serviceAccount->Main = $request['Main'];
+        $serviceAccount->Organization = $request['BAPA'];
+        $serviceAccount->TransformerDetailsId = $input['id'];
+        $serviceAccount->Locked = 'Yes';
+        $serviceAccount->Evat5Percent = $request['Evat5Percent'];
+        $serviceAccount->Ewt2Percent = $request['Ewt2Percent'];
+        $serviceAccount->save();
 
-        return redirect(route('billingTransformers.index'));
+        // UPDATE SERVICE CONNECTION STATUS
+        $serviceConnection = ServiceConnections::find($serviceAccount->ServiceConnectionId);
+        $serviceConnection->Status = 'Closed';
+        $serviceConnection->save();
+
+        Flash::success('Account migrated successfully.');
+
+        return redirect(route('serviceAccounts.pending-accounts'))->with('success', 'Account migrated!');
     }
 
     /**

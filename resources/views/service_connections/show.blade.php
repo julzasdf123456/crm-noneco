@@ -12,12 +12,13 @@ use Illuminate\Support\Facades\Auth;
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    @if (empty($timeFrame) | $timeFrame == null)
+                    {{-- @if (empty($timeFrame) | $timeFrame == null)
                         <span><i>Timeframe not recorded</i></span>
                     @else
                         <span class="badge-lg bg-warning"><strong>{{ $timeFrame->first()==null ? 'Timeframe not recorded' : $timeFrame->first()->Status; }}</strong></span>
-                    @endif
+                    @endif --}}
                     
+                    <span class="badge-lg bg-warning"><strong>{{ $serviceConnections->Status }}</strong></span>
                 </div> 
                 <div class="col-sm-6">
                     <a class="btn btn-default float-right"

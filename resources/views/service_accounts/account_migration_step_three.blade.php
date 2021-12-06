@@ -97,12 +97,13 @@
             {!! Form::open(['route' => 'billingTransformers.store']) !!}
             <div class="card-body">
                 <div class="row">
+                    <input type="hidden" name="ServiceAccountId" value="{{ $serviceAccount->id }}">
+
                     @include('billing_transformers.fields')
                 </div>
             </div>
             <div class="card-footer">
-                {!! Form::submit('Save', ['class' => 'btn btn-primary']) !!}
-                <a href="{{ route('billingTransformers.index') }}" class="btn btn-default">Cancel</a>
+                {!! Form::submit('Finish', ['class' => 'btn btn-primary']) !!}
             </div>
             {!! Form::close() !!}
         </div>

@@ -19,7 +19,15 @@
 </section>
 
 <div class="content px-3">
+    
     <div class="row">
+        @if(session()->has('message'))
+            <div class="col-lg-12">
+                <div class="alert alert-success">
+                    {{ session()->get('success') }}
+                </div>
+            </div>
+        @endif
         <div class="col-lg-12">
             <table class="table table-hover table-sm">
                 <thead>
