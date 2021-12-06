@@ -277,3 +277,9 @@ Route::resource('billingMeters', App\Http\Controllers\BillingMetersController::c
 
 
 Route::resource('meterReaders', App\Http\Controllers\MeterReadersController::class);
+
+
+Route::resource('meterReaderTrackNames', App\Http\Controllers\MeterReaderTrackNamesController::class);
+
+
+Route::resource('meterReaderTracks', App\Http\Controllers\MeterReaderTracksController::class);
