@@ -53,9 +53,9 @@ Route::post('save-uploaded-images', [ServiceConnectionsEnergization::class, 'sav
 // TRACKS
 Route::post('save-track-names', [MeterReaderTracksAPI::class, 'saveTrackNames']);
 Route::post('save-tracks', [MeterReaderTracksAPI::class, 'saveTracks']);
+Route::get('get-downloadable-tracknames', [MeterReaderTracksAPI::class, 'getDownloadableTrackNames']);
+Route::get('get-downloadable-tracks', [MeterReaderTracksAPI::class, 'getDownloadableTracks']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
-
-

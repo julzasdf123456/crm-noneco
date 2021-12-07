@@ -45,6 +45,18 @@ class MeterReaderTracksAPI extends Controller {
             return response()->json(['res' => 'ok'], $this->successStatus);
         }
     }
+
+    public function getDownloadableTrackNames() {
+        $trackNames = MeterReaderTrackNames::all();
+
+        return response()->json($trackNames, 200);
+    }
+
+    public function getDownloadableTracks(Request $request) {
+        $tracks = MeterReaderTracks::where('TrackNameId', $request['TrackNameId'])->get();
+
+        return response()->json($tracks, 200);
+    }
 }
 
 ?>
