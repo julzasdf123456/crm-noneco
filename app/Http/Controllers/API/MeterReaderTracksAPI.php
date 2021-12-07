@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\API;
+use App\Http\Controllers\Controller; 
 use Illuminate\Http\Request; 
 use App\Models\MeterReaderTrackNames;
 use App\Models\MeterReaderTracks;
@@ -20,7 +21,7 @@ class MeterReaderTracksAPI extends Controller {
             $trackNames->TrackName = $request['TrackName'];
             $trackNames->save();
 
-            return response()->json($trackNames, $this->successStatus);
+            return response()->json(['res' => 'ok'], $this->successStatus);
         }
     }
 
@@ -41,7 +42,7 @@ class MeterReaderTracksAPI extends Controller {
             $track->Captured = $request['created_at'];
             $track->save();
 
-            return response()->json($track, $this->successStatus);
+            return response()->json(['res' => 'ok'], $this->successStatus);
         }
     }
 }

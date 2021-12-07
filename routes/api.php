@@ -9,6 +9,7 @@ use App\Http\Controllers\API\ServiceConnectionsEnergization;
 use App\Http\Controllers\API\OtherData;
 use App\Http\Controllers\API\TicketrepositoriesController;
 use App\Http\Controllers\API\TicketsController;
+use App\Http\Controllers\API\MeterReaderTracksAPI;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +49,10 @@ Route::get('update-downloaded-status', [TicketsController::class, 'updateDownloa
 
 // IMAGES
 Route::post('save-uploaded-images', [ServiceConnectionsEnergization::class, 'saveUploadedImages']);
+
+// TRACKS
+Route::post('save-track-names', [MeterReaderTracksAPI::class, 'saveTrackNames']);
+Route::post('save-tracks', [MeterReaderTracksAPI::class, 'saveTracks']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
