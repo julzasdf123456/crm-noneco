@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateMeterReaderTracksRequest;
 use App\Repositories\MeterReaderTracksRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
+use App\Models\MeterReaderTracks;
 use Flash;
 use Response;
 
@@ -152,5 +153,13 @@ class MeterReaderTracksController extends AppBaseController
         Flash::success('Meter Reader Tracks deleted successfully.');
 
         return redirect(route('meterReaderTracks.index'));
+    }
+
+    public function getTracksByTrackNameId(Request $request) {
+        if ($request->ajax()) {
+            $tracks = MeterReaderTracks::where('TrackNameId', $request['TrackNameId'])->get();
+
+            return response()->json($tracks, 200);
+        }
     }
 }

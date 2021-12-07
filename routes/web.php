@@ -281,5 +281,5 @@ Route::resource('meterReaders', App\Http\Controllers\MeterReadersController::cla
 
 Route::resource('meterReaderTrackNames', App\Http\Controllers\MeterReaderTrackNamesController::class);
 
-
+Route::get('/meter_reader_tracks/get-tracks-by-tracknameid', [App\Http\Controllers\MeterReaderTracksController::class, 'getTracksByTrackNameId'])->name('meterReaderTracks.get-tracks-by-tracknameid');
 Route::resource('meterReaderTracks', App\Http\Controllers\MeterReaderTracksController::class);

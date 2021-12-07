@@ -17,7 +17,7 @@ class MeterReaderTracksAPI extends Controller {
             return response()->json(['res' => 'exists'], $this->successStatus);
         } else {
             $trackNames = new MeterReaderTrackNames;
-            $trackNames->id = IDGenerator::generateIDandRandString();
+            $trackNames->id = $request['id'];
             $trackNames->TrackName = $request['TrackName'];
             $trackNames->save();
 

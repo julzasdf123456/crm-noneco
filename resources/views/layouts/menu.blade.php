@@ -330,6 +330,12 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-user-alt-slash nav-icon"></i><p>Pending Accounts</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('meterReaderTrackNames.index') }}"
+                   class="nav-link {{ Request::is('meterReaderTrackNames.index*') ? 'active' : '' }}">                   
+                   <i class="fas fa-map-marked-alt nav-icon"></i><p>M. Reader Tracks</p>
+                </a>
+            </li>
         </ul>
     </li>
 @endcanany
