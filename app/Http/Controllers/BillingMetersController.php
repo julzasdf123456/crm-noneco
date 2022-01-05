@@ -108,15 +108,15 @@ class BillingMetersController extends AppBaseController
      */
     public function edit($id)
     {
-        $billingMeters = $this->billingMetersRepository->find($id);
+        $meters = $this->billingMetersRepository->find($id);
 
-        if (empty($billingMeters)) {
+        if (empty($meters)) {
             Flash::error('Billing Meters not found');
 
             return redirect(route('billingMeters.index'));
         }
 
-        return view('billing_meters.edit')->with('billingMeters', $billingMeters);
+        return view('/billing_meters/update_step_two')->with('meters', $meters);
     }
 
     /**
@@ -139,9 +139,16 @@ class BillingMetersController extends AppBaseController
 
         $billingMeters = $this->billingMetersRepository->update($request->all(), $id);
 
+        // UPDATE ServiceAccounts.Multiplier
+        $sa = ServiceAccounts::find($billingMeters->ServiceAccountId);
+        if ($sa != null) {
+            $sa->Multiplier = $request['Multiplier'];
+            $sa->save();
+        }
+
         Flash::success('Billing Meters updated successfully.');
 
-        return redirect(route('billingMeters.index'));
+        return redirect(route('serviceAccounts.show', [$billingMeters->ServiceAccountId]));
     }
 
     /**

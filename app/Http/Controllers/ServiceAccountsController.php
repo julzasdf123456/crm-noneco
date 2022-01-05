@@ -18,6 +18,7 @@ use App\Models\ServiceConnectionAccountTypes;
 use App\Models\ServiceAccounts;
 use App\Models\MeterReaders;
 use App\Models\BillingMeters;
+use App\Models\BillingTransformers;
 use App\Models\ServiceConnectionMtrTrnsfrmr;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Flash;
@@ -47,14 +48,14 @@ class ServiceAccountsController extends AppBaseController
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
                         ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
                         ->paginate(15);
         } else {
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
                         ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
                         ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
@@ -110,7 +111,41 @@ class ServiceAccountsController extends AppBaseController
      */
     public function show($id)
     {
-        $serviceAccounts = $this->serviceAccountsRepository->find($id);
+        $serviceAccounts = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.ForDistribution',
+                    'Billing_ServiceAccounts.Organization',
+                    'Billing_ServiceAccounts.Main',
+                    'Billing_ServiceAccounts.GroupCode',
+                    'Billing_ServiceAccounts.Multiplier',
+                    'Billing_ServiceAccounts.Coreloss',
+                    'Billing_ServiceAccounts.ConnectionDate',
+                    'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.SeniorCitizen',
+                    'Billing_ServiceAccounts.Evat5Percent',
+                    'Billing_ServiceAccounts.Ewt2Percent',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->where('Billing_ServiceAccounts.id', $id)
+            ->first();
+
+        $meters = BillingMeters::where('ServiceAccountId', $id)
+            ->orderByDesc('created_at')
+            ->first();
+
+        $transformer = BillingTransformers::where('ServiceAccountId', $id)
+            ->orderByDesc('created_at')
+            ->first();
 
         if (empty($serviceAccounts)) {
             Flash::error('Service Accounts not found');
@@ -118,7 +153,11 @@ class ServiceAccountsController extends AppBaseController
             return redirect(route('serviceAccounts.index'));
         }
 
-        return view('service_accounts.show')->with('serviceAccounts', $serviceAccounts);
+        return view('service_accounts.show', [
+            'serviceAccounts' => $serviceAccounts,
+            'meters' => $meters,
+            'transformer' => $transformer,
+        ]);
     }
 
     /**
@@ -130,15 +169,15 @@ class ServiceAccountsController extends AppBaseController
      */
     public function edit($id)
     {
-        $serviceAccounts = $this->serviceAccountsRepository->find($id);
+        $serviceAccount = $this->serviceAccountsRepository->find($id);
 
-        if (empty($serviceAccounts)) {
+        if (empty($serviceAccount)) {
             Flash::error('Service Accounts not found');
 
             return redirect(route('serviceAccounts.index'));
         }
 
-        return view('service_accounts.edit')->with('serviceAccounts', $serviceAccounts);
+        return view('service_accounts.edit')->with('serviceAccount', $serviceAccount);
     }
 
     /**
@@ -163,7 +202,7 @@ class ServiceAccountsController extends AppBaseController
 
         Flash::success('Service Accounts updated successfully.');
 
-        return redirect(route('serviceAccounts.index'));
+        return redirect(route('serviceAccounts.show', [$id]));
     }
 
     /**
@@ -296,6 +335,22 @@ class ServiceAccountsController extends AppBaseController
             'meterAndTransformer' => $meterAndTransformer,
             'serviceConnection' => $serviceConnection,
             'meters' => $meters
+        ]);
+    }
+
+    public function updateStepOne($id) {
+        $serviceAccount = ServiceAccounts::find($id);
+        $towns = Towns::where('id', $serviceAccount->Town)->pluck('Town', 'id');
+        $barangays = Barangays::where('TownId', $serviceAccount->Town)->pluck('Barangay', 'id');
+        $accountTypes = ServiceConnectionAccountTypes::all();
+        $meterReaders = MeterReaders::all();
+
+        return view('/service_accounts/update_step_one', [
+            'serviceAccount' => $serviceAccount,
+            'towns' => $towns,
+            'barangays' => $barangays,
+            'accountTypes' => $accountTypes,
+            'meterReaders' => $meterReaders
         ]);
     }
 }

@@ -1181,7 +1181,7 @@ class ServiceConnectionsController extends AppBaseController
         } 
     }
 
-    public function transformerIndex() {
+    public function transformerIndex() { 
         $serviceConnections = DB::table('CRM_ServiceConnections')
                     ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
                     ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')                    
@@ -1212,7 +1212,7 @@ class ServiceConnectionsController extends AppBaseController
     }
 
     public function transformerAssigning($scId) {
-        $serviceConnection = DB::table('CRM_ServiceConnections')
+        $serviceConnection = DB::table('CRM_ServicseConnections')
             ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
             ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
             ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')

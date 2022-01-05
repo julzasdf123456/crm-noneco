@@ -164,6 +164,7 @@ Route::get('/service_accounts/pending-accounts/', [App\Http\Controllers\ServiceA
 Route::get('/service_accounts/account-migration/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'accountMigration'])->name('serviceAccounts.account-migration');
 Route::get('/service_accounts/account-migration-step-two/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'accountMigrationStepTwo'])->name('serviceAccounts.account-migration-step-two');
 Route::get('/service_accounts/account-migration-step-three/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'accountMigrationStepThree'])->name('serviceAccounts.account-migration-step-three');
+Route::get('/service_accounts/update_step_one/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'updateStepOne'])->name('serviceAccounts.update-step-one');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 

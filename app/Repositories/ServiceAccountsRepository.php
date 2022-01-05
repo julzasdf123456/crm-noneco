@@ -36,6 +36,7 @@ class ServiceAccountsRepository extends BaseRepository
         'ComputeType',
         'Organization',
         'OrganizationParentAccount',
+        'AccountCount',
         'GPSMeter'
     ];
 

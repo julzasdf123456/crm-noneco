@@ -61,6 +61,11 @@ class CreateTableBillingServiceAccounts extends Migration
             // OLD Data
             $table->string('OldAccountNo', 50)->nullable();
 
+            // DISCONNECTION and CONNECTION DATA            
+            $table->date('ConnectionDate')->nullable();
+            $table->datetime('LatestReadingDate')->nullable();
+            $table->date('DateDisconnected')->nullable();
+            $table->date('DateTransfered')->nullable();
 
             $table->string('UserId', 50)->nullable();
         });

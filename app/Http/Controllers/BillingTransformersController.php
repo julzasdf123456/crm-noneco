@@ -122,7 +122,7 @@ class BillingTransformersController extends AppBaseController
             return redirect(route('billingTransformers.index'));
         }
 
-        return view('billing_transformers.edit')->with('billingTransformers', $billingTransformers);
+        return view('billing_transformers.update_step_three')->with('billingTransformers', $billingTransformers);
     }
 
     /**
@@ -147,7 +147,7 @@ class BillingTransformersController extends AppBaseController
 
         Flash::success('Billing Transformers updated successfully.');
 
-        return redirect(route('billingTransformers.index'));
+        return redirect(route('serviceAccounts.show', [$billingTransformers->ServiceAccountId]));
     }
 
     /**
@@ -175,4 +175,5 @@ class BillingTransformersController extends AppBaseController
 
         return redirect(route('billingTransformers.index'));
     }
+    
 }

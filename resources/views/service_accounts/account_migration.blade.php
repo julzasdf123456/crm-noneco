@@ -47,6 +47,7 @@
                     <input type="hidden" value="{{ $serviceConnection->id }}" name="ServiceConnectionId">
                     <input type="hidden" value="{{ $inspection->GeoMeteringPole }}" name="GPSMeter">
                     <input type="hidden" value="{{ $serviceConnection->AccountCount }}" name="AccountCount">
+                    <input type="hidden" value="{{ $serviceConnection != null ? $serviceConnection->DateTimeOfEnergization : null }}" name="ConnectionDate">
 
                     @include('service_accounts.fields')
                 </div>

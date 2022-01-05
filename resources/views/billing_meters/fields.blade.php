@@ -8,7 +8,7 @@
 
         <div class="col-lg-4 col-md-4">
             <div class="input-group">
-                {!! Form::text('SerialNumber', $meters != null ? $meter->SerialNumber : ($meterAndTransformer==null ? null : $meterAndTransformer->MeterSerialNumber), ['class' => 'form-control','maxlength' => 100,'maxlength' => 100]) !!}
+                {!! Form::text('SerialNumber', $meters != null ? $meters->SerialNumber : ($meterAndTransformer==null ? null : $meterAndTransformer->MeterSerialNumber), ['class' => 'form-control','maxlength' => 100,'maxlength' => 100]) !!}
             </div>
         </div>
 
@@ -19,7 +19,7 @@
 
         <div class="col-lg-4 col-md-4">
             <div class="input-group">
-                {!! Form::text('SealNumber', $meters != null ? $meter->SealNumber : ($meterAndTransformer==null ? null : $meterAndTransformer->MeterSealNumber), ['class' => 'form-control','maxlength' => 100,'maxlength' => 100]) !!}
+                {!! Form::text('SealNumber', $meters != null ? $meters->SealNumber : ($meterAndTransformer==null ? null : $meterAndTransformer->MeterSealNumber), ['class' => 'form-control','maxlength' => 100,'maxlength' => 100]) !!}
             </div>
         </div>
     </div> 
@@ -35,7 +35,7 @@
 
         <div class="col-lg-4 col-md-4">
             <div class="input-group">
-                {!! Form::text('Brand', $meters != null ? $meter->Brand : ($meterAndTransformer==null ? null : $meterAndTransformer->MeterBrand), ['class' => 'form-control','maxlength' => 100,'maxlength' => 100]) !!}
+                {!! Form::text('Brand', $meters != null ? $meters->Brand : ($meterAndTransformer==null ? null : $meterAndTransformer->MeterBrand), ['class' => 'form-control','maxlength' => 100,'maxlength' => 100]) !!}
             </div>
         </div>
 
@@ -46,7 +46,7 @@
 
         <div class="col-lg-4 col-md-4">
             <div class="input-group">
-                {!! Form::text('Model', $meters != null ? $meter->Model : null, ['class' => 'form-control','maxlength' => 100,'maxlength' => 100]) !!}
+                {!! Form::text('Model', $meters != null ? $meters->Model : null, ['class' => 'form-control','maxlength' => 100,'maxlength' => 100]) !!}
             </div>
         </div>
     </div> 
@@ -62,7 +62,7 @@
 
         <div class="col-lg-4 col-md-4">
             <div class="input-group">
-                {!! Form::select('Status', ['FUNCTIONAL' => 'FUNCTIONAL', 'DEFECTIVE' => 'DEFECTIVE'], $meters != null ? $meter->Status : null, ['class' => 'form-control']) !!}
+                {!! Form::select('Status', ['FUNCTIONAL' => 'FUNCTIONAL', 'DEFECTIVE' => 'DEFECTIVE'], $meters != null ? $meters->Status : null, ['class' => 'form-control']) !!}
             </div>
         </div>
 
@@ -73,7 +73,7 @@
 
         <div class="col-lg-4 col-md-4">
             <div class="input-group">
-                {!! Form::number('Multiplier', $meters != null ? $meter->Multiplier : '1.0', ['class' => 'form-control', 'maxlength' => 10,'maxlength' => 10, 'step' => 'any']) !!}
+                {!! Form::number('Multiplier', $meters != null ? $meters->Multiplier : '1.0', ['class' => 'form-control', 'maxlength' => 10,'maxlength' => 10, 'step' => 'any']) !!}
             </div>
         </div>
     </div> 
@@ -89,7 +89,7 @@
 
         <div class="col-lg-4 col-md-4">
             <div class="input-group">
-                {!! Form::text('ConnectionDate', $meters != null ? $meter->ConnectionDate : ($serviceConnection != null ? $serviceConnection->DateTimeOfEnergization : null), ['class' => 'form-control','id'=>'ConnectionDate']) !!}
+                {!! Form::text('ConnectionDate', $meters != null ? $meters->ConnectionDate : ($serviceConnection != null ? $serviceConnection->DateTimeOfEnergization : null), ['class' => 'form-control','id'=>'ConnectionDate']) !!}
             </div>
         </div>
 
@@ -100,7 +100,7 @@
 
         <div class="col-lg-4 col-md-4">
             <div class="input-group">
-                {!! Form::text('DateDisconnected', $meters != null ? $meter->DateDisconnected : null, ['class' => 'form-control','id'=>'DateDisconnected']) !!}
+                {!! Form::text('DateDisconnected', $meters != null ? $meters->DateDisconnected : null, ['class' => 'form-control','id'=>'DateDisconnected']) !!}
             </div>
         </div>
     </div> 
@@ -116,7 +116,7 @@
 
         <div class="col-lg-4 col-md-4">
             <div class="input-group">
-                {!! Form::number('InitialReading', $meters != null ? $meter->InitialReading : '0.0', ['class' => 'form-control', 'step' => 'any']) !!}
+                {!! Form::number('InitialReading', $meters != null ? $meters->InitialReading : '0.0', ['class' => 'form-control', 'step' => 'any']) !!}
             </div>
         </div>
 
@@ -127,7 +127,7 @@
 
         <div class="col-lg-4 col-md-4">
             <div class="input-group">
-                {!! Form::number('LatestReading', $meters != null ? $meter->LatestReading : '0.0', ['class' => 'form-control', 'step' => 'any']) !!}
+                {!! Form::number('LatestReading', $meters != null ? $meters->LatestReading : '0.0', ['class' => 'form-control', 'step' => 'any']) !!}
             </div>
         </div>
     </div> 
@@ -143,7 +143,7 @@
 
         <div class="col-lg-4 col-md-4">
             <div class="input-group">
-                {!! Form::text('LatestReadingDate', $meters != null ? $meter->LatestReadingDate : null, ['class' => 'form-control','id'=>'LatestReadingDate']) !!}
+                {!! Form::text('LatestReadingDate', $meters != null ? $meters->LatestReadingDate : null, ['class' => 'form-control','id'=>'LatestReadingDate']) !!}
             </div>
         </div>
 
@@ -154,7 +154,7 @@
 
         <div class="col-lg-4 col-md-4">
             <div class="input-group">
-                {!! Form::text('DateTransfered', $meters != null ? $meter->DateTransfered : null, ['class' => 'form-control','id'=>'DateTransfered']) !!}
+                {!! Form::text('DateTransfered', $meters != null ? $meters->DateTransfered : null, ['class' => 'form-control','id'=>'DateTransfered']) !!}
             </div>
         </div>
     </div> 

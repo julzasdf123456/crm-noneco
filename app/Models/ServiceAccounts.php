@@ -81,6 +81,12 @@ class ServiceAccounts extends Model
         'Main',
         'Evat5Percent',
         'Ewt2Percent',
+        'AccountCount',
+        'ConnectionDate',
+        'LatestReadingDate',
+        'DateDisconnected',
+        'DateTransfered',
+        'SeniorCitizen'
     ];
 
     /**
@@ -121,6 +127,11 @@ class ServiceAccounts extends Model
         'Main' => 'string',
         'Evat5Percent' => 'string',
         'Ewt2Percent' => 'string',
+        'ConnectionDate' => 'string',
+        'LatestReadingDate' => 'string',
+        'DateDisconnected' => 'string',
+        'DateTransfered' => 'string',
+        'SeniorCitizen' => 'string'
     ];
 
     /**
@@ -163,7 +174,18 @@ class ServiceAccounts extends Model
         'Main' => 'nullable|string',
         'Evat5Percent' => 'nullable|string',
         'Ewt2Percent' => 'nullable|string',
+        'ConnectionDate' => 'nullable',
+        'LatestReadingDate' => 'nullable',
+        'DateDisconnected' => 'nullable',
+        'DateTransfered' => 'nullable',
+        'SeniorCitizen' => 'nullable|string'
     ];
 
-    
+    public static function getAddress($serviceAccount) {
+        if ($serviceAccount->Purok==null && ($serviceAccount->Barangay!=null && $serviceAccount->Town!=null)) {
+            return $serviceAccount->Barangay . ', ' . $serviceAccount->Town;
+        } elseif($serviceAccount->Purok!=null && ($serviceAccount->Barangay!=null && $serviceAccount->Town!=null)) {
+            return $serviceAccount->Purok . ', ' . $serviceAccount->Barangay . ', ' . $serviceAccount->Town;
+        }
+    }
 }
