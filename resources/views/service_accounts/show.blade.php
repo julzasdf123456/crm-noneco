@@ -45,6 +45,10 @@
                                @include('service_accounts.tab_technical')
                             </div>
 
+                            <div class="tab-pane" id="billing-hist">
+                                
+                            </div>
+
                             <div class="tab-pane" id="disco-hist">
                                 
                             </div>

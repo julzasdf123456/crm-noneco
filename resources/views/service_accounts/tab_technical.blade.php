@@ -3,7 +3,9 @@
         <span class="card-title">Active Meter Info</span>
 
         <div class="card-tools">
-            <a href="{{ route('billingMeters.edit', [$meters->id]) }}" class="btn btn-tool text-success" title="Update meter data"><i class="fas fa-pen"></i></a>
+            @if ($meters != null)
+                <a href="{{ route('billingMeters.edit', [$meters->id]) }}" class="btn btn-tool text-success" title="Update meter data"><i class="fas fa-pen"></i></a>
+            @endif
             <a href="#" class="btn btn-tool text-primary" title="Change Meter"><i class="fas fa-random"></i></a>
             <a href="#" class="btn btn-tool" title="Meter history"><i class="fas fa-history"></i></a>
         </div>
@@ -48,7 +50,9 @@
         <span class="card-title">Active Transformer Info</span>
 
         <div class="card-tools">
+            @if ($transformer != null)
             <a href="{{ route('billingTransformers.edit', [$transformer->id]) }}" class="btn btn-tool text-success" title="Update transformer data"><i class="fas fa-pen"></i></a>
+            @endif
             <a href="#" class="btn btn-tool text-primary" title="Change Transformer"><i class="fas fa-random"></i></a>
             <a href="#" class="btn btn-tool" title="Transformer history"><i class="fas fa-history"></i></a>
         </div>
