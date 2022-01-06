@@ -226,23 +226,6 @@ class BillOfMaterialsMatrixController extends AppBaseController
     public function getBillOfMaterialsJson(Request $request) {
         if ($request->ajax()) {
             $scId = $request['scId'];
-            // $billOfMaterials = DB::table('CRM_BillOfMaterialsMatrix')
-            //     ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
-            //     ->leftJoin('CRM_Structures', 'CRM_BillOfMaterialsMatrix.StructureId', '=', 'CRM_Structures.id')    
-            //     ->select('CRM_MaterialAssets.id',
-            //             'CRM_MaterialAssets.Description',
-            //             'CRM_MaterialAssets.Amount',
-            //             DB::raw('SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer)) AS ProjectRequirements'),
-            //             DB::raw('(CAST(CRM_MaterialAssets.Amount As Money) * SUM(CAST(CRM_BillOfMaterialsMatrix.Quantity AS Integer))) AS ExtendedCost'))
-            //     ->whereIn('CRM_Structures.Data', function($query)  use ($scId) {
-            //         $query->select('StructureId')
-            //             ->from('CRM_StructureAssignments')
-            //             ->where('ServiceConnectionId', $scId);
-            //     })
-            //     ->groupBy('CRM_MaterialAssets.Description', 'CRM_MaterialAssets.Amount', 'CRM_MaterialAssets.id')
-            //     ->orderBy('CRM_MaterialAssets.Description')
-            //     ->get();   
-
             $billOfMaterials = DB::table('CRM_BillOfMaterialsMatrix')
                 ->leftJoin('CRM_MaterialAssets', 'CRM_BillOfMaterialsMatrix.MaterialsId', '=', 'CRM_MaterialAssets.id')
                 ->leftJoin('CRM_Structures', 'CRM_BillOfMaterialsMatrix.StructureId', '=', 'CRM_Structures.id')    
