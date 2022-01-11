@@ -146,8 +146,8 @@ use Illuminate\Support\Facades\Auth;
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('serviceConnections.daily-monitor') }}"
-                        class="nav-link {{ Request::is('serviceConnections.daily-monitor*') ? 'active' : '' }}">
+                        <a href="{{ route('serviceConnections.energization-report') }}"
+                        class="nav-link {{ Request::is('serviceConnections.energization-report*') ? 'active' : '' }}">
                         <i class="fas fa-charging-station nav-icon text-warning"></i><p>Energization</p>
                         </a>
                     </li>

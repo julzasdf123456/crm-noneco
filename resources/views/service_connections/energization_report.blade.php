@@ -5,8 +5,8 @@
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-12">
-                <h4 style="display: inline; margin-right: 15px;">Applications Report</h4>
-                <i class="text-muted">Generates data containing all filed applications on a specified date range</i>
+                <h4 style="display: inline; margin-right: 15px;">Energization Report</h4>
+                <i class="text-muted">Generates data containing all successfully energized applications on a specified date range</i>
             </div>
         </div>
     </div>
@@ -17,7 +17,7 @@
         {{-- PARAMS --}}
         <div class="col-lg-3 col-md-4">
             <div class="card card-primary card-outline">
-                {!! Form::open(['route' => 'serviceConnections.download-applications-report']) !!}
+                {!! Form::open(['route' => 'serviceConnections.download-energization-report']) !!}
                 <div class="card-header">
                     <span class="card-title">Config</span>
                 </div>
@@ -94,7 +94,7 @@
                 e.preventDefault()
                 
                 $.ajax({
-                    url : '/service_connections/fetch-applications-report',
+                    url : '/service_connections/fetch-energization-report',
                     type : 'GET',
                     data : {
                         From : $('#From').val(),

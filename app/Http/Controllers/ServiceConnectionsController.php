@@ -30,6 +30,7 @@ use App\Models\PoleIndex;
 use App\Models\PreDefinedMaterials;
 use App\Models\PreDefinedMaterialsMatrix;
 use App\Exports\ServiceConnectionApplicationsReportExport;
+use App\Exports\ServiceConnectionEnergizationReportExport;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -1871,7 +1872,7 @@ class ServiceConnectionsController extends AppBaseController
         return response()->json($output, 200);
     }
 
-    public function downloadSummaryReport(Request $request) {
+    public function downloadApplicationsReport(Request $request) {
         if ($request['Office'] == 'All') {
             $serviceConnections = DB::table('CRM_ServiceConnections')
             ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
@@ -1922,5 +1923,130 @@ class ServiceConnectionsController extends AppBaseController
         $export = new ServiceConnectionApplicationsReportExport($serviceConnections->toArray());
 
         return Excel::download($export, 'Applications-Report.xlsx');
+    }
+
+    public function energizationReport() {
+        return view('/service_connections/energization_report');
+    }
+
+    public function fetchEnergizationReport(Request $request) {
+        if ($request['Office'] == 'All') {
+            $serviceConnections = DB::table('CRM_ServiceConnections')
+            ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+            ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->join('CRM_ServiceConnectionCrew', 'CRM_ServiceConnections.StationCrewAssigned', '=', 'CRM_ServiceConnectionCrew.id')
+            ->select('CRM_ServiceConnections.id as id',
+                        'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                        'CRM_ServiceConnections.DateTimeOfEnergization',
+                        'CRM_ServiceConnections.Sitio as Sitio', 
+                        'CRM_ServiceConnections.Office', 
+                        'CRM_Towns.Town as Town',
+                        'CRM_Barangays.Barangay as Barangay')
+            ->whereBetween('CRM_ServiceConnections.DateTimeOfEnergization', [$request['From'], $request['To']])
+            ->where(function ($query) {
+                $query->where('CRM_ServiceConnections.Trash', 'No')
+                    ->orWhereNull('CRM_ServiceConnections.Trash');
+            })
+            ->orderByDesc('DateTimeOfEnergization')
+            ->get();
+        } else {
+            $serviceConnections = DB::table('CRM_ServiceConnections')
+            ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+            ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->join('CRM_ServiceConnectionCrew', 'CRM_ServiceConnections.StationCrewAssigned', '=', 'CRM_ServiceConnectionCrew.id')
+            ->select('CRM_ServiceConnections.id as id',
+                        'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                        'CRM_ServiceConnections.DateTimeOfEnergization',
+                        'CRM_ServiceConnections.Sitio as Sitio', 
+                        'CRM_ServiceConnections.Office', 
+                        'CRM_Towns.Town as Town',
+                        'CRM_Barangays.Barangay as Barangay')
+            ->whereBetween('CRM_ServiceConnections.DateTimeOfEnergization', [$request['From'], $request['To']])
+            ->where('CRM_ServiceConnections.Office', $request['Office'])
+            ->where(function ($query) {
+                $query->where('CRM_ServiceConnections.Trash', 'No')
+                    ->orWhereNull('CRM_ServiceConnections.Trash');
+            })
+            ->orderByDesc('DateTimeOfEnergization')
+            ->get();
+        }
+        
+            
+        if (count($serviceConnections) > 0) {
+            $output = '';
+            $count = 1;
+            foreach ($serviceConnections as $row) {    
+                $output .= '
+                    <tr>
+                        <td>' . $count . '</td>
+                        <td><a href="' . route('serviceConnections.show', [$row->id]) . '">' . $row->id . '</a></td>
+                        <td>' . $row->ServiceAccountName . '</td>
+                        <td>' . ServiceConnections::getAddress($row) . '</td>
+                        <td>' . $row->Office . '</td>
+                        <td>' . date('F d, Y @ h:i:s A', strtotime($row->DateTimeOfEnergization)) . '</td>
+                    </tr>   
+                ';
+                $count++;
+            }                
+        } else {
+            $output = '';
+        }
+
+        return response()->json($output, 200);
+    }
+
+    public function downloadEnergizationReport(Request $request) {
+        if ($request['Office'] == 'All') {
+            $serviceConnections = DB::table('CRM_ServiceConnections')
+            ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+            ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->join('CRM_ServiceConnectionCrew', 'CRM_ServiceConnections.StationCrewAssigned', '=', 'CRM_ServiceConnectionCrew.id')
+            ->select(DB::raw("CONCAT(CRM_ServiceConnections.id, ' ') as id"),
+                        'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                        'CRM_ServiceConnections.DateTimeOfEnergization',
+                        'CRM_ServiceConnections.Office', 
+                        'CRM_ServiceConnections.Sitio as Sitio', 
+                        'CRM_Barangays.Barangay as Barangay',
+                        'CRM_Towns.Town as Town',
+                        'CRM_ServiceConnections.ConnectionApplicationType',
+                        'CRM_ServiceConnections.Status')
+            ->whereBetween('CRM_ServiceConnections.DateTimeOfEnergization', [$request['From'], $request['To']])
+            ->where(function ($query) {
+                $query->where('CRM_ServiceConnections.Trash', 'No')
+                    ->orWhereNull('CRM_ServiceConnections.Trash');
+            })
+            ->orderByDesc('DateTimeOfEnergization')
+            ->get();
+        } else {
+            $serviceConnections = DB::table('CRM_ServiceConnections')
+            ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+            ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->join('CRM_ServiceConnectionCrew', 'CRM_ServiceConnections.StationCrewAssigned', '=', 'CRM_ServiceConnectionCrew.id')
+            ->select(DB::raw("CONCAT(CRM_ServiceConnections.id, ' ') as id"),
+                        'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                        'CRM_ServiceConnections.DateTimeOfEnergization',
+                        'CRM_ServiceConnections.Office', 
+                        'CRM_ServiceConnections.Sitio as Sitio',
+                        'CRM_Barangays.Barangay as Barangay', 
+                        'CRM_Towns.Town as Town',
+                        'CRM_ServiceConnections.ConnectionApplicationType',
+                        'CRM_ServiceConnections.Status')
+            ->whereBetween('CRM_ServiceConnections.DateTimeOfEnergization', [$request['From'], $request['To']])
+            ->where('CRM_ServiceConnections.Office', $request['Office'])
+            ->where(function ($query) {
+                $query->where('CRM_ServiceConnections.Trash', 'No')
+                    ->orWhereNull('CRM_ServiceConnections.Trash');
+            })
+            ->orderByDesc('DateTimeOfEnergization')
+            ->get();
+        }
+
+        $export = new ServiceConnectionEnergizationReportExport($serviceConnections->toArray());
+
+        return Excel::download($export, 'Energization-Report.xlsx');
     }
 }

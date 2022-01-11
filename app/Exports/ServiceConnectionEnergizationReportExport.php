@@ -15,7 +15,7 @@ use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Illuminate\Support\Facades\DB;
 
-class ServiceConnectionApplicationsReportExport implements FromArray, ShouldAutoSize, WithColumnFormatting, WithHeadings, WithStyles, WithEvents, WithCustomStartCell {
+class ServiceConnectionEnergizationReportExport implements FromArray, ShouldAutoSize, WithColumnFormatting, WithHeadings, WithStyles, WithEvents, WithCustomStartCell {
 
     private $serviceConnections;
 
@@ -39,7 +39,7 @@ class ServiceConnectionApplicationsReportExport implements FromArray, ShouldAuto
         return [
             'Service Account No.',
             'Applicant Name',
-            'Date of Application',
+            'Date of Energization',
             'Office',
             'Purok',
             'Barangay',
@@ -87,7 +87,7 @@ class ServiceConnectionApplicationsReportExport implements FromArray, ShouldAuto
                 
                 $event->sheet->setCellValue('A1', env('APP_COMPANY'));
                 $event->sheet->setCellValue('A2', env('APP_ADDRESS'));
-                $event->sheet->setCellValue('A4', 'Service Connection Application Report');
+                $event->sheet->setCellValue('A4', 'Service Connection Energization Report');
                 
                 // SET TOTAL
                 // $totalRow = count($this->billOfMaterials) + 8;
