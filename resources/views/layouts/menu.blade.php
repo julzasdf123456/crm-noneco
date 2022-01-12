@@ -347,6 +347,16 @@ use Illuminate\Support\Facades\Auth;
     
 @endcanany
 
+{{-- DAMAGE ASSESSMENT --}}
+@canany(['Super Admin'])
+    <li class="nav-item">
+        <a href="{{ route('damageAssessments.index') }}"
+        class="nav-link {{ Request::is('damageAssessments.index*') ? 'active' : '' }}">
+            <i class="fas fa-house-damage nav-icon text-default"></i><p>Damage Assessment</p>
+        </a>
+    </li>    
+@endcanany
+
 <li class="nav-header">BILLING</li>
 {{-- SERVICE ACCOUNTS --}}
 @canany(['Super Admin'])
@@ -457,4 +467,5 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
+
 

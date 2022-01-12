@@ -86,7 +86,8 @@ class ServiceAccounts extends Model
         'LatestReadingDate',
         'DateDisconnected',
         'DateTransfered',
-        'SeniorCitizen'
+        'SeniorCitizen',
+        'AccountPaymentType'
     ];
 
     /**
@@ -131,7 +132,8 @@ class ServiceAccounts extends Model
         'LatestReadingDate' => 'string',
         'DateDisconnected' => 'string',
         'DateTransfered' => 'string',
-        'SeniorCitizen' => 'string'
+        'SeniorCitizen' => 'string',
+        'AccountPaymentType' => 'string'
     ];
 
     /**
@@ -178,7 +180,8 @@ class ServiceAccounts extends Model
         'LatestReadingDate' => 'nullable',
         'DateDisconnected' => 'nullable',
         'DateTransfered' => 'nullable',
-        'SeniorCitizen' => 'nullable|string'
+        'SeniorCitizen' => 'nullable|string',
+        'AccountPaymentType' => 'nullable|string'
     ];
 
     public static function getAddress($serviceAccount) {

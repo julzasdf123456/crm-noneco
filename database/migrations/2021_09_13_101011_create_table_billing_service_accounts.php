@@ -35,6 +35,7 @@ class CreateTableBillingServiceAccounts extends Migration
             $table->string('Main', 10)->nullable(); // Yes, No
             $table->string('Evat5Percent', 10)->nullable(); // Yes, No
             $table->string('Ewt2Percent', 10)->nullable(); // Yes, No
+            $table->string('AccountPaymentType', 50)->nullable(); // Prepaid, Postpaid
 
             // METER READER
             $table->string('MeterDetailsId', 50)->nullable(); // CURRENT ACTIVE
