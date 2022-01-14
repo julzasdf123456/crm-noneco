@@ -15,8 +15,47 @@
     </section>
 
     <div class="row">
-        <div class="col-lg-12">
+        <div class="col-lg-10">
             <div id="map" style="height: 88vh;"></div>  
+        </div>
+        <div class="col-lg-2">
+            <div class="card card-primary card-outline">
+                <div class="card-header">
+                    <span class="card-title">Display Config</span>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        {!! Form::label('Feeder', 'Feeder') !!}
+                        <select name="Feeder" id="Feeder" class="form-control">
+                            <option>-- Select --</option>
+                            <option value="All">All</option>
+                            @foreach ($feeders as $feeder)
+                                <option value="{{ $feeder->Feeder }}">{{ $feeder->Feeder }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="card card-primary card-outline">
+                <div class="card-header">
+                    <span class="card-title">Search</span>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        {!! Form::text('search', null, ['class' => 'form-control','id'=>'search', 'placeholder' => 'Search Pole No']) !!}
+                    </div>
+                    <button id="searchBtn" class="btn btn-sm btn-primary">Go</button>
+                    
+                    <div class="divider"></div>
+
+                    <table id="searchTable" class="table table-sm table-hover">
+                        <thead></thead>
+                        <tbody style="display: block; height: 300px; overflow-y: scroll"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -29,62 +68,173 @@
         mapboxgl.accessToken = 'pk.eyJ1IjoianVsemxvcGV6IiwiYSI6ImNqZzJ5cWdsMjJid3Ayd2xsaHcwdGhheW8ifQ.BcTcaOXmXNLxdO3wfXaf5A';
             const map = new mapboxgl.Map({
             container: 'map', // container ID
-            style: 'mapbox://styles/mapbox/satellite-v9',
+            // style: 'mapbox://styles/mapbox/satellite-v9',
+            style : 'mapbox://styles/julzlopez/ckahntemo048l1il7edks77wb',
             center: [124.017820, 9.762118], // starting position [lng, lat]
-            zoom: 11 // starting zoom
+            zoom: 10 // starting zoom
         });
 
-        const marker1 = new mapboxgl.Marker()
-                .setLngLat([123.877309, 9.891799])
-                .addTo(map);
+        var markers = [];
 
-                new mapboxgl.Marker()
-                .setLngLat([123.977259, 9.949275])
-                .addTo(map);
+        map.on('load', () => {
+            loadObjects()
+        })
 
-                new mapboxgl.Marker()
-                .setLngLat([123.976707, 9.949239])
-                .addTo(map);
+        // RELOAD MAP ON FEEDRE CHANGE
+        $('#Feeder').on('change', function() {
+            loadObjects()
+        })
 
-                new mapboxgl.Marker()
-                .setLngLat([123.805265, 9.619035])
-                .addTo(map);
+        // SEARCH POLE
+        $('#searchBtn').on('click', function() {
+            if (jQuery.isEmptyObject($('#search').val())) {
+                $('#searchTable tbody tr').remove()
+            } else {
+                $.ajax({
+                    url : '/damage_assessments/search-pole',
+                    type : 'GET',
+                    data : {
+                        Search : $('#search').val(),
+                    }, 
+                    success : function(res) {
+                        $('#searchTable tbody tr').remove()
+                        $.each(res, function(index, element) {
+                            $('#searchTable tbody').append('<tr>' +
+                                '<td>' + res[index]['ObjectName'] + '</td>' +
+                                '<td><button onclick="goToPole(' + res[index]['id'] + ')" class="btn btn-sm btn-link"><i class="fas fa-eye"></i></button></td>' +
+                            '</tr>')
+                        })
+                    },
+                    error : function(err) {
+                        alert("An error occurred during the search")
+                    }
+                })
+            }
+            
+        })
 
-                new mapboxgl.Marker()
-                .setLngLat([123.939079, 9.613674])
-                .addTo(map);
+        function goToPole(id) {
+            $.ajax({
+                url : '/damage_assessments/view-pole',
+                type : 'GET',
+                data : {
+                    id : id
+                },
+                success : function(res) {
+                    map.flyTo({
+                            center: [parseFloat(res['Longitude']), parseFloat(res['Latitude'])],
+                            zoom: 20,
+                            bearing: 0,                        
+                            speed: 1.8, // make the flying slow
+                            curve: 1, // change the speed at which it zooms out                        
+                            // easing: (t) => t,                        
+                            essential: true
+                        });
 
-        const marker2 = new mapboxgl.Marker()
-                .setLngLat([124.091388, 9.911926])
-                .addTo(map);
+                    if (res['Feeder'] == $('#Feeder').val()) {
 
-        const marker3 = new mapboxgl.Marker({ color : 'red', })
-                .setLngLat([124.009151, 9.922765])
-                .addTo(map);
+                    } else {
+                        // CREATE MARKER
+                        const el = document.createElement('div');
+                        el.className = 'marker';
+                        el.id = res['id'];
+                        el.title = res['ObjectName']
+                        // el.innerHTML += "<p>" + res['ObjectName'] + "</p>"
+                        if (res['Status'] == 'BROKEN') {
+                            el.style.backgroundColor = `red`;
+                        } else if (res['Status'] == 'FIXED') {
+                            el.style.backgroundColor = `#4caf50`;
+                        } else {
+                            el.style.backgroundColor = `orange`;
+                        }                        
+                        el.style.width = `15px`;
+                        el.style.height = `15px`;
+                        el.style.borderRadius = '50%';
+                        el.style.backgroundSize = '100%';
 
-        const marker4 = new mapboxgl.Marker({ color : 'red', })
-                .setLngLat([123.945467, 9.892833])
-                .addTo(map);
+                        el.addEventListener('click', () => {
+                            alert(this.id)
+                        });
 
-                new mapboxgl.Marker({ color : 'red', })
-                .setLngLat([123.946062, 9.915609])
-                .addTo(map);
+                        marker = new mapboxgl.Marker(el)
+                            .setLngLat([parseFloat(res['Longitude']), parseFloat(res['Latitude'])])
+                            .addTo(map);
 
-                new mapboxgl.Marker({ color : 'red', })
-                .setLngLat([123.994945, 9.839239])
-                .addTo(map);
+                        markers.push(marker)
+                    }
+                    
+                },
+                error : function (err) {
+                    alert("An error occurred during fetching the pole")
+                }
+            })
+        }
 
-                new mapboxgl.Marker({ color : 'red', })
-                .setLngLat([124.110577, 9.899276])
-                .addTo(map);
+        function loadObjects() {
+            $.ajax({
+                url : '/damage_assessments/get-objects',
+                type : 'GET',
+                data : {
+                    Feeder : $('#Feeder').val(),
+                },
+                success : function(res) {
+                    if (markers.length > 0) {
+                        for (x=0; x<markers.length; x++) {
+                            markers[x].remove()
+                        }
+                    }
+                    var i = 0;
+                    $.each(res, function(index, element) {
+                        // Create a DOM element for each marker.
+                        const el = document.createElement('div');
+                        el.className = 'marker';
+                        el.id = res[index]['id'];
+                        el.title = res[index]['ObjectName']
+                        // el.innerHTML += "<p>" + res[index]['ObjectName'] + "</p>"
+                        if (res[index]['Status'] == 'BROKEN') {
+                            el.style.backgroundColor = `red`;
+                        } else if (res[index]['Status'] == 'FIXED') {
+                            el.style.backgroundColor = `#4caf50`;
+                        } else {
+                            el.style.backgroundColor = `orange`;
+                        }                        
+                        el.style.width = `15px`;
+                        el.style.height = `15px`;
+                        el.style.borderRadius = '50%';
+                        el.style.backgroundSize = '100%';
 
-                new mapboxgl.Marker({ color : 'red', })
-                .setLngLat([124.154228, 9.797528])
-                .addTo(map);
+                        el.addEventListener('click', () => {
+                            alert(this.id)
+                        });
 
-        const marker5 = new mapboxgl.Marker()
-                .setLngLat([123.944094, 9.894355])
-                .addTo(map);
+                        marker = new mapboxgl.Marker(el)
+                            .setLngLat([parseFloat(res[index]['Longitude']), parseFloat(res[index]['Latitude'])])
+                            .addTo(map);
+
+                        markers.push(marker)
+
+                        if (i==0) {
+                            map.flyTo({
+                            center: [parseFloat(res[index]['Longitude']), parseFloat(res[index]['Latitude'])],
+                            zoom: 12,
+                            bearing: 0,                        
+                            speed: 1.8, // make the flying slow
+                            curve: 1, // change the speed at which it zooms out                        
+                            // easing: (t) => t,                        
+                            essential: true
+                        })
+                        }
+
+                        i++;
+                    })
+
+                },
+                error : function(err) {
+                    alert('An error occurred while fetching the data objects')
+                }
+            })
+        }
+
     </script>
 @endpush
 

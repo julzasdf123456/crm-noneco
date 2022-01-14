@@ -295,4 +295,7 @@ Route::get('/meter_reader_tracks/get-tracks-by-tracknameid', [App\Http\Controlle
 Route::resource('meterReaderTracks', App\Http\Controllers\MeterReaderTracksController::class);
 
 
+Route::get('/damage_assessments/get-objects', [App\Http\Controllers\DamageAssessmentController::class, 'getObjects'])->name('damageAssessments.get-objects');
+Route::get('/damage_assessments/search-pole', [App\Http\Controllers\DamageAssessmentController::class, 'searchPole'])->name('damageAssessments.search-pole');
+Route::get('/damage_assessments/view-pole', [App\Http\Controllers\DamageAssessmentController::class, 'viewPole'])->name('damageAssessments.view-pole');
 Route::resource('damageAssessments', App\Http\Controllers\DamageAssessmentController::class);

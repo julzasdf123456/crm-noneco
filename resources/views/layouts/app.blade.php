@@ -236,7 +236,7 @@
                     {{-- <img src="https://boheco1.com/wp-content/uploads/2018/06/boheco-1-1024x1012.png" class="user-image img-circle elevation-2" alt="User Image"> --}}
                     <img src="https://www.pngkit.com/png/full/128-1285102_code-optimization-interface-circular-symbol-icons-software-developer.png"
                          class="user-image img-circle elevation-2" alt="User Image"> 
-                    <span class="d-none d-md-inline">{{ Auth::user()->name }}</span>
+                    <span class="d-none d-md-inline">{{ Auth::check() ? Auth::user()->name : '' }}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                     <!-- User image -->
@@ -246,8 +246,8 @@
                              class="img-circle elevation-2"
                              alt="User Image"> 
                         <p>
-                            {{ Auth::user()->name }}
-                            <small>Member since {{ Auth::user()->created_at->format('M. Y') }}</small>
+                            {{ Auth::check() ? Auth::user()->name : '' }}
+                            <small>Member since {{ Auth::check() ? Auth::user()->created_at->format('M. Y') : '' }}</small>
                         </p>
                     </li>
                     <!-- Menu Footer-->

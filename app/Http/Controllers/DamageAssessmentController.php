@@ -7,6 +7,8 @@ use App\Http\Requests\UpdateDamageAssessmentRequest;
 use App\Repositories\DamageAssessmentRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\DamageAssessment;
 use Flash;
 use Response;
 
@@ -17,6 +19,7 @@ class DamageAssessmentController extends AppBaseController
 
     public function __construct(DamageAssessmentRepository $damageAssessmentRepo)
     {
+        $this->middleware('auth');
         $this->damageAssessmentRepository = $damageAssessmentRepo;
     }
 
@@ -29,10 +32,18 @@ class DamageAssessmentController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $damageAssessments = $this->damageAssessmentRepository->all();
+        $feeders = DB::table('CRM_DamageAssessment')
+            ->select('Feeder')
+            ->orderBy('Feeder')
+            ->groupBy('Feeder')
+            ->get();
 
-        return view('damage_assessments.index')
-            ->with('damageAssessments', $damageAssessments);
+        // $poles = DamageAssessment::select('id', 'ObjectName', 'Feeder')->get();
+
+        return view('damage_assessments.index', [
+            'feeders' => $feeders,
+            // 'poles' => $poles,
+        ]);
     }
 
     /**
@@ -152,5 +163,27 @@ class DamageAssessmentController extends AppBaseController
         Flash::success('Damage Assessment deleted successfully.');
 
         return redirect(route('damageAssessments.index'));
+    }
+
+    public function getObjects(Request $request) {
+        if ($request['Feeder'] == 'All') {
+            $objects = DamageAssessment::all();
+        } else {
+            $objects = DamageAssessment::where('Feeder', $request['Feeder'])->get();
+        }
+
+        return response()->json($objects, 200);
+    }
+
+    public function searchPole(Request $request) {
+        $objects = DamageAssessment::where('ObjectName', 'LIKE', '%' . $request['Search'] . '%')->get();
+
+        return response()->json($objects, 200);
+    }
+
+    public function viewPole(Request $request) {
+        $objects = DamageAssessment::where('id', $request['id'])->first();
+
+        return response()->json($objects, 200);
     }
 }
