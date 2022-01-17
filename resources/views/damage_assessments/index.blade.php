@@ -8,11 +8,15 @@
                     <span>
                         <h4 style="display: inline; margin-right: 15px;">TODAC</h4>
                         <i class="text-muted">Typhoon Odette Damage Assessment Console</i>
+                        <strong style="margin-left: 100px; margin-right: 20px;">LEGEND:</strong>
+                        <span style="margin-right: 20px;"><i class="fas fa-info-circle text-info"></i> Undamaged</span>
+                        <span style="margin-right: 20px;"><i class="fas fa-exclamation-triangle text-danger"></i> Damaged</span>
+                        <span style="margin-right: 20px;"><i class="fas fa-check-circle text-success"></i> Fixed</span>
                     </span>
                 </div>
             </div>
         </div>
-    </section>
+    </section>  
 
     <div class="row">
         <div class="col-lg-10">
@@ -61,6 +65,55 @@
     
 @endsection
 
+{{-- MODAL FOR UPDATING INSPECTIONS --}}
+<div class="modal fade" id="modal-update" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"><i id="status-icon" class="ico-tab"></i>Update Pole Status</h4>
+                
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    {!! Form::label('item-id', 'Object ID') !!}
+                    {!! Form::text('Id', null, ['class' => 'form-control','id'=>'item-id', 'readonly' => 'true']) !!}
+                </div>
+
+                <div class="form-group">
+                    {!! Form::label('PoleNumber', 'PoleNumber') !!}
+                    {!! Form::text('PoleNumber', null, ['class' => 'form-control','id'=>'PoleNumber', 'readonly' => 'true']) !!}
+                </div>
+
+                <div class="form-group">
+                    {!! Form::label('Feeder', 'Feeder') !!}
+                    {!! Form::text('Feeder', null, ['class' => 'form-control','id'=>'FeederInfo', 'readonly' => 'true']) !!}
+                </div>
+
+                <div class="form-group" id="status-div">
+                    {!! Form::label('Status', 'Status') !!}
+                    <select name="Status" class="form-control" id="Status">
+                        <option value="ONGOING">ONGOING</option>
+                        <option value="DONE">DONE</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    {!! Form::label('Remarks', 'Remarks') !!}
+                    {!! Form::textarea('Remarks', null, ['class' => 'form-control','id'=>'Remarks', 'rows' => 3]) !!}
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                {{-- <button type="button" class="btn btn-primary" id="submit">Save changes</button> --}}
+                <button id="save" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('page_scripts')
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.1/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.5.1/mapbox-gl.css" rel="stylesheet">
@@ -68,8 +121,8 @@
         mapboxgl.accessToken = 'pk.eyJ1IjoianVsemxvcGV6IiwiYSI6ImNqZzJ5cWdsMjJid3Ayd2xsaHcwdGhheW8ifQ.BcTcaOXmXNLxdO3wfXaf5A';
             const map = new mapboxgl.Map({
             container: 'map', // container ID
-            // style: 'mapbox://styles/mapbox/satellite-v9',
-            style : 'mapbox://styles/julzlopez/ckahntemo048l1il7edks77wb',
+            style: 'mapbox://styles/mapbox/satellite-v9',
+            // style : 'mapbox://styles/julzlopez/ckavvlwp029ua1ipexauenqnc',
             center: [124.017820, 9.762118], // starting position [lng, lat]
             zoom: 10 // starting zoom
         });
@@ -101,7 +154,7 @@
                         $.each(res, function(index, element) {
                             $('#searchTable tbody').append('<tr>' +
                                 '<td>' + res[index]['ObjectName'] + '</td>' +
-                                '<td><button onclick="goToPole(' + res[index]['id'] + ')" class="btn btn-sm btn-link"><i class="fas fa-eye"></i></button></td>' +
+                                '<td><button id="update" onclick="goToPole(' + res[index]['id'] + ')" class="btn btn-sm btn-link" data-toggle="modal" data-target="#modal-update" pole-no="' + res[index]['ObjectName'] + '" feeder="' + res[index]['Feeder'] + '" status="' + res[index]['Status'] + '" remarks="' + res[index]['Notes'] + '" data-id="' + res[index]['id'] + '" svcid="' + res[index]['id'] + '"><i class="fas fa-eye"></i></button></td>' +
                             '</tr>')
                         })
                     },
@@ -140,21 +193,18 @@
                         el.id = res['id'];
                         el.title = res['ObjectName']
                         // el.innerHTML += "<p>" + res['ObjectName'] + "</p>"
-                        if (res['Status'] == 'BROKEN') {
-                            el.style.backgroundColor = `red`;
-                        } else if (res['Status'] == 'FIXED') {
-                            el.style.backgroundColor = `#4caf50`;
-                        } else {
-                            el.style.backgroundColor = `orange`;
+                        
+                        if (res['Status'] == 'OK') {
+                            el.innerHTML += '<button id="update" class="btn btn-sm" style="margin-left: -10px;" data-toggle="modal" data-target="#modal-update" pole-no="' + res['ObjectName'] + '" feeder="' + res['Feeder'] + '" status="' + res['Status'] + '" remarks="' + res['Notes'] + '" data-id="' + res['id'] + '" svcid="' + res['id'] + '" style="margin-left: 10px;"> <span id="' + res['id'] + '"><i class="fas fa-info-circle text-info"></i></span> </button>'
+                        } else if (res['Status'] == 'ONGOING') {
+                            el.innerHTML += '<button id="update" class="btn btn-sm" style="margin-left: -10px;" data-toggle="modal" data-target="#modal-update" pole-no="' + res['ObjectName'] + '" feeder="' + res['Feeder'] + '" status="' + res['Status'] + '" remarks="' + res['Notes'] + '" data-id="' + res['id'] + '" svcid="' + res['id'] + '" style="margin-left: 10px;"> <span id="' + res['id'] + '"><i class="fas fa-exclamation-triangle text-danger"></i></span> </button>'
+                        } else if (res['Status'] == 'DONE') {
+                            el.innerHTML += '<button id="update" class="btn btn-sm" style="margin-left: -10px;" data-toggle="modal" data-target="#modal-update" pole-no="' + res['ObjectName'] + '" feeder="' + res['Feeder'] + '" status="' + res['Status'] + '" remarks="' + res['Notes'] + '" data-id="' + res['id'] + '" svcid="' + res['id'] + '" style="margin-left: 10px;"> <span id="' + res['id'] + '"><i class="fas fa-check-circle text-success"></i></span> </button>'
                         }                        
                         el.style.width = `15px`;
                         el.style.height = `15px`;
                         el.style.borderRadius = '50%';
                         el.style.backgroundSize = '100%';
-
-                        el.addEventListener('click', () => {
-                            alert(this.id)
-                        });
 
                         marker = new mapboxgl.Marker(el)
                             .setLngLat([parseFloat(res['Longitude']), parseFloat(res['Latitude'])])
@@ -191,21 +241,22 @@
                         el.id = res[index]['id'];
                         el.title = res[index]['ObjectName']
                         // el.innerHTML += "<p>" + res[index]['ObjectName'] + "</p>"
-                        if (res[index]['Status'] == 'BROKEN') {
-                            el.style.backgroundColor = `red`;
-                        } else if (res[index]['Status'] == 'FIXED') {
-                            el.style.backgroundColor = `#4caf50`;
-                        } else {
-                            el.style.backgroundColor = `orange`;
-                        }                        
+                        if (res[index]['Status'] == 'OK') {
+                            el.innerHTML += '<button id="update" class="btn btn-sm" style="margin-left: -10px;" data-toggle="modal" data-target="#modal-update" pole-no="' + res[index]['ObjectName'] + '" feeder="' + res[index]['Feeder'] + '" status="' + res[index]['Status'] + '" remarks="' + res[index]['Notes'] + '" data-id="' + res[index]['id'] + '" svcid="' + res[index]['id'] + '" style="margin-left: 10px;"> <span id="' + res[index]['id'] + '"><i class="fas fa-info-circle text-info"></i></span> </button>'
+                        } else if (res[index]['Status'] == 'ONGOING') {
+                            el.innerHTML += '<button id="update" class="btn btn-sm" style="margin-left: -10px;" data-toggle="modal" data-target="#modal-update" pole-no="' + res[index]['ObjectName'] + '" feeder="' + res[index]['Feeder'] + '" status="' + res[index]['Status'] + '" remarks="' + res[index]['Notes'] + '" data-id="' + res[index]['id'] + '" svcid="' + res[index]['id'] + '" style="margin-left: 10px;"> <span id="' + res[index]['id'] + '"><i class="fas fa-exclamation-triangle text-danger"></i></span> </button>'
+                        } else if (res[index]['Status'] == 'DONE') {
+                            el.innerHTML += '<button id="update" class="btn btn-sm" style="margin-left: -10px;" data-toggle="modal" data-target="#modal-update" pole-no="' + res[index]['ObjectName'] + '" feeder="' + res[index]['Feeder'] + '" status="' + res[index]['Status'] + '" remarks="' + res[index]['Notes'] + '" data-id="' + res[index]['id'] + '" svcid="' + res[index]['id'] + '" style="margin-left: 10px;"> <span id="' + res[index]['id'] + '"><i class="fas fa-check-circle text-success"></i></span> </button>'
+                        }  
+                        el.style.backgroundColor = `transparent`;                       
                         el.style.width = `15px`;
                         el.style.height = `15px`;
                         el.style.borderRadius = '50%';
                         el.style.backgroundSize = '100%';
 
-                        el.addEventListener('click', () => {
-                            alert(this.id)
-                        });
+                        // el.addEventListener('click', () => {
+                        //     alert(this.id)
+                        // });
 
                         marker = new mapboxgl.Marker(el)
                             .setLngLat([parseFloat(res[index]['Longitude']), parseFloat(res[index]['Latitude'])])
@@ -234,6 +285,62 @@
                 }
             })
         }
+
+        // MODAL INITIALIZATION
+        $('body').on('click', '#update', function() {
+            $('#status-icon').removeAttr('class');
+            $('#PoleNumber').val($(this).attr('pole-no'));
+            $('#FeederInfo').val($(this).attr('feeder'));
+            $('#Remarks').val($(this).attr('remarks'));
+            $('#item-id').val($(this).attr('svcid'));
+            $('#status-icon').attr('class');
+            if ($(this).attr('status') == 'OK') {
+                $('#status-icon').addClass('ico-tab').addClass('fas').addClass('fa-info-circle').addClass('text-info');
+            } else if ($(this).attr('status') == 'ONGOING') {
+                $('#status-icon').addClass('ico-tab').addClass('fas').addClass('fa-exclamation-triangle').addClass('text-danger');
+            } else {
+                $('#status-icon').addClass('ico-tab').addClass('fas').addClass('fa-check-circle').addClass('text-success');
+            }
+        });
+
+        // SAVE MODAL
+        $('#save').on('click', function() {
+            $.ajax({
+                url : '/damage_assessments/update-ajax',
+                type : 'POST',
+                data : {
+                    _token : "{{ csrf_token() }}",
+                    id : $('#item-id').val(),
+                    Status : $('#Status').val(),
+                    Remarks : $('#Remarks').val(),
+                }, 
+                success : function(res) {
+                    $('#modal-update').modal('hide');
+
+                    if (res == 'ok') {
+                        $('#' + $('#item-id').val() + ' i').remove();
+                        if ($('#Status').val() == 'OK') {
+                            $('#' + $('#item-id').val()).append('<i class="fas fa-info-circle text-info"></i>');
+                        } else if ($('#Status').val() == 'ONGOING') {
+                            $('#' + $('#item-id').val()).append('<i class="fas fa-exclamation-triangle text-danger"></i>');
+                        } else {
+                            $('#' + $('#item-id').val()).append('<i class="fas fa-check-circle text-success"></i>');
+                        }
+                        $('#PoleNumber').val("");
+                        $('#FeederInfo').val("");
+                        $('#Remarks').val("");
+                        $('#item-id').val("");
+                        $('#Status').val("");
+                        // alert('Data updated!')
+                    } else {
+                        alert(res)
+                    }
+                },
+                error : function(err) {
+                    alert('An error occured while updating this data')
+                }
+            })
+        })
 
     </script>
 @endpush

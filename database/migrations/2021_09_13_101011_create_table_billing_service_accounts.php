@@ -53,6 +53,8 @@ class CreateTableBillingServiceAccounts extends Migration
 
             // GPS COORDINATES
             $table->string('GPSMeter', 50)->nullable();
+            $table->string('Latitude')->nullable();
+            $table->string('Longitude')->nullable();
 
             $table->string('BillingType', 50)->nullable(); // Prepaid, Postpaid
             $table->string('SeniorCitizen', 50)->nullable(); // Yes, No

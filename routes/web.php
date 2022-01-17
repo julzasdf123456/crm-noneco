@@ -298,4 +298,8 @@ Route::resource('meterReaderTracks', App\Http\Controllers\MeterReaderTracksContr
 Route::get('/damage_assessments/get-objects', [App\Http\Controllers\DamageAssessmentController::class, 'getObjects'])->name('damageAssessments.get-objects');
 Route::get('/damage_assessments/search-pole', [App\Http\Controllers\DamageAssessmentController::class, 'searchPole'])->name('damageAssessments.search-pole');
 Route::get('/damage_assessments/view-pole', [App\Http\Controllers\DamageAssessmentController::class, 'viewPole'])->name('damageAssessments.view-pole');
+Route::post('/damage_assessments/update-ajax', [App\Http\Controllers\DamageAssessmentController::class, 'updateAjax'])->name('damageAssessments.update-ajax');
 Route::resource('damageAssessments', App\Http\Controllers\DamageAssessmentController::class);
+
+
+Route::resource('readingSchedules', App\Http\Controllers\ReadingSchedulesController::class);

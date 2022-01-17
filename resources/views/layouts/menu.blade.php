@@ -348,7 +348,7 @@ use Illuminate\Support\Facades\Auth;
 @endcanany
 
 {{-- DAMAGE ASSESSMENT --}}
-@canany(['Super Admin'])
+@canany(['Super Admin', 'view damage monitor'])
     <li class="nav-item">
         <a href="{{ route('damageAssessments.index') }}"
         class="nav-link {{ Request::is('damageAssessments.index*') ? 'active' : '' }}">
@@ -376,12 +376,12 @@ use Illuminate\Support\Facades\Auth;
                 </a>
             </li>
             <li class="nav-header">                
-                Others 
+                Meter Reading 
             </li>
             <li class="nav-item">
-                <a href="{{ route('serviceAccounts.pending-accounts') }}"
-                   class="nav-link {{ Request::is('serviceAccounts.pending-accounts*') ? 'active' : '' }}">                   
-                   <i class="fas fa-user-alt-slash nav-icon text-primary"></i><p>Pending Accounts</p>
+                <a href="{{ route('readingSchedules.index') }}"
+                   class="nav-link {{ Request::is('readingSchedules.index*') ? 'active' : '' }}">                   
+                   <i class="fas fa-calendar-week nav-icon text-primary"></i><p>Reading Scheduler</p>
                 </a>
             </li>
             <li class="nav-item">
@@ -390,6 +390,16 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-map-marked-alt nav-icon text-primary"></i><p>M. Reader Tracks</p>
                 </a>
             </li>
+            <li class="nav-header">                
+                Others 
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('serviceAccounts.pending-accounts') }}"
+                   class="nav-link {{ Request::is('serviceAccounts.pending-accounts*') ? 'active' : '' }}">                   
+                   <i class="fas fa-user-alt-slash nav-icon text-primary"></i><p>Pending Accounts</p>
+                </a>
+            </li>
+            
         </ul>
     </li>
 @endcanany
@@ -467,5 +477,6 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
+
 
 

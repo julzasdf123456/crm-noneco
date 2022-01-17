@@ -87,7 +87,9 @@ class ServiceAccounts extends Model
         'DateDisconnected',
         'DateTransfered',
         'SeniorCitizen',
-        'AccountPaymentType'
+        'AccountPaymentType',
+        'Latitude',
+        'Longitude'
     ];
 
     /**
@@ -133,7 +135,9 @@ class ServiceAccounts extends Model
         'DateDisconnected' => 'string',
         'DateTransfered' => 'string',
         'SeniorCitizen' => 'string',
-        'AccountPaymentType' => 'string'
+        'AccountPaymentType' => 'string',
+        'Latitude' => 'string',
+        'Longitude' => 'string'
     ];
 
     /**
@@ -181,7 +185,9 @@ class ServiceAccounts extends Model
         'DateDisconnected' => 'nullable',
         'DateTransfered' => 'nullable',
         'SeniorCitizen' => 'nullable|string',
-        'AccountPaymentType' => 'nullable|string'
+        'AccountPaymentType' => 'nullable|string',
+        'Latitude' => 'nullable|string',
+        'Longitude' => 'nullable|string'
     ];
 
     public static function getAddress($serviceAccount) {
@@ -189,6 +195,32 @@ class ServiceAccounts extends Model
             return $serviceAccount->Barangay . ', ' . $serviceAccount->Town;
         } elseif($serviceAccount->Purok!=null && ($serviceAccount->Barangay!=null && $serviceAccount->Town!=null)) {
             return $serviceAccount->Purok . ', ' . $serviceAccount->Barangay . ', ' . $serviceAccount->Town;
+        }
+    }
+
+    public static function getLatitude($object) {
+        if ($object != null) {
+            $splitted = explode(",", $object);
+            if ($splitted != null && $splitted[0] != null) {
+                return $splitted[0];
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public static function getLongitude($object) {
+        if ($object != null) {
+            $splitted = explode(",", $object);
+            if ($splitted != null && $splitted[1] != null) {
+                return $splitted[1];
+            } else {
+                return null;
+            }
+        } else {
+            return null;
         }
     }
 }

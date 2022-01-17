@@ -186,4 +186,18 @@ class DamageAssessmentController extends AppBaseController
 
         return response()->json($objects, 200);
     }
+
+    public function updateAjax(Request $request)
+    {
+        $damageAssessment = $this->damageAssessmentRepository->find($request['id']);
+
+        if (empty($damageAssessment)) {
+
+            return response()->json('not found', 404);
+        }
+
+        $damageAssessment = $this->damageAssessmentRepository->update($request->all(), $request['id']);
+
+        return response()->json('ok', 200);
+    }
 }
