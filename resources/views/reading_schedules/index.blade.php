@@ -8,10 +8,10 @@
                     <h4>Reading Schedules</h4>
                 </div>
                 <div class="col-sm-6">
-                    <a class="btn btn-primary float-right"
+                    {{-- <a class="btn btn-primary float-right"
                        href="{{ route('readingSchedules.create') }}">
                         Add New
-                    </a>
+                    </a> --}}
                 </div>
             </div>
         </div>
@@ -24,14 +24,28 @@
         <div class="clearfix"></div>
 
         <div class="card">
-            <div class="card-body p-0">
-                @include('reading_schedules.table')
-
-                <div class="card-footer clearfix">
-                    <div class="float-right">
-                        
-                    </div>
-                </div>
+            <div class="card-body table-responsive p-0">
+                <table class="table">
+                    <thead>
+                        <th>Meter Readers</th>
+                        <th width="80px"></th>
+                    </thead>
+                    <tbody>
+                        @if ($meterReaders != null)
+                            @foreach ($meterReaders as $item)
+                                <tr>
+                                    <td>{{ $item->name }}</td>
+                                    <td>
+                                        <span>
+                                            <a href="{{ route('readingSchedules.view-schedule', [$item->id]) }}" class="ico-tab-mini" title="View All schedule"><i class="fas fa-eye"></i></a>
+                                            <a href="{{ route('readingSchedules.update-schedule', [$item->id]) }}" class="text-warning" title="Add schedule"><i class="fas fa-calendar-plus"></i></a>
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endif
+                    </tbody>
+                </table>
             </div>
 
         </div>

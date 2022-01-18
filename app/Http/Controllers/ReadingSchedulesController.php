@@ -7,6 +7,11 @@ use App\Http\Requests\UpdateReadingSchedulesRequest;
 use App\Repositories\ReadingSchedulesRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Users;
+use App\Models\Towns;
+use App\Models\ReadingSchedules;
+use Illuminate\Support\Facades\DB;
 use Flash;
 use Response;
 
@@ -30,10 +35,12 @@ class ReadingSchedulesController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $readingSchedules = $this->readingSchedulesRepository->all();
+        // $readingSchedules = $this->readingSchedulesRepository->all();
+        $meterReaders = User::role('Meter Reader')->get();
 
-        return view('reading_schedules.index')
-            ->with('readingSchedules', $readingSchedules);
+        return view('reading_schedules.index', [
+            'meterReaders' => $meterReaders
+        ]);
     }
 
     /**
@@ -94,6 +101,8 @@ class ReadingSchedulesController extends AppBaseController
     public function edit($id)
     {
         $readingSchedules = $this->readingSchedulesRepository->find($id);
+        $towns = Towns::all();
+        $user = Users::find($readingSchedules->MeterReader);
 
         if (empty($readingSchedules)) {
             Flash::error('Reading Schedules not found');
@@ -101,7 +110,11 @@ class ReadingSchedulesController extends AppBaseController
             return redirect(route('readingSchedules.index'));
         }
 
-        return view('reading_schedules.edit')->with('readingSchedules', $readingSchedules);
+        return view('reading_schedules.edit', [
+            'readingSchedules' => $readingSchedules,
+            'towns' => $towns,
+            'user' => $user,
+        ]);
     }
 
     /**
@@ -153,5 +166,36 @@ class ReadingSchedulesController extends AppBaseController
         Flash::success('Reading Schedules deleted successfully.');
 
         return redirect(route('readingSchedules.index'));
+    }
+
+    public function updateSchedule($userId) {
+        $user = Users::find($userId);
+        $towns = Towns::all();
+
+        return view('/reading_schedules/update_schedule', [
+            'user' => $user,
+            'towns' => $towns,
+        ]);
+    }
+
+    public function viewSchedule($userId) {
+        $readingSchedules = ReadingSchedules::where('MeterReader', $userId)
+            ->where('ScheduledDate', '>=', date('Y-m-d'))
+            ->get();
+        $user = Users::find($userId);
+
+        return view('/reading_schedules/view_schedule', [
+            'readingSchedules' => $readingSchedules,
+            'user' => $user,
+        ]);
+    }
+
+    public function getLatestSchedule(Request $request) {
+        $readingSchedules = ReadingSchedules::where('MeterReader', $request['id'])
+            ->limit(50)
+            ->orderByDesc('ScheduledDate')
+            ->get();
+
+        return response()->json($readingSchedules, 200);
     }
 }

@@ -302,4 +302,7 @@ Route::post('/damage_assessments/update-ajax', [App\Http\Controllers\DamageAsses
 Route::resource('damageAssessments', App\Http\Controllers\DamageAssessmentController::class);
 
 
+Route::get('/reading_schedules/update-schedule/{userId}', [App\Http\Controllers\ReadingSchedulesController::class, 'updateSchedule'])->name('readingSchedules.update-schedule');
+Route::get('/reading_schedules/view-schedule/{userId}', [App\Http\Controllers\ReadingSchedulesController::class, 'viewSchedule'])->name('readingSchedules.view-schedule');
+Route::get('/reading_schedules/get-latest-schedule', [App\Http\Controllers\ReadingSchedulesController::class, 'getLatestSchedule'])->name('readingSchedules.get-latest-schedule');
 Route::resource('readingSchedules', App\Http\Controllers\ReadingSchedulesController::class);
