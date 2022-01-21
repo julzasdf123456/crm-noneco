@@ -75,8 +75,6 @@
                                 </select>
                             </div>
 
-
-
                             <!-- Scheduleddate Field -->
                             <div class="form-group col-sm-6">
                                 {!! Form::label('ScheduledDate', 'Reading Date') !!}
@@ -93,6 +91,14 @@
                                 </script>
                             @endpush
 
+                            <!-- Status Field -->
+                            <div class="form-group col-sm-6">
+                                {!! Form::label('Status', 'Status') !!}
+                                <select name="Status" id="Status" class="form-control">
+                                    <option value="" {{ $readingSchedules->Status==null ? 'selected' : '' }}>Not Yet Downloaded</option>
+                                    <option value="Downloaded" {{ $readingSchedules->Status=='Downloaded' ? 'selected' : '' }}>Downloaded</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 

@@ -306,3 +306,8 @@ Route::get('/reading_schedules/update-schedule/{userId}', [App\Http\Controllers\
 Route::get('/reading_schedules/view-schedule/{userId}', [App\Http\Controllers\ReadingSchedulesController::class, 'viewSchedule'])->name('readingSchedules.view-schedule');
 Route::get('/reading_schedules/get-latest-schedule', [App\Http\Controllers\ReadingSchedulesController::class, 'getLatestSchedule'])->name('readingSchedules.get-latest-schedule');
 Route::resource('readingSchedules', App\Http\Controllers\ReadingSchedulesController::class);
+
+
+Route::get('/rates/upload-rate', [App\Http\Controllers\RatesController::class, 'uploadRate'])->name('rates.upload-rate');
+Route::post('/rates/validate-rate-upload', [App\Http\Controllers\RatesController::class, 'validateRateUpload'])->name('rates.validate-rate-upload');
+Route::resource('rates', App\Http\Controllers\RatesController::class);

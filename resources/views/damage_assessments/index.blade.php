@@ -312,7 +312,7 @@
                     _token : "{{ csrf_token() }}",
                     id : $('#item-id').val(),
                     Status : $('#Status').val(),
-                    Remarks : $('#Remarks').val(),
+                    Notes : $('#Remarks').val(),
                 }, 
                 success : function(res) {
                     $('#modal-update').modal('hide');

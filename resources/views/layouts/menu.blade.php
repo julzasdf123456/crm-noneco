@@ -375,6 +375,12 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-user-circle nav-icon text-primary"></i><p>Active Accounts</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('rates.index') }}"
+                   class="nav-link {{ Request::is('rates*') ? 'active' : '' }}">
+                    <i class="fas fa-percentage nav-icon text-primary"></i><p>Rate Management</p>
+                </a>
+            </li>
             <li class="nav-header">                
                 Meter Reading 
             </li>
@@ -477,6 +483,5 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
-
 
 

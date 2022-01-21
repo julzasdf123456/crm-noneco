@@ -21,6 +21,7 @@ class CreateTableBillingReadingSchedules extends Migration
             $table->date('ServicePeriod')->nullable();
             $table->date('ScheduledDate')->nullable();
             $table->string('MeterReader')->nullable();
+            $table->string('Status')->nullable(); // Downloaded,Null
             $table->timestamps();
         });
     }

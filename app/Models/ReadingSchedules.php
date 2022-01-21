@@ -41,7 +41,8 @@ class ReadingSchedules extends Model
         'GroupCode',
         'ServicePeriod',
         'ScheduledDate',
-        'MeterReader'
+        'MeterReader',
+        'Status'
     ];
 
     /**
@@ -55,7 +56,8 @@ class ReadingSchedules extends Model
         'GroupCode' => 'string',
         'ServicePeriod' => 'date',
         'ScheduledDate' => 'date',
-        'MeterReader' => 'string'
+        'MeterReader' => 'string',
+        'Status' => 'string'
     ];
 
     /**
@@ -71,7 +73,8 @@ class ReadingSchedules extends Model
         'ScheduledDate' => 'nullable',
         'MeterReader' => 'nullable|string|max:255',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'Status' => 'nullable|string'
     ];
 
     

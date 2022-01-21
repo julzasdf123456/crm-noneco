@@ -76,8 +76,15 @@
                         var schedDate = moment(res[index]['ScheduledDate'], moment.defaultFormat).toDate();
                         obj['title'] = 'Area: ' + res[index]['AreaCode'] + ' | Day ' + res[index]['GroupCode'];
                         obj['start'] = schedDate;
-                        obj['backgroundColor'] = '#66bb6a';
-                        obj['borderColor'] = '#66bb6a';
+
+                        if (res[index]['Status'] == 'Downloaded') {                            
+                            obj['backgroundColor'] = '#ff8a65';
+                            obj['borderColor'] = '#ff8a65';
+                        } else {
+                            obj['backgroundColor'] = '#66bb6a';
+                            obj['borderColor'] = '#66bb6a';
+                        }
+                        
 
                         var urlShow = "{{ route('readingSchedules.edit', ['rsId']) }}"
                         urlShow = urlShow.replace("rsId", res[index]['id'])

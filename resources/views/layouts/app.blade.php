@@ -418,7 +418,8 @@
                 $('#assign-badge-count').text(response.length);
             },
             error : function(error) {
-                alert(error);
+                // alert(error);
+                
             }
         });
     });
