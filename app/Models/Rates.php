@@ -95,7 +95,9 @@ class Rates extends Model
         'DistributionVAT',
         'TotalRateVATExcluded',
         'TotalRateVATIncluded',
-        'UserId'
+        'UserId',
+        'RealPropertyTax',
+        'AreaCode'
     ];
 
     /**
@@ -136,7 +138,9 @@ class Rates extends Model
         'DistributionVAT' => 'string',
         'TotalRateVATExcluded' => 'string',
         'TotalRateVATIncluded' => 'string',
-        'UserId' => 'string'
+        'UserId' => 'string',
+        'RealPropertyTax' => 'string',
+        'AreaCode' => 'string'
     ];
 
     /**
@@ -179,7 +183,9 @@ class Rates extends Model
         'TotalRateVATIncluded' => 'nullable|string|max:20',
         'UserId' => 'nullable|string|max:255',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'RealPropertyTax' => 'nullable|string',
+        'AreaCode' => 'nullable|string'
     ];
 
     

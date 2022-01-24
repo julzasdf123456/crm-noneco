@@ -20,6 +20,8 @@ use App\Models\MeterReaders;
 use App\Models\BillingMeters;
 use App\Models\BillingTransformers;
 use App\Models\ServiceConnectionMtrTrnsfrmr;
+use App\Models\User;
+use App\Models\Users;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Flash;
 use Response;

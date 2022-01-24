@@ -63,3 +63,6 @@ You can also check out our other paid products on [CodeCanyon](https://codecanyo
 
 ### Project Config
 - In table CRM_MemberConsumerImages Manually "HexImage - Text" to database;
+
+### Billing - Rates
+- In the "Rates Template", make sure to add the Real Property Tax (RPT) to the overall rate during deployment

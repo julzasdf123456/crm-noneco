@@ -17,6 +17,7 @@ class CreateTableRates extends Migration
             $table->string('id')->unsigned();
             $table->primary('id');
             $table->string('RateFor', 100)->nullable(); // RATE FOR A SPECIFIC AREA
+            $table->string('AreaCode')->nullable();
             $table->string('ConsumerType', 100)->nullable();
             $table->date('ServicePeriod')->nullable();
             $table->string('Notes', 1000)->nullable();
@@ -45,6 +46,7 @@ class CreateTableRates extends Migration
             $table->string('TransmissionVAT', 20)->nullable();
             $table->string('SystemLossVAT', 20)->nullable();
             $table->string('DistributionVAT', 20)->nullable();
+            $table->string('RealPropertyTax', 20)->nullable();
             $table->string('TotalRateVATExcluded', 20)->nullable();
             $table->string('TotalRateVATIncluded', 20)->nullable();
             $table->string('UserId')->nullable();

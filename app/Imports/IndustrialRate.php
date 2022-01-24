@@ -10,19 +10,19 @@ use App\Models\IDGenerator;
 class IndustrialRate implements WithMappedCells, WithCalculatedFormulas, ToModel 
 {
 
-    private $servicePeriod, $userId, $district;
+    private $servicePeriod, $userId, $district, $areaCode;
 
-    public function __construct($servicePeriod, $userId, $district)
+    public function __construct($servicePeriod, $userId, $district, $areaCode)
     {
         $this->servicePeriod = $servicePeriod;
         $this->userId = $userId;
         $this->district = $district;
+        $this->areaCode = $areaCode;
     }
 
     public function mapping(): array
     {
         return [
-            'ConsumerType' => 'F8',
             'GenerationSystemCharge' => 'F11',
             'TransmissionDeliveryChargeKW' => 'F12',
             'TransmissionDeliveryChargeKWH' => 'F13',
@@ -48,8 +48,9 @@ class IndustrialRate implements WithMappedCells, WithCalculatedFormulas, ToModel
             'TransmissionVAT' => 'F38',
             'SystemLossVAT' => 'F39',
             'DistributionVAT' => 'F40',
+            'RealPropertyTax' => 'F41',
             'TotalRateVATExcluded' => 'F35',
-            'TotalRateVATIncluded' => 'F42',
+            'TotalRateVATIncluded' => 'F43',
         ];
     }
     
@@ -60,7 +61,7 @@ class IndustrialRate implements WithMappedCells, WithCalculatedFormulas, ToModel
             'RateFor' => $this->district,
             'ServicePeriod' => $this->servicePeriod,
             'UserId' => $this->userId,
-            'ConsumerType' => $row['ConsumerType'],
+            'ConsumerType' => 'INDUSTRIAL',
             'GenerationSystemCharge' => $row['GenerationSystemCharge'],
             'TransmissionDeliveryChargeKW' => $row['TransmissionDeliveryChargeKW'],
             'TransmissionDeliveryChargeKWH' => $row['TransmissionDeliveryChargeKWH'],
@@ -86,8 +87,10 @@ class IndustrialRate implements WithMappedCells, WithCalculatedFormulas, ToModel
             'TransmissionVAT' => $row['TransmissionVAT'],
             'SystemLossVAT' => $row['SystemLossVAT'],
             'DistributionVAT' => $row['DistributionVAT'],
+            'RealPropertyTax' => $row['RealPropertyTax'],
             'TotalRateVATExcluded' => $row['TotalRateVATExcluded'],
             'TotalRateVATIncluded' => $row['TotalRateVATIncluded'],
+            'AreaCode' => $this->areaCode,
         ]);
     }
 }

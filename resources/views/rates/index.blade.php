@@ -19,21 +19,37 @@
 
     <div class="content px-3">
 
-        @include('flash::message')
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2 col-md-10 offset-md-1">
+                @include('flash::message')
 
-        <div class="clearfix"></div>
+                <div class="clearfix"></div>
 
-        <div class="card">
-            <div class="card-body p-0">
-                @include('rates.table')
-
-                <div class="card-footer clearfix">
-                    <div class="float-right">
-                        
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Current Rates</span>
                     </div>
+                    <div class="card-body table-responsive px-0">                        
+                        <table class="table table-hover">
+                            <thead>
+                                <th>Billing Period</th>
+                                <th width="8%"></th>
+                            </thead>
+                            <tbody>
+                                @foreach ($rates as $item)
+                                    <tr>
+                                        <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
+                                        <td>
+                                            <a href="{{ route('rates.view-rates', [$item->ServicePeriod]) }}" class="float-right"><i class="fas fa-eye"></i></a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
                 </div>
             </div>
-
         </div>
     </div>
 

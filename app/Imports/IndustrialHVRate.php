@@ -10,13 +10,14 @@ use App\Models\IDGenerator;
 class IndustrialHVRate implements WithMappedCells, WithCalculatedFormulas, ToModel 
 {
 
-    private $servicePeriod, $userId, $district;
+    private $servicePeriod, $userId, $district, $areaCode;
 
-    public function __construct($servicePeriod, $userId, $district)
+    public function __construct($servicePeriod, $userId, $district, $areaCode)
     {
         $this->servicePeriod = $servicePeriod;
         $this->userId = $userId;
         $this->district = $district;
+        $this->areaCode = $areaCode;
     }
 
     public function mapping(): array
@@ -47,8 +48,9 @@ class IndustrialHVRate implements WithMappedCells, WithCalculatedFormulas, ToMod
             'TransmissionVAT' => 'J38',
             'SystemLossVAT' => 'J39',
             'DistributionVAT' => 'J40',
+            'RealPropertyTax' => 'J41',
             'TotalRateVATExcluded' => 'J35',
-            'TotalRateVATIncluded' => 'J42',
+            'TotalRateVATIncluded' => 'J43',
         ];
     }
     
@@ -85,8 +87,10 @@ class IndustrialHVRate implements WithMappedCells, WithCalculatedFormulas, ToMod
             'TransmissionVAT' => $row['TransmissionVAT'],
             'SystemLossVAT' => $row['SystemLossVAT'],
             'DistributionVAT' => $row['DistributionVAT'],
+            'RealPropertyTax' => $row['RealPropertyTax'],
             'TotalRateVATExcluded' => $row['TotalRateVATExcluded'],
             'TotalRateVATIncluded' => $row['TotalRateVATIncluded'],
+            'AreaCode' => $this->areaCode,
         ]);
     }
 }

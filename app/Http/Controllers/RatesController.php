@@ -17,6 +17,7 @@ use App\Imports\StreetlightsRate;
 use App\Imports\IndustrialHVRate;
 use App\Imports\CommercialHVRate;
 use App\Imports\PublicBuildingHVRate;
+use App\Models\Rates;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Flash;
@@ -42,10 +43,15 @@ class RatesController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $rates = $this->ratesRepository->all();
+        $rates = DB::table('Billing_Rates')
+            ->select('ServicePeriod')
+            ->groupBy('ServicePeriod')
+            ->orderByDesc('ServicePeriod')
+            ->get();
 
-        return view('rates.index')
-            ->with('rates', $rates);
+        return view('rates.index', [
+            'rates' => $rates,
+        ]);
     }
 
     /**
@@ -179,40 +185,63 @@ class RatesController extends AppBaseController
             $file = $request->file('file');
             $userId = Auth::id();
 
+            $areaCode = '';
+            if ($district == 'VICTORIAS') {
+                $areaCode = '04';
+            } elseif ($district == 'TOBOSO') {
+                $areaCode = '09';
+            } elseif ($district == 'SAN CARLOS') {
+                $areaCode = '05';
+            } elseif ($district == 'SAGAY') {
+                $areaCode = '06';
+            } elseif ($district == 'MANAPLA') {
+                $areaCode = '03';
+            } elseif ($district == 'ESCALANTE') {
+                $areaCode = '07';
+            } elseif ($district == 'E.B. MAGALONA') {
+                $areaCode = '02';
+            } elseif ($district == 'CALATRAVA') {
+                $areaCode = '08';
+            } elseif ($district == 'CADIZ') {
+                $areaCode = '01';
+            } else {
+                $areaCode = '00';
+            }
+
             // RESIDENTIAL
-            $residentialRates = new ResidentialRate($period, $userId, $district);
+            $residentialRates = new ResidentialRate($period, $userId, $district, $areaCode);
             Excel::import($residentialRates, $file);
 
             // COMMERCIAL
-            $commercialRates = new CommercialRate($period, $userId, $district);
+            $commercialRates = new CommercialRate($period, $userId, $district, $areaCode);
             Excel::import($commercialRates, $file);
 
             // INDUSTRIAL
-            $industrialRates = new IndustrialRate($period, $userId, $district);
+            $industrialRates = new IndustrialRate($period, $userId, $district, $areaCode);
             Excel::import($industrialRates, $file);
 
             // WATER SYSTEMS
-            $waterSystemsRates = new WaterSystemsRate($period, $userId, $district);
+            $waterSystemsRates = new WaterSystemsRate($period, $userId, $district, $areaCode);
             Excel::import($waterSystemsRates, $file);
 
             // PUBLIC BUILDING
-            $publicBuildingRates = new PublicBuildingRate($period, $userId, $district);
+            $publicBuildingRates = new PublicBuildingRate($period, $userId, $district, $areaCode);
             Excel::import($publicBuildingRates, $file);
 
             // STREETLIGHTS
-            $streetlightsRates = new StreetlightsRate($period, $userId, $district);
+            $streetlightsRates = new StreetlightsRate($period, $userId, $district, $areaCode);
             Excel::import($streetlightsRates, $file);
 
             // INDUSTRIAL HIGH VOLTAGE
-            $industrialHvRates = new IndustrialHVRate($period, $userId, $district);
+            $industrialHvRates = new IndustrialHVRate($period, $userId, $district, $areaCode);
             Excel::import($industrialHvRates, $file);
 
             // COMMERCIAL HIGH VOLTAGE
-            $commercialHvRates = new CommercialHVRate($period, $userId, $district);
+            $commercialHvRates = new CommercialHVRate($period, $userId, $district, $areaCode);
             Excel::import($commercialHvRates, $file);
 
             // PUBLIC BUILDING
-            $publicBuildingHVRates = new PublicBuildingHVRate($period, $userId, $district);
+            $publicBuildingHVRates = new PublicBuildingHVRate($period, $userId, $district, $areaCode);
             Excel::import($publicBuildingHVRates, $file);
 
             Flash::success('Rates for ' . $district . ' uploaded successfully.');
@@ -221,5 +250,32 @@ class RatesController extends AppBaseController
         } else {
             return abort(404, "No file specified!");
         }
+    }
+
+    public function viewRates($servicePeriod) {
+        $categories = DB::table('Billing_Rates')
+            ->select('RateFor')
+            ->where('ServicePeriod', $servicePeriod)
+            ->groupBy('RateFor')
+            ->get();
+        
+        $rates = DB::table('Billing_Rates')
+            ->where('ServicePeriod', $servicePeriod)
+            ->orderBy('created_at')
+            ->get();
+
+        return view('rates.view_rates', [
+            'categories' => $categories,
+            'servicePeriod' => $servicePeriod,
+            'rates' => $rates,
+        ]);
+    }
+
+    public function deleteRates($servicePeriod) {
+        Rates::where('ServicePeriod', $servicePeriod)->delete();
+
+        Flash::success('Rates for ' . date('F Y', strtotime($servicePeriod)) . ' deleted.');
+
+        return redirect(route('rates.index'));
     }
 }

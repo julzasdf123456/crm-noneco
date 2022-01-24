@@ -10,6 +10,7 @@ use App\Http\Controllers\API\OtherData;
 use App\Http\Controllers\API\TicketrepositoriesController;
 use App\Http\Controllers\API\TicketsController;
 use App\Http\Controllers\API\MeterReaderTracksAPI;
+use App\Http\Controllers\API\ReadAndBillAPI;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,3 +60,8 @@ Route::get('get-downloadable-tracks', [MeterReaderTracksAPI::class, 'getDownload
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// READ AND BILL
+Route::get('get-undownloaded-schedules', [ReadAndBillAPI::class, 'getUndownloadedSchedules']);
+Route::get('download-accounts', [ReadAndBillAPI::class, 'downloadAccounts']);
+Route::get('download-rates', [ReadAndBillAPI::class, 'downloadRates']);

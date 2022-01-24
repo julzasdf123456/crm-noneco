@@ -10,13 +10,14 @@ use App\Models\IDGenerator;
 class StreetlightsRate implements WithMappedCells, WithCalculatedFormulas, ToModel 
 {
 
-    private $servicePeriod, $userId, $district;
+    private $servicePeriod, $userId, $district, $areaCode;
 
-    public function __construct($servicePeriod, $userId, $district)
+    public function __construct($servicePeriod, $userId, $district, $areaCode)
     {
         $this->servicePeriod = $servicePeriod;
         $this->userId = $userId;
         $this->district = $district;
+        $this->areaCode = $areaCode;
     }
 
     public function mapping(): array
@@ -47,8 +48,9 @@ class StreetlightsRate implements WithMappedCells, WithCalculatedFormulas, ToMod
             'TransmissionVAT' => 'I38',
             'SystemLossVAT' => 'I39',
             'DistributionVAT' => 'I40',
+            'RealPropertyTax' => 'I41',
             'TotalRateVATExcluded' => 'I35',
-            'TotalRateVATIncluded' => 'I42',
+            'TotalRateVATIncluded' => 'I43',
         ];
     }
     
@@ -85,8 +87,10 @@ class StreetlightsRate implements WithMappedCells, WithCalculatedFormulas, ToMod
             'TransmissionVAT' => $row['TransmissionVAT'],
             'SystemLossVAT' => $row['SystemLossVAT'],
             'DistributionVAT' => $row['DistributionVAT'],
+            'RealPropertyTax' => $row['RealPropertyTax'],
             'TotalRateVATExcluded' => $row['TotalRateVATExcluded'],
             'TotalRateVATIncluded' => $row['TotalRateVATIncluded'],
+            'AreaCode' => $this->areaCode,
         ]);
     }
 }
