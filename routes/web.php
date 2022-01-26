@@ -313,3 +313,6 @@ Route::post('/rates/validate-rate-upload', [App\Http\Controllers\RatesController
 Route::get('/rates/view-rates/{servicePeriod}', [App\Http\Controllers\RatesController::class, 'viewRates'])->name('rates.view-rates');
 Route::post('/rates/delete-rates/{servicePeriod}', [App\Http\Controllers\RatesController::class, 'deleteRates'])->name('rates.delete-rates');
 Route::resource('rates', App\Http\Controllers\RatesController::class);
+
+
+Route::resource('readings', App\Http\Controllers\ReadingsController::class);

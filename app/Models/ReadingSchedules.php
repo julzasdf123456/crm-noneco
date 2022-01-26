@@ -54,8 +54,8 @@ class ReadingSchedules extends Model
         'id' => 'string',
         'AreaCode' => 'string',
         'GroupCode' => 'string',
-        'ServicePeriod' => 'date',
-        'ScheduledDate' => 'date',
+        'ServicePeriod' => 'string',
+        'ScheduledDate' => 'string',
         'MeterReader' => 'string',
         'Status' => 'string'
     ];
@@ -77,5 +77,4 @@ class ReadingSchedules extends Model
         'Status' => 'nullable|string'
     ];
 
-    
 }

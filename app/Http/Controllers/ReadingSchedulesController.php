@@ -139,7 +139,7 @@ class ReadingSchedulesController extends AppBaseController
 
         Flash::success('Reading Schedules updated successfully.');
 
-        return redirect(route('readingSchedules.index'));
+        return redirect(route('readingSchedules.view-schedule', [$readingSchedules->MeterReader]));
     }
 
     /**
