@@ -39,6 +39,14 @@ class CreateTableCRMTickets extends Migration
             $table->string('CrewAssigned')->nullable();
             $table->string('Trash')->nullable();
             $table->string('Office')->nullable();
+            $table->string('CurrentMeterNo')->nullable();
+            $table->string('CurrentMeterBrand')->nullable();
+            $table->string('CurrentMeterReading')->nullable();
+            $table->string('KwhRating')->nullable();
+            $table->string('PercentError')->nullable();
+            $table->string('NewMeterNo')->nullable();
+            $table->string('NewMeterBrand')->nullable();
+            $table->string('NewMeterReading')->nullable();
             $table->timestamps();
         });
     }

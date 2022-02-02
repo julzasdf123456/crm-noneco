@@ -375,10 +375,41 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-user-circle nav-icon text-primary"></i><p>Active Accounts</p>
                 </a>
             </li>
+            <li class="nav-header">                
+                Others 
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('serviceAccounts.pending-accounts') }}"
+                   class="nav-link {{ Request::is('serviceAccounts.pending-accounts*') ? 'active' : '' }}">                   
+                   <i class="fas fa-user-alt-slash nav-icon text-primary"></i><p>Pending Accounts</p>
+                </a>
+            </li>
+            
+        </ul>
+    </li>
+@endcanany
+
+{{-- BILLS --}}
+@canany(['Super Admin'])
+    <li class="nav-item has-treeview">
+        <a href="#" class="nav-link">
+            <i class="fas fa-wallet nav-icon text-primary"></i>
+            <p>
+                Bills
+                <i class="fas fa-angle-left right"></i>
+            </p>
+        </a>
+        <ul class="nav nav-treeview">
             <li class="nav-item">
                 <a href="{{ route('rates.index') }}"
                    class="nav-link {{ Request::is('rates*') ? 'active' : '' }}">
                     <i class="fas fa-percentage nav-icon text-primary"></i><p>Rate Management</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('bills.unbilled-readings') }}"
+                   class="nav-link {{ Request::is('bills.unbilled-readings*') ? 'active' : '' }}">
+                    <i class="fas fa-exclamation-triangle nav-icon text-primary"></i><p>Unbilled Readings</p>
                 </a>
             </li>
             <li class="nav-header">                
@@ -396,16 +427,6 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-map-marked-alt nav-icon text-primary"></i><p>M. Reader Tracks</p>
                 </a>
             </li>
-            <li class="nav-header">                
-                Others 
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('serviceAccounts.pending-accounts') }}"
-                   class="nav-link {{ Request::is('serviceAccounts.pending-accounts*') ? 'active' : '' }}">                   
-                   <i class="fas fa-user-alt-slash nav-icon text-primary"></i><p>Pending Accounts</p>
-                </a>
-            </li>
-            
         </ul>
     </li>
 @endcanany
@@ -483,3 +504,6 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
+
+
+

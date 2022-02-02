@@ -22,6 +22,8 @@ use App\Models\BillingTransformers;
 use App\Models\ServiceConnectionMtrTrnsfrmr;
 use App\Models\User;
 use App\Models\Users;
+use App\Models\Bills;
+use App\Models\Readings;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Flash;
 use Response;
@@ -149,6 +151,10 @@ class ServiceAccountsController extends AppBaseController
             ->orderByDesc('created_at')
             ->first();
 
+        $bills = Bills::where('AccountNumber', $id)
+            ->orderByDesc('BillingDate')
+            ->get();
+
         if (empty($serviceAccounts)) {
             Flash::error('Service Accounts not found');
 
@@ -159,6 +165,7 @@ class ServiceAccountsController extends AppBaseController
             'serviceAccounts' => $serviceAccounts,
             'meters' => $meters,
             'transformer' => $transformer,
+            'bills' => $bills,
         ]);
     }
 

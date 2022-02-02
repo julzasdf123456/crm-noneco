@@ -66,3 +66,6 @@ Route::get('get-undownloaded-schedules', [ReadAndBillAPI::class, 'getUndownloade
 Route::get('download-accounts', [ReadAndBillAPI::class, 'downloadAccounts']);
 Route::get('download-rates', [ReadAndBillAPI::class, 'downloadRates']);
 Route::get('update-downloaded-status', [ReadAndBillAPI::class, 'updateDownloadedStatus']);
+Route::post('receive-readings', [ReadAndBillAPI::class, 'receiveReadings']);
+Route::post('receive-bills', [ReadAndBillAPI::class, 'receiveBills']);
+Route::post('save-reading-images', [ReadAndBillAPI::class, 'saveReadingImages']);

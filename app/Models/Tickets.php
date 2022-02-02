@@ -76,6 +76,14 @@ class Tickets extends Model
         'CrewAssigned',
         'Trash',
         'Office',
+        'CurrentMeterNo',
+        'CurrentMeterBrand',
+        'CurrentMeterReading',
+        'KwhRating',
+        'PercentError',
+        'NewMeterNo',
+        'NewMeterBrand',
+        'NewMeterReading',
     ];
 
     /**
@@ -108,6 +116,14 @@ class Tickets extends Model
         'CrewAssigned' => 'string',
         'Trash' => 'string',
         'Office' => 'string',
+        'CurrentMeterNo' => 'string',
+        'CurrentMeterBrand' => 'string',
+        'CurrentMeterReading' => 'string',
+        'KwhRating' => 'string',
+        'PercentError' => 'string',
+        'NewMeterNo' => 'string',
+        'NewMeterBrand' => 'string',
+        'NewMeterReading' => 'string',
     ];
 
     /**
@@ -142,6 +158,14 @@ class Tickets extends Model
         'updated_at' => 'nullable',
         'Trash' => 'nullable|string',
         'Office' => 'nullable|string',
+        'CurrentMeterNo' => 'nullable|string',
+        'CurrentMeterBrand' => 'nullable|string',
+        'CurrentMeterReading' => 'nullable|string',
+        'KwhRating' => 'nullable|string',
+        'PercentError' => 'nullable|string',
+        'NewMeterNo' => 'nullable|string',
+        'NewMeterBrand' => 'nullable|string',
+        'NewMeterReading' => 'nullable|string',
     ];
 
     public static function getAddress($ticket) {

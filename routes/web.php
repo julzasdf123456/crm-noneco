@@ -316,3 +316,10 @@ Route::resource('rates', App\Http\Controllers\RatesController::class);
 
 
 Route::resource('readings', App\Http\Controllers\ReadingsController::class);
+
+Route::get('/bills/unbilled-readings', [App\Http\Controllers\BillsController::class, 'unbilledReadings'])->name('bills.unbilled-readings');
+Route::get('/bills/unbilled-readings-console/{servicePeriod}', [App\Http\Controllers\BillsController::class, 'unbilledReadingsConsole'])->name('bills.unbilled-readings-console');
+Route::resource('bills', App\Http\Controllers\BillsController::class);
+
+
+Route::resource('readingImages', App\Http\Controllers\ReadingImagesController::class);

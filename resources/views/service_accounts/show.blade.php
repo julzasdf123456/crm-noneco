@@ -46,7 +46,7 @@
                             </div>
 
                             <div class="tab-pane" id="billing-hist">
-                                
+                                @include('service_accounts.tab_billing_history')
                             </div>
 
                             <div class="tab-pane" id="disco-hist">

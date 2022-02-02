@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Readings extends Model
 {
-    use SoftDeletes;
+    // use SoftDeletes;
 
     use HasFactory;
 
@@ -47,7 +47,8 @@ class Readings extends Model
         'DemandKwhUsed',
         'Notes',
         'Latitude',
-        'Longitude'
+        'Longitude',
+        'FieldStatus', // OVERREADING, STUCK-UP, NOT IN USE, NO DISPLAY
     ];
 
     /**
@@ -64,7 +65,8 @@ class Readings extends Model
         'DemandKwhUsed' => 'string',
         'Notes' => 'string',
         'Latitude' => 'string',
-        'Longitude' => 'string'
+        'Longitude' => 'string',
+        'FieldStatus' => 'string'
     ];
 
     /**
@@ -83,7 +85,8 @@ class Readings extends Model
         'Latitude' => 'nullable|string|max:60',
         'Longitude' => 'nullable|string|max:60',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'FieldStatus' => 'nullable|string'
     ];
 
     
