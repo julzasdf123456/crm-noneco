@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\ServiceConnectionTimeframes;
 use App\Models\ServiceConnectionImages;
+use App\Models\ServiceConnectionCrew;
 use App\Models\IDGenerator;
 
 class ServiceConnectionsEnergization extends Controller {
@@ -35,6 +36,53 @@ class ServiceConnectionsEnergization extends Controller {
         } else {
             return response()->json($serviceConnections, $this->successStatus); 
         } 
+    }
+
+    public function updateDownloadedServiceConnectionStatus(Request $request) {
+        $serviceConnections = DB::table('CRM_ServiceConnections')
+            ->leftJoin('CRM_ServiceConnectionInspections', 'CRM_ServiceConnections.id', '=', 'CRM_ServiceConnectionInspections.ServiceConnectionId')
+            ->where(function ($query) {
+                $query->where('CRM_ServiceConnections.Status', 'Approved')
+                    ->orWhere('CRM_ServiceConnections.Status', 'Not Energized');
+            })
+            ->where(function ($query) {
+                $query->where('CRM_ServiceConnections.Trash', 'No')
+                    ->orWhereNull('CRM_ServiceConnections.Trash');
+            })
+            ->whereIn('CRM_ServiceConnections.id', DB::table('CRM_ServiceConnectionMeterAndTransformer')->pluck('ServiceConnectionId'))
+            ->select('CRM_ServiceConnections.*')
+            ->orderBy('CRM_ServiceConnections.ServiceAccountName')
+            ->get();
+
+        $crew = ServiceConnectionCrew::find($request['CrewAssigned']);
+
+        $dateTimeDownloaded = date('Y-m-d H:i:s');
+
+        foreach($serviceConnections as $item) {
+            // CREATE LOG
+            $timeFrame = new ServiceConnectionTimeframes;
+            $timeFrame->id = IDGenerator::generateIDandRandString();
+            $timeFrame->ServiceConnectionId = $item->id;
+            $timeFrame->UserId = $request['User'];
+            $timeFrame->Status = $request['Status'];
+            $timeFrame->Notes = 'Application downloaded by crew ' . $request['CrewAssigned'];
+
+            $timeFrame->save();
+        }
+
+        $serviceConnections = DB::table('CRM_ServiceConnections')
+            ->leftJoin('CRM_ServiceConnectionInspections', 'CRM_ServiceConnections.id', '=', 'CRM_ServiceConnectionInspections.ServiceConnectionId')
+            ->where(function ($query) {
+                $query->where('CRM_ServiceConnections.Status', 'Approved')
+                    ->orWhere('CRM_ServiceConnections.Status', 'Not Energized');
+            })
+            ->where(function ($query) {
+                $query->where('CRM_ServiceConnections.Trash', 'No')
+                    ->orWhereNull('CRM_ServiceConnections.Trash');
+            })
+            ->update(['Status' => 'Downloaded by Crew']);
+        
+        return response()->json(['res' => 'ok'], $this->successStatus);   
     }
 
     public function getInspectionsForEnergizationData() {

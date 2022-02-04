@@ -31,7 +31,7 @@ class TicketsController extends Controller {
         }
     }
 
-    public function updateDownloadedStatus(Request $request) {
+    public function updateDownloadedTicketsStatus(Request $request) {
         $tickets = Tickets::where('CrewAssigned', $request['CrewAssigned'])
             ->where('Status', 'Received')
             ->where(function ($query) {
@@ -65,5 +65,32 @@ class TicketsController extends Controller {
             ->update(['Status' => 'Downloaded by Crew', 'DateTimeDownloaded' => $dateTimeDownloaded]);
 
         return response()->json(['response' => 'ok'], $this->successStatus);
+    }
+
+    public function uploadTickets(Request $request) {
+        $tickets = Tickets::find($request['id']);
+
+        if ($tickets != null) {
+            $tickets->DateTimeLinemanArrived = $request['DateTimeLinemanArrived'];
+            $tickets->DateTimeLinemanExecuted = $request['DateTimeLinemanExecuted'];
+            $tickets->Status = $request['Status'];
+            $tickets->Notes = $request['Notes'];
+            $tickets->CurrentMeterReading = $request['CurrentMeterReading'];
+            $tickets->NewMeterBrand = $request['NewMeterBrand'];
+            $tickets->NewMeterNo = $request['NewMeterNo'];
+            $tickets->NewMeterReading = $request['NewMeterReading'];
+            $tickets->save();
+
+            // CREATE LOG
+            $ticketLog = new TicketLogs;
+            $ticketLog->id = IDGenerator::generateIDandRandString();
+            $ticketLog->TicketId = $request['id'];
+            $ticketLog->Log = "Ticket uploadd by crew";
+            $ticketLog->LogDetails = $tickets->Notes;
+            $ticketLog->UserId = $request['UserId'];
+            $ticketLog->save();
+        }
+
+        return response()->json($tickets, $this->successStatus);
     }
 }

@@ -36,6 +36,7 @@ Route::get('get-for-energization-data', [ServiceConnectionsEnergization::class, 
 Route::get('get-inspections-for-energization-data', [ServiceConnectionsEnergization::class, 'getInspectionsForEnergizationData']);
 Route::post('update-energized', [ServiceConnectionsEnergization::class, 'updateEnergized']);
 Route::post('create-timeframes', [ServiceConnectionsEnergization::class, 'createTimeFrames']);
+Route::get('update-downloaded-service-connection-status', [ServiceConnectionsEnergization::class, 'updateDownloadedServiceConnectionStatus']);
 
 Route::get('get-towns', [OtherData::class, 'getTowns']);
 Route::get('get-barangays', [OtherData::class, 'getBarangays']);
@@ -46,7 +47,8 @@ Route::post('login', [UserController::class, 'login']);
 // TICKETS
 Route::get('get-ticket-types', [TicketrepositoriesController::class, 'getTicketTypes']);
 Route::get('get-downloadable-tickets', [TicketsController::class, 'getDownloadableTickets']);
-Route::get('update-downloaded-status', [TicketsController::class, 'updateDownloadedStatus']);
+Route::get('update-downloaded-tickets-status', [TicketsController::class, 'updateDownloadedTicketsStatus']);
+Route::post('upload-tickets', [TicketsController::class, 'uploadTickets']);
 
 // IMAGES
 Route::post('save-uploaded-images', [ServiceConnectionsEnergization::class, 'saveUploadedImages']);
@@ -69,3 +71,4 @@ Route::get('update-downloaded-status', [ReadAndBillAPI::class, 'updateDownloaded
 Route::post('receive-readings', [ReadAndBillAPI::class, 'receiveReadings']);
 Route::post('receive-bills', [ReadAndBillAPI::class, 'receiveBills']);
 Route::post('save-reading-images', [ReadAndBillAPI::class, 'saveReadingImages']);
+

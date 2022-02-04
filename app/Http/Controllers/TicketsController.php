@@ -67,6 +67,30 @@ class TicketsController extends AppBaseController
 
         $tickets = $this->ticketsRepository->create($input);
 
+        // FILTER METER RELATED TICKETS
+        $ticket = DB::table('CRM_TicketsRepository')
+            ->where('id', $tickets->Ticket)
+            ->whereIn('ParentTicket', ['1668541254365', '1668541254387', '1668541254387', '1668541254422', '1668541254427']) // Mother Meter, KWH Meter, KWH Meter Transfer, Disconnection, Reconnection
+            ->first(); 
+            
+        if ($ticket != null) {
+            // SAVE METER INFO
+            $accountMeterInfo = DB::table('Billing_ServiceAccounts')
+                ->leftJoin('Billing_Meters', 'Billing_ServiceAccounts.id', '=', 'Billing_Meters.ServiceAccountId')
+                ->select('Billing_Meters.SerialNumber',
+                    'Billing_Meters.Brand',
+                    'Billing_ServiceAccounts.Latitude',
+                    'Billing_ServiceAccounts.Longitude')
+                ->first();
+            
+            if ($accountMeterInfo != null) {
+                $tickets->CurrentMeterBrand = $accountMeterInfo->Brand;
+                $tickets->CurrentMeterNo = $accountMeterInfo->SerialNumber;
+                $tickets->GeoLocation = $accountMeterInfo->Latitude != null ? ($accountMeterInfo->Latitude . ',' . $accountMeterInfo->Longitude) : null;
+                $tickets->save();
+            }
+        }
+
         Flash::success('Tickets saved successfully.');
 
         // CREATE LOG

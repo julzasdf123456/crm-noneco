@@ -64,5 +64,9 @@ You can also check out our other paid products on [CodeCanyon](https://codecanyo
 ### Project Config
 - In table CRM_MemberConsumerImages Manually "HexImage - Text" to database;
 
+### Tickets
+- In the creation of Tickets, replace the array of METER-RELATED mother tickets to capture all the tickets pertaining to meter complains
+    (found in TicketsController.store)
+
 ### Billing - Rates
 - In the "Rates Template", make sure to add the Real Property Tax (RPT) to the overall rate during deployment
