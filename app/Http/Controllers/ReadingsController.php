@@ -7,6 +7,11 @@ use App\Http\Requests\UpdateReadingsRequest;
 use App\Repositories\ReadingsRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
+use App\Models\Bills;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use App\Models\Readings;
 use Flash;
 use Response;
 
@@ -153,5 +158,36 @@ class ReadingsController extends AppBaseController
         Flash::success('Readings deleted successfully.');
 
         return redirect(route('readings.index'));
+    }
+
+    public function readingMonitor() {
+        $servicePeriods = DB::table('Billing_Readings')
+            ->select('ServicePeriod')
+            ->groupBy('ServicePeriod')
+            ->orderByDesc('ServicePeriod')
+            ->limit(30)
+            ->get();
+
+        return view('/readings/reading_monitor', [
+            'servicePeriods' => $servicePeriods,
+        ]);
+    }
+
+    public function readingMonitorView($servicePeriod) {
+        $meterReaders = User::role('Meter Reader')->orderBy('name')->get();
+
+        return view('/readings/reading_monitor_view', [
+            'meterReaders' => $meterReaders,
+            'servicePeriod' => $servicePeriod,
+        ]);
+    }
+
+    public function getReadingsFromMeterReader(Request $request) {
+        $readings = Readings::where('ServicePeriod', $request['ServicePeriod'])
+            ->where('MeterReader', $request['MeterReader'])
+            ->orderBy('ReadingTimestamp')
+            ->get();
+
+        return response()->json($readings, 200);
     }
 }

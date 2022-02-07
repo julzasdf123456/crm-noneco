@@ -11,6 +11,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Users;
 use App\Models\Permission;
+use Illuminate\Support\Facades\Hash;
 use Flash;
 use Response;
 
@@ -221,4 +222,21 @@ class UsersController extends AppBaseController
 
         return redirect('users/' . $id);
     }
+
+    public function authenticate(Request $request) {
+        $users = User::where('username', $request['username'])->first();
+        if ($users != null) {
+            if (Hash::check($request['password'], $users->password)) {
+                if ($users->can($request['permission'])) {
+                    return response()->json(['res' => 'ok'], 200);
+                } else {
+                    return response()->json(['res' => 'error'], 406);
+                }              
+            } else {
+                return response()->json(['res' => 'error'], 405);
+            }
+        } else {
+            return response()->json(['res' => 'error'], 404);
+        }        
+    } 
 }

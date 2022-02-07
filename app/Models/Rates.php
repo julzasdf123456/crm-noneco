@@ -188,5 +188,11 @@ class Rates extends Model
         'AreaCode' => 'nullable|string'
     ];
 
-    
+    public static function floatRate($rate) {
+        if ($rate != null) {
+            return floatval($rate);
+        } else {
+            return 0;
+        }
+    }
 }

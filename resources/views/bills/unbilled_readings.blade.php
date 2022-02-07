@@ -33,10 +33,10 @@
                                             <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
                                             <td>
                                                 <div class="progress progress-xs" style="margin-top: 10px;">
-                                                    <div class="progress-bar bg-warning" style="width: {{ (floatval($item->Bills)/floatval($item->Readings)) * 100 }}%"></div>
+                                                    <div class="progress-bar bg-warning" style="width: {{ $item->Readings > 0 ? ((floatval($item->Bills)/floatval($item->Readings)) * 100) : 100 }}%"></div>
                                                 </div>
                                             </td>
-                                            <td><span class="badge bg-danger">{{ number_format(((floatval($item->Bills)/floatval($item->Readings)) * 100), 2) }}%</span></td>
+                                            <td><span class="badge bg-danger">{{ $item->Readings > 0 ? number_format(((floatval($item->Bills)/floatval($item->Readings)) * 100), 2) : 100 }}%</span></td>
                                             <td>
                                                 <a href="{{ route('bills.unbilled-readings-console', [$item->ServicePeriod]) }}"><i class="fas fa-eye"></i></a>
                                             </td>

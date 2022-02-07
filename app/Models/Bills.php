@@ -137,7 +137,8 @@ class Bills extends Model
         'RealPropertyTax',
         'Notes',
         'UserId',
-        'BilledFrom'
+        'BilledFrom',
+        'AveragedCount',
     ];
 
     /**
@@ -199,7 +200,8 @@ class Bills extends Model
         'RealPropertyTax' => 'string',
         'Notes' => 'string',
         'UserId' => 'string',
-        'BilledFrom' => 'string'
+        'BilledFrom' => 'string',
+        'AveragedCount' => 'string',
     ];
 
     /**
@@ -263,8 +265,11 @@ class Bills extends Model
         'UserId' => 'nullable|string|max:255',
         'BilledFrom' => 'nullable|string|max:255',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'AveragedCount' => 'nullable|string'
     ];
 
-    
+    public static function createDueDate($readDate) {
+        return date('Y-m-d', strtotime($readDate . ' +9 days'));
+    }
 }

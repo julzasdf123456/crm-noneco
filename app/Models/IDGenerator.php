@@ -36,4 +36,8 @@ class IDGenerator extends Model
     public static function generateIDandRandString($numbers = 30) {
         return round(microtime(true) * 1000) . '-' . Str::random($numbers);
     }
+
+    public static function generateBillNumber($areaCode) {
+        return $areaCode . substr(IDGenerator::generateID(), 6);
+    }
 }

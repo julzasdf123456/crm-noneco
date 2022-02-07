@@ -25,6 +25,7 @@ class CreateTableReadings extends Migration
             $table->string('Latitude', 60)->nullable();
             $table->string('Longitude', 60)->nullable();
             $table->string('FieldStatus', 50)->nullable();
+            $table->string('MeterReader', 60)->nullable();
             $table->timestamps();
         });
     }

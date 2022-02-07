@@ -49,6 +49,7 @@ class Readings extends Model
         'Latitude',
         'Longitude',
         'FieldStatus', // OVERREADING, STUCK-UP, NOT IN USE, NO DISPLAY
+        'MeterReader',
     ];
 
     /**
@@ -59,14 +60,15 @@ class Readings extends Model
     protected $casts = [
         'id' => 'string',
         'AccountNumber' => 'string',
-        'ServicePeriod' => 'date',
+        'ServicePeriod' => 'string',
         'ReadingTimestamp' => 'datetime',
         'KwhUsed' => 'string',
         'DemandKwhUsed' => 'string',
         'Notes' => 'string',
         'Latitude' => 'string',
         'Longitude' => 'string',
-        'FieldStatus' => 'string'
+        'FieldStatus' => 'string',
+        'MeterReader' => 'string'
     ];
 
     /**
@@ -86,7 +88,8 @@ class Readings extends Model
         'Longitude' => 'nullable|string|max:60',
         'created_at' => 'nullable',
         'updated_at' => 'nullable',
-        'FieldStatus' => 'nullable|string'
+        'FieldStatus' => 'nullable|string',
+        'MeterReader' => 'nullable|string'
     ];
 
     

@@ -70,3 +70,6 @@ You can also check out our other paid products on [CodeCanyon](https://codecanyo
 
 ### Billing - Rates
 - In the "Rates Template", make sure to add the Real Property Tax (RPT) to the overall rate during deployment
+
+### User - Special Authentication
+- In UsersController.authenticate(), update the permissions

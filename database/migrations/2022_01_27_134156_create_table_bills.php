@@ -73,6 +73,8 @@ class CreateTableBills extends Migration
             $table->string('Notes', 2500)->nullable();
             $table->string('UserId')->nullable();
             $table->string('BilledFrom')->nullable();
+
+            $table->string('AveragedCount')->nullable(); // Number of months that the bill is averaged
             $table->timestamps();
         });
     }

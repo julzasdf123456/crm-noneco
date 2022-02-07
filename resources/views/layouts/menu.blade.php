@@ -422,6 +422,12 @@ use Illuminate\Support\Facades\Auth;
                 </a>
             </li>
             <li class="nav-item">
+                <a href="{{ route('readings.reading-monitor') }}"
+                   class="nav-link {{ Request::is('readings.reading-monitor*') ? 'active' : '' }}">                   
+                   <i class="fas fa-street-view nav-icon text-primary"></i><p>Reading Monitoring</p>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="{{ route('meterReaderTrackNames.index') }}"
                    class="nav-link {{ Request::is('meterReaderTrackNames.index*') ? 'active' : '' }}">                   
                    <i class="fas fa-map-marked-alt nav-icon text-primary"></i><p>M. Reader Tracks</p>

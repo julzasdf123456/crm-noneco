@@ -47,6 +47,7 @@ Route::post('/users/create-user-permissions', [UsersController::class, 'createUs
 Route::get('/users/remove-permission/{id}/{permission}', [UsersController::class, 'removePermission'])->name('users.remove_permission');
 Route::get('/users/remove-roles/{id}', [UsersController::class, 'clearRoles'])->name('users.remove_roles');
 
+Route::post('/users/authenticate', [UsersController::class, 'authenticate'])->name('users.authenticate');
 Route::resource('users', UsersController::class);
 
 Route::resource('roles', App\Http\Controllers\RoleController::class);
@@ -314,11 +315,17 @@ Route::get('/rates/view-rates/{servicePeriod}', [App\Http\Controllers\RatesContr
 Route::post('/rates/delete-rates/{servicePeriod}', [App\Http\Controllers\RatesController::class, 'deleteRates'])->name('rates.delete-rates');
 Route::resource('rates', App\Http\Controllers\RatesController::class);
 
-
+Route::get('/readings/reading-monitor', [App\Http\Controllers\ReadingsController::class, 'readingMonitor'])->name('readings.reading-monitor');
+Route::get('/readings/reading-monitor-view/{servicePeriod}', [App\Http\Controllers\ReadingsController::class, 'readingMonitorView'])->name('readings.reading-monitor-view');
+Route::get('/readings/get-readings-from-meter-reader', [App\Http\Controllers\ReadingsController::class, 'getReadingsFromMeterReader'])->name('readings.get-readings-from-meter-reader');
 Route::resource('readings', App\Http\Controllers\ReadingsController::class);
 
 Route::get('/bills/unbilled-readings', [App\Http\Controllers\BillsController::class, 'unbilledReadings'])->name('bills.unbilled-readings');
 Route::get('/bills/unbilled-readings-console/{servicePeriod}', [App\Http\Controllers\BillsController::class, 'unbilledReadingsConsole'])->name('bills.unbilled-readings-console');
+Route::get('/bills/zero-readings-view/{readingId}', [App\Http\Controllers\BillsController::class, 'zeroReadingsView'])->name('bills.zero-readings-view');
+Route::get('/bills/average-bill/{readingId}', [App\Http\Controllers\BillsController::class, 'averageBill'])->name('bills.average-bill');
+Route::get('/bills/rebill-reading-adjustment/{readingId}', [App\Http\Controllers\BillsController::class, 'rebillReadingAdjustment'])->name('bills.rebill-reading-adjustment');
+Route::post('/bills/rebill/{readingId}', [App\Http\Controllers\BillsController::class, 'rebill'])->name('bills.rebill');
 Route::resource('bills', App\Http\Controllers\BillsController::class);
 
 

@@ -11,7 +11,8 @@
                         <strong style="margin-left: 100px; margin-right: 20px;">LEGEND:</strong>
                         <span style="margin-right: 20px;"><i class="fas fa-info-circle text-info"></i> Undamaged</span>
                         <span style="margin-right: 20px;"><i class="fas fa-exclamation-triangle text-danger"></i> Damaged</span>
-                        <span style="margin-right: 20px;"><i class="fas fa-check-circle text-success"></i> Fixed</span>
+                        <span style="margin-right: 20px;"><i class="fas fa-check-circle text-warning"></i> Fixed</span>
+                        <span style="margin-right: 20px;"><i class="fas fa-lightbulb text-success"></i> Energized</span>
                     </span>
                 </div>
             </div>
@@ -121,8 +122,8 @@
         mapboxgl.accessToken = 'pk.eyJ1IjoianVsemxvcGV6IiwiYSI6ImNqZzJ5cWdsMjJid3Ayd2xsaHcwdGhheW8ifQ.BcTcaOXmXNLxdO3wfXaf5A';
             const map = new mapboxgl.Map({
             container: 'map', // container ID
-            style: 'mapbox://styles/mapbox/satellite-v9',
-            // style : 'mapbox://styles/julzlopez/ckavvlwp029ua1ipexauenqnc',
+            // style: 'mapbox://styles/mapbox/satellite-v9',
+            style : 'mapbox://styles/julzlopez/ckavvlwp029ua1ipexauenqnc',
             center: [124.017820, 9.762118], // starting position [lng, lat]
             zoom: 10 // starting zoom
         });
