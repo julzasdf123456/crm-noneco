@@ -24,6 +24,8 @@ use App\Models\User;
 use App\Models\Users;
 use App\Models\Bills;
 use App\Models\Readings;
+use App\Models\Collectibles;
+use App\Models\ArrearsLedgerDistribution;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Flash;
 use Response;
@@ -138,6 +140,11 @@ class ServiceAccountsController extends AppBaseController
                     'Billing_ServiceAccounts.SeniorCitizen',
                     'Billing_ServiceAccounts.Evat5Percent',
                     'Billing_ServiceAccounts.Ewt2Percent',
+                    'Billing_ServiceAccounts.Contestable',
+                    'Billing_ServiceAccounts.NetMetered',
+                    'Billing_ServiceAccounts.AccountRetention',
+                    'Billing_ServiceAccounts.DurationInMonths',
+                    'Billing_ServiceAccounts.AccountExpiration',
                     'CRM_Towns.Town',
                     'CRM_Barangays.Barangay')
             ->where('Billing_ServiceAccounts.id', $id)
@@ -154,6 +161,12 @@ class ServiceAccountsController extends AppBaseController
         $bills = Bills::where('AccountNumber', $id)
             ->orderByDesc('BillingDate')
             ->get();
+        
+        $collectibles = Collectibles::where('AccountNumber', $id)->first();
+
+        $arrearsLedger = ArrearsLedgerDistribution::where('AccountNumber', $id)
+            ->orderBy('ServicePeriod')
+            ->get();
 
         if (empty($serviceAccounts)) {
             Flash::error('Service Accounts not found');
@@ -166,6 +179,8 @@ class ServiceAccountsController extends AppBaseController
             'meters' => $meters,
             'transformer' => $transformer,
             'bills' => $bills,
+            'collectibles' => $collectibles,
+            'arrearsLedger' => $arrearsLedger,
         ]);
     }
 

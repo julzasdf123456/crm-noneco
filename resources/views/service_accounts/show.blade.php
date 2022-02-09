@@ -36,6 +36,9 @@
                             <li class="nav-item"><a class="nav-link" href="#disco-hist" data-toggle="tab">
                                 <i class="fas fa-unlink"></i>
                                 </lord-icon>Disconnection History</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#arrears" data-toggle="tab">
+                                <i class="fas fa-receipt"></i>
+                                </lord-icon>Arrears</a></li>
                         </ul>
                     </div>
 
@@ -51,6 +54,10 @@
 
                             <div class="tab-pane" id="disco-hist">
                                 
+                            </div>
+
+                            <div class="tab-pane" id="arrears">
+                                @include('service_accounts.tab_arrears')
                             </div>
                         </div>
                     </div>

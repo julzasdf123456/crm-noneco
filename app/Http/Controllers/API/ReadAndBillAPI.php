@@ -55,6 +55,16 @@ class ReadAndBillAPI extends Controller {
         $accounts = DB::table('Billing_ServiceAccounts')
             ->where('AreaCode', $request['AreaCode'])
             ->where('GroupCode', $request['GroupCode'])
+            ->whereNotIn('id', DB::table('Billing_Readings')->where('ServicePeriod', $request['ServicePeriod'])->pluck('AccountNumber'))
+            ->whereNotIn('AccountType', ['PUBLIC BUILDING HIGH VOLTAGE', 'COMMERCIAL HIGH VOLTAGE', 'INDUSTRIAL HIGH VOLTAGE'])
+            ->where(function ($query) {
+                $query->where(function($queryX) {
+                        $queryX->where('AccountExpiration', '>', date('Y-m-d'))
+                            ->where('AccountRetention', 'Temporary');
+                    })
+                    ->orWhere('AccountRetention', 'Permanent')
+                    ->orWhereNull('AccountExpiration');
+            })
             ->select('id', 
                 'ServiceAccountName',
                 'Multiplier',
@@ -69,6 +79,9 @@ class ReadAndBillAPI extends Controller {
                 'Longitude',
                 'OldAccountNo',
                 'SequenceCode',
+                'SeniorCitizen',
+                'Evat5Percent',
+                'Ewt2Percent',
                 DB::raw("(SELECT KwhUsed FROM Billing_Readings WHERE ServicePeriod='" . $prevMonth . "' AND AccountNumber=Billing_ServiceAccounts.id) AS KwhUsed"),
                 DB::raw("'" . date('Y-m-d', strtotime($request['ServicePeriod'])) . "' AS ServicePeriod"))
             ->get();

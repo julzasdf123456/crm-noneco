@@ -22,12 +22,12 @@
     {{-- OTHERS --}}
     <div class="row">
         <div class="col-md-12 col-lg-12">
-            <div class="card">
+            <div class="card collapsed-card">
                 <div class="card-header">
                     <span class="card-title">Process Flow Monitoring</span>
                     <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                            <i class="fas fa-minus"></i>
+                            <i class="fas fa-plus"></i>
                         </button>
                     </div>
                 </div>
@@ -168,11 +168,24 @@
             </div>
         </div>
 
+        {{-- APPLICATION AND ENERGIZATION TREND GRAPH --}}
+        <div class="col-lg-6">            
+            <div class="card" style="height: 40vh;">
+                <div class="card-header border-0">
+                    <span class="card-title"><i class="fas fa-chart-area ico-tab"></i>Trend of Service Connection Applications and Energizations</span>
+                </div>
+                <div class="card-body">
+                    <canvas id="application-chart-canvas" height="300" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {{-- INSPECTION REPORTS --}}
         <div class="col-md-6 col-lg-6">
-            <div class="card">
+            <div class="card" style="height: 40vh;">
                 <div class="card-header border-0">
                     <div class="d-flex justify-content-between">
-                        <h3 class="card-title">Inspection Report</h3>
+                        <h3 class="card-title"><i class="fas fa-paste ico-tab"></i>Inspection Report</h3>
                         <a href="javascript:void(0);">View Report</a>
                     </div>
                 </div>
@@ -203,6 +216,80 @@
                 </div>
             </div>
         </div>
+
+        {{-- DAILY MONITORING --}}
+        <div class="col-lg-12">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h4 class="m-0">Daily Monitoring</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="content">
+                <div class="row">
+                    <div class="col-lg-2 col-md-4">
+                        <div class="card card-primary card-outline">
+                            <div class="card-header">
+                                <span class="card-title">Pick Date</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="target" style="position:relative" data-target-input="nearest">
+                                    <input type="text" class="form-control datetimepicker-input" id="daypicker" data-toggle="datetimepicker" data-target="#target" autocomplete="off"/>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+            
+                    <div class="col-lg-5 col-md-4">
+                        <div class="card" style="height: 40vh;">
+                            <div class="card-header border-0">
+                                <span class="card-title" id="applications-title">Applications</span>
+                            </div>
+            
+                            <div class="card-body table-responsive px-0">
+                                <table id="applications-table" class="table table-hover">
+                                    <thead>
+                                        <th width="5%"></th>
+                                        <th>Svc. No.</th>
+                                        <th>Applicant Name</th>
+                                        <th>Address</th>
+                                    </thead>
+                                    <tbody>
+            
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="col-lg-5 col-md-4">
+                        <div class="card" style="height: 40vh;">
+                            <div class="card-header border-0">
+                                <span class="card-title" id="energized-title">Energized</span>
+                            </div>
+            
+                            <div class="card-body table-responsive px-0">
+                                <table id="energized-table" class="table table-hover">
+                                    <thead>
+                                        <th width="5%"></th>
+                                        <th>Svc. No.</th>
+                                        <th>Applicant Name</th>
+                                        <th>Address</th>
+                                    </thead>
+                                    <tbody>
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{--  --}}
     </div>
 </div>
 @endsection
@@ -239,8 +326,56 @@
     <!-- /.modal-dialog -->
 </div>
 
+@push('page_css')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css" integrity="sha512-3JRrEUwaCkFUBLK1N8HehwQgu8e23jTH4np5NHOmQOobuC4ROQxFwFgBLTnhcnQRMs84muMh0PnnwXlPq5MGjg==" crossorigin="anonymous" />
+@endpush
+
 @push('page_scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js" integrity="sha512-k6/Bkb8Fxf/c1Tkyl39yJwcOZ1P4cRrJu77p83zJjN2Z55prbFHxPs9vN7q3l3+tSMGPDdoH51AEU8Vgo1cgAA==" crossorigin="anonymous"></script>
     <script type="text/javascript">
+        $(document).ready(function() {
+            $("#target").datetimepicker({
+                format: 'YYYY-MM-DD',
+                defaultDate: new Date(),
+                inline : true,
+                sideBySide : true,
+            });
+
+            $("#target").on('change.datetimepicker', function() {
+                // applications
+                $.ajax({
+                    url : '/service_connections/fetch-daily-monitor-applications-data',
+                    type : 'GET',
+                    data : {
+                        DateOfApplication : $('#daypicker').val(),
+                    },
+                    success : function(res) {
+                        $('#applications-table tbody tr').remove()
+                        $('#applications-table tbody').append(res)
+                    },
+                    error : function(err) {
+                        alert('An error occurred while fetching data. See console for details!')
+                    }
+                })
+
+                // energized
+                $.ajax({
+                    url : '/service_connections/fetch-daily-monitor-energized-data',
+                    type : 'GET',
+                    data : {
+                        DateOfEnergization : $('#daypicker').val(),
+                    },
+                    success : function(res) {
+                        $('#energized-table tbody tr').remove()
+                        $('#energized-table tbody').append(res)
+                    },
+                    error : function(err) {
+                        alert('An error occurred while fetching data. See console for details!')
+                    }
+                })
+            })
+        });
+
         $("#main").HTMLSVGconnect({
             stroke: "#787878",
             strokeWidth: 4,
@@ -404,7 +539,7 @@
             });
         });
 
-        // CHART
+        // INSPECTION CHART
         $.ajax({
             url : '/home/get-inspection-report',
                 type: "GET",
@@ -482,6 +617,101 @@
                     // alert(error);
                     console.log('Server error!');
                 }
-        })        
+        })  
+
+        /**
+         * APPLICATION TREND CHART
+         */      
+        var applicationsChartCanvas = document.getElementById('application-chart-canvas').getContext('2d')
+        // $('#application-chart-canvas').get(0).getContext('2d');
+        //get previous 6 months
+        var prevMonths = [];
+        for (var i=0; i<6; i++) {
+            prevMonths.push(moment().subtract(i, 'months').format('MMM Y'))
+        }
+
+        $.ajax({
+            url : '/service_connections/fetch-application-count-via-status',
+            type : 'GET',
+            success : function(res) {
+                var applicationData = []
+                var energizationData = []
+
+                applicationData.push(res[0]['ApplicationOne'])
+                applicationData.push(res[0]['ApplicationTwo'])
+                applicationData.push(res[0]['ApplicationThree'])
+                applicationData.push(res[0]['ApplicationFour'])
+                applicationData.push(res[0]['ApplicationFive'])
+                applicationData.push(res[0]['ApplicationSix'])
+
+                energizationData.push(res[0]['EnergizationOne'])
+                energizationData.push(res[0]['EnergizationTwo'])
+                energizationData.push(res[0]['EnergizationThree'])
+                energizationData.push(res[0]['EnergizationFour'])
+                energizationData.push(res[0]['EnergizationFive'])
+                energizationData.push(res[0]['EnergizationSix'])
+                
+                var applicationChartData = {
+                    labels: prevMonths,
+                    datasets: [
+                    {
+                        label: 'Applications Received',
+                        backgroundColor: 'rgba(60,141,188,0.9)',
+                        borderColor: 'rgba(60,141,188,0.8)',
+                        pointRadius: true,
+                        pointColor: '#3b8bba',
+                        pointStrokeColor: 'rgba(60,141,188,1)',
+                        pointHighlightFill: '#fff',
+                        pointHighlightStroke: 'rgba(60,141,188,1)',
+                        data: applicationData
+                    },
+                    {
+                        label: 'Applications Energized',
+                        backgroundColor: 'rgba(210, 214, 222, 1)',
+                        borderColor: 'rgba(210, 214, 222, 1)',
+                        pointRadius: true,
+                        pointColor: 'rgba(210, 214, 222, 1)',
+                        pointStrokeColor: '#c1c7d1',
+                        pointHighlightFill: '#fff',
+                        pointHighlightStroke: 'rgba(220,220,220,1)',
+                        data: energizationData
+                    }
+                    ]
+                }
+
+                var applicationsChartOptions = {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    legend: {
+                        display: true
+                    },
+                    scales: {
+                        xAxes: [{
+                            gridLines: {
+                                display: false
+                            }
+                        }],
+                        yAxes: [{
+                            gridLines: {
+                                display: false
+                            }
+                        }]
+                    }
+                }
+
+                // This will get the first returned node in the jQuery collection.
+                // eslint-disable-next-line no-unused-vars
+                var applicationsChart = new Chart(applicationsChartCanvas, { // lgtm[js/unused-local-variable]
+                    type: 'line',
+                    data: applicationChartData,
+                    options: applicationsChartOptions
+                })
+            },
+            error : function(error) {
+                console.log(error)
+            }
+        })
+
+        
     </script>
 @endpush

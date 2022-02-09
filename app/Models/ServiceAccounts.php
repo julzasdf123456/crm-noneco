@@ -89,7 +89,12 @@ class ServiceAccounts extends Model
         'SeniorCitizen',
         'AccountPaymentType',
         'Latitude',
-        'Longitude'
+        'Longitude',
+        'AccountRetention',
+        'AccountExpiration',
+        'DurationInMonths',
+        'Contestable',
+        'NetMetered'
     ];
 
     /**
@@ -137,7 +142,12 @@ class ServiceAccounts extends Model
         'SeniorCitizen' => 'string',
         'AccountPaymentType' => 'string',
         'Latitude' => 'string',
-        'Longitude' => 'string'
+        'Longitude' => 'string',
+        'AccountRetention' => 'string',
+        'AccountExpiration' => 'string',
+        'DurationInMonths' => 'string',
+        'Contestable' => 'string',
+        'NetMetered' => 'string'
     ];
 
     /**
@@ -187,7 +197,12 @@ class ServiceAccounts extends Model
         'SeniorCitizen' => 'nullable|string',
         'AccountPaymentType' => 'nullable|string',
         'Latitude' => 'nullable|string',
-        'Longitude' => 'nullable|string'
+        'Longitude' => 'nullable|string',
+        'AccountRetention' => 'nullable|string',
+        'AccountExpiration' => 'nullable|string',
+        'DurationInMonths' => 'nullable|string',
+        'Contestable' => 'nullable|string',
+        'NetMetered' => 'nullable|string'
     ];
 
     public static function getAddress($serviceAccount) {

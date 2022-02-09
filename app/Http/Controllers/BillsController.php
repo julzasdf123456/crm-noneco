@@ -276,62 +276,133 @@ class BillsController extends AppBaseController
 
                 $totalKwh = ($average * $multiplier) + $coreloss;
 
-                // SET BILLING VALUES
-                $bill = new Bills;
-                $bill->id = IDGenerator::generateIDandRandString();
-                $bill->BillNumber = IDGenerator::generateBillNumber($account->AreaCode);
-                $bill->AccountNumber = $account->id;
-                $bill->ServicePeriod = $reading->ServicePeriod;
-                $bill->Multiplier = $multiplier;
-                $bill->Coreloss = $coreloss;
-                $bill->KwhUsed = $average;
-                $bill->PreviousKwh = $previousBill != null ? $previousBill->PresentKwh : 0;
-                $bill->PresentKwh = 0;
-                $bill->KwhAmount = $effectiveRate * $average;
-                $bill->EffectiveRate = $effectiveRate;
-                $bill->AdditionalCharges = null;
-                $bill->Deductions = null;
-                $bill->NetAmount = $totalKwh * $effectiveRate;
-                $bill->BillingDate = date('Y-m-d');
-                $bill->ServiceDateFrom = $previousBill != null ? date('Y-m-d', strtotime($previousBill->ServiceDateTo . ' +1 day')) : date('Y-m-d');
-                $bill->ServiceDateTo = date('Y-m-d', strtotime($reading->ReadingTimestamp));
-                $bill->DueDate = Bills::createDueDate($bill->ServiceDateTo);
-                $bill->MeterNumber = $meterInfo != null ? $meterInfo->SerialNumber : null;
-                $bill->ConsumerType = $account->AccountType;
-                $bill->BillType = $bill->ConsumerType;
+                $netAmount = $totalKwh * $effectiveRate;
 
-                $bill->GenerationSystemCharge = $average * Rates::floatRate($rate->GenerationSystemCharge);
-                $bill->TransmissionDeliveryChargeKW = $average * Rates::floatRate($rate->TransmissionDeliveryChargeKW);
-                $bill->TransmissionDeliveryChargeKWH = $average * Rates::floatRate($rate->TransmissionDeliveryChargeKWH);
-                $bill->SystemLossCharge = $average * Rates::floatRate($rate->SystemLossCharge);
-                $bill->DistributionDemandCharge = $average * Rates::floatRate($rate->DistributionDemandCharge);
-                $bill->DistributionSystemCharge = $average * Rates::floatRate($rate->DistributionSystemCharge);
-                $bill->SupplyRetailCustomerCharge = $average * Rates::floatRate($rate->SupplyRetailCustomerCharge);
-                $bill->SupplySystemCharge = $average * Rates::floatRate($rate->SupplySystemCharge);
-                $bill->MeteringRetailCustomerCharge = $average * Rates::floatRate($rate->MeteringRetailCustomerCharge);
-                $bill->MeteringSystemCharge = $average * Rates::floatRate($rate->MeteringSystemCharge);
-                $bill->RFSC = $average * Rates::floatRate($rate->RFSC);
-                $bill->LifelineRate = $average * Rates::floatRate($rate->LifelineRate);
-                $bill->InterClassCrossSubsidyCharge = $average * Rates::floatRate($rate->InterClassCrossSubsidyCharge);
-                $bill->PPARefund = $average * Rates::floatRate($rate->PPARefund);
-                $bill->SeniorCitizenSubsidy = $average * Rates::floatRate($rate->SeniorCitizenSubsidy);
-                $bill->MissionaryElectrificationCharge = $average * Rates::floatRate($rate->MissionaryElectrificationCharge);
-                $bill->EnvironmentalCharge = $average * Rates::floatRate($rate->EnvironmentalCharge);
-                $bill->StrandedContractCosts = $average * Rates::floatRate($rate->StrandedContractCosts);
-                $bill->NPCStrandedDebt = $average * Rates::floatRate($rate->NPCStrandedDebt);
-                $bill->FeedInTariffAllowance = $average * Rates::floatRate($rate->FeedInTariffAllowance);
-                $bill->MissionaryElectrificationREDCI = $average * Rates::floatRate($rate->MissionaryElectrificationREDCI);
-                $bill->GenerationVAT = $average * Rates::floatRate($rate->GenerationVAT);
-                $bill->TransmissionVAT = $average * Rates::floatRate($rate->TransmissionVAT);
-                $bill->SystemLossVAT = $average * Rates::floatRate($rate->SystemLossVAT);
-                $bill->DistributionVAT = $average * Rates::floatRate($rate->DistributionVAT);
-                $bill->RealPropertyTax = $average * Rates::floatRate($rate->RealPropertyTax);
-                $bill->AveragedCount = 'YES';
-                $bill->BilledFrom = 'WEB';
-                $bill->UserId = Auth::id();
+                $seniorCitizen = Rates::floatRate($rate->SeniorCitizenSubsidy) * $netAmount;
+                $deductions = $seniorCitizen;
 
-                // SAVE BILL
-                $bill->save();
+                // CHECK IF Bill for this period
+                $bill = Bills::where('ServicePeriod', $reading->ServicePeriod)
+                    ->where('AccountNumber', $account->id)
+                    ->first();
+                
+                if ($bill != null) {
+                    if ($account->SeniorCitizen != null && $account->SeniorCitizen=="Yes" && $kwhUsed < 101) {
+                        $bill->Deductions = $deductions;
+                        $netAmount = $netAmount - $deductions;
+                    }
+                    // SET BILLING VALUES
+                    $bill->KwhUsed = $average;
+                    $bill->PreviousKwh = $previousBill != null ? $previousBill->PresentKwh : 0;
+                    $bill->PresentKwh = 0;
+                    $bill->KwhAmount = $effectiveRate * $average;
+                    $bill->EffectiveRate = $effectiveRate;
+                    $bill->AdditionalCharges = null;
+                    $bill->NetAmount = $netAmount;
+                    $bill->BillingDate = date('Y-m-d');
+                    $bill->ServiceDateFrom = $previousBill != null ? date('Y-m-d', strtotime($previousBill->ServiceDateTo . ' +1 day')) : date('Y-m-d');
+                    $bill->ServiceDateTo = date('Y-m-d', strtotime($reading->ReadingTimestamp));
+                    $bill->DueDate = Bills::createDueDate($bill->ServiceDateTo);
+                    $bill->MeterNumber = $meterInfo != null ? $meterInfo->SerialNumber : null;
+                    $bill->ConsumerType = $account->AccountType;
+                    $bill->BillType = $bill->ConsumerType;
+
+                    $bill->GenerationSystemCharge = $average * Rates::floatRate($rate->GenerationSystemCharge);
+                    $bill->TransmissionDeliveryChargeKW = $average * Rates::floatRate($rate->TransmissionDeliveryChargeKW);
+                    $bill->TransmissionDeliveryChargeKWH = $average * Rates::floatRate($rate->TransmissionDeliveryChargeKWH);
+                    $bill->SystemLossCharge = $average * Rates::floatRate($rate->SystemLossCharge);
+                    $bill->DistributionDemandCharge = $average * Rates::floatRate($rate->DistributionDemandCharge);
+                    $bill->DistributionSystemCharge = $average * Rates::floatRate($rate->DistributionSystemCharge);
+                    $bill->SupplyRetailCustomerCharge = $average * Rates::floatRate($rate->SupplyRetailCustomerCharge);
+                    $bill->SupplySystemCharge = $average * Rates::floatRate($rate->SupplySystemCharge);
+                    $bill->MeteringRetailCustomerCharge = $average * Rates::floatRate($rate->MeteringRetailCustomerCharge);
+                    $bill->MeteringSystemCharge = $average * Rates::floatRate($rate->MeteringSystemCharge);
+                    $bill->RFSC = $average * Rates::floatRate($rate->RFSC);
+                    $bill->LifelineRate = $average * Rates::floatRate($rate->LifelineRate);
+                    $bill->InterClassCrossSubsidyCharge = $average * Rates::floatRate($rate->InterClassCrossSubsidyCharge);
+                    $bill->PPARefund = $average * Rates::floatRate($rate->PPARefund);
+                    $bill->SeniorCitizenSubsidy = $average * Rates::floatRate($rate->SeniorCitizenSubsidy);
+                    $bill->MissionaryElectrificationCharge = $average * Rates::floatRate($rate->MissionaryElectrificationCharge);
+                    $bill->EnvironmentalCharge = $average * Rates::floatRate($rate->EnvironmentalCharge);
+                    $bill->StrandedContractCosts = $average * Rates::floatRate($rate->StrandedContractCosts);
+                    $bill->NPCStrandedDebt = $average * Rates::floatRate($rate->NPCStrandedDebt);
+                    $bill->FeedInTariffAllowance = $average * Rates::floatRate($rate->FeedInTariffAllowance);
+                    $bill->MissionaryElectrificationREDCI = $average * Rates::floatRate($rate->MissionaryElectrificationREDCI);
+                    $bill->GenerationVAT = $average * Rates::floatRate($rate->GenerationVAT);
+                    $bill->TransmissionVAT = $average * Rates::floatRate($rate->TransmissionVAT);
+                    $bill->SystemLossVAT = $average * Rates::floatRate($rate->SystemLossVAT);
+                    $bill->DistributionVAT = $average * Rates::floatRate($rate->DistributionVAT);
+                    $bill->RealPropertyTax = $average * Rates::floatRate($rate->RealPropertyTax);
+                    $bill->AveragedCount = 'YES';
+                    $bill->BilledFrom = 'WEB';
+                    $bill->UserId = Auth::id();
+
+                    // SAVE BILL
+                    $bill->save();
+                } else {
+                    // SET BILLING VALUES
+                    $bill = new Bills;
+                    $bill->id = IDGenerator::generateIDandRandString();
+                    $bill->BillNumber = IDGenerator::generateBillNumber($account->AreaCode);
+
+                    if ($account->SeniorCitizen != null && $account->SeniorCitizen=="Yes" && $kwhUsed < 101) {
+                        $bill->Deductions = $deductions;
+                        $netAmount = $netAmount - $deductions;
+                    }
+
+                    $bill->AccountNumber = $account->id;
+                    $bill->ServicePeriod = $reading->ServicePeriod;
+                    $bill->Multiplier = $multiplier;
+                    $bill->Coreloss = $coreloss;
+                    $bill->KwhUsed = $average;
+                    $bill->PreviousKwh = $previousBill != null ? $previousBill->PresentKwh : 0;
+                    $bill->PresentKwh = 0;
+                    $bill->KwhAmount = $effectiveRate * $average;
+                    $bill->EffectiveRate = $effectiveRate;
+                    $bill->AdditionalCharges = null;
+                    $bill->NetAmount = $netAmount;
+                    $bill->BillingDate = date('Y-m-d');
+                    $bill->ServiceDateFrom = $previousBill != null ? date('Y-m-d', strtotime($previousBill->ServiceDateTo . ' +1 day')) : date('Y-m-d');
+                    $bill->ServiceDateTo = date('Y-m-d', strtotime($reading->ReadingTimestamp));
+                    $bill->DueDate = Bills::createDueDate($bill->ServiceDateTo);
+                    $bill->MeterNumber = $meterInfo != null ? $meterInfo->SerialNumber : null;
+                    $bill->ConsumerType = $account->AccountType;
+                    $bill->BillType = $bill->ConsumerType;
+
+                    $bill->GenerationSystemCharge = $average * Rates::floatRate($rate->GenerationSystemCharge);
+                    $bill->TransmissionDeliveryChargeKW = $average * Rates::floatRate($rate->TransmissionDeliveryChargeKW);
+                    $bill->TransmissionDeliveryChargeKWH = $average * Rates::floatRate($rate->TransmissionDeliveryChargeKWH);
+                    $bill->SystemLossCharge = $average * Rates::floatRate($rate->SystemLossCharge);
+                    $bill->DistributionDemandCharge = $average * Rates::floatRate($rate->DistributionDemandCharge);
+                    $bill->DistributionSystemCharge = $average * Rates::floatRate($rate->DistributionSystemCharge);
+                    $bill->SupplyRetailCustomerCharge = $average * Rates::floatRate($rate->SupplyRetailCustomerCharge);
+                    $bill->SupplySystemCharge = $average * Rates::floatRate($rate->SupplySystemCharge);
+                    $bill->MeteringRetailCustomerCharge = $average * Rates::floatRate($rate->MeteringRetailCustomerCharge);
+                    $bill->MeteringSystemCharge = $average * Rates::floatRate($rate->MeteringSystemCharge);
+                    $bill->RFSC = $average * Rates::floatRate($rate->RFSC);
+                    $bill->LifelineRate = $average * Rates::floatRate($rate->LifelineRate);
+                    $bill->InterClassCrossSubsidyCharge = $average * Rates::floatRate($rate->InterClassCrossSubsidyCharge);
+                    $bill->PPARefund = $average * Rates::floatRate($rate->PPARefund);
+                    $bill->SeniorCitizenSubsidy = $average * Rates::floatRate($rate->SeniorCitizenSubsidy);
+                    $bill->MissionaryElectrificationCharge = $average * Rates::floatRate($rate->MissionaryElectrificationCharge);
+                    $bill->EnvironmentalCharge = $average * Rates::floatRate($rate->EnvironmentalCharge);
+                    $bill->StrandedContractCosts = $average * Rates::floatRate($rate->StrandedContractCosts);
+                    $bill->NPCStrandedDebt = $average * Rates::floatRate($rate->NPCStrandedDebt);
+                    $bill->FeedInTariffAllowance = $average * Rates::floatRate($rate->FeedInTariffAllowance);
+                    $bill->MissionaryElectrificationREDCI = $average * Rates::floatRate($rate->MissionaryElectrificationREDCI);
+                    $bill->GenerationVAT = $average * Rates::floatRate($rate->GenerationVAT);
+                    $bill->TransmissionVAT = $average * Rates::floatRate($rate->TransmissionVAT);
+                    $bill->SystemLossVAT = $average * Rates::floatRate($rate->SystemLossVAT);
+                    $bill->DistributionVAT = $average * Rates::floatRate($rate->DistributionVAT);
+                    $bill->RealPropertyTax = $average * Rates::floatRate($rate->RealPropertyTax);
+                    $bill->AveragedCount = 'YES';
+                    $bill->BilledFrom = 'WEB';
+                    $bill->UserId = Auth::id();
+
+                    // SAVE BILL
+                    $bill->save();
+                }
+                
 
                 Flash::success('Bill to account ' . $account->ServiceAccountName . ' for period ' . date('F Y', strtotime($bill->ServicePeriod)) . ' averaged successfully!');
 
@@ -401,12 +472,21 @@ class BillsController extends AppBaseController
 
             $totalKwh = ($kwhUsed * $multiplier) + $coreloss;
 
+            $netAmount = $totalKwh * $effectiveRate;
+
+            $seniorCitizen = Rates::floatRate($rate->SeniorCitizenSubsidy) * $netAmount;
+            $deductions = $seniorCitizen;
+
             // CHECK IF Bill for this period
             $bill = Bills::where('ServicePeriod', $reading->ServicePeriod)
                 ->where('AccountNumber', $account->id)
                 ->first();
             
             if ($bill != null) {
+                if ($account->SeniorCitizen != null && $account->SeniorCitizen=="Yes" && $kwhUsed < 101) {
+                    $bill->Deductions = $deductions;
+                    $netAmount = $netAmount - $deductions;
+                }
                 // SET BILLING VALUES
                 $bill->KwhUsed = $kwhUsed;
                 $bill->PreviousKwh = $previousBill != null ? $previousBill->PresentKwh : 0;
@@ -414,15 +494,14 @@ class BillsController extends AppBaseController
                 $bill->KwhAmount = $effectiveRate * $kwhUsed;
                 $bill->EffectiveRate = $effectiveRate;
                 $bill->AdditionalCharges = null;
-                $bill->Deductions = null;
-                $bill->NetAmount = $totalKwh * $effectiveRate;
+                $bill->NetAmount = $netAmount;
                 $bill->BillingDate = date('Y-m-d');
                 $bill->ServiceDateFrom = $previousBill != null ? date('Y-m-d', strtotime($previousBill->ServiceDateTo . ' +1 day')) : date('Y-m-d');
                 $bill->ServiceDateTo = date('Y-m-d', strtotime($reading->ReadingTimestamp));
                 $bill->DueDate = Bills::createDueDate($bill->ServiceDateTo);
                 $bill->MeterNumber = $meterInfo != null ? $meterInfo->SerialNumber : null;
                 $bill->ConsumerType = $account->AccountType;
-                $bill->BillType = $bill->ConsumerType;
+                $bill->BillType = $bill->ConsumerType;              
 
                 $bill->GenerationSystemCharge = $kwhUsed * Rates::floatRate($rate->GenerationSystemCharge);
                 $bill->TransmissionDeliveryChargeKW = $kwhUsed * Rates::floatRate($rate->TransmissionDeliveryChargeKW);
@@ -462,6 +541,12 @@ class BillsController extends AppBaseController
                 $bill->BillNumber = IDGenerator::generateBillNumber($account->AreaCode);
                 $bill->AccountNumber = $account->id;
                 $bill->ServicePeriod = $reading->ServicePeriod;
+                
+                if ($account->SeniorCitizen != null && $account->SeniorCitizen=="Yes" && $kwhUsed < 101) {
+                    $bill->Deductions = $deductions;
+                    $netAmount = $netAmount - $deductions;
+                }
+                
                 $bill->Multiplier = $multiplier;
                 $bill->Coreloss = $coreloss;
                 $bill->KwhUsed = $kwhUsed;
@@ -470,8 +555,7 @@ class BillsController extends AppBaseController
                 $bill->KwhAmount = $effectiveRate * $kwhUsed;
                 $bill->EffectiveRate = $effectiveRate;
                 $bill->AdditionalCharges = null;
-                $bill->Deductions = null;
-                $bill->NetAmount = $totalKwh * $effectiveRate;
+                $bill->NetAmount = $netAmount;
                 $bill->BillingDate = date('Y-m-d');
                 $bill->ServiceDateFrom = $previousBill != null ? date('Y-m-d', strtotime($previousBill->ServiceDateTo . ' +1 day')) : date('Y-m-d');
                 $bill->ServiceDateTo = date('Y-m-d', strtotime($reading->ReadingTimestamp));

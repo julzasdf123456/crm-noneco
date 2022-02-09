@@ -70,6 +70,13 @@ class CreateTableBillingServiceAccounts extends Migration
             $table->date('DateDisconnected')->nullable();
             $table->date('DateTransfered')->nullable();
 
+            $table->string('AccountRetention')->nullable(); // TEMPORARY, PERMANENT
+            $table->date('AccountExpiration')->nullable();
+            $table->string('DurationInMonths')->nullable();
+
+            $table->string('Contestable')->nullable();
+            $table->string('NetMetered')->nullable();
+
             $table->string('UserId', 50)->nullable();
         });
     }

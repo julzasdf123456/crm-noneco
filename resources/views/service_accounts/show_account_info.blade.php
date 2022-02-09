@@ -56,6 +56,24 @@
                     <th class="{{ $serviceAccounts->SeniorCitizen=='Yes' ? 'text-success' : 'text-muted' }}">{{ $serviceAccounts->SeniorCitizen=='Yes' ? 'Yes' : 'No' }}</th>
                 </tr>
                 <tr>
+                    <td class="text-muted">Contestable</td>
+                    <th class="{{ $serviceAccounts->Contestable=='Yes' ? 'text-success' : 'text-muted' }}">{{ $serviceAccounts->Contestable=='Yes' ? 'Yes' : 'No' }}</th>
+                </tr>
+                <tr>
+                    <td class="text-muted">Longevity</td>
+                    <th>{{ $serviceAccounts->AccountRetention }}</th>
+                </tr>
+                @if ($serviceAccounts->AccountRetention != null && $serviceAccounts->AccountRetention == 'Temporary')
+                    <tr>
+                        <td class="text-muted">Duration (in months)</td>
+                        <th>{{ $serviceAccounts->DurationInMonths }}</th>
+                    </tr>
+                    <tr>
+                        <td class="{{ date('Y-m-d', strtotime($serviceAccounts->AccountExpiration)) < date('Y-m-d') ? 'text-danger' : 'text-muted' }}">Expiration</td>
+                        <th class="{{ date('Y-m-d', strtotime($serviceAccounts->AccountExpiration)) < date('Y-m-d') ? 'text-danger' : 'text-muted' }}">{{ $serviceAccounts->AccountExpiration != null ? date('F d, Y', strtotime($serviceAccounts->AccountExpiration)) : '-' }}</th>
+                    </tr>
+                @endif
+                <tr>
                     <td class="text-muted">EVAT 5%</td>
                     <th class="{{ $serviceAccounts->Evat5Percent=='Yes' ? 'text-success' : 'text-muted' }}">{{ $serviceAccounts->Evat5Percent=='Yes' ? 'Yes' : 'No' }}</th>
                 </tr>

@@ -187,6 +187,54 @@
                             </div>
                         </div> 
                     </div>
+
+                    {{-- ACCOUNT RETENTION --}}
+                    <div class="form-group col-sm-12">
+                        <div class="row">
+                            <!-- AccountRetention Field -->
+                            <div class="col-lg-1 col-md-2">
+                                {!! Form::label('AccountRetention', 'Account Longevity:') !!}
+                            </div>
+
+                            <div class="col-lg-3 col-md-2">
+                                <div class="input-group">
+                                    {!! Form::select('AccountRetention', ['Permanent' => 'Permanent', 'Temporary' => 'Temporary'], $serviceAccount != null ? $serviceAccount->AccountRetention : 'Permanent', ['class' => 'form-control']) !!}
+                                </div>
+                            </div>
+
+                            <!-- Account Duration -->
+                            <div class="col-lg-1 col-md-2">
+                                {!! Form::label('Duration', 'Application Duration:') !!}
+                            </div>
+
+                            <div class="col-lg-3 col-md-2">
+                                <div class="input-group">
+                                    {!! Form::text('DurationInMonths', ($serviceAccount != null ? $serviceAccount->DurationInMonths : null), ['class' => 'form-control','maxlength' => 50,'maxlength' => 50]) !!}
+                                </div>
+                            </div>
+
+                            <!-- Account Expiration -->
+                            <div class="col-lg-1 col-md-2">
+                                {!! Form::label('AccountExpiration', 'Account Expiration:') !!}
+                            </div>
+
+                            <div class="col-lg-3 col-md-2">
+                                <div class="input-group">
+                                    {!! Form::text('AccountExpiration', ($serviceAccount != null ? $serviceAccount->AccountExpiration : null), ['class' => 'form-control','maxlength' => 50,'maxlength' => 50]) !!}
+                                </div>
+                            </div>
+
+                            @push('page_scripts')
+                                <script type="text/javascript">
+                                    $('#AccountExpiration').datetimepicker({
+                                        format: 'YYYY-MM-DD',
+                                        useCurrent: true,
+                                        sideBySide: true
+                                    })
+                                </script>
+                            @endpush
+                        </div> 
+                    </div>
                     
                     @push('page_scripts')
                         <script>
@@ -277,6 +325,34 @@
                         </div> 
                     </div>
 
+                    {{-- CONTESTABLE --}}
+                    <div class="form-group col-sm-12">
+                        <div class="row">
+                            <!-- Contestable Field -->
+                            <div class="col-lg-1 col-md-2">
+                                {!! Form::label('Contestable', 'Contestable:') !!}
+                            </div>
+
+                            <div class="col-lg-1 col-md-1">
+                                <div class="input-group">
+                                    <input type="hidden" value="" name="Contestable">
+                                    <input type="checkbox" value="Yes" name="Contestable" class="custom-checkbox" {{ $serviceAccount->Contestable=='Yes' ? 'checked' : '' }}>
+                                </div>
+                            </div>
+
+                            <!-- Net Metered Field -->
+                            <div class="col-lg-1 col-md-2">
+                                {!! Form::label('NetMetered', 'Net Metered:') !!}
+                            </div>
+
+                            <div class="col-lg-1 col-md-1">
+                                <div class="input-group">
+                                    <input type="hidden" value="" name="NetMetered">
+                                    <input type="checkbox" value="Yes" name="NetMetered" class="custom-checkbox" {{ $serviceAccount->NetMetered=='Yes' ? 'checked' : '' }}>
+                                </div>
+                            </div>
+                        </div> 
+                    </div>
                 </div>
             </div>
 

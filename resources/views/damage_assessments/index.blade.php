@@ -97,7 +97,8 @@
                     {!! Form::label('Status', 'Status') !!}
                     <select name="Status" class="form-control" id="Status">
                         <option value="ONGOING">ONGOING</option>
-                        <option value="DONE">DONE</option>
+                        <option value="DONE">FIXED</option>
+                        <option value="ENERGIZED">ENERGIZED</option>
                     </select>
                 </div>
 
@@ -200,7 +201,7 @@
                         } else if (res['Status'] == 'ONGOING') {
                             el.innerHTML += '<button id="update" class="btn btn-sm" style="margin-left: -10px;" data-toggle="modal" data-target="#modal-update" pole-no="' + res['ObjectName'] + '" feeder="' + res['Feeder'] + '" status="' + res['Status'] + '" remarks="' + res['Notes'] + '" data-id="' + res['id'] + '" svcid="' + res['id'] + '" style="margin-left: 10px;"> <span id="' + res['id'] + '"><i class="fas fa-exclamation-triangle text-danger"></i></span> </button>'
                         } else if (res['Status'] == 'DONE') {
-                            el.innerHTML += '<button id="update" class="btn btn-sm" style="margin-left: -10px;" data-toggle="modal" data-target="#modal-update" pole-no="' + res['ObjectName'] + '" feeder="' + res['Feeder'] + '" status="' + res['Status'] + '" remarks="' + res['Notes'] + '" data-id="' + res['id'] + '" svcid="' + res['id'] + '" style="margin-left: 10px;"> <span id="' + res['id'] + '"><i class="fas fa-check-circle text-success"></i></span> </button>'
+                            el.innerHTML += '<button id="update" class="btn btn-sm" style="margin-left: -10px;" data-toggle="modal" data-target="#modal-update" pole-no="' + res['ObjectName'] + '" feeder="' + res['Feeder'] + '" status="' + res['Status'] + '" remarks="' + res['Notes'] + '" data-id="' + res['id'] + '" svcid="' + res['id'] + '" style="margin-left: 10px;"> <span id="' + res['id'] + '"><i class="fas fa-check-circle text-warning"></i></span> </button>'
                         }                        
                         el.style.width = `15px`;
                         el.style.height = `15px`;
@@ -247,7 +248,7 @@
                         } else if (res[index]['Status'] == 'ONGOING') {
                             el.innerHTML += '<button id="update" class="btn btn-sm" style="margin-left: -10px;" data-toggle="modal" data-target="#modal-update" pole-no="' + res[index]['ObjectName'] + '" feeder="' + res[index]['Feeder'] + '" status="' + res[index]['Status'] + '" remarks="' + res[index]['Notes'] + '" data-id="' + res[index]['id'] + '" svcid="' + res[index]['id'] + '" style="margin-left: 10px;"> <span id="' + res[index]['id'] + '"><i class="fas fa-exclamation-triangle text-danger"></i></span> </button>'
                         } else if (res[index]['Status'] == 'DONE') {
-                            el.innerHTML += '<button id="update" class="btn btn-sm" style="margin-left: -10px;" data-toggle="modal" data-target="#modal-update" pole-no="' + res[index]['ObjectName'] + '" feeder="' + res[index]['Feeder'] + '" status="' + res[index]['Status'] + '" remarks="' + res[index]['Notes'] + '" data-id="' + res[index]['id'] + '" svcid="' + res[index]['id'] + '" style="margin-left: 10px;"> <span id="' + res[index]['id'] + '"><i class="fas fa-check-circle text-success"></i></span> </button>'
+                            el.innerHTML += '<button id="update" class="btn btn-sm" style="margin-left: -10px;" data-toggle="modal" data-target="#modal-update" pole-no="' + res[index]['ObjectName'] + '" feeder="' + res[index]['Feeder'] + '" status="' + res[index]['Status'] + '" remarks="' + res[index]['Notes'] + '" data-id="' + res[index]['id'] + '" svcid="' + res[index]['id'] + '" style="margin-left: 10px;"> <span id="' + res[index]['id'] + '"><i class="fas fa-check-circle text-warning"></i></span> </button>'
                         }  
                         el.style.backgroundColor = `transparent`;                       
                         el.style.width = `15px`;

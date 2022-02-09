@@ -131,6 +131,54 @@
     </div> 
 </div>
 
+{{-- ACCOUNT RETENTION --}}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <!-- AccountRetention Field -->
+        <div class="col-lg-1 col-md-2">
+            {!! Form::label('AccountRetention', 'Account Longevity:') !!}
+        </div>
+
+        <div class="col-lg-3 col-md-2">
+            <div class="input-group">
+                {!! Form::select('AccountRetention', ['Permanent' => 'Permanent', 'Temporary' => 'Temporary'], $serviceConnection != null ? $serviceConnection->AccountApplicationType : 'Permanent', ['class' => 'form-control']) !!}
+            </div>
+        </div>
+
+        <!-- Account Duration -->
+        <div class="col-lg-1 col-md-2">
+            {!! Form::label('DurationInMonths', 'Application Duration:') !!}
+        </div>
+
+        <div class="col-lg-3 col-md-2">
+            <div class="input-group">
+                {!! Form::text('DurationInMonths', ($serviceConnection != null ? $serviceConnection->TemporaryDurationInMonths : null), ['class' => 'form-control','maxlength' => 50,'maxlength' => 50, 'readonly' => true]) !!}
+            </div>
+        </div>
+
+        <!-- Account Expiration -->
+        <div class="col-lg-1 col-md-2">
+            {!! Form::label('AccountExpiration', 'Account Expiration:') !!}
+        </div>
+
+        <div class="col-lg-3 col-md-2">
+            <div class="input-group">
+                {!! Form::text('AccountExpiration', ($serviceConnection != null ? ($serviceConnection->AccountApplicationType=='Temporary' ? date('Y-m-d', strtotime($serviceConnection->DateTimeOfEnergization . ' +' . ($serviceConnection->TemporaryDurationInMonths != null ? $serviceConnection->TemporaryDurationInMonths : '3') . ' months')) : null) : null), ['class' => 'form-control','maxlength' => 50,'maxlength' => 50]) !!}
+            </div>
+        </div>
+
+        @push('page_scripts')
+            <script type="text/javascript">
+                $('#AccountExpiration').datetimepicker({
+                    format: 'YYYY-MM-DD',
+                    useCurrent: true,
+                    sideBySide: true
+                })
+            </script>
+        @endpush
+    </div> 
+</div>
+
 {{-- METER READER --}}
 <div class="form-group col-sm-12">
     <div class="row">
@@ -184,6 +232,36 @@
     </div> 
 </div>
 
+<div class="divider"></div>
+
+{{-- CONTESTABLE --}}
+<div class="form-group col-sm-12">
+    <div class="row">
+        <!-- Contestable Field -->
+        <div class="col-lg-1 col-md-2">
+            {!! Form::label('Contestable', 'Contestable:') !!}
+        </div>
+
+        <div class="col-lg-1 col-md-1">
+            <div class="input-group">
+                {{ Form::checkbox('Contestable', 'Yes', false, ['class' => 'custom-checkbox']) }}
+            </div>
+        </div>
+
+        <!-- Net Metered Field -->
+        <div class="col-lg-1 col-md-2">
+            {!! Form::label('NetMetered', 'Net Metered:') !!}
+        </div>
+
+        <div class="col-lg-1 col-md-1">
+            <div class="input-group">
+                {{ Form::checkbox('NetMetered', 'Yes', false, ['class' => 'custom-checkbox']) }}
+            </div>
+        </div>
+    </div> 
+</div>
+
+<div class="divider"></div>
 
 @push('page_scripts')
     <script>
