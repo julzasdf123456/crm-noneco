@@ -341,40 +341,46 @@
                 sideBySide : true,
             });
 
-            $("#target").on('change.datetimepicker', function() {
-                // applications
-                $.ajax({
-                    url : '/service_connections/fetch-daily-monitor-applications-data',
-                    type : 'GET',
-                    data : {
-                        DateOfApplication : $('#daypicker').val(),
-                    },
-                    success : function(res) {
-                        $('#applications-table tbody tr').remove()
-                        $('#applications-table tbody').append(res)
-                    },
-                    error : function(err) {
-                        alert('An error occurred while fetching data. See console for details!')
-                    }
-                })
+            fetchDailyMonitor()
 
-                // energized
-                $.ajax({
-                    url : '/service_connections/fetch-daily-monitor-energized-data',
-                    type : 'GET',
-                    data : {
-                        DateOfEnergization : $('#daypicker').val(),
-                    },
-                    success : function(res) {
-                        $('#energized-table tbody tr').remove()
-                        $('#energized-table tbody').append(res)
-                    },
-                    error : function(err) {
-                        alert('An error occurred while fetching data. See console for details!')
-                    }
-                })
+            $("#target").on('change.datetimepicker', function() {
+                fetchDailyMonitor()
             })
         });
+
+        function fetchDailyMonitor() {
+            // applications
+            $.ajax({
+                url : '/service_connections/fetch-daily-monitor-applications-data',
+                type : 'GET',
+                data : {
+                    DateOfApplication : $('#daypicker').val(),
+                },
+                success : function(res) {
+                    $('#applications-table tbody tr').remove()
+                    $('#applications-table tbody').append(res)
+                },
+                error : function(err) {
+                    alert('An error occurred while fetching data. See console for details!')
+                }
+            })
+
+            // energized
+            $.ajax({
+                url : '/service_connections/fetch-daily-monitor-energized-data',
+                type : 'GET',
+                data : {
+                    DateOfEnergization : $('#daypicker').val(),
+                },
+                success : function(res) {
+                    $('#energized-table tbody tr').remove()
+                    $('#energized-table tbody').append(res)
+                },
+                error : function(err) {
+                    alert('An error occurred while fetching data. See console for details!')
+                }
+            })
+        }
 
         $("#main").HTMLSVGconnect({
             stroke: "#787878",

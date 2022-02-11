@@ -338,3 +338,16 @@ Route::resource('collectibles', App\Http\Controllers\CollectiblesController::cla
 
 
 Route::resource('arrearsLedgerDistributions', App\Http\Controllers\ArrearsLedgerDistributionController::class);
+
+Route::get('/transaction_indices/service-connection-collection', [App\Http\Controllers\TransactionIndexController::class, 'serviceConnectionCollection'])->name('transactionIndices.service-connection-collection');
+Route::get('/transaction_indices/get-payable-details', [App\Http\Controllers\TransactionIndexController::class, 'getPayableDetails'])->name('transactionIndices.get-payable-details');
+Route::get('/transaction_indices/get-payable-total', [App\Http\Controllers\TransactionIndexController::class, 'getPayableTotal'])->name('transactionIndices.get-payable-total');
+Route::get('/transaction_indices/save-and-print-or-service-connections', [App\Http\Controllers\TransactionIndexController::class, 'saveAndPrintORServiceConnections'])->name('transactionIndices.save-and-print-or-service-connections');
+Route::get('/transaction_indices/print-or-service-connections/{transactionIndexId}', [App\Http\Controllers\TransactionIndexController::class, 'printORServiceConnections'])->name('transactionIndices.print-or-service-connections');
+Route::resource('transactionIndices', App\Http\Controllers\TransactionIndexController::class);
+
+
+Route::resource('transactionDetails', App\Http\Controllers\TransactionDetailsController::class);
+
+Route::get('/paid_bills/search', [App\Http\Controllers\PaidBillsController::class, 'search'])->name('paidBills.search');
+Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);

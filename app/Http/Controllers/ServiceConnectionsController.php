@@ -127,8 +127,8 @@ class ServiceConnectionsController extends AppBaseController
     public function show($id)
     {
         $serviceConnections = DB::table('CRM_ServiceConnections')
-            ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
-            ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
             ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
             ->join('CRM_ServiceConnectionCrew', 'CRM_ServiceConnections.StationCrewAssigned', '=', 'CRM_ServiceConnectionCrew.id')
             ->select('CRM_ServiceConnections.id as id',
@@ -172,7 +172,7 @@ class ServiceConnectionsController extends AppBaseController
         $serviceConnectionTransactions = ServiceConnectionPayTransaction::where('ServiceConnectionId', $id)->first();
 
         $materialPayments = DB::table('CRM_ServiceConnectionMaterialPayments')
-                    ->join('CRM_ServiceConnectionMaterialPayables', 'CRM_ServiceConnectionMaterialPayments.Material', '=', 'CRM_ServiceConnectionMaterialPayables.id')
+                    ->leftJoin('CRM_ServiceConnectionMaterialPayables', 'CRM_ServiceConnectionMaterialPayments.Material', '=', 'CRM_ServiceConnectionMaterialPayables.id')
                     ->select('CRM_ServiceConnectionMaterialPayments.id',
                             'CRM_ServiceConnectionMaterialPayments.Quantity',
                             'CRM_ServiceConnectionMaterialPayments.Vat',
@@ -183,7 +183,7 @@ class ServiceConnectionsController extends AppBaseController
                     ->get();
 
         $particularPayments = DB::table('CRM_ServiceConnectionParticularPaymentsTransactions')
-                    ->join('CRM_ServiceConnectionPaymentParticulars', 'CRM_ServiceConnectionParticularPaymentsTransactions.Particular', '=', 'CRM_ServiceConnectionPaymentParticulars.id')
+                    ->leftJoin('CRM_ServiceConnectionPaymentParticulars', 'CRM_ServiceConnectionParticularPaymentsTransactions.Particular', '=', 'CRM_ServiceConnectionPaymentParticulars.id')
                     ->select('CRM_ServiceConnectionParticularPaymentsTransactions.id',
                             'CRM_ServiceConnectionParticularPaymentsTransactions.Amount',
                             'CRM_ServiceConnectionParticularPaymentsTransactions.Vat',
@@ -195,7 +195,7 @@ class ServiceConnectionsController extends AppBaseController
         $totalTransactions = ServiceConnectionTotalPayments::where('ServiceConnectionId', $id)->first();
 
         $timeFrame = DB::table('CRM_ServiceConnectionTimeframes')
-                ->join('users', 'CRM_ServiceConnectionTimeframes.UserId', '=', 'users.id')
+                ->leftJoin('users', 'CRM_ServiceConnectionTimeframes.UserId', '=', 'users.id')
                 ->select('CRM_ServiceConnectionTimeframes.id',
                         'CRM_ServiceConnectionTimeframes.Status',
                         'CRM_ServiceConnectionTimeframes.created_at',
@@ -739,9 +739,9 @@ class ServiceConnectionsController extends AppBaseController
             
             if ($query != '' ) {
                 $data = DB::table('CRM_ServiceConnections')
-                    ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
-                    ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
-                    ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+                    ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+                    ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
                     ->select('CRM_ServiceConnections.id as ConsumerId',
                                     'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
                                     'CRM_ServiceConnections.Status as Status',
@@ -760,9 +760,9 @@ class ServiceConnectionsController extends AppBaseController
                     ->get();
             } else {
                 $data = DB::table('CRM_ServiceConnections')
-                    ->join('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
-                    ->join('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
-                    ->join('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+                    ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')                    
+                    ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
                     ->select('CRM_ServiceConnections.id as ConsumerId',
                                     'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
                                     'CRM_ServiceConnections.Status as Status',
@@ -2053,18 +2053,18 @@ class ServiceConnectionsController extends AppBaseController
     public function fetchApplicationCountViaStatus(Request $request) {
         $startDate = date('Y-m-d', strtotime('first day of this month'));
         $serviceConnections = DB::table('CRM_ServiceConnections')
-            ->select(DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateOfApplication BETWEEN '" . date('Y-m-d', strtotime($startDate . '-1 month')) . "' AND '" . $startDate . "') AS 'ApplicationOne'"),
-                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateOfApplication BETWEEN '" . date('Y-m-d', strtotime($startDate . '-2 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-1 month')) . "') AS 'ApplicationTwo'"),
-                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateOfApplication BETWEEN '" . date('Y-m-d', strtotime($startDate . '-3 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-2 months')) . "') AS 'ApplicationThree'"),
-                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateOfApplication BETWEEN '" . date('Y-m-d', strtotime($startDate . '-4 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-3 months')) . "') AS 'ApplicationFour'"),
-                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateOfApplication BETWEEN '" . date('Y-m-d', strtotime($startDate . '-5 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-4 months')) . "') AS 'ApplicationFive'"),
-                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateOfApplication BETWEEN '" . date('Y-m-d', strtotime($startDate . '-6 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-5 months')) . "') AS 'ApplicationSix'"),
-                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateTimeOfEnergization BETWEEN '" . date('Y-m-d', strtotime($startDate . '-1 month')) . "' AND '" . $startDate . "') AS 'EnergizationOne'"),
-                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateTimeOfEnergization BETWEEN '" . date('Y-m-d', strtotime($startDate . '-2 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-1 month')) . "') AS 'EnergizationTwo'"),
-                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateTimeOfEnergization BETWEEN '" . date('Y-m-d', strtotime($startDate . '-3 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-2 months')) . "') AS 'EnergizationThree'"),
-                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateTimeOfEnergization BETWEEN '" . date('Y-m-d', strtotime($startDate . '-4 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-3 months')) . "') AS 'EnergizationFour'"),
-                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateTimeOfEnergization BETWEEN '" . date('Y-m-d', strtotime($startDate . '-5 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-4 months')) . "') AS 'EnergizationFive'"),
-                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateTimeOfEnergization BETWEEN '" . date('Y-m-d', strtotime($startDate . '-6 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-5 months')) . "') AS 'EnergizationSix'"),)
+            ->select(DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateOfApplication BETWEEN '" . $startDate . "' AND '" . date('Y-m-d', strtotime($startDate . ' +1 month')) . "') AS 'ApplicationOne'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateOfApplication BETWEEN '" . date('Y-m-d', strtotime($startDate . '-1 months')) . "' AND '" . $startDate . "') AS 'ApplicationTwo'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateOfApplication BETWEEN '" . date('Y-m-d', strtotime($startDate . '-2 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-1 months')) . "') AS 'ApplicationThree'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateOfApplication BETWEEN '" . date('Y-m-d', strtotime($startDate . '-3 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-2 months')) . "') AS 'ApplicationFour'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateOfApplication BETWEEN '" . date('Y-m-d', strtotime($startDate . '-4 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-3 months')) . "') AS 'ApplicationFive'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateOfApplication BETWEEN '" . date('Y-m-d', strtotime($startDate . '-5 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-4 months')) . "') AS 'ApplicationSix'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateTimeOfEnergization BETWEEN '" . $startDate . "' AND '" . date('Y-m-d', strtotime($startDate . ' +1 month')) . "') AS 'EnergizationOne'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateTimeOfEnergization BETWEEN '" . date('Y-m-d', strtotime($startDate . '-1 months')) . "' AND '" . $startDate . "') AS 'EnergizationTwo'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateTimeOfEnergization BETWEEN '" . date('Y-m-d', strtotime($startDate . '-2 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-1 months')) . "') AS 'EnergizationThree'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateTimeOfEnergization BETWEEN '" . date('Y-m-d', strtotime($startDate . '-3 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-2 months')) . "') AS 'EnergizationFour'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateTimeOfEnergization BETWEEN '" . date('Y-m-d', strtotime($startDate . '-4 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-3 months')) . "') AS 'EnergizationFive'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_ServiceConnections WHERE DateTimeOfEnergization BETWEEN '" . date('Y-m-d', strtotime($startDate . '-5 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-4 months')) . "') AS 'EnergizationSix'"),)
             ->limit(1)
             ->get();
     

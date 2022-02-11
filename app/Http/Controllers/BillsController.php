@@ -15,6 +15,7 @@ use App\Models\ServiceAccounts;
 use App\Models\Rates;
 use App\Models\Bills;
 use App\Models\IDGenerator;
+use App\Models\ArrearsLedgerDistribution;
 use App\Repositories\ReadingsRepository;
 use Flash;
 use Response;
@@ -260,6 +261,9 @@ class BillsController extends AppBaseController
             ->where('ServiceAccountId', $reading->AccountNumber)
             ->orderByDesc('created_at')
             ->first();
+        $arrearLedgers = ArrearsLedgerDistribution::where('AccountNumber', $reading->AccountNumber)
+            ->where('ServicePeriod', $reading->ServicePeriod)
+            ->first();
 
         if ($rate != null) {
             if (count($previousBills) > 0) {
@@ -278,8 +282,13 @@ class BillsController extends AppBaseController
 
                 $netAmount = $totalKwh * $effectiveRate;
 
+                // DEDUCTIONS
                 $seniorCitizen = Rates::floatRate($rate->SeniorCitizenSubsidy) * $netAmount;
                 $deductions = $seniorCitizen;
+
+                // ADDITIONAL CHARGES
+                $arrears = $arrearLedgers != null ? floatval($arrearLedgers->Amount) : 0;
+                $addOns = $arrears;
 
                 // CHECK IF Bill for this period
                 $bill = Bills::where('ServicePeriod', $reading->ServicePeriod)
@@ -291,13 +300,14 @@ class BillsController extends AppBaseController
                         $bill->Deductions = $deductions;
                         $netAmount = $netAmount - $deductions;
                     }
+                    $netAmount = $netAmount + $addOns;
                     // SET BILLING VALUES
                     $bill->KwhUsed = $average;
                     $bill->PreviousKwh = $previousBill != null ? $previousBill->PresentKwh : 0;
                     $bill->PresentKwh = 0;
                     $bill->KwhAmount = $effectiveRate * $average;
                     $bill->EffectiveRate = $effectiveRate;
-                    $bill->AdditionalCharges = null;
+                    $bill->AdditionalCharges = $addOns;
                     $bill->NetAmount = $netAmount;
                     $bill->BillingDate = date('Y-m-d');
                     $bill->ServiceDateFrom = $previousBill != null ? date('Y-m-d', strtotime($previousBill->ServiceDateTo . ' +1 day')) : date('Y-m-d');
@@ -349,7 +359,7 @@ class BillsController extends AppBaseController
                         $bill->Deductions = $deductions;
                         $netAmount = $netAmount - $deductions;
                     }
-
+                    $netAmount = $netAmount + $addOns;
                     $bill->AccountNumber = $account->id;
                     $bill->ServicePeriod = $reading->ServicePeriod;
                     $bill->Multiplier = $multiplier;
@@ -359,7 +369,7 @@ class BillsController extends AppBaseController
                     $bill->PresentKwh = 0;
                     $bill->KwhAmount = $effectiveRate * $average;
                     $bill->EffectiveRate = $effectiveRate;
-                    $bill->AdditionalCharges = null;
+                    $bill->AdditionalCharges = $addOns;
                     $bill->NetAmount = $netAmount;
                     $bill->BillingDate = date('Y-m-d');
                     $bill->ServiceDateFrom = $previousBill != null ? date('Y-m-d', strtotime($previousBill->ServiceDateTo . ' +1 day')) : date('Y-m-d');
@@ -442,8 +452,9 @@ class BillsController extends AppBaseController
             ->where('ServiceAccountId', $reading->AccountNumber)
             ->orderByDesc('created_at')
             ->first();
-
-
+        $arrearLedgers = ArrearsLedgerDistribution::where('AccountNumber', $reading->AccountNumber)
+            ->where('ServicePeriod', $reading->ServicePeriod)
+            ->first();
         $previousBill = DB::table('Billing_Bills')
             ->where('AccountNumber', $reading->AccountNumber)
             ->where('ServicePeriod', date('Y-m-d', strtotime($reading->ServicePeriod . ' -1 month')))
@@ -474,8 +485,13 @@ class BillsController extends AppBaseController
 
             $netAmount = $totalKwh * $effectiveRate;
 
+            // DEDUCTIONS
             $seniorCitizen = Rates::floatRate($rate->SeniorCitizenSubsidy) * $netAmount;
             $deductions = $seniorCitizen;
+
+            // ADDITIONAL CHARGES
+            $arrears = $arrearLedgers != null ? floatval($arrearLedgers->Amount) : 0;
+            $addOns = $arrears;
 
             // CHECK IF Bill for this period
             $bill = Bills::where('ServicePeriod', $reading->ServicePeriod)
@@ -487,13 +503,14 @@ class BillsController extends AppBaseController
                     $bill->Deductions = $deductions;
                     $netAmount = $netAmount - $deductions;
                 }
+                $netAmount = $netAmount + $addOns;
                 // SET BILLING VALUES
                 $bill->KwhUsed = $kwhUsed;
                 $bill->PreviousKwh = $previousBill != null ? $previousBill->PresentKwh : 0;
                 $bill->PresentKwh = $reading->KwhUsed;
                 $bill->KwhAmount = $effectiveRate * $kwhUsed;
                 $bill->EffectiveRate = $effectiveRate;
-                $bill->AdditionalCharges = null;
+                $bill->AdditionalCharges = $addOns;
                 $bill->NetAmount = $netAmount;
                 $bill->BillingDate = date('Y-m-d');
                 $bill->ServiceDateFrom = $previousBill != null ? date('Y-m-d', strtotime($previousBill->ServiceDateTo . ' +1 day')) : date('Y-m-d');
@@ -546,7 +563,7 @@ class BillsController extends AppBaseController
                     $bill->Deductions = $deductions;
                     $netAmount = $netAmount - $deductions;
                 }
-                
+                $netAmount = $netAmount + $addOns;
                 $bill->Multiplier = $multiplier;
                 $bill->Coreloss = $coreloss;
                 $bill->KwhUsed = $kwhUsed;
@@ -554,7 +571,7 @@ class BillsController extends AppBaseController
                 $bill->PresentKwh = $reading->KwhUsed;
                 $bill->KwhAmount = $effectiveRate * $kwhUsed;
                 $bill->EffectiveRate = $effectiveRate;
-                $bill->AdditionalCharges = null;
+                $bill->AdditionalCharges = $addOns;
                 $bill->NetAmount = $netAmount;
                 $bill->BillingDate = date('Y-m-d');
                 $bill->ServiceDateFrom = $previousBill != null ? date('Y-m-d', strtotime($previousBill->ServiceDateTo . ' +1 day')) : date('Y-m-d');

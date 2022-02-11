@@ -11,6 +11,9 @@ use App\Models\ServiceConnections;
 use App\Http\Controllers\ServiceConnectionsController;
 use App\Models\User;
 use App\Models\ServiceConnectionTimeframes;
+use App\Models\ServiceConnectionPayParticulars;
+use App\Models\ServiceConnectionTotalPayments;
+use App\Models\ServiceConnectionPayTransaction;
 use App\Models\IDGenerator;
 use Illuminate\Support\Facades\Auth;
 use Flash;
@@ -106,6 +109,33 @@ class ServiceConnectionInspectionsController extends AppBaseController
             $timeFrame->save();
         }
         $serviceConnection->save();
+
+        // CREATE PAYMENT TRANSACTIONS
+        $paymentParticulars = ServiceConnectionPayParticulars::all();
+        $subTotal = 0.0;
+        $vatTotal = 0.0;
+        $overAllTotal = 0.0;
+        foreach($paymentParticulars as $item) {
+            $transactions = new ServiceConnectionPayTransaction;
+            $transactions->id = IDGenerator::generateIDandRandString();
+            $transactions->ServiceConnectionId = $input['ServiceConnectionId'];
+            $transactions->Particular = $item->id;
+            $transactions->Amount = $item->DefaultAmount;
+            $transactions->Vat = floatval($item->DefaultAmount) * floatval($item->VatPercentage);
+            $transactions->Total = floatval($transactions->Vat) + floatval($transactions->Amount);
+            $transactions->save();
+
+            $subTotal = $subTotal + floatval($transactions->Amount);
+            $vatTotal = $vatTotal + floatval($transactions->Vat);
+            $overAllTotal = $overAllTotal + floatval($transactions->Total);
+        }
+        $totalTransactions = new ServiceConnectionTotalPayments;
+        $totalTransactions->id = IDGenerator::generateIDandRandString();
+        $totalTransactions->ServiceConnectionId = $input['ServiceConnectionId'];
+        $totalTransactions->SubTotal = $subTotal;
+        $totalTransactions->TotalVat = $vatTotal;
+        $totalTransactions->Total = $overAllTotal;
+        $totalTransactions->save();
 
         // return redirect()->action([ServiceConnectionsController::class, 'show'], [$input['ServiceConnectionId']]);
         // return redirect()->action([App\Http\Controllers\ServiceConnectionMtrTrnsfrmrController::class, 'createStepThree'], [$input['ServiceConnectionId']]);

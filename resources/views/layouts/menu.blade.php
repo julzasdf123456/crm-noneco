@@ -437,12 +437,40 @@ use Illuminate\Support\Facades\Auth;
     </li>
 @endcanany
 
+<!-- TELLERING MENU -->
+@canany(['Super Admin'])
+    <li class="nav-header">COLLECTION</li>
+    <li class="nav-item has-treeview">
+        <a href="#" class="nav-link">
+            <i class="fas fa-credit-card nav-icon text-info"></i>
+            <p>
+                Collection
+                <i class="fas fa-angle-left right"></i>
+            </p>
+        </a>
+        <ul class="nav nav-treeview">
+            <li class="nav-item">
+                <a href="{{ route('paidBills.index') }}"
+                class="nav-link {{ Request::is('paidBills.index*') ? 'active' : '' }}">
+                <i class="fas fa-file-invoice-dollar nav-icon text-info"></i><p>Bills Payment</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('transactionIndices.service-connection-collection') }}"
+                class="nav-link {{ Request::is('transactionIndices.service-connection-collection*') ? 'active' : '' }}">
+                <i class="fas fa-plug nav-icon text-info"></i><p>Service Connection</p>
+                </a>
+            </li>
+        </ul>
+    </li>
+@endcanany
+
 <li class="nav-header">MISCELLANEOUS</li>
 <!-- EXTRAS MENU -->
 @canany(['Super Admin', 'create membership', 'sc create'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
-            <i class="fas fa-ellipsis-v nav-icon text-info"></i>
+            <i class="fas fa-ellipsis-v nav-icon"></i>
             <p>
                 Extras
                 <i class="fas fa-angle-left right"></i>
@@ -452,7 +480,7 @@ use Illuminate\Support\Facades\Auth;
             <li class="nav-item">
                 <a href="{{ route('towns.index') }}"
                 class="nav-link {{ Request::is('towns*') ? 'active' : '' }}">
-                <i class="fas fa-map-marker-alt nav-icon text-info"></i><p>Towns</p>
+                <i class="fas fa-map-marker-alt nav-icon"></i><p>Towns</p>
                 </a>
             </li>
 
@@ -460,14 +488,14 @@ use Illuminate\Support\Facades\Auth;
             <li class="nav-item">
                 <a href="{{ route('barangays.index') }}"
                 class="nav-link {{ Request::is('barangays*') ? 'active' : '' }}">
-                <i class="fas fa-map-marked-alt nav-icon text-info"></i><p>Barangays</p>
+                <i class="fas fa-map-marked-alt nav-icon"></i><p>Barangays</p>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="{{ route('serviceConnectionCrews.index') }}"
                    class="nav-link {{ Request::is('serviceConnectionCrews*') ? 'active' : '' }}">
-                   <i class="fas fa-map-marked-alt nav-icon text-info"></i><p>Station Crews</p>
+                   <i class="fas fa-map-marked-alt nav-icon"></i><p>Station Crews</p>
                 </a>
             </li>
         </ul>
@@ -510,6 +538,5 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
-
 
 

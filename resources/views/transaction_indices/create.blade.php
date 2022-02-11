@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <h1>Edit Service Connection Pay Particulars</h1>
+                    <h1>Create Transaction Index</h1>
                 </div>
             </div>
         </div>
@@ -17,18 +17,19 @@
 
         <div class="card">
 
-            {!! Form::model($serviceConnectionPayParticulars, ['route' => ['serviceConnectionPayParticulars.update', $serviceConnectionPayParticulars->id], 'method' => 'patch']) !!}
+            {!! Form::open(['route' => 'transactionIndices.store']) !!}
 
             <div class="card-body">
+
                 <div class="row">
-                    <input type="hidden" name="id" value="{{ $serviceConnectionPayParticulars->id }}">
-                    @include('service_connection_pay_particulars.fields')
+                    @include('transaction_indices.fields')
                 </div>
+
             </div>
 
             <div class="card-footer">
                 {!! Form::submit('Save', ['class' => 'btn btn-primary']) !!}
-                <a href="{{ route('serviceConnectionPayParticulars.index') }}" class="btn btn-default">Cancel</a>
+                <a href="{{ route('transactionIndices.index') }}" class="btn btn-default">Cancel</a>
             </div>
 
             {!! Form::close() !!}

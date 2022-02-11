@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <h1>Edit Service Connection Pay Particulars</h1>
+                    <h1>Edit Transaction Details</h1>
                 </div>
             </div>
         </div>
@@ -17,18 +17,17 @@
 
         <div class="card">
 
-            {!! Form::model($serviceConnectionPayParticulars, ['route' => ['serviceConnectionPayParticulars.update', $serviceConnectionPayParticulars->id], 'method' => 'patch']) !!}
+            {!! Form::model($transactionDetails, ['route' => ['transactionDetails.update', $transactionDetails->id], 'method' => 'patch']) !!}
 
             <div class="card-body">
                 <div class="row">
-                    <input type="hidden" name="id" value="{{ $serviceConnectionPayParticulars->id }}">
-                    @include('service_connection_pay_particulars.fields')
+                    @include('transaction_details.fields')
                 </div>
             </div>
 
             <div class="card-footer">
                 {!! Form::submit('Save', ['class' => 'btn btn-primary']) !!}
-                <a href="{{ route('serviceConnectionPayParticulars.index') }}" class="btn btn-default">Cancel</a>
+                <a href="{{ route('transactionDetails.index') }}" class="btn btn-default">Cancel</a>
             </div>
 
             {!! Form::close() !!}

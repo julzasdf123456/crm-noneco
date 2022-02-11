@@ -53,40 +53,54 @@ class ReadAndBillAPI extends Controller {
         $prevMonth = date('Y-m-01', strtotime($request['ServicePeriod'] . ' -1 month'));
 
         $accounts = DB::table('Billing_ServiceAccounts')
-            ->where('AreaCode', $request['AreaCode'])
-            ->where('GroupCode', $request['GroupCode'])
-            ->whereNotIn('id', DB::table('Billing_Readings')->where('ServicePeriod', $request['ServicePeriod'])->pluck('AccountNumber'))
-            ->whereNotIn('AccountType', ['PUBLIC BUILDING HIGH VOLTAGE', 'COMMERCIAL HIGH VOLTAGE', 'INDUSTRIAL HIGH VOLTAGE'])
+            ->leftJoin('Billing_Collectibles', 'Billing_ServiceAccounts.id', '=', 'Billing_Collectibles.AccountNumber')
+            ->where('Billing_ServiceAccounts.AreaCode', $request['AreaCode'])
+            ->where('Billing_ServiceAccounts.GroupCode', $request['GroupCode'])
+            ->whereNotIn('Billing_ServiceAccounts.id', DB::table('Billing_Readings')->where('ServicePeriod', $request['ServicePeriod'])->pluck('AccountNumber'))
+            ->whereNotIn('Billing_ServiceAccounts.AccountType', ['PUBLIC BUILDING HIGH VOLTAGE', 'COMMERCIAL HIGH VOLTAGE', 'INDUSTRIAL HIGH VOLTAGE'])
             ->where(function ($query) {
                 $query->where(function($queryX) {
-                        $queryX->where('AccountExpiration', '>', date('Y-m-d'))
-                            ->where('AccountRetention', 'Temporary');
+                        $queryX->where('Billing_ServiceAccounts.AccountExpiration', '>', date('Y-m-d'))
+                            ->where('Billing_ServiceAccounts.AccountRetention', 'Temporary');
                     })
-                    ->orWhere('AccountRetention', 'Permanent')
-                    ->orWhereNull('AccountExpiration');
+                    ->orWhere('Billing_ServiceAccounts.AccountRetention', 'Permanent')
+                    ->orWhereNull('Billing_ServiceAccounts.AccountExpiration');
             })
-            ->select('id', 
-                'ServiceAccountName',
-                'Multiplier',
-                'Coreloss',
-                'AccountType',
-                'AccountStatus',
-                'AreaCode',
-                'GroupCode',
-                'Town',
-                'Barangay',
-                'Latitude',
-                'Longitude',
-                'OldAccountNo',
-                'SequenceCode',
-                'SeniorCitizen',
-                'Evat5Percent',
-                'Ewt2Percent',
-                DB::raw("(SELECT KwhUsed FROM Billing_Readings WHERE ServicePeriod='" . $prevMonth . "' AND AccountNumber=Billing_ServiceAccounts.id) AS KwhUsed"),
+            ->select('Billing_ServiceAccounts.id', 
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.Multiplier',
+                'Billing_ServiceAccounts.Coreloss',
+                'Billing_ServiceAccounts.AccountType',
+                'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.AreaCode',
+                'Billing_ServiceAccounts.GroupCode',
+                'Billing_ServiceAccounts.Town',
+                'Billing_ServiceAccounts.Barangay',
+                'Billing_ServiceAccounts.Latitude',
+                'Billing_ServiceAccounts.Longitude',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.SequenceCode',
+                'Billing_ServiceAccounts.SeniorCitizen',
+                'Billing_ServiceAccounts.Evat5Percent',
+                'Billing_ServiceAccounts.Ewt2Percent',
+                'Billing_Collectibles.Balance',
+                DB::raw("(SELECT TOP 1 Amount FROM Billing_ArrearsLedgerDistribution WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $request['ServicePeriod'] . "') AS ArrearsLedger"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE ServicePeriod='" . $prevMonth . "' AND AccountNumber=Billing_ServiceAccounts.id) AS KwhUsed"),
                 DB::raw("'" . date('Y-m-d', strtotime($request['ServicePeriod'])) . "' AS ServicePeriod"))
             ->get();
 
-        return response()->json($accounts, $this->successStatus);
+        /**
+         * CHECK IF RATE IS AVAILABLE
+         */
+        $rates = Rates::where('ServicePeriod', $request['ServicePeriod']) 
+            ->get();
+
+        if (count($rates) > 0) {
+            return response()->json($accounts, $this->successStatus);
+        } else {
+            return response()->json([], 404);
+        }
+        
     }
 
     public function downloadRates(Request $request) {

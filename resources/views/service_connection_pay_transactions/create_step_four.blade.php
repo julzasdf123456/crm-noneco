@@ -77,7 +77,7 @@ $id = IDGenerator::generateID();
                     <div class="divider"></div>
 
                     <div class="row">
-                        <div class="col-lg-6 col-md-6 col-sm-12">
+                        {{-- <div class="col-lg-6 col-md-6 col-sm-12">
                             <p>Material Payments</p>
 
                             <div class="row">
@@ -139,7 +139,7 @@ $id = IDGenerator::generateID();
                                     <p>Materials Total: <strong id="totalMaterials">0.0</strong></p>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
 
                         <div class="col-lg-6 col-md-6 col-sm-12">
                             <p>Particulars and Others</p>
@@ -188,7 +188,7 @@ $id = IDGenerator::generateID();
                                                         <td class="text-right">{{ number_format($item->Vat, 2) }}</td>  
                                                         <td class="text-right">{{ number_format($item->Total, 2) }}</td>
                                                         <td>
-                                                            <button class='btn btn-xs btn-danger' onClick='deleteParticulars({{ $item->id }})'><i class='fas fa-trash'></i></button>
+                                                            <button class='btn btn-xs btn-danger' onClick='deleteParticulars("{{ $item->id }}")'><i class='fas fa-trash'></i></button>
                                                         </td>  
                                                     </tr>
                                                 @endforeach
