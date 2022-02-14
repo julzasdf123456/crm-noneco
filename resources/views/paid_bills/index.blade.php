@@ -14,8 +14,31 @@
         </div>
     </section>
 
-    <div class="content px-3">
+    <div class="content">
+        <div class="row">
+            <div class="col-lg-4 col-md-5">
+                <div class="card" style="height: 60vh;">
+                    <div class="card-header border-0">
+                        <span class="card-title">
+                            <h4 id="account-name">...</h4>
+                            <address class="text-muted" id="account-number">...</address>
+                        </span>
+                    </div>
+                    <div class="card-body table-responsive px-0">
+                        <table class="table table-hover" id="payables-table">
+                            <thead>
+                                <th>Billing Month</th>
+                                <th>Amount Due</th>
+                                <th width="50px"></th>
+                            </thead>
+                            <tbody>
 
+                            </tbody>
+                        </table>
+                    </div>
+                </div>                  
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -108,6 +131,53 @@
                     console.log(error)
                 }
             })
+        }
+
+        function fetchDetails(id) {
+            $('#account-number').text(id)
+            // FETCH ACCOUNT DETAILS
+            $.ajax({
+                url : '/paid_bills/fetch-account',
+                type : 'GET',
+                data : {
+                    AccountNumber : id,
+                },
+                success : function(res) {
+                    $('#payables-table tbody tr').remove();
+                    if (jQuery.isEmptyObject(res)) {
+
+                    } else {
+                        $('#account-name').text(res['ServiceAccountName'])
+                    }
+                    $('#modal-search').modal('hide')
+                },
+                error : function(err) {
+                    $('#modal-search').modal('hide')
+                    console.log(err)
+                    alert('Error fetching account details. Contact support for more.')
+                } 
+            })
+
+            // FETCH UNPAID BILLS
+            $.ajax({
+                url : '/paid_bills/fetch-details',
+                type : 'GET',
+                data : {
+                    AccountNumber : id,
+                }, 
+                success : function(res) {
+                    $('#payables-table tbody tr').remove();
+                    if (jQuery.isEmptyObject(res)) {
+
+                    } else {
+                        $('#payables-table tbody').append(res)
+                    }
+                },
+                error : function(err) {
+                    console.log(err)
+                    alert('Error fetching account details. Contact support for more.')
+                }
+            })            
         }
     </script>
 @endpush

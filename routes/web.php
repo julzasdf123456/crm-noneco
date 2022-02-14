@@ -350,4 +350,6 @@ Route::resource('transactionIndices', App\Http\Controllers\TransactionIndexContr
 Route::resource('transactionDetails', App\Http\Controllers\TransactionDetailsController::class);
 
 Route::get('/paid_bills/search', [App\Http\Controllers\PaidBillsController::class, 'search'])->name('paidBills.search');
+Route::get('/paid_bills/fetch-details', [App\Http\Controllers\PaidBillsController::class, 'fetchDetails'])->name('paidBills.fetch-details');
+Route::get('/paid_bills/fetch-account', [App\Http\Controllers\PaidBillsController::class, 'fetchAccount'])->name('paidBills.fetch-account');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);

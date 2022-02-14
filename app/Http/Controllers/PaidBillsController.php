@@ -188,6 +188,9 @@ class PaidBillsController extends AppBaseController
                             <td>' . $item->ServiceAccountName . '</td>
                             <td>' . ServiceAccounts::getAddress($item) . '</td>
                             <td>' . $item->AccountStatus . '</td>
+                            <td>
+                                <button class="btn btn-link text-primary" onclick=fetchDetails("' . $item->id . '")><i class="fas fa-forward"></i></button>
+                            </td>
                         </tr>
                     '; 
             }
@@ -196,5 +199,54 @@ class PaidBillsController extends AppBaseController
         } else {
             return response()->json([], 200);
         }        
+    }
+
+    public function fetchDetails(Request $request) {
+        $unpaidBills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->where('Billing_Bills.AccountNumber', $request['AccountNumber'])
+            ->whereNotIn('Billing_Bills.AccountNumber', DB::table('Cashier_PaidBills')->pluck('Cashier_PaidBills.AccountNumber'))
+            ->select('Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_Bills.*')
+            ->get();
+
+        $output = "";
+
+        if (count($unpaidBills) > 0) {
+            foreach($unpaidBills as $item) {
+                $output .= '
+                        <tr>
+                            <td>' . date('F Y', strtotime($item->ServicePeriod)) . '</td>
+                            <td>' . number_format($item->NetAmount, 2) . '</td>
+                            <td class="text-right">
+                                <button class="btn btn-link text-primary" onclick=fetchPayable("' . $item->id . '")><i class="fas fa-forward"></i></button>
+                            </td>
+                        </tr>
+                    '; 
+            }
+
+            return response()->json($output, 200);
+        } else {
+            return response()->json([], 200);
+        }            
+    }
+
+    public function fetchAccount(Request $request) {
+        $account = DB::table('Billing_ServiceAccounts')
+            ->where('id', $request['AccountNumber'])
+            ->first();
+
+        return response()->json($account, 200);
     }
 }
