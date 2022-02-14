@@ -352,4 +352,6 @@ Route::resource('transactionDetails', App\Http\Controllers\TransactionDetailsCon
 Route::get('/paid_bills/search', [App\Http\Controllers\PaidBillsController::class, 'search'])->name('paidBills.search');
 Route::get('/paid_bills/fetch-details', [App\Http\Controllers\PaidBillsController::class, 'fetchDetails'])->name('paidBills.fetch-details');
 Route::get('/paid_bills/fetch-account', [App\Http\Controllers\PaidBillsController::class, 'fetchAccount'])->name('paidBills.fetch-account');
+Route::get('/paid_bills/fetch-payable', [App\Http\Controllers\PaidBillsController::class, 'fetchPayable'])->name('paidBills.fetch-payable');
+Route::get('/paid_bills/save-paid-bill-and-print', [App\Http\Controllers\PaidBillsController::class, 'savePaidBillAndPrint'])->name('paidBills.save-paid-bill-and-print');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);

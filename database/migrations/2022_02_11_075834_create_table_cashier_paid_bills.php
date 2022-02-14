@@ -18,7 +18,7 @@ class CreateTableCashierPaidBills extends Migration
             $table->primary('id');
             $table->string('BillNumber')->nullable();
             $table->string('AccountNumber')->nullable();
-            $table->string('ServicePeriod')->nullable();
+            $table->date('ServicePeriod')->nullable();
             $table->string('ORNumber')->nullable();
             $table->date('ORDate')->nullable();
             $table->string('DCRNumber')->nullable();

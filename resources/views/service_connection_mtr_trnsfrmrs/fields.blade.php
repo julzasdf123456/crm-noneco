@@ -212,7 +212,7 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-charging-station"></i></span>
                 </div>
-                {!! Form::select('TransformerOwnership', ['NONECO' => 'NONECO', 'Privately Owned' => 'Privately Owned'], null, ['class' => 'form-control']) !!}
+                {!! Form::select('TransformerOwnership', [env('APP_COMPANY_ABRV') => env('APP_COMPANY_ABRV'), 'Privately Owned' => 'Privately Owned'], null, ['class' => 'form-control']) !!}
             </div>
         </div>
     </div> 

@@ -158,8 +158,14 @@ class ServiceAccountsController extends AppBaseController
             ->orderByDesc('created_at')
             ->first();
 
-        $bills = Bills::where('AccountNumber', $id)
-            ->orderByDesc('BillingDate')
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Cashier_PaidBills', 'Billing_Bills.id', '=', 'Cashier_PaidBills.ObjectSourceId')
+            ->where('Billing_Bills.AccountNumber', $id)
+            ->select('Billing_Bills.*',
+                'Cashier_PaidBills.PostingDate', 
+                'Cashier_PaidBills.id AS PostingId',
+                'Cashier_PaidBills.Teller')
+            ->orderByDesc('Billing_Bills.ServicePeriod')
             ->get();
         
         $collectibles = Collectibles::where('AccountNumber', $id)->first();

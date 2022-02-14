@@ -6,19 +6,27 @@
             <thead>
                 <th>Bill Number</th>
                 <th>Billing Month</th>
-                <th class="right-text">Kwh Used</th>
-                <th class="right-text">Rate</th>
-                <th class="right-text">Net Amount</th>
+                <th class="text-right">Kwh Used</th>
+                <th class="text-right">Rate</th>
+                <th class="text-right">Net Amount</th>
+                <th>Payment Date</th>
                 <th width="10%"></th>
             </thead>
             <tbody>
                 @foreach ($bills as $item)
                     <tr>
-                        <td>{{ $item->BillNumber }}</td>
+                        <td><i class="fas {{ $item->PostingDate != null ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger' }} ico-tab"></i>{{ $item->BillNumber }}</td>
                         <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
-                        <td class="right-text">{{ $item->KwhUsed != null ? number_format($item->KwhUsed, 2) : '0' }}</td>
-                        <td class="right-text">{{ $item->EffectiveRate != null ? number_format($item->EffectiveRate, 4) : '0' }}</td>
-                        <td class="right-text">{{ $item->NetAmount != null ? number_format($item->NetAmount, 2) : '0' }}</td>
+                        <td class="text-right">{{ $item->KwhUsed != null ? number_format($item->KwhUsed, 2) : '0' }}</td>
+                        <td class="text-right">{{ $item->EffectiveRate != null ? number_format($item->EffectiveRate, 4) : '0' }}</td>
+                        <td class="text-right">{{ $item->NetAmount != null ? number_format($item->NetAmount, 2) : '0' }}</td>
+                        <td>{{ $item->PostingDate != null ? date('F d, Y', strtotime($item->PostingDate)) : '-' }}</td>
+                        <td class="text-right">
+                            @if ($item->PostingDate == null)
+                                <button class="btn btn-link btn-sm text-warning" title="Adjust Reading"><i class="fas fa-pen"></i></button>
+                            @endif
+                            <a class="btn btn-link" title="View Bill"><i class="fas fa-eye"></i></a>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>

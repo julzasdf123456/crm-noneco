@@ -7,8 +7,12 @@ use App\Http\Requests\UpdatePaidBillsRequest;
 use App\Repositories\PaidBillsRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;    
+use Illuminate\Support\Facades\DB;   
+use Illuminate\Support\Facades\Auth;    
 use App\Models\ServiceAccounts;
+use App\Models\Bills;
+use App\Models\IDGenerator;
+use App\Models\PaidBills;
 use Flash;
 use Response;
 
@@ -207,7 +211,7 @@ class PaidBillsController extends AppBaseController
             ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
             ->where('Billing_Bills.AccountNumber', $request['AccountNumber'])
-            ->whereNotIn('Billing_Bills.AccountNumber', DB::table('Cashier_PaidBills')->pluck('Cashier_PaidBills.AccountNumber'))
+            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->pluck('Cashier_PaidBills.ObjectSourceId'))
             ->select('Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.AccountCount',
@@ -219,21 +223,37 @@ class PaidBillsController extends AppBaseController
                     'CRM_Towns.Town',
                     'CRM_Barangays.Barangay',
                     'Billing_Bills.*')
+            ->orderByDesc('Billing_Bills.ServicePeriod')
             ->get();
 
         $output = "";
 
         if (count($unpaidBills) > 0) {
             foreach($unpaidBills as $item) {
-                $output .= '
+                if (date('Y-m-d', strtotime($item->DueDate)) < date('Y-m-d')) {
+                    // SURCHARGE
+                    $output .= '
                         <tr>
+                            <td>' . $item->BillNumber . '</td>
                             <td>' . date('F Y', strtotime($item->ServicePeriod)) . '</td>
-                            <td>' . number_format($item->NetAmount, 2) . '</td>
+                            <th class="text-danger">₱ ' . number_format($item->NetAmount, 2) . ' + penalty</th>
                             <td class="text-right">
                                 <button class="btn btn-link text-primary" onclick=fetchPayable("' . $item->id . '")><i class="fas fa-forward"></i></button>
                             </td>
                         </tr>
                     '; 
+                } else {
+                    $output .= '
+                        <tr>
+                            <td>' . $item->BillNumber . '</td>
+                            <td>' . date('F Y', strtotime($item->ServicePeriod)) . '</td>
+                            <th>₱ ' . number_format($item->NetAmount, 2) . '</th>
+                            <td class="text-right">
+                                <button class="btn btn-link text-primary" onclick=fetchPayable("' . $item->id . '")><i class="fas fa-forward"></i></button>
+                            </td>
+                        </tr>
+                    '; 
+                }                
             }
 
             return response()->json($output, 200);
@@ -248,5 +268,40 @@ class PaidBillsController extends AppBaseController
             ->first();
 
         return response()->json($account, 200);
+    }
+
+    public function fetchPayable(Request $request) {
+        $bill = Bills::find($request['BillId']);
+
+        if ($bill != null) {
+            return response()->json($bill, 200);
+        } else {
+            return response()->json(['res' => 'Bill not found'], 404);
+        }
+    }
+
+    public function savePaidBillAndPrint(Request $request) {
+        $paidBill = new PaidBills;
+        $paidBill->id = IDGenerator::generateIDandRandString();
+        $paidBill->BillNumber = $request['BillNumber'];
+        $paidBill->AccountNumber = $request['AccountNumber'];
+        $paidBill->ServicePeriod = $request['ServicePeriod'];
+        $paidBill->KwhUsed = $request['KwhUsed'];
+        $paidBill->Teller = Auth::id();
+        $paidBill->OfficeTransacted = env('APP_LOCATION');
+        $paidBill->PostingDate = date('Y-m-d');
+        $paidBill->PostingTime = date('H:i:s');
+        $paidBill->Surcharge = $request['Surcharge'];
+        $paidBill->Form2307TwoPercent = $request['Form2307TwoPercent'];
+        $paidBill->Form2307FivePercent = $request['Form2307FivePercent'];
+        $paidBill->AdditionalCharges = $request['AdditionalCharges'];
+        $paidBill->Deductions = $request['Deductions'];
+        $paidBill->NetAmount = $request['NetAmount'];
+        $paidBill->Source = 'MONTHLY BILL';
+        $paidBill->ObjectSourceId = $request['BillId'];
+        $paidBill->UserId = Auth::id();
+        $paidBill->save();
+
+        return response()->json($paidBill, 200);
     }
 }
