@@ -460,7 +460,7 @@
                     BillId : billId,
                 }, 
                 success : function(res) {
-                    location.reload()
+                    window.location.href = "{{ url('/paid_bills/print-bill-payment') }}" + "/" + res['id']
                 },
                 error : function(err) {
                     alert('An error occurred while performing the transaction. Contact support for more.')

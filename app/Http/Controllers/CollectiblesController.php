@@ -185,7 +185,7 @@ class CollectiblesController extends AppBaseController
     }
 
     public function clearLedger($id) {
-        $arrearLedger = ArrearsLedgerDistribution::where('AccountNumber', $id)->delete();
+        $arrearLedger = ArrearsLedgerDistribution::where('AccountNumber', $id)->whereNull('IsPaid')->delete();
 
         return redirect(route('serviceAccounts.show', [$id]));
     }

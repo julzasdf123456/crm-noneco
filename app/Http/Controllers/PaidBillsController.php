@@ -211,6 +211,7 @@ class PaidBillsController extends AppBaseController
             ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
             ->where('Billing_Bills.AccountNumber', $request['AccountNumber'])
+            ->whereNull('Billing_Bills.MergedToCollectible')
             ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->pluck('Cashier_PaidBills.ObjectSourceId'))
             ->select('Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.OldAccountNo',
@@ -304,4 +305,13 @@ class PaidBillsController extends AppBaseController
 
         return response()->json($paidBill, 200);
     }
+
+    public function printBillPayment($paidBillId) {
+        $paidBill = PaidBills::find($paidBillId);
+
+        return view('/paid_bills/print_bill_payment', [
+            'paidBill' => $paidBill
+        ]);
+    }
 }
+

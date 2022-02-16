@@ -1,8 +1,10 @@
 @php
+    use App\Models\Bills;
     use App\Models\IDGenerator;
 @endphp
 <div class="content">
     <div class="row">
+        {{-- Uncollected Arrears --}}
         <div class="col-lg-6">
             {{-- COLLECTIBLES --}}
             <div class="card" style="height: 60vh;">
@@ -10,7 +12,7 @@
                     <span class="card-title">Uncollected Arrears</span>
                     <div class="card-tools">
                         <button class="btn btn-tool" title="Update Figure" data-toggle="modal" data-target="#modal-update-collectible"><i class="fas fa-pen"></i></button>
-                        @if ($collectibles != null && count($arrearsLedger) < 1)
+                        @if ($collectibles != null && count($checkLedger) < 1)
                             <button class="btn btn-tool text-warning" title="Split into multiple months (termed payment)" data-toggle="modal" data-target="#modal-ledgerize"><i class="fas fa-clipboard-list"></i></button>
                         @endif                        
                     </div>
@@ -19,7 +21,7 @@
                     @if ($collectibles != null)
                         <h3 class="text-danger">₱ {{ number_format($collectibles->Balance, 2) }}</h3>
 
-                        @if ($arrearsLedger != null && count($arrearsLedger) > 0)
+                        @if ($arrearsLedger != null)
                             <div class="divider"></div>
                             <p><i>Arrears | Termed Ledger ({{ count($arrearsLedger) }} months to pay)</i></p>
 
@@ -35,7 +37,11 @@
                                             <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
                                             <td class="text-right">₱ {{ number_format($item->Amount, 2) }}</td>
                                             <td>
-                                                {{-- INSERT STATUS HERE --}}
+                                                @if ($item->IsPaid == 'Yes')
+                                                    <i class="fas fa-check-circle text-primary"></i>
+                                                @else
+                                                    <i class="fas fa-exclamation-circle text-danger"></i>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -43,7 +49,7 @@
                             </table>
 
                             {!! Form::open(['route' => ['collectibles.clear-ledger', $serviceAccounts->id], 'method' => 'post']) !!}
-                            {!! Form::button('<i class="fas fa-trash"></i>', ['type' => 'submit', 'class' => 'btn btn-sm btn-link text-danger float-right', 'onclick' => "return confirm('Are you sure you want to clear this ledger?')"]) !!}
+                            {!! Form::button('<i class="fas fa-trash"></i>', ['type' => 'submit', 'class' => 'btn btn-sm btn-link text-danger float-right', 'title' => 'Clear ledger', 'onclick' => "return confirm('Are you sure you want to clear this ledger?')"]) !!}
                             {!! Form::close() !!}
                         @else
                             <p>Arrears not ledgerized</p>
@@ -55,13 +61,89 @@
             </div>
         </div>
 
+        {{-- Monthly Bill Arrears --}}
         <div class="col-lg-6">
             <div class="card" style="height: 60vh;">
                 <div class="card-header border-0">
                     <span class="card-title">Monthly Bill Arrears</span>
+
+                    <div class="card-tools">
+                        @if (count($unmergedArrears) > 0)
+                            <a href="{{ route('serviceAccounts.merge-all-bill-arrears', [ $serviceAccounts->id]) }}" class="btn btn-xs btn-danger" title="Merge All Arrears"><i class="fas fa-stream ico-tab-mini"></i>Merge All</a>
+                        @else
+                            <a href="{{ route('serviceAccounts.unmerge-all-bill-arrears', [ $serviceAccounts->id]) }}" class="btn btn-xs btn-primary" title="Unmerge All Arrears"><i class="fas fa-folder-minus ico-tab-mini"></i>Unmerge All</a> 
+                        @endif
+                        
+                    </div>
                 </div>
                 <div class="card-body table-responsive px-0">
+                    <table class="table table-hover">
+                        <thead>
+                            <th>Bill No.</th>
+                            <th>Billing Mnth.</th>
+                            <th>Amount</th>
+                            <th>Penalty</th>
+                            <th width="60px"></th>
+                        </thead>
+                        <tbody>
+                            @if (count($billArrears) > 0) 
+                                @foreach ($billArrears as $item)
+                                    <tr>
+                                        <td>{{ $item->BillNumber }}</td>
+                                        <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
+                                        <td>{{ number_format($item->NetAmount, 2) }}</td>
+                                        <td>{{ number_format(Bills::getPenalty($item->NetAmount), 2) }}</td>
+                                        <td>
+                                            @if ($item->MergedToCollectible == 'Yes')
+                                                <a href="{{ route('serviceAccounts.unmerge-bill-arrear', [$item->id]) }}" class="btn btn-xs btn-link text-primary" title="Unmerge this arrear to collectibles"><i class="fas fa-folder-minus"></i></a>
+                                            @else
+                                                <a href="{{ route('serviceAccounts.merge-bill-arrear', [$item->id]) }}" class="btn btn-xs btn-link text-danger" title="Merge this arrear to collectibles"><i class="fas fa-stream"></i></a>
+                                            @endif                                            
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endif
+                        </tbody>
+                    </table>
+                    
+                </div>
+            </div>
+        </div>
 
+        {{-- Arrears transaction history --}}
+        <div class="col-lg-12">
+            <div class="card collapsed-card">
+                <div class="card-header">
+                    <span class="card-title">Arrears Transaction History</span>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body table-responsive px-0">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <th>Transaction No.</th>
+                            <th>OR Number</th>
+                            <th>OR Date</th>
+                            <th>Payment Details</th>
+                            <th class="text-right" style="padding-right: 20px;">Total</th>
+                            <th>Payment Type</th>
+                        </thead>
+                        <tbody>
+                            @foreach ($arrearTransactionHistory as $item)
+                                <tr>
+                                    <td>{{ $item->TransactionNumber }}</td>
+                                    <td>{{ $item->ORNumber }}</td>
+                                    <td>{{ date('F d, Y', strtotime($item->ORDate)) }}</td>
+                                    <td>{{ $item->PaymentTitle }}</td>
+                                    <td class="text-right" style="padding-right: 20px;">₱ {{ number_format($item->Total, 2) }}</td>
+                                    <td>{{ $item->PaymentUsed }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

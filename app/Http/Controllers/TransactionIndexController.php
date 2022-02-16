@@ -13,6 +13,9 @@ use App\Models\ServiceConnectionTotalPayments;
 use App\Models\ServiceConnections;
 use App\Models\TransactionDetails;
 use App\Models\TransactionIndex;
+use App\Models\ArrearsLedgerDistribution;
+use App\Models\Collectibles;
+use App\Models\ServiceAccounts;
 use App\Models\IDGenerator;
 use Flash;
 use Response;
@@ -229,7 +232,7 @@ class TransactionIndexController extends AppBaseController
 
         $transactionIndex = new TransactionIndex;
         $transactionIndex->id = $id;
-        $transactionIndex->TransactionNumber = $id;
+        $transactionIndex->TransactionNumber = env('APP_LOCATION') . '-' . $id;
         $transactionIndex->PaymentTitle = "Service Connection Application Payment of " . $totalTransactions->ServiceAccountName;
         $transactionIndex->ORNumber = $request['ORNumber'];
         $transactionIndex->ORDate = date('Y-m-d');
@@ -239,6 +242,7 @@ class TransactionIndexController extends AppBaseController
         $transactionIndex->ServiceConnectionId = $request['svcId'];
         $transactionIndex->Source = "Service Connection Application";
         $transactionIndex->PaymentUsed = $request['PaymentUsed'];
+        $transactionIndex->UserId = Auth::id();
         $transactionIndex->save();
 
         foreach($particularPayments as $item) {
@@ -266,6 +270,201 @@ class TransactionIndexController extends AppBaseController
         $transactionDetails = TransactionDetails::where('TransactionIndexId', $transactionIndexId)->get();
 
         return view('/transaction_indices/print_or_service_connections', [
+            'transactionIndex' => $transactionIndex,
+            'transactionDetails' => $transactionDetails,
+        ]);
+    }
+
+    public function uncollectedArrears() {
+        return view('/transaction_indices/uncollected_arrears');
+    }
+
+    public function searchArrearCollectibles(Request $request) {
+        $results = DB::table('Billing_Collectibles')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Collectibles.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['query'] . '%')
+            ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['query'] . '%')
+            ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['query'] . '%')
+            ->where('Billing_Collectibles.Balance', '!=', '0')
+            ->select('Billing_ServiceAccounts.id as AccountNumber',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_Collectibles.Balance',
+                    'Billing_Collectibles.id')
+            ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+            ->get();
+
+        $output = "";
+
+        if (count($results) > 0) {
+            foreach($results as $item) {
+                $ledger = ArrearsLedgerDistribution::where('AccountNumber', $item->AccountNumber)
+                    ->whereNull('IsPaid')
+                    ->get();
+
+                if (count($ledger) > 0) {
+                    $output .= '
+                        <tr>
+                            <td>' . $item->AccountNumber . '</td>
+                            <td>' . $item->ServiceAccountName . '</td>
+                            <td>' . number_format($item->Balance, 2) . '</td>
+                            <td class="text-right">
+                                <a class="btn btn-link text-primary" href="' . route('transactionIndices.ledger-arrears-collection', [$item->AccountNumber]) . '"><i class="fas fa-forward"></i></a>
+                            </td>
+                        </tr>
+                    ';
+                } else {
+                    $output .= '
+                        <tr>
+                            <td>' . $item->AccountNumber . '</td>
+                            <td>' . $item->ServiceAccountName . '</td>
+                            <td>' . number_format($item->Balance, 2) . '</td>
+                            <td class="text-right">
+                                <button class="btn btn-link text-primary" onclick=fetchDetails("' . $item->AccountNumber . '")><i class="fas fa-forward"></i></button>
+                            </td>
+                        </tr>
+                    ';
+                }                
+            }
+
+            return response()->json($output, 200);
+        } else {
+            return response()->json(['res' => 'No results found'], 200);
+        }       
+    }
+
+    public function fetchArrearDetails(Request $request) {
+        $collectibles = Collectibles::where('AccountNumber', $request['AccountNumber'])->first();
+
+        if ($collectibles != null) {
+            return response()->json($collectibles, 200);
+        } else {
+            return response()->json([], 200);
+        }
+    }
+
+    public function saveArrearTransaction(Request $request) {
+        $account = ServiceAccounts::find($request['AccountNumber']);
+
+        $total = floatval($request['AmountPaid']);
+
+        // SAVE TRANSACTION
+        $id = IDGenerator::generateID();
+
+        $transactionIndex = new TransactionIndex;
+        $transactionIndex->id = $id;
+        $transactionIndex->TransactionNumber = env('APP_LOCATION') . '-' . $id;
+        $transactionIndex->PaymentTitle = "Partial Payment to the arrears of " . $account->ServiceAccountName;
+        $transactionIndex->ORNumber = $request['ORNumber'];
+        $transactionIndex->ORDate = date('Y-m-d');
+        $transactionIndex->SubTotal = round($total, 2);
+        // $transactionIndex->VAT = 0; // TO BE ADDED LATER
+        $transactionIndex->Total = round($total, 2);
+        $transactionIndex->Source = "Arrears Collectible";
+        $transactionIndex->ObjectId = $request['AccountNumber']; // ACCOUNT NUMBER
+        $transactionIndex->PaymentUsed = $request['PaymentUsed'];
+        $transactionIndex->UserId = Auth::id();
+        $transactionIndex->save();
+
+        // SAVE TRANSACTION DETAILS
+        $transactionDetails = new TransactionDetails;
+        $transactionDetails->id = IDGenerator::generateIDandRandString();
+        $transactionDetails->TransactionIndexId = $id;
+        $transactionDetails->Particular = "Uncollected Arrear Partial Payment";
+        $transactionDetails->Amount = round($total, 2);
+        // $transactionDetails->VAT = $item->Vat; // TO BE ADDED LATER
+        $transactionDetails->Total = round($total, 2);
+        $transactionDetails->save();
+
+        // DEDUCT BALANCE
+        $collectibles = Collectibles::where('AccountNumber', $request['AccountNumber'])->first();
+
+        if ($collectibles != null) {
+            $collectibles->Balance = floatval($request['RemainingBalance']);
+            $collectibles->save();
+        }
+
+        return response()->json($transactionIndex, 200);
+    }
+
+    public function ledgerArrearsCollection($accountNo) {
+        $account = ServiceAccounts::find($accountNo);
+        $collectibles = Collectibles::where('AccountNumber', $accountNo)->first();
+        $ledger = ArrearsLedgerDistribution::where('AccountNumber', $accountNo)->orderBy('ServicePeriod')->get();
+
+        return view('/transaction_indices/ledger_arrears_collection', [
+            'account' => $account,
+            'collectibles' => $collectibles,
+            'ledger' => $ledger,
+        ]);
+    }
+
+    public function saveLedgerArrearTransaction(Request $request) {
+        $ledgerIds = $request['LedgerIds'];
+        $len = count($ledgerIds);
+        $account = ServiceAccounts::find($request['AccountNumber']);
+        $collectibles = Collectibles::where('AccountNumber', $request['AccountNumber'])->first();
+
+        // SAVE TRANSACTION
+        $total = floatval($request['TotalPayment']);
+
+        // SAVE TRANSACTION
+        $id = IDGenerator::generateID();
+
+        $transactionIndex = new TransactionIndex;
+        $transactionIndex->id = $id;
+        $transactionIndex->TransactionNumber = env('APP_LOCATION') . '-' . $id;
+        $transactionIndex->PaymentTitle = "Partial Payment to the arrears of " . $account->ServiceAccountName;
+        $transactionIndex->ORNumber = $request['ORNumber'];
+        $transactionIndex->ORDate = date('Y-m-d');
+        $transactionIndex->SubTotal = round($total, 2);
+        // $transactionIndex->VAT = 0; // TO BE ADDED LATER
+        $transactionIndex->Total = round($total, 2);
+        $transactionIndex->Source = "Arrears Termed Ledger";
+        $transactionIndex->ObjectId = $request['AccountNumber']; // ACCOUNT NUMBER
+        $transactionIndex->PaymentUsed = $request['PaymentUsed'];
+        $transactionIndex->UserId = Auth::id();
+        $transactionIndex->save();
+
+        for ($i=0; $i<$len; $i++) {
+            // LEDGERS
+            $ledgers = ArrearsLedgerDistribution::find($ledgerIds[$i]);
+
+            if ($ledgers != null) {
+                // SAVE TRANSACTION DETAILS
+                $transactionDetails = new TransactionDetails;
+                $transactionDetails->id = IDGenerator::generateIDandRandString();
+                $transactionDetails->TransactionIndexId = $id;
+                $transactionDetails->Particular = "Termed arrear for " . date('F Y', strtotime($ledgers->ServicePeriod));
+                $transactionDetails->Amount = round(floatval($ledgers->Amount), 2);
+                // $transactionDetails->VAT = $item->Vat; // TO BE ADDED LATER
+                $transactionDetails->Total = round(floatval($ledgers->Amount), 2);
+                $transactionDetails->save();
+
+                // UPDATE LEDGER STATUS
+                $ledgers->IsPaid = 'Yes';
+                $ledgers->save();
+            }
+        }
+
+        // DEDUCT BALANCE
+        if ($collectibles != null) {
+            $collectibles->Balance = round((floatval($collectibles->Balance) - $total), 2);
+            $collectibles->save();
+        }
+
+        return response()->json($transactionIndex, 200);
+    }
+
+    public function printORTermedLedgerArrears($transactionIndexId) {
+        $transactionIndex = TransactionIndex::find($transactionIndexId);
+        $transactionDetails = TransactionDetails::where('TransactionIndexId', $transactionIndexId)->get();
+
+        return view('/transaction_indices/print_or_termed_ledger_arrears', [
             'transactionIndex' => $transactionIndex,
             'transactionDetails' => $transactionDetails,
         ]);

@@ -25,6 +25,9 @@ use App\Models\Users;
 use App\Models\Bills;
 use App\Models\Readings;
 use App\Models\Collectibles;
+use App\Models\IDGenerator;
+use App\Models\PaidBills;
+use App\Models\TransactionIndex;
 use App\Models\ArrearsLedgerDistribution;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Flash;
@@ -168,10 +171,63 @@ class ServiceAccountsController extends AppBaseController
             ->orderByDesc('Billing_Bills.ServicePeriod')
             ->get();
         
+        // ARREARS
         $collectibles = Collectibles::where('AccountNumber', $id)->first();
 
         $arrearsLedger = ArrearsLedgerDistribution::where('AccountNumber', $id)
             ->orderBy('ServicePeriod')
+            ->get();
+
+        $checkLedger = ArrearsLedgerDistribution::where('AccountNumber', $id)
+            ->whereNull('IsPaid')
+            ->orderBy('ServicePeriod')
+            ->get();
+
+        $billArrears = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->where('Billing_Bills.AccountNumber', $id)
+            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->pluck('Cashier_PaidBills.ObjectSourceId'))
+            ->select('Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_Bills.*')
+            ->orderByDesc('Billing_Bills.ServicePeriod')
+            ->get();
+
+        $unmergedArrears = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->where('Billing_Bills.AccountNumber', $id)
+            ->whereNull('Billing_Bills.MergedToCollectible')
+            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->pluck('Cashier_PaidBills.ObjectSourceId'))
+            ->select('Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_Bills.*')
+            ->orderByDesc('Billing_Bills.ServicePeriod')
+            ->offset(1)
+            ->get();
+
+        $arrearTransactionHistory = TransactionIndex::where('ObjectId', $id)
+            ->whereIn('Source', ['Arrears Termed Ledger', 'Arrears Collectible'])
+            ->orderByDesc('created_at')
             ->get();
 
         if (empty($serviceAccounts)) {
@@ -187,6 +243,10 @@ class ServiceAccountsController extends AppBaseController
             'bills' => $bills,
             'collectibles' => $collectibles,
             'arrearsLedger' => $arrearsLedger,
+            'billArrears' => $billArrears,
+            'unmergedArrears' => $unmergedArrears,
+            'checkLedger' => $checkLedger,
+            'arrearTransactionHistory' => $arrearTransactionHistory,
         ]);
     }
 
@@ -384,4 +444,113 @@ class ServiceAccountsController extends AppBaseController
         ]);
     }
 
+    public function mergeAllBillArrears($id) {
+        $billArrears = DB::table('Billing_Bills')
+            ->where('AccountNumber', $id)
+            ->whereNull('MergedToCollectible')
+            ->whereNotIn('id', DB::table('Cashier_PaidBills')->pluck('ObjectSourceId'))
+            ->orderByDesc('ServicePeriod')
+            ->get();
+
+        $total = 0;
+
+        foreach($billArrears as $item) {
+            $billArrear = Bills::find($item->id);
+            $total = $total + Bills::computePenalty($item->NetAmount);
+            if ($billArrear != null) {
+                $billArrear->MergedToCollectible = 'Yes';
+                $billArrear->save();
+            }            
+        }
+
+        $collectibles = Collectibles::where('AccountNumber', $id)->first();
+        if ($collectibles != null) {
+            $balance = floatval($collectibles->Balance) + $total;
+            $collectibles->Balance = round($balance, 2);
+            $collectibles->save();
+        } else {
+            $collectibles = new Collectibles;
+            $collectibles->id = IDGenerator::generateIDandRandString();
+            $collectibles->AccountNumber = $id;
+            $collectibles->Balance = round($total, 2);
+            $collectibles->save();
+        }
+
+        return redirect(route('serviceAccounts.show', [$id]));
+    }
+
+    public function unmergeAllBillArrears($id) {
+        $billArrears = DB::table('Billing_Bills')
+            ->where('AccountNumber', $id)
+            ->where('MergedToCollectible', 'Yes')
+            ->whereNotIn('id', DB::table('Cashier_PaidBills')->pluck('ObjectSourceId'))
+            ->orderByDesc('ServicePeriod')
+            ->get();
+
+        $total = 0;
+
+        foreach($billArrears as $item) {
+            $billArrear = Bills::find($item->id);
+            $total = $total + Bills::computePenalty($item->NetAmount);
+            if ($billArrear != null) {
+                $billArrear->MergedToCollectible = null;
+                $billArrear->save();
+            }            
+        }
+
+        $collectibles = Collectibles::where('AccountNumber', $id)->first();
+        if ($collectibles != null) {
+            $balance = floatval($collectibles->Balance) - $total;
+            $collectibles->Balance = $balance;
+            $collectibles->save();
+        } 
+
+        return redirect(route('serviceAccounts.show', [$id]));
+    }
+
+    public function unmergeBillArrear($billId) {
+        $bill = Bills::find($billId);
+
+        if ($bill != null) {
+            $bill->MergedToCollectible = null;
+            $bill->save();
+
+            $collectibles = Collectibles::where('AccountNumber', $bill->AccountNumber)->first();
+            if ($collectibles != null) {
+                $balance = floatval($collectibles->Balance) - Bills::computePenalty($bill->NetAmount);
+                $collectibles->Balance = $balance;
+                $collectibles->save();
+            }
+
+            return redirect(route('serviceAccounts.show', [$bill->AccountNumber]));
+        } else {
+            return abort(404, 'Bill not found');
+        }        
+    }
+
+    public function mergeBillArrear($billId) {
+        $bill = Bills::find($billId);
+
+        if ($bill != null) {
+            $bill->MergedToCollectible = 'Yes';
+            $bill->save();
+
+            $collectibles = Collectibles::where('AccountNumber', $bill->AccountNumber)->first();
+            if ($collectibles != null) {
+                $balance = floatval($collectibles->Balance) + Bills::computePenalty($bill->NetAmount);
+                $collectibles->Balance = $balance;
+                $collectibles->save();
+            } else {
+                $collectibles = new Collectibles;
+                $collectibles->id = IDGenerator::generateIDandRandString();
+                $collectibles->AccountNumber = $id;
+                $collectibles->Balance = Bills::computePenalty($bill->NetAmount);
+                $collectibles->save();
+            }
+
+            return redirect(route('serviceAccounts.show', [$bill->AccountNumber]));
+        } else {
+            return abort(404, 'Bill not found');
+        }        
+    }
 }

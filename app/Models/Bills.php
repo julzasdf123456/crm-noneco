@@ -139,6 +139,7 @@ class Bills extends Model
         'UserId',
         'BilledFrom',
         'AveragedCount',
+        'MergedToCollectible',
     ];
 
     /**
@@ -202,6 +203,7 @@ class Bills extends Model
         'UserId' => 'string',
         'BilledFrom' => 'string',
         'AveragedCount' => 'string',
+        'MergedToCollectible' => 'string'
     ];
 
     /**
@@ -266,10 +268,27 @@ class Bills extends Model
         'BilledFrom' => 'nullable|string|max:255',
         'created_at' => 'nullable',
         'updated_at' => 'nullable',
-        'AveragedCount' => 'nullable|string'
+        'AveragedCount' => 'nullable|string',
+        'MergedToCollectible' => 'nullable|string'
     ];
 
     public static function createDueDate($readDate) {
         return date('Y-m-d', strtotime($readDate . ' +9 days'));
+    }
+
+    public static function computePenalty($netAmount) {
+        if ($netAmount > 1000) {
+            return ($netAmount * .3) + $netAmount;
+        } else {
+            return 56.00 + $netAmount;
+        }
+    }
+
+    public static function getPenalty($netAmount) {
+        if ($netAmount > 1000) {
+            return $netAmount * .3;
+        } else {
+            return 56.00;
+        }
     }
 }

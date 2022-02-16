@@ -133,5 +133,9 @@ class PaidBills extends Model
         'updated_at' => 'nullable'
     ];
 
-    
+    public static function roundDecimal($val, $precision) {
+        $mult = pow(10, $precision); // Can be cached in lookup table        
+        return floor($val * $mult) / $mult;
+    }
+
 }

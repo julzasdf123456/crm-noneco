@@ -176,6 +176,10 @@ Route::get('/service_accounts/account-migration/{id}', [App\Http\Controllers\Ser
 Route::get('/service_accounts/account-migration-step-two/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'accountMigrationStepTwo'])->name('serviceAccounts.account-migration-step-two');
 Route::get('/service_accounts/account-migration-step-three/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'accountMigrationStepThree'])->name('serviceAccounts.account-migration-step-three');
 Route::get('/service_accounts/update_step_one/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'updateStepOne'])->name('serviceAccounts.update-step-one');
+Route::get('/service_accounts/merge-all-bill-arrears/{id}', [App\Http\Controllers\ServiceAccountsController::class,  'mergeAllBillArrears'])->name('serviceAccounts.merge-all-bill-arrears');
+Route::get('/service_accounts/unmerge-all-bill-arrears/{id}', [App\Http\Controllers\ServiceAccountsController::class,  'unmergeAllBillArrears'])->name('serviceAccounts.unmerge-all-bill-arrears');
+Route::get('/service_accounts/unmerge-bill-arrear/{billId}', [App\Http\Controllers\ServiceAccountsController::class,  'unmergeBillArrear'])->name('serviceAccounts.unmerge-bill-arrear');
+Route::get('/service_accounts/merge-bill-arrear/{billId}', [App\Http\Controllers\ServiceAccountsController::class,  'mergeBillArrear'])->name('serviceAccounts.merge-bill-arrear');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 
@@ -344,6 +348,13 @@ Route::get('/transaction_indices/get-payable-details', [App\Http\Controllers\Tra
 Route::get('/transaction_indices/get-payable-total', [App\Http\Controllers\TransactionIndexController::class, 'getPayableTotal'])->name('transactionIndices.get-payable-total');
 Route::get('/transaction_indices/save-and-print-or-service-connections', [App\Http\Controllers\TransactionIndexController::class, 'saveAndPrintORServiceConnections'])->name('transactionIndices.save-and-print-or-service-connections');
 Route::get('/transaction_indices/print-or-service-connections/{transactionIndexId}', [App\Http\Controllers\TransactionIndexController::class, 'printORServiceConnections'])->name('transactionIndices.print-or-service-connections');
+Route::get('/transaction_indices/uncollected-arrears', [App\Http\Controllers\TransactionIndexController::class, 'uncollectedArrears'])->name('transactionIndices.uncollected-arrears');
+Route::get('/transaction_indices/search-arrear-collectibles', [App\Http\Controllers\TransactionIndexController::class, 'searchArrearCollectibles'])->name('transactionIndices.search-arrear-collectibles');
+Route::get('/transaction_indices/fetch-arrear-details', [App\Http\Controllers\TransactionIndexController::class, 'fetchArrearDetails'])->name('transactionIndices.fetch-arrear-details');
+Route::get('/transaction_indices/save-arrear-transaction', [App\Http\Controllers\TransactionIndexController::class, 'saveArrearTransaction'])->name('transactionIndices.save-arrear-transaction');
+Route::get('/transaction_indices/ledger-arrears-collection/{accountNo}', [App\Http\Controllers\TransactionIndexController::class, 'ledgerArrearsCollection'])->name('transactionIndices.ledger-arrears-collection');
+Route::get('/transaction_indices/save-ledger-arrear-transaction', [App\Http\Controllers\TransactionIndexController::class, 'saveLedgerArrearTransaction'])->name('transactionIndices.save-ledger-arrear-transaction');
+Route::get('/transaction_indices/print-or-termed-ledger-arrears/{transactionIndexId}', [App\Http\Controllers\TransactionIndexController::class, 'printORTermedLedgerArrears'])->name('transactionIndices.print-or-termed-ledger-arrears');
 Route::resource('transactionIndices', App\Http\Controllers\TransactionIndexController::class);
 
 
@@ -354,4 +365,5 @@ Route::get('/paid_bills/fetch-details', [App\Http\Controllers\PaidBillsControlle
 Route::get('/paid_bills/fetch-account', [App\Http\Controllers\PaidBillsController::class, 'fetchAccount'])->name('paidBills.fetch-account');
 Route::get('/paid_bills/fetch-payable', [App\Http\Controllers\PaidBillsController::class, 'fetchPayable'])->name('paidBills.fetch-payable');
 Route::get('/paid_bills/save-paid-bill-and-print', [App\Http\Controllers\PaidBillsController::class, 'savePaidBillAndPrint'])->name('paidBills.save-paid-bill-and-print');
+Route::get('/paid_bills/print-bill-payment/{paidBillId}', [App\Http\Controllers\PaidBillsController::class, 'printBillPayment'])->name('paidBills.print-bill-payment');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);

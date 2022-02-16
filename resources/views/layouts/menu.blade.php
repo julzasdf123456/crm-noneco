@@ -461,6 +461,12 @@ use Illuminate\Support\Facades\Auth;
                 <i class="fas fa-plug nav-icon text-info"></i><p>Service Connection</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('transactionIndices.uncollected-arrears') }}"
+                class="nav-link {{ Request::is('transactionIndices.uncollected-arrears*') ? 'active' : '' }}">
+                <i class="fas fa-exclamation-circle nav-icon text-info"></i><p>Uncollected Arrears</p>
+                </a>
+            </li>
         </ul>
     </li>
 @endcanany
@@ -538,5 +544,3 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
-
-
