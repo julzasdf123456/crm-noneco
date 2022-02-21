@@ -367,3 +367,12 @@ Route::get('/paid_bills/fetch-payable', [App\Http\Controllers\PaidBillsControlle
 Route::get('/paid_bills/save-paid-bill-and-print', [App\Http\Controllers\PaidBillsController::class, 'savePaidBillAndPrint'])->name('paidBills.save-paid-bill-and-print');
 Route::get('/paid_bills/print-bill-payment/{paidBillId}', [App\Http\Controllers\PaidBillsController::class, 'printBillPayment'])->name('paidBills.print-bill-payment');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);
+
+
+Route::resource('disconnectionHistories', App\Http\Controllers\DisconnectionHistoryController::class);
+
+Route::get('/disco_notice_histories/generate-nod', [App\Http\Controllers\DiscoNoticeHistoryController::class, 'generateNod'])->name('discoNoticeHistories.generate-nod');
+Route::get('/disco_notice_histories/get-disco-list-preview', [App\Http\Controllers\DiscoNoticeHistoryController::class, 'getDiscoListPreview'])->name('discoNoticeHistories.get-disco-list-preview');
+Route::get('/disco_notice_histories/print-reroute', [App\Http\Controllers\DiscoNoticeHistoryController::class, 'printReroute'])->name('discoNoticeHistories.print-reroute');
+Route::get('/disco_notice_histories/print-disconnection-list/{period}/{area}', [App\Http\Controllers\DiscoNoticeHistoryController::class, 'printDisconnectionList'])->name('discoNoticeHistories.print-disconnection-list');
+Route::resource('discoNoticeHistories', App\Http\Controllers\DiscoNoticeHistoryController::class);

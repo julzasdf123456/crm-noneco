@@ -437,6 +437,33 @@ use Illuminate\Support\Facades\Auth;
     </li>
 @endcanany
 
+{{-- DISCONNECTION --}}
+@canany(['Super Admin'])
+    <li class="nav-item has-treeview">
+        <a href="#" class="nav-link">
+            <i class="fas fa-users-slash nav-icon text-primary"></i>
+            <p>
+                Disconnection
+                <i class="fas fa-angle-left right"></i>
+            </p>
+        </a>
+        <ul class="nav nav-treeview">
+            <li class="nav-item">
+                <a href="{{ route('rates.index') }}"
+                   class="nav-link {{ Request::is('rates*') ? 'active' : '' }}">
+                    <i class="fas fa-chart-line nav-icon text-primary"></i><p>Dashboard</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('discoNoticeHistories.generate-nod') }}"
+                   class="nav-link {{ Request::is('discoNoticeHistories.generate-nod*') ? 'active' : '' }}">
+                    <i class="fas fa-file nav-icon text-primary"></i><p>Generate NoD</p>
+                </a>
+            </li>
+        </ul>
+    </li>
+@endcanany
+
 <!-- TELLERING MENU -->
 @canany(['Super Admin'])
     <li class="nav-header">COLLECTION</li>
