@@ -696,4 +696,162 @@ class TicketsController extends AppBaseController
             return response()->json(['response' => 'ok'], 200);
         }
     }
+
+    public function dashboard() {
+        return view('/tickets/dashboard');
+    }
+
+    public function fetchDashboardTicketsTrend() {
+        $startDate = date('Y-m-d', strtotime('first day of this month'));
+        $tickets = DB::table('CRM_Tickets')
+            ->select(DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE created_at BETWEEN '" . $startDate . "' AND '" . date('Y-m-d', strtotime($startDate . ' +1 month')) . "') AS 'FileOne'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE created_at BETWEEN '" . date('Y-m-d', strtotime($startDate . '-1 months')) . "' AND '" . $startDate . "') AS 'FileTwo'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE created_at BETWEEN '" . date('Y-m-d', strtotime($startDate . '-2 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-1 months')) . "') AS 'FileThree'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE created_at BETWEEN '" . date('Y-m-d', strtotime($startDate . '-3 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-2 months')) . "') AS 'FileFour'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE created_at BETWEEN '" . date('Y-m-d', strtotime($startDate . '-4 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-3 months')) . "') AS 'FileFive'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE created_at BETWEEN '" . date('Y-m-d', strtotime($startDate . '-5 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-4 months')) . "') AS 'FileSix'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE DateTimeLinemanExecuted BETWEEN '" . $startDate . "' AND '" . date('Y-m-d', strtotime($startDate . ' +1 month')) . "') AS 'ExecutionOne'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE DateTimeLinemanExecuted BETWEEN '" . date('Y-m-d', strtotime($startDate . '-1 months')) . "' AND '" . $startDate . "') AS 'ExecutionTwo'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE DateTimeLinemanExecuted BETWEEN '" . date('Y-m-d', strtotime($startDate . '-2 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-1 months')) . "') AS 'ExecutionThree'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE DateTimeLinemanExecuted BETWEEN '" . date('Y-m-d', strtotime($startDate . '-3 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-2 months')) . "') AS 'ExecutionFour'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE DateTimeLinemanExecuted BETWEEN '" . date('Y-m-d', strtotime($startDate . '-4 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-3 months')) . "') AS 'ExecutionFive'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE DateTimeLinemanExecuted BETWEEN '" . date('Y-m-d', strtotime($startDate . '-5 months')) . "' AND '" . date('Y-m-d', strtotime($startDate . '-4 months')) . "') AS 'ExecutionSix'"),)
+            ->limit(1)
+            ->get();
+
+        return response()->json($tickets, 200);
+    }
+
+    public function getTicketStatistics() {
+        $startDate = date('Y-m-d', strtotime('first day of this month'));
+        $endDate = date('Y-m-d', strtotime('last day of this month'));
+
+        // GET AVERAGE
+        $execTime = DB::table('CRM_Tickets')
+            ->select(DB::raw("DATEDIFF(hh, created_at, DateTimeLinemanExecuted) as 'Average'"))
+            ->where('Status', 'Executed')
+            ->whereBetween('DateTimeLinemanExecuted', [$startDate, $endDate])
+            ->get();
+
+        $total = 0;
+        foreach ($execTime as $item) {
+            $total += intval($item->Average);
+        }
+
+        if (count($execTime) > 0) {
+            $average = $total/count($execTime);
+        } else {
+            $average = 0;
+        }        
+
+        // GET STATS
+        $stats = DB::table('CRM_Tickets')
+            ->select(DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE Status='Received' AND (Trash IS NULL OR Trash = 'No')) AS 'Received'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE Status IN ('Forwareded to Crew', 'Downloaded by Crew', 'Forwarded to Crew') AND (Trash IS NULL OR Trash = 'No')) AS 'SentToLineman'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE Status='Executed' AND (DateTimeLinemanExecuted BETWEEN '" . $startDate . "' AND '" . $endDate . "') AND (Trash IS NULL OR Trash = 'No')) AS 'ExecutedThisMonth'"),
+                DB::raw($average . " AS 'AverageExecutionTime'"))
+            ->limit(1)
+            ->get();
+
+        return response()->json($stats, 200);
+    }
+
+    public function getTicketStatisticsDetails(Request $request) {
+        if ($request['Query'] == 'Received') {
+            $tickets = DB::table('CRM_Tickets')
+                ->leftJoin('CRM_Barangays', 'CRM_Tickets.Barangay', '=', 'CRM_Barangays.id')
+                ->leftJoin('CRM_Towns', 'CRM_Tickets.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_TicketsRepository', 'CRM_Tickets.Ticket', '=', 'CRM_TicketsRepository.id')
+                ->where('Status', 'Received')
+                ->select('CRM_Tickets.id',
+                    'CRM_Tickets.AccountNumber',
+                    'CRM_Tickets.ConsumerName',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'CRM_Tickets.Sitio',
+                    'CRM_TicketsRepository.ParentTicket',
+                    'CRM_TicketsRepository.Name as Ticket',
+                    'CRM_TicketsRepository.Type as TicketType',
+                    'CRM_Tickets.created_at AS DatePerformed',)
+                ->where(function ($query) {
+                        $query->where('CRM_Tickets.Trash', 'No')
+                            ->orWhereNull('CRM_Tickets.Trash');
+                    })
+                ->orderByDesc('CRM_Tickets.created_at')
+                ->get();
+        } elseif ($request['Query'] == 'Forwarded To Lineman') {
+            $tickets = DB::table('CRM_Tickets')
+                ->leftJoin('CRM_Barangays', 'CRM_Tickets.Barangay', '=', 'CRM_Barangays.id')
+                ->leftJoin('CRM_Towns', 'CRM_Tickets.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_TicketsRepository', 'CRM_Tickets.Ticket', '=', 'CRM_TicketsRepository.id')
+                ->whereIn('Status', ['Forwareded to Crew', 'Downloaded by Crew', 'Forwarded to Crew'])
+                ->select('CRM_Tickets.id',
+                    'CRM_Tickets.AccountNumber',
+                    'CRM_Tickets.ConsumerName',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'CRM_Tickets.Sitio',
+                    'CRM_TicketsRepository.ParentTicket',
+                    'CRM_TicketsRepository.Name as Ticket',
+                    'CRM_TicketsRepository.Type as TicketType',
+                    'CRM_Tickets.DateTimeDownloaded AS DatePerformed',)
+                ->where(function ($query) {
+                        $query->where('CRM_Tickets.Trash', 'No')
+                            ->orWhereNull('CRM_Tickets.Trash');
+                    })
+                ->orderByDesc('CRM_Tickets.created_at')
+                ->get();
+        } else {
+            $startDate = date('Y-m-d', strtotime('first day of this month'));
+            $endDate = date('Y-m-d', strtotime('last day of this month'));
+
+            $tickets = DB::table('CRM_Tickets')
+                ->leftJoin('CRM_Barangays', 'CRM_Tickets.Barangay', '=', 'CRM_Barangays.id')
+                ->leftJoin('CRM_Towns', 'CRM_Tickets.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_TicketsRepository', 'CRM_Tickets.Ticket', '=', 'CRM_TicketsRepository.id')
+                ->where('Status', 'Executed')
+                ->whereBetween('DateTimeLinemanExecuted', [$startDate, $endDate])
+                ->select('CRM_Tickets.id',
+                    'CRM_Tickets.AccountNumber',
+                    'CRM_Tickets.ConsumerName',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'CRM_Tickets.Sitio',
+                    'CRM_TicketsRepository.ParentTicket',
+                    'CRM_TicketsRepository.Name as Ticket',
+                    'CRM_TicketsRepository.Type as TicketType',
+                    'CRM_Tickets.DateTimeLinemanExecuted AS DatePerformed',)
+                ->where(function ($query) {
+                        $query->where('CRM_Tickets.Trash', 'No')
+                            ->orWhereNull('CRM_Tickets.Trash');
+                    })
+                ->orderByDesc('CRM_Tickets.created_at')
+                ->get();
+        }
+        
+        $output = "";
+
+        if (count($tickets) > 0) {
+            foreach($tickets as $item) {
+                $ticketParent = DB::table('CRM_TicketsRepository')
+                    ->where('id', $item->ParentTicket)
+                    ->first();
+
+                $output .= '
+                    <tr>
+                        <td>' . $item->AccountNumber . '</td>
+                        <td>' . $item->ConsumerName . '</td>
+                        <td>' . Tickets::getAddress($item) . '</td>
+                        <td>' . ($ticketParent != null ? ($ticketParent->Name . ' - ' . $item->Ticket) : $item->Ticket) . '</td>
+                        <td>' . date('F d, Y @ h:i:s A', strtotime($item->DatePerformed)) . '</td>
+                        <td>
+                            <a href="' . route("tickets.show", [$item->id]) . '"><i class="fas fa-eye"></i></a>
+                        </td>
+                    </tr>
+                ';
+            }            
+        }
+
+        return response()->json($output, 200);
+    }
 }

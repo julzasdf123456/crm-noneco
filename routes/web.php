@@ -271,6 +271,10 @@ Route::post('/tickets/update-date-filed', [App\Http\Controllers\TicketsControlle
 Route::post('/tickets/update-date-downloaded', [App\Http\Controllers\TicketsController::class, 'updateDateDownloaded'])->name('tickets.update-date-downloaded');
 Route::post('/tickets/update-date-arrival', [App\Http\Controllers\TicketsController::class, 'updateDateArrival'])->name('tickets.update-date-arrival');
 Route::post('/tickets/update-execution', [App\Http\Controllers\TicketsController::class, 'updateExecution'])->name('tickets.update-execution');
+Route::get('/tickets/dashboard', [App\Http\Controllers\TicketsController::class, 'dashboard'])->name('tickets.dashboard');
+Route::get('/tickets/fetch-dashboard-tickets-trend', [App\Http\Controllers\TicketsController::class, 'fetchDashboardTicketsTrend'])->name('tickets.fetch-dashboard-tickets-trend');
+Route::get('/tickets/get-ticket-statistics', [App\Http\Controllers\TicketsController::class, 'getTicketStatistics'])->name('tickets.get-ticket-statistics');
+Route::get('/tickets/get-ticket-statistics-details', [App\Http\Controllers\TicketsController::class, 'getTicketStatisticsDetails'])->name('tickets.get-ticket-statistics-details');
 Route::resource('tickets', App\Http\Controllers\TicketsController::class);
 
 

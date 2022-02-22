@@ -316,6 +316,13 @@ use Illuminate\Support\Facades\Auth;
         </a>
         <ul class="nav nav-treeview">
             <li class="nav-item">
+                <a href="{{ route('tickets.dashboard') }}"
+                class="nav-link {{ Request::is('tickets.dashboard*') ? 'active' : '' }}">
+                    <i class="fas fa-chart-line nav-icon text-danger"></i>
+                    <p>Dashboard</p>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="{{ route('tickets.index') }}"
                 class="nav-link {{ Request::is('tickets.index*') ? 'active' : '' }}">
                     <i class="fas fa-clipboard-list nav-icon text-danger"></i><p>All Tickets</p>
@@ -449,8 +456,8 @@ use Illuminate\Support\Facades\Auth;
         </a>
         <ul class="nav nav-treeview">
             <li class="nav-item">
-                <a href="{{ route('rates.index') }}"
-                   class="nav-link {{ Request::is('rates*') ? 'active' : '' }}">
+                <a href="{{ route('discoNoticeHistories.index') }}"
+                   class="nav-link {{ Request::is('discoNoticeHistories.index*') ? 'active' : '' }}">
                     <i class="fas fa-chart-line nav-icon text-primary"></i><p>Dashboard</p>
                 </a>
             </li>
