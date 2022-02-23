@@ -11,6 +11,7 @@ use App\Http\Controllers\API\TicketrepositoriesController;
 use App\Http\Controllers\API\TicketsController;
 use App\Http\Controllers\API\MeterReaderTracksAPI;
 use App\Http\Controllers\API\ReadAndBillAPI;
+use App\Http\Controllers\API\DisconnectionAPI;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,4 +72,7 @@ Route::get('update-downloaded-status', [ReadAndBillAPI::class, 'updateDownloaded
 Route::post('receive-readings', [ReadAndBillAPI::class, 'receiveReadings']);
 Route::post('receive-bills', [ReadAndBillAPI::class, 'receiveBills']);
 Route::post('save-reading-images', [ReadAndBillAPI::class, 'saveReadingImages']);
+
+// DISCONNECTION
+Route::get('get-disconnection-list', [DisconnectionAPI::class, 'getDisconnectionList']);
 

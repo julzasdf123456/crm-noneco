@@ -175,4 +175,8 @@ class Tickets extends Model
             return $ticket->Sitio . ', ' . $ticket->Barangay . ', ' . $ticket->Town;
         }
     }
+
+    public static function getAverageDailyDivisor() {
+        return 22;
+    }
 }

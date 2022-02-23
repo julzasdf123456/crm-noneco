@@ -62,7 +62,7 @@
                     <div class="icon">
                         <i class="fas fa-tools"></i>
                     </div>
-                    <a href="#" class="small-box-footer">More Info <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="{{ route('tickets.kps-monitor') }}" class="small-box-footer">More Info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
         </div>

@@ -90,5 +90,11 @@ class DisconnectionHistory extends Model
         'updated_at' => 'nullable'
     ];
 
-    
+    public static function noOfDaysTillNotice() {
+        return 9;
+    }
+
+    public static function noOfDaysTillDisconnection() {
+        return 11;
+    }
 }

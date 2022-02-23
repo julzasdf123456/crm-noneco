@@ -275,6 +275,10 @@ Route::get('/tickets/dashboard', [App\Http\Controllers\TicketsController::class,
 Route::get('/tickets/fetch-dashboard-tickets-trend', [App\Http\Controllers\TicketsController::class, 'fetchDashboardTicketsTrend'])->name('tickets.fetch-dashboard-tickets-trend');
 Route::get('/tickets/get-ticket-statistics', [App\Http\Controllers\TicketsController::class, 'getTicketStatistics'])->name('tickets.get-ticket-statistics');
 Route::get('/tickets/get-ticket-statistics-details', [App\Http\Controllers\TicketsController::class, 'getTicketStatisticsDetails'])->name('tickets.get-ticket-statistics-details');
+Route::get('/tickets/kps-monitor', [App\Http\Controllers\TicketsController::class, 'kpsMonitor'])->name('tickets.kps-monitor');
+Route::get('/tickets/get-kps-ticket-crew-graph', [App\Http\Controllers\TicketsController::class, 'getKpsTicketCrewGraph'])->name('tickets.get-kps-ticket-crew-graph');
+Route::get('/tickets/get-ticket-avg-hours', [App\Http\Controllers\TicketsController::class, 'getTicketCrewAverageHours'])->name('tickets.get-ticket-avg-hours');
+Route::get('/tickets/get-overall-avg-kps', [App\Http\Controllers\TicketsController::class, 'getOverAllAverageKps'])->name('tickets.get-overall-avg-kps');
 Route::resource('tickets', App\Http\Controllers\TicketsController::class);
 
 

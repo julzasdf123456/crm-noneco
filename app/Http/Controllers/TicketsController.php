@@ -854,4 +854,199 @@ class TicketsController extends AppBaseController
 
         return response()->json($output, 200);
     }
+
+    public function kpsMonitor() {
+        return view('/tickets/kps_monitor');
+    }
+
+    public function getKpsTicketCrewGraph(Request $request) {
+        $startDate = date('Y-m-d', strtotime($request['Month']));
+        $endDate = date('Y-m-d', strtotime($request['Month'] . ' +1 month'));
+
+        $stats = DB::table('CRM_ServiceConnectionCrew')
+            ->select('StationName',
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE CrewAssigned=CRM_ServiceConnectionCrew.id AND (Trash IS NULL OR Trash='No') AND (created_at BETWEEN '" . $startDate . "' AND '" . $endDate . "')) AS 'Assigned'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE CrewAssigned=CRM_ServiceConnectionCrew.id AND (Trash IS NULL OR Trash='No') AND Status='Executed' AND (created_at BETWEEN '" . $startDate . "' AND '" . $endDate . "')) AS 'Executed'")
+            )
+            ->orderBy('StationName')
+            ->get();
+
+        return response()->json($stats, 200);
+    }
+
+    public function getTicketCrewAverageHours(Request $request) {
+        $startDate = date('Y-m-d', strtotime($request['Month']));
+        $endDate = date('Y-m-d', strtotime($request['Month'] . ' +1 month'));
+        $crews = DB::table('CRM_ServiceConnectionCrew')->orderBy('StationName')->get();
+
+        $crewArr = [];
+        $receivedToSentAvg = 0;
+        $sentToArrivalAvg = 0;
+        $arrivalToExecutionAvg = 0;
+        $overAllAvg = 0;
+        $i = 0;
+        foreach ($crews as $item) {
+            // RECEIVED - SENT TO LINEMAN Timeline
+            $receivedToSent = DB::table('CRM_Tickets')
+                ->select(DB::raw("DATEDIFF(hh, created_at, DateTimeDownloaded) as 'Res'"))
+                ->where('CrewAssigned', $item->id)
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->whereNotNull('DateTimeDownloaded')
+                ->where(function ($query) {
+                    $query->where('Trash', 'No')
+                        ->orWhereNull('Trash');
+                })
+                ->get();
+
+            foreach ($receivedToSent as $itemX) {
+                $receivedToSentAvg += intval($itemX->Res);
+            } 
+            if (count($receivedToSent) > 0) {
+                $receivedToSentAvg = $receivedToSentAvg/count($receivedToSent);
+            } else {
+                $receivedToSentAvg = 0;
+            }   
+
+            // SENT TO LINEMAN - ARRIVAL Timeline
+            $sentToArrival = DB::table('CRM_Tickets')
+                ->select(DB::raw("DATEDIFF(hh, DateTimeDownloaded, DateTimeLinemanArrived) as 'Res'"))
+                ->where('CrewAssigned', $item->id)
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->whereNotNull('DateTimeDownloaded')
+                ->whereNotNull('DateTimeLinemanArrived')
+                ->where(function ($query) {
+                    $query->where('Trash', 'No')
+                        ->orWhereNull('Trash');
+                })
+                ->get();
+            foreach ($sentToArrival as $itemY) {
+                $sentToArrivalAvg += intval($itemY->Res);
+            } 
+            if (count($sentToArrival) > 0) {
+                $sentToArrivalAvg = $sentToArrivalAvg/count($sentToArrival);
+            } else {
+                $sentToArrivalAvg = 0;
+            }   
+
+            // ARRIVAL - EXECUTION Timeline
+            $arrivalToExecution = DB::table('CRM_Tickets')
+                ->select(DB::raw("DATEDIFF(hh, DateTimeLinemanArrived, DateTimeLinemanExecuted) as 'Res'"))
+                ->where('CrewAssigned', $item->id)
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->whereNotNull('DateTimeLinemanArrived')
+                ->whereNotNull('DateTimeLinemanExecuted')
+                ->where(function ($query) {
+                    $query->where('Trash', 'No')
+                        ->orWhereNull('Trash');
+                })
+                ->get();
+            foreach ($arrivalToExecution as $itemZ) {
+                $arrivalToExecutionAvg += intval($itemZ->Res);
+            } 
+            if (count($arrivalToExecution) > 0) {
+                $arrivalToExecutionAvg = $arrivalToExecutionAvg/count($arrivalToExecution);
+            } else {
+                $arrivalToExecutionAvg = 0;
+            } 
+
+            // OVERALL Timeline
+            $overAll = DB::table('CRM_Tickets')
+                ->select(DB::raw("DATEDIFF(hh, created_at, DateTimeLinemanExecuted) as 'Res'"))
+                ->where('CrewAssigned', $item->id)
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->whereNotNull('DateTimeLinemanExecuted')
+                ->where(function ($query) {
+                    $query->where('Trash', 'No')
+                        ->orWhereNull('Trash');
+                })
+                ->get();
+            foreach ($overAll as $itemA) {
+                $overAllAvg += intval($itemA->Res);
+            } 
+            if (count($overAll) > 0) {
+                $overAllAvg = $overAllAvg/count($overAll);
+            } else {
+                $overAllAvg = 0;
+            } 
+
+            // AVERAGE COMPLAIN PER DAY THIS MONTH
+            $ticketsThisMonth = DB::table('CRM_Tickets')
+                ->select(DB::raw("COUNT(id) AS 'Count'"))
+                ->where('CrewAssigned', $item->id)
+                ->where(function ($query) {
+                    $query->where('Trash', 'No')
+                        ->orWhereNull('Trash');
+                })
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->first();
+
+            // AVERAGE COMPLAIN EXECUTED PER DAY THIS MONTH
+            $ticketsExecutedThisMonth = DB::table('CRM_Tickets')
+                ->select(DB::raw("COUNT(id) AS 'Count'"))
+                ->where('CrewAssigned', $item->id)
+                ->where('Status', 'Executed')
+                ->where(function ($query) {
+                    $query->where('Trash', 'No')
+                        ->orWhereNull('Trash');
+                })
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->first();
+            
+            $crewArr[$i]["StationId"] = $item->id;
+            $crewArr[$i]["StationCrew"] = $item->StationName;
+            $crewArr[$i]["Received"] = number_format($receivedToSentAvg, 2);
+            $crewArr[$i]["SentToArrival"] = number_format($sentToArrivalAvg, 2);
+            $crewArr[$i]["ArrivalToExecution"] = number_format($arrivalToExecutionAvg, 2);
+            $crewArr[$i]["OverAll"] = number_format($overAllAvg, 2);
+            $crewArr[$i]["TicketsThisMonth"] = $ticketsThisMonth != null ? $ticketsThisMonth->Count : 0;
+            $crewArr[$i]["AverageThisMonth"] = $ticketsThisMonth != null ? (intval($ticketsThisMonth->Count) > 0 ? intval($ticketsThisMonth->Count)/Tickets::getAverageDailyDivisor() : 0) : 0; // 22 days a month
+            $crewArr[$i]["ExecutedThisMonth"] = $ticketsExecutedThisMonth != null ? $ticketsExecutedThisMonth->Count : 0;
+            $crewArr[$i]["AverageExecutedThisMonth"] = $ticketsExecutedThisMonth != null ? (intval($ticketsExecutedThisMonth->Count) > 0 ? intval($ticketsExecutedThisMonth->Count)/Tickets::getAverageDailyDivisor() : 0) : 0; // 22 days a month
+            
+            $i++;
+        }
+
+        $output = "";
+        for ($x=0; $x<count($crewArr); $x++) {
+            $output .= '
+                <tr>
+                    <th>' . $crewArr[$x]["StationCrew"] . '</th>
+                    <td class="text-center">' . $crewArr[$x]["Received"] . ' hrs</td>
+                    <td class="text-center">' . $crewArr[$x]["SentToArrival"] . ' hrs</td>
+                    <td class="text-center">' . $crewArr[$x]["ArrivalToExecution"] . ' hrs</td>
+                    <td class="text-center">' . $crewArr[$x]["OverAll"] . ' hrs</td>
+                    <td class="text-center">' . $crewArr[$x]["TicketsThisMonth"] . '</td>
+                    <td class="text-center">' . number_format(intval($crewArr[$x]["AverageThisMonth"]), 0) . '</td>
+                    <td class="text-center">' . $crewArr[$x]["ExecutedThisMonth"] . '</td>
+                    <td class="text-center">' . number_format(intval($crewArr[$x]["AverageExecutedThisMonth"]), 0) . '</td>
+                </tr>
+            ';
+        }
+
+        return response()->json($output, 200);
+    }
+
+    public function getOverAllAverageKps(Request $request) {
+        $startDate = date('Y-m-d', strtotime($request['Month']));
+        $endDate = date('Y-m-d', strtotime($request['Month'] . ' +1 month'));
+
+        $stats = DB::table('CRM_Tickets')
+            ->select(
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE (Trash IS NULL OR Trash = 'No') AND (created_at BETWEEN '" . $startDate . "' AND '" . $endDate . "')) AS 'TotalFiled'"),
+                DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE (Trash IS NULL OR Trash = 'No') AND (DateTimeLinemanExecuted BETWEEN '" . $startDate . "' AND '" . $endDate . "')) AS 'TotalExecuted'")
+            )->limit(1)
+            ->first();
+
+        $data = [];
+        if ($stats != null) {
+            array_push($data, [
+                "TotalFiled" => $stats->TotalFiled, 
+                "TotalExecuted" => $stats->TotalExecuted,
+                "AverageFiled" => intval($stats->TotalFiled) > 0 ? number_format(intval($stats->TotalFiled)/Tickets::getAverageDailyDivisor(), 2) : 0,
+                "AverageExecuted" => intval($stats->TotalExecuted) > 0 ? number_format(intval($stats->TotalExecuted)/Tickets::getAverageDailyDivisor(), 2) : 0,
+            ]);
+        }
+
+        return response()->json($data, 200);
+    }
 }
