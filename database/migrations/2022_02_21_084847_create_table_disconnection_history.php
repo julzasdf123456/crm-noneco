@@ -25,6 +25,8 @@ class CreateTableDisconnectionHistory extends Migration
             $table->string('Status')->nullable();
             $table->string('UserId')->nullable();
             $table->string('Notes')->nullable();
+            $table->date('DateDisconnected')->nullable();
+            $table->time('TimeDisconnected')->nullable();
             $table->timestamps();
         });
     }

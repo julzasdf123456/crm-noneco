@@ -49,7 +49,9 @@ class DisconnectionHistory extends Model
         'DisconnectionPayment',
         'Status',
         'UserId',
-        'Notes'
+        'Notes',
+        'DateDisconnected',
+        'TimeDisconnected'
     ];
 
     /**
@@ -67,7 +69,9 @@ class DisconnectionHistory extends Model
         'DisconnectionPayment' => 'string',
         'Status' => 'string',
         'UserId' => 'string',
-        'Notes' => 'string'
+        'Notes' => 'string',
+        'DateDisconnected' => 'string',
+        'TimeDisconnected' => 'string'
     ];
 
     /**
@@ -87,7 +91,9 @@ class DisconnectionHistory extends Model
         'UserId' => 'nullable|string|max:255',
         'Notes' => 'nullable|string|max:255',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'DateDisconnected' => 'string|nullable',
+        'TimeDisconnected' => 'string|nullable'
     ];
 
     public static function noOfDaysTillNotice() {

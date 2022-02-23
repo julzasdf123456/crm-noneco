@@ -53,7 +53,7 @@
                             </div>
 
                             <div class="tab-pane" id="disco-hist">
-                                
+                                @include('service_accounts.tab_disconnection_history')
                             </div>
 
                             <div class="tab-pane" id="arrears">

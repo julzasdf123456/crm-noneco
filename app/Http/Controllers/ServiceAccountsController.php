@@ -29,6 +29,7 @@ use App\Models\IDGenerator;
 use App\Models\PaidBills;
 use App\Models\TransactionIndex;
 use App\Models\ArrearsLedgerDistribution;
+use App\Models\DisconnectionHistory;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Flash;
 use Response;
@@ -225,6 +226,10 @@ class ServiceAccountsController extends AppBaseController
             ->offset(1)
             ->get();
 
+        $disconnectionHistory = DisconnectionHistory::where('AccountNumber', $id)
+            ->orderByDesc('DateDisconnected')
+            ->get();
+
         $arrearTransactionHistory = TransactionIndex::where('ObjectId', $id)
             ->whereIn('Source', ['Arrears Termed Ledger', 'Arrears Collectible'])
             ->orderByDesc('created_at')
@@ -247,6 +252,7 @@ class ServiceAccountsController extends AppBaseController
             'unmergedArrears' => $unmergedArrears,
             'checkLedger' => $checkLedger,
             'arrearTransactionHistory' => $arrearTransactionHistory,
+            'disconnectionHistory' => $disconnectionHistory,
         ]);
     }
 

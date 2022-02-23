@@ -75,4 +75,5 @@ Route::post('save-reading-images', [ReadAndBillAPI::class, 'saveReadingImages'])
 
 // DISCONNECTION
 Route::get('get-disconnection-list', [DisconnectionAPI::class, 'getDisconnectionList']);
+Route::post('receive-disconnection-uploads', [DisconnectionAPI::class, 'receiveDisconnectionUploads']);
 

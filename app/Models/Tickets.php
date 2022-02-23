@@ -179,4 +179,8 @@ class Tickets extends Model
     public static function getAverageDailyDivisor() {
         return 22;
     }
+
+    public static function getDisconnectionDelinquencyId() {
+        return '1668541254423';
+    }
 }
