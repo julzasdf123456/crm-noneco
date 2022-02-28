@@ -1,6 +1,7 @@
 @php
     use App\Models\ServiceConnections;
     use App\Models\IDGenerator;
+    use App\Models\BillsOfMaterialsSummary;
 @endphp
 @extends('layouts.app')
 
@@ -243,6 +244,13 @@
                                     <td></td>
                                     <td class="text-right">{{ number_format($billOfMaterialsSummary->HandlingCost, 2) }}</td> 
                                 </tr>  
+                                <tr>
+                                    <td></td>
+                                    <td class="text-right">VAT ({{ BillsOfMaterialsSummary::getVat() * 100 }} %)</td>  
+                                    <td></td>
+                                    <td></td>
+                                    <td class="text-right">{{ number_format($billOfMaterialsSummary->TotalVAT, 2) }}</td> 
+                                </tr> 
                                 <tr>
                                     <th></th>
                                     <th class="text-right">Overall Total</th>  

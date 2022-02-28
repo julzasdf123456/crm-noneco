@@ -19,6 +19,9 @@
         @endif
     @endif
 @else
+    @if ($totalTransactions->Notes != null) 
+        <p class="badge bg-success" style="padding: 10px;"><i class="fas fa-check-circle ico-tab-mini"></i>Paid</p>
+    @endif
     <div class="row">
         <div class="col-md-12">
             <div class="callout callout-info">

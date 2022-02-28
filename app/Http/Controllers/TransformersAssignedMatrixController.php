@@ -171,7 +171,7 @@ class TransformersAssignedMatrixController extends AppBaseController
 
             // ADD TRANSFORMER
             $transformerMatrix = new TransformersAssignedMatrix;
-            $transformerMatrix->id = IDGenerator::generateRandString();
+            $transformerMatrix->id = IDGenerator::generateIDandRandString();
             $transformerMatrix->ServiceConnectionId = $request['ServiceConnectionId'];
             $transformerMatrix->MaterialsId = $request['MaterialsId'];
             $transformerMatrix->Quantity = $request['Quantity'];
@@ -189,7 +189,7 @@ class TransformersAssignedMatrixController extends AppBaseController
                         ->first();
 
                     $linkFuse = new TransformersAssignedMatrix;
-                    $linkFuse->id = IDGenerator::generateRandString(25);
+                    $linkFuse->id = IDGenerator::generateIDandRandString();
                     $linkFuse->ServiceConnectionId = $request['ServiceConnectionId'];
                     $linkFuse->MaterialsId = $transformerIndex->LinkFuseCode;
                     $linkFuse->Quantity = $request['Quantity'];

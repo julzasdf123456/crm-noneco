@@ -95,7 +95,7 @@
                     {{-- POLES TABLE --}}
                     <table class="table table-sm" id="equipments-table">
                         <thead>
-                            <th>Poles</th>
+                            <th>Equipments</th>
                             <th>Quantity</th>
                             <th width="10%" class="text-center">Amount</th>
                             <th width="10%" class="text-center">Cost</th>
@@ -109,7 +109,7 @@
                                     <td class="text-right">{{ number_format($item->Amount) }}</td>
                                     <td class="text-right">{{ number_format(floatval($item->Quantity) * floatval($item->Amount), 2) }}</td>
                                     <td>
-                                        <button class="btn btn-sm text-danger" onclick="deletePole({{ $item->id }})"><i class="fas fa-trash"></i></button>
+                                        <button class="btn btn-sm text-danger" onclick="deletePole('{{ $item->id }}')"><i class="fas fa-trash"></i></button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -147,7 +147,8 @@
                         Quantity : qty,
                     },
                     success : function(response) {
-                        fetchEquipments();
+                        // fetchEquipments();
+                        location.reload()
                     },
                     error : function(error) {
                         console.log(error);

@@ -595,6 +595,7 @@ class ServiceConnectionsController extends AppBaseController
                                     'CRM_ServiceConnections.AccountCount as AccountCount',  
                                     'CRM_ServiceConnections.Sitio as Sitio', 
                                     'CRM_Towns.Town as Town',
+                                    'CRM_ServiceConnections.LoadCategory',
                                     'CRM_Barangays.Barangay as Barangay')
                     ->where(function ($query) {
                                         $query->where('CRM_ServiceConnections.Trash', 'No')
@@ -618,6 +619,7 @@ class ServiceConnectionsController extends AppBaseController
                                     'CRM_ServiceConnections.AccountCount as AccountCount',  
                                     'CRM_ServiceConnections.Sitio as Sitio', 
                                     'CRM_Towns.Town as Town',
+                                    'CRM_ServiceConnections.LoadCategory',
                                     'CRM_Barangays.Barangay as Barangay')
                     ->where(function ($query) {
                                         $query->where('CRM_ServiceConnections.Trash', 'No')
@@ -632,34 +634,63 @@ class ServiceConnectionsController extends AppBaseController
             if ($total_row > 0) {
                 $output = '';
                 foreach ($data as $row) {
+                    if ($row->LoadCategory == 'above 5kVa') {
+                        $output .= '
+                            <div class="col-md-10 offset-md-1 col-lg-10 offset-lg-1" style="margin-top: 10px;">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 col-lg-6">
+                                                <div>
+                                                    <h4>' .$row->ServiceAccountName . '</h4>
+                                                    <p class="text-muted" style="margin-bottom: 0;">Acount Number: ' . $row->ConsumerId . '</p>
+                                                    <p class="text-muted" style="margin-bottom: 0;">' . $row->Barangay . ', ' . $row->Town  . '</p>
+                                                    <a href="' . route('serviceConnections.show', [$row->ConsumerId]) . '" class="text-primary" style="margin-top: 5px; padding: 8px;" title="View"><i class="fas fa-eye"></i></a>
+                                                    <a href="' . route('serviceConnections.edit', [$row->ConsumerId]) . '" class="text-warning" style="margin-top: 5px; padding: 8px;" title="Edit"><i class="fas fa-pen"></i></a>
+                                                </div>     
+                                            </div> 
 
-                    $output .= '
-                        <div class="col-md-10 offset-md-1 col-lg-10 offset-lg-1" style="margin-top: 10px;">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6 col-lg-6">
-                                            <div>
-                                                <h4>' .$row->ServiceAccountName . '</h4>
-                                                <p class="text-muted" style="margin-bottom: 0;">Acount Number: ' . $row->ConsumerId . '</p>
-                                                <p class="text-muted" style="margin-bottom: 0;">' . $row->Barangay . ', ' . $row->Town  . '</p>
-                                                <a href="' . route('serviceConnections.show', [$row->ConsumerId]) . '" class="text-primary" style="margin-top: 5px; padding: 8px;" title="View"><i class="fas fa-eye"></i></a>
-                                                <a href="' . route('serviceConnections.edit', [$row->ConsumerId]) . '" class="text-warning" style="margin-top: 5px; padding: 8px;" title="Edit"><i class="fas fa-pen"></i></a>
-                                            </div>     
-                                        </div> 
-
-                                        <div class="col-md-6 col-lg-6 d-sm-none d-md-block d-none d-sm-block" style="border-left: 2px solid #007bff; padding-left: 15px;">
-                                            <div>
-                                                <p class="text-muted" style="margin-bottom: 0;">Date of Application: <strong>' . date('F d, Y', strtotime($row->DateOfApplication)) . '</strong></p>
-                                                <p class="text-muted" style="margin-bottom: 0;">AccountCount: <strong>' . $row->AccountCount . '</strong></p>
-                                                <p class="text-muted" style="margin-bottom: 0;">Status: <strong>' . $row->Status . '</strong></p>
-                                            </div>     
+                                            <div class="col-md-6 col-lg-6 d-sm-none d-md-block d-none d-sm-block" style="border-left: 2px solid #f44336; padding-left: 15px;">
+                                                <div>
+                                                    <p class="text-muted" style="margin-bottom: 0;">Date of Application: <strong>' . date('F d, Y', strtotime($row->DateOfApplication)) . '</strong></p>
+                                                    <p class="text-muted" style="margin-bottom: 0;">AccountCount: <strong>' . $row->AccountCount . '</strong></p>
+                                                    <p class="text-muted" style="margin-bottom: 0;">Status: <strong>' . $row->Status . '</strong></p>
+                                                </div>     
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>   
-                    ';
+                            </div>   
+                        ';
+                    } else {
+                        $output .= '
+                            <div class="col-md-10 offset-md-1 col-lg-10 offset-lg-1" style="margin-top: 10px;">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 col-lg-6">
+                                                <div>
+                                                    <h4>' .$row->ServiceAccountName . '</h4>
+                                                    <p class="text-muted" style="margin-bottom: 0;">Acount Number: ' . $row->ConsumerId . '</p>
+                                                    <p class="text-muted" style="margin-bottom: 0;">' . $row->Barangay . ', ' . $row->Town  . '</p>
+                                                    <a href="' . route('serviceConnections.show', [$row->ConsumerId]) . '" class="text-primary" style="margin-top: 5px; padding: 8px;" title="View"><i class="fas fa-eye"></i></a>
+                                                    <a href="' . route('serviceConnections.edit', [$row->ConsumerId]) . '" class="text-warning" style="margin-top: 5px; padding: 8px;" title="Edit"><i class="fas fa-pen"></i></a>
+                                                </div>     
+                                            </div> 
+
+                                            <div class="col-md-6 col-lg-6 d-sm-none d-md-block d-none d-sm-block" style="border-left: 2px solid #007bff; padding-left: 15px;">
+                                                <div>
+                                                    <p class="text-muted" style="margin-bottom: 0;">Date of Application: <strong>' . date('F d, Y', strtotime($row->DateOfApplication)) . '</strong></p>
+                                                    <p class="text-muted" style="margin-bottom: 0;">AccountCount: <strong>' . $row->AccountCount . '</strong></p>
+                                                    <p class="text-muted" style="margin-bottom: 0;">Status: <strong>' . $row->Status . '</strong></p>
+                                                </div>     
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>   
+                        ';
+                    }                    
                 }                
             } else {
                 $output = '<p class="text-center">No data found.</p>';
@@ -1457,6 +1488,70 @@ class ServiceConnectionsController extends AppBaseController
                                             floatval($billOfMaterialsSummary->HandlingCost) +
                                             floatval($billOfMaterialsSummary->LaborCost);
             
+            // total vat
+            $vatAmount = floatval($billOfMaterialsSummary->Total) * BillsOfMaterialsSummary::getVat();
+
+            $billOfMaterialsSummary->Total = $billOfMaterialsSummary->Total + $vatAmount;
+
+            $billOfMaterialsSummary->TotalVAT = $vatAmount;
+            
+            $billOfMaterialsSummary->save();
+        } else {
+            $billOfMaterialsSummary->MonthDuration = $serviceConnection->TemporaryDurationInMonths;
+
+            // CALCULATE SUB-TOTAL
+            $subTtl = 0.0;
+            foreach($materials as $items) { // materials total
+                $subTtl += floatval($items->Cost);
+            }
+            foreach($transformers as $items) { 
+                if ($items->Type != 'Transformer') {
+                    $subTtl += floatval($items->Quantity) * floatval($items->Amount);
+                }
+            }
+
+            // transformer sub total
+            $transSoloTtl = 0.0;
+            foreach($transformers as $items) { 
+                if ($items->Type == 'Transformer') {
+                    $transSoloTtl += floatval($items->Quantity) * floatval($items->Amount);
+                }                
+            }
+
+            // sub total
+            $billOfMaterialsSummary->SubTotal = $subTtl + $transSoloTtl;
+
+            // materials labor cost            
+            $billOfMaterialsSummary->MaterialLaborCost = $subTtl * floatval($billOfMaterialsSummary->MaterialLaborCostPercentage);
+
+            if ($billOfMaterialsSummary->ExcludeTransformerLaborCost == null) {
+                $billOfMaterialsSummary->TransformerLaborCost = $transSoloTtl * floatval($billOfMaterialsSummary->TransformerLaborCostPercentage);
+                $billOfMaterialsSummary->LaborCost = floatval($billOfMaterialsSummary->TransformerLaborCost) + floatval($billOfMaterialsSummary->MaterialLaborCost);
+            } else {
+                if ($billOfMaterialsSummary->ExcludeTransformerLaborCost == 'Yes') {
+                    $billOfMaterialsSummary->TransformerLaborCost = null;
+                    $billOfMaterialsSummary->LaborCost = $billOfMaterialsSummary->MaterialLaborCost;
+                } else {
+                    $billOfMaterialsSummary->TransformerLaborCost = $transSoloTtl * floatval($billOfMaterialsSummary->TransformerLaborCostPercentage);
+                    $billOfMaterialsSummary->LaborCost = floatval($billOfMaterialsSummary->TransformerLaborCost) + floatval($billOfMaterialsSummary->MaterialLaborCost);
+                }
+            }
+
+            // handling labor cost            
+            $billOfMaterialsSummary->HandlingCost = floatval($billOfMaterialsSummary->LaborCost) * floatval($billOfMaterialsSummary->HandlingCostPercentage);
+
+            // overall total
+            $billOfMaterialsSummary->Total = floatval($billOfMaterialsSummary->SubTotal) +
+                                            floatval($billOfMaterialsSummary->HandlingCost) +
+                                            floatval($billOfMaterialsSummary->LaborCost);
+
+            // total vat
+            $vatAmount = floatval($billOfMaterialsSummary->Total) * BillsOfMaterialsSummary::getVat();
+
+            $billOfMaterialsSummary->Total = $billOfMaterialsSummary->Total + $vatAmount;
+
+            $billOfMaterialsSummary->TotalVAT = $vatAmount;
+
             $billOfMaterialsSummary->save();
         }
 

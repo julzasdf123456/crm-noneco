@@ -501,6 +501,21 @@ use Illuminate\Support\Facades\Auth;
                 <i class="fas fa-exclamation-circle nav-icon text-info"></i><p>Uncollected Arrears</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('transactionIndices.other-payments') }}"
+                class="nav-link {{ Request::is('transactionIndices.other-payments*') ? 'active' : '' }}">
+                <i class="fas fa-coins nav-icon text-info"></i><p>Other Payments</p>
+                </a>
+            </li>
+            <li class="nav-header">                
+                Settings
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('accountPayables.index') }}"
+                   class="nav-link {{ Request::is('accountPayables*') ? 'active' : '' }}">
+                   <i class="fas fa-circle nav-icon text-info"></i><p>Account Payables</p>
+                </a>
+            </li>
         </ul>
     </li>
 @endcanany

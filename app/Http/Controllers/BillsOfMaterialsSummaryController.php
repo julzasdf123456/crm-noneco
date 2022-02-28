@@ -152,6 +152,12 @@ class BillsOfMaterialsSummaryController extends AppBaseController
         // RECALCULATE HandlingCost  BASED ON NEW HandlingCostPercentage
         $request['HandlingCost'] = (floatval($boMSummary->LaborCost)) * floatval($request['HandlingCostPercentage']);
 
+        // RECALCULATE Total
+        $total = floatval($billsOfMaterialsSummary->SubTotal) + floatval($request['HandlingCost']) + floatval($request['LaborCost']);
+        $vat = BillsOfMaterialsSummary::getVat() * floatval($total);
+        $request['Total'] = $total + $vat;
+        $request['TotalVAT'] = $vat;
+
         $billsOfMaterialsSummary = $this->billsOfMaterialsSummaryRepository->update($request->all(), $id);
 
         Flash::success('Bills Of Materials Summary updated successfully.');

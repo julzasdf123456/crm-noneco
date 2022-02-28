@@ -7,23 +7,25 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * Class TransactionDetails
+ * Class CacheOtherPayments
  * @package App\Models
- * @version February 10, 2022, 9:11 am PST
+ * @version February 28, 2022, 8:20 am PST
  *
+ * @property string $AccountNumber
  * @property string $TransactionIndexId
  * @property string $Particular
  * @property string $Amount
  * @property string $VAT
  * @property string $Total
+ * @property string $AccountCode
  */
-class TransactionDetails extends Model
+class CacheOtherPayments extends Model
 {
     // use SoftDeletes;
 
     use HasFactory;
 
-    public $table = 'Cashier_TransactionDetails';
+    public $table = 'Cache_Cashier_OtherPayments';
     
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
@@ -37,6 +39,7 @@ class TransactionDetails extends Model
 
     public $fillable = [
         'id',
+        'AccountNumber',
         'TransactionIndexId',
         'Particular',
         'Amount',
@@ -52,6 +55,7 @@ class TransactionDetails extends Model
      */
     protected $casts = [
         'id' => 'string',
+        'AccountNumber' => 'string',
         'TransactionIndexId' => 'string',
         'Particular' => 'string',
         'Amount' => 'string',
@@ -67,14 +71,15 @@ class TransactionDetails extends Model
      */
     public static $rules = [
         'id' => 'string',
+        'AccountNumber' => 'nullable|string|max:255',
         'TransactionIndexId' => 'nullable|string|max:255',
         'Particular' => 'nullable|string|max:350',
         'Amount' => 'nullable|string|max:255',
         'VAT' => 'nullable|string|max:255',
         'Total' => 'nullable|string|max:255',
+        'AccountCode' => 'nullable|string|max:255',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable',
-        'AccountCode' => 'nullable|string'
+        'updated_at' => 'nullable'
     ];
 
     

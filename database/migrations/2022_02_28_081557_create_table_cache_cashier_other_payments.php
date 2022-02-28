@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTableCashierTransactionDetails extends Migration
+class CreateTableCacheCashierOtherPayments extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,10 @@ class CreateTableCashierTransactionDetails extends Migration
      */
     public function up()
     {
-        Schema::create('Cashier_TransactionDetails', function (Blueprint $table) {
+        Schema::create('Cache_Cashier_OtherPayments', function (Blueprint $table) {
             $table->string('id')->unsigned();
             $table->primary('id');
+            $table->string('AccountNumber')->nullable();
             $table->string('TransactionIndexId')->nullable();
             $table->string('Particular', 350)->nullable();
             $table->string('Amount')->nullable();
@@ -33,6 +34,6 @@ class CreateTableCashierTransactionDetails extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Cashier_TransactionDetails');
+        Schema::dropIfExists('Cache_Cashier_OtherPayments');
     }
 }

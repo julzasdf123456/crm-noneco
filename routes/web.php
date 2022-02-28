@@ -354,6 +354,7 @@ Route::resource('arrearsLedgerDistributions', App\Http\Controllers\ArrearsLedger
 Route::get('/transaction_indices/service-connection-collection', [App\Http\Controllers\TransactionIndexController::class, 'serviceConnectionCollection'])->name('transactionIndices.service-connection-collection');
 Route::get('/transaction_indices/get-payable-details', [App\Http\Controllers\TransactionIndexController::class, 'getPayableDetails'])->name('transactionIndices.get-payable-details');
 Route::get('/transaction_indices/get-payable-total', [App\Http\Controllers\TransactionIndexController::class, 'getPayableTotal'])->name('transactionIndices.get-payable-total');
+Route::get('/transaction_indices/get-power-load-payables', [App\Http\Controllers\TransactionIndexController::class, 'getPowerLoadPayables'])->name('transactionIndices.get-power-load-payables');
 Route::get('/transaction_indices/save-and-print-or-service-connections', [App\Http\Controllers\TransactionIndexController::class, 'saveAndPrintORServiceConnections'])->name('transactionIndices.save-and-print-or-service-connections');
 Route::get('/transaction_indices/print-or-service-connections/{transactionIndexId}', [App\Http\Controllers\TransactionIndexController::class, 'printORServiceConnections'])->name('transactionIndices.print-or-service-connections');
 Route::get('/transaction_indices/uncollected-arrears', [App\Http\Controllers\TransactionIndexController::class, 'uncollectedArrears'])->name('transactionIndices.uncollected-arrears');
@@ -363,6 +364,10 @@ Route::get('/transaction_indices/save-arrear-transaction', [App\Http\Controllers
 Route::get('/transaction_indices/ledger-arrears-collection/{accountNo}', [App\Http\Controllers\TransactionIndexController::class, 'ledgerArrearsCollection'])->name('transactionIndices.ledger-arrears-collection');
 Route::get('/transaction_indices/save-ledger-arrear-transaction', [App\Http\Controllers\TransactionIndexController::class, 'saveLedgerArrearTransaction'])->name('transactionIndices.save-ledger-arrear-transaction');
 Route::get('/transaction_indices/print-or-termed-ledger-arrears/{transactionIndexId}', [App\Http\Controllers\TransactionIndexController::class, 'printORTermedLedgerArrears'])->name('transactionIndices.print-or-termed-ledger-arrears');
+Route::get('/transaction_indices/other-payments', [App\Http\Controllers\TransactionIndexController::class, 'otherPayments'])->name('transactionIndices.other-payments');
+Route::get('/transaction_indices/search-consumer', [App\Http\Controllers\TransactionIndexController::class, 'searchConsumer'])->name('transactionIndices.search-consumer');
+Route::get('/transaction_indices/fetch-account-details', [App\Http\Controllers\TransactionIndexController::class, 'fetchAccountDetails'])->name('transactionIndices.fetch-account-details');
+Route::get('/transaction_indices/fetch-payable-details', [App\Http\Controllers\TransactionIndexController::class, 'fetchPayableDetails'])->name('transactionIndices.fetch-payable-details');
 Route::resource('transactionIndices', App\Http\Controllers\TransactionIndexController::class);
 
 
@@ -384,3 +389,11 @@ Route::get('/disco_notice_histories/get-disco-list-preview', [App\Http\Controlle
 Route::get('/disco_notice_histories/print-reroute', [App\Http\Controllers\DiscoNoticeHistoryController::class, 'printReroute'])->name('discoNoticeHistories.print-reroute');
 Route::get('/disco_notice_histories/print-disconnection-list/{period}/{area}', [App\Http\Controllers\DiscoNoticeHistoryController::class, 'printDisconnectionList'])->name('discoNoticeHistories.print-disconnection-list');
 Route::resource('discoNoticeHistories', App\Http\Controllers\DiscoNoticeHistoryController::class);
+
+
+Route::resource('accountPayables', App\Http\Controllers\AccountPayablesController::class);
+
+
+Route::get('/cache_other_payments/fetch-cached', [App\Http\Controllers\CacheOtherPaymentsController::class, 'fetchCached'])->name('cacheOtherPayments.fetch-cached');
+Route::get('/cache_other_payments/save-other-payments', [App\Http\Controllers\CacheOtherPaymentsController::class, 'saveOtherPayments'])->name('cacheOtherPayments.save-other-payments');
+Route::resource('cacheOtherPayments', App\Http\Controllers\CacheOtherPaymentsController::class);

@@ -4,6 +4,9 @@
 @endphp
 <div class="row">
     @if ($billOfMaterialsSummary != null)
+        @if ($billOfMaterialsSummary->IsPaid == 'Yes')
+            <p class="badge bg-success" style="padding: 10px;"><i class="fas fa-check-circle ico-tab-mini"></i>Paid</p>
+        @endif
         <div class="col-lg-12 col-sm-12">
             {{-- TOOLBAR --}}
             <span>

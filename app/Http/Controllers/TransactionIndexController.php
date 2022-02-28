@@ -16,7 +16,9 @@ use App\Models\TransactionIndex;
 use App\Models\ArrearsLedgerDistribution;
 use App\Models\Collectibles;
 use App\Models\ServiceAccounts;
+use App\Models\BillsOfMaterialsSummary;
 use App\Models\IDGenerator;
+use App\Models\AccountPayables;
 use Flash;
 use Response;
 
@@ -190,6 +192,16 @@ class TransactionIndexController extends AppBaseController
         return response()->json($particularPayments, 200);
     }
 
+    public function getPowerLoadPayables(Request $request) {
+        $powerLoadPayables = BillsOfMaterialsSummary::where('ServiceConnectionId', $request['ServiceConnectionId'])->first();
+
+        if ($powerLoadPayables != null) {
+            return response()->json($powerLoadPayables, 200);
+        } else {
+            return response()->json('No payables found', 404);
+        }        
+    }
+
     public function getPayableTotal(Request $request) {
         $totalTransactions = DB::table('CRM_ServiceConnectionTotalPayments')
             ->leftJoin('CRM_ServiceConnections', 'CRM_ServiceConnectionTotalPayments.ServiceConnectionId', '=', 'CRM_ServiceConnections.id')
@@ -238,13 +250,20 @@ class TransactionIndexController extends AppBaseController
         $transactionIndex->ORDate = date('Y-m-d');
         $transactionIndex->SubTotal = $totalTransactions->SubTotal;
         $transactionIndex->VAT = $totalTransactions->TotalVat;
-        $transactionIndex->Total = $totalTransactions->Total;
+        $transactionIndex->Total = $request['Total'];
         $transactionIndex->ServiceConnectionId = $request['svcId'];
-        $transactionIndex->Source = "Service Connection Application";
+        $transactionIndex->Source = $request['LoadCategory'] == 'above 5kVa' ? "Service Connection Application w Power Load" : "Service Connection Application";
         $transactionIndex->PaymentUsed = $request['PaymentUsed'];
         $transactionIndex->UserId = Auth::id();
         $transactionIndex->save();
 
+        $saTransaction = ServiceConnectionTotalPayments::where('ServiceConnectionId', $request['svcId'])->first();
+        if ($saTransaction != null) {
+            $saTransaction->Notes = $request['ORNumber'];
+            $saTransaction->save();
+        }
+
+        // SAVE TRANSACTION DETIALS
         foreach($particularPayments as $item) {
             $transactionDetails = new TransactionDetails;
             $transactionDetails->id = IDGenerator::generateIDandRandString();
@@ -254,6 +273,27 @@ class TransactionIndexController extends AppBaseController
             $transactionDetails->VAT = $item->Vat;
             $transactionDetails->Total = $item->Total;
             $transactionDetails->save();
+        }
+
+        // SAVE TRANSACTION DETAILS FOR POWER LOAD
+        if ($request['LoadCategory'] == 'above 5kVa') {
+            $powerLoadPayables = BillsOfMaterialsSummary::where('ServiceConnectionId', $request['svcId'])->first();
+
+            if ($powerLoadPayables != null) {
+                $transactionDetails = new TransactionDetails;
+                $transactionDetails->id = IDGenerator::generateIDandRandString();
+                $transactionDetails->TransactionIndexId = $id;
+                $transactionDetails->Particular = 'Power Load Payables';
+                $transactionDetails->Amount = round(floatval($powerLoadPayables->Total) - floatval($powerLoadPayables->TotalVAT), 2);
+                $transactionDetails->VAT = $powerLoadPayables->TotalVAT;
+                $transactionDetails->Total = $powerLoadPayables->Total;
+                $transactionDetails->save();
+
+                $powerLoadPayables->IsPaid = 'Yes';
+                $powerLoadPayables->ORNumber = $request['ORNumber'];
+                $powerLoadPayables->ORDate = date('Y-m-d');
+                $powerLoadPayables->save();
+            }            
         }
 
         // UPDATE Service Connection OR
@@ -468,5 +508,76 @@ class TransactionIndexController extends AppBaseController
             'transactionIndex' => $transactionIndex,
             'transactionDetails' => $transactionDetails,
         ]);
+    }
+
+    public function otherPayments() {
+        $payables = AccountPayables::all();
+        return view('/transaction_indices/other_payments', [
+            'payables' => $payables,
+        ]);
+    }
+
+    public function searchConsumer(Request $request) {
+        $results = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['query'] . '%')
+            ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['query'] . '%')
+            ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['query'] . '%')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+            ->get();
+
+        $output = "";
+
+        if (count($results) > 0) {
+            foreach($results as $item) {
+                $output .= '
+                        <tr>
+                            <td>' . $item->id . '</td>
+                            <td>' . $item->ServiceAccountName . '</td>
+                            <td>' . ServiceAccounts::getAddress($item) . '</td>
+                            <td>' . $item->AccountStatus . '</td>
+                            <td>
+                                <button class="btn btn-link text-primary" onclick=fetchAccountDetails("' . $item->id . '")><i class="fas fa-forward"></i></button>
+                            </td>
+                        </tr>
+                    '; 
+            }
+
+            return response()->json($output, 200);
+        } else {
+            return response()->json([], 200);
+        }        
+    }
+
+    public function fetchAccountDetails(Request $request) {
+        $account = ServiceAccounts::find($request['id']);
+
+        if ($account != null) {
+            return response()->json($account, 200);
+        } else {
+            return response()->json('Account not found', 404);
+        }
+    }
+
+    public function fetchPayableDetails(Request $request) {
+        $payable = AccountPayables::find($request['id']);
+
+        if ($payable != null) {
+            return response()->json($payable, 200);
+        } else {
+            return response()->json('Payable not found', 404);
+        }
     }
 }

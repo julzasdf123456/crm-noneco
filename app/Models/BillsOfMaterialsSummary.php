@@ -59,6 +59,9 @@ class BillsOfMaterialsSummary extends Model
         'TransformerLaborCost',
         'MaterialLaborCost',
         'TransformerTotal',
+        'IsPaid',
+        'ORNumber',
+        'ORDate'
     ];
 
     /**
@@ -83,6 +86,9 @@ class BillsOfMaterialsSummary extends Model
         'TransformerLaborCost' => 'string',
         'MaterialLaborCost' => 'string',
         'TransformerTotal' => 'string',
+        'IsPaid' => 'string',
+        'ORNumber' => 'string',
+        'ORDate' => 'string'
     ];
 
     /**
@@ -109,6 +115,9 @@ class BillsOfMaterialsSummary extends Model
         'TransformerLaborCost' => 'string|nullable',
         'MaterialLaborCost' => 'string|nullable',
         'TransformerTotal' => 'string|nullable',
+        'IsPaid' => 'string|nullable',
+        'ORNumber' => 'string|nullable',
+        'ORDate' => 'string|nullable'
     ];
 
     public static function calculateMaterials($materials) {
@@ -123,5 +132,9 @@ class BillsOfMaterialsSummary extends Model
         $sum = 0.0;
 
         return $sum;
+    }
+
+    public static function getVat() {
+        return .12;
     }
 }

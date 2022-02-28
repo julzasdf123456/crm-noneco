@@ -149,7 +149,7 @@
                                     <td>{{ $item->Quantity }}</td>
                                     <td class="text-right">{{ number_format(floatval($item->Amount) * floatval($item->Quantity), 2) }}</td>
                                     <td class="text-right">
-                                        <button class="btn btn-sm text-danger" onclick="deleteTransformer({{ $item->id }})"><i class="fas fa-trash"></i></button>
+                                        <button class="btn btn-sm text-danger" onclick="deleteTransformer('{{ $item->id }}')"><i class="fas fa-trash"></i></button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -220,7 +220,7 @@
                         Quantity : qty,
                     },
                     success : function(response) {
-                        fetchTransformers();
+                        location.reload()
                     },
                     error : function(error) {
                         console.log(error);
@@ -239,7 +239,7 @@
                         id: id,
                     },
                     success : function(data) {
-                        fetchTransformers();
+                        location.reload()
                     },
                     error : function(error) {
                         console.log(error);
@@ -267,7 +267,7 @@
                                 '<td>' + data[index]['Quantity'] + '</td>' +
                                 '<td class="text-right">' + Number((parseFloat(data[index]['Quantity']) * parseFloat(data[index]['Amount'])).toFixed(2)).toLocaleString() + '</td>' +
                                 '<td class="text-right">' +
-                                    '<button class="btn btn-sm text-danger" onclick="deleteTransformer(' + data[index]['id'] + ')"><i class="fas fa-trash"></i></button>' +
+                                    '<button class="btn btn-sm text-danger" onclick="deleteTransformer("' + data[index]['id'] + '")"><i class="fas fa-trash"></i></button>' +
                                 '</td>' +
                             '</tr>'
                         );

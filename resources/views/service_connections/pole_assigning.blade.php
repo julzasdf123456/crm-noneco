@@ -173,7 +173,7 @@
                                     <td class="text-right">{{ number_format($item->Amount) }}</td>
                                     <td class="text-right">{{ number_format(floatval($item->Quantity) * floatval($item->Amount), 2) }}</td>
                                     <td>
-                                        <button class="btn btn-sm text-danger" onclick="deletePole({{ $item->id }})"><i class="fas fa-trash"></i></button>
+                                        <button class="btn btn-sm text-danger" onclick="deletePole('{{ $item->id }}')"><i class="fas fa-trash"></i></button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -212,7 +212,8 @@
                         Quantity : qty,
                     },
                     success : function(response) {
-                        fetchPoles();
+                        location.reload()
+                        // fetchPoles()
                     },
                     error : function(error) {
                         console.log(error);
@@ -240,7 +241,7 @@
                                 '<td class="text-right">' + Number(parseFloat(data[index]['Amount']).toFixed(2)).toLocaleString() + '</td>' +
                                 '<td class="text-right">' + Number((parseInt(data[index]['Quantity']) * parseFloat(data[index]['Amount'])).toFixed(2)).toLocaleString() + '</td>' +
                                 '<td>' +
-                                    '<button class="btn btn-sm text-danger" onclick="deletePole(' + data[index]['id'] + ')"><i class="fas fa-trash"></i></button>' +
+                                    '<button class="btn btn-sm text-danger" onclick=deletePole(' + data[index]['id'] + ')><i class="fas fa-trash"></i></button>' +
                                 '</td>' +
                             '</tr>'
                         );

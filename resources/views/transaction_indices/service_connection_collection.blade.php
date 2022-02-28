@@ -30,7 +30,7 @@
                                     <tr>
                                         <td>{{ $item->ServiceAccountName }}</td>
                                         <td class="text-right">
-                                            <button onclick="fetchPayables({{ $item->id }})" class="btn btn-sm btn-link"><i class="fas fa-forward"></i></button>
+                                            <button onclick="fetchPayables('{{ $item->id }}', '{{ $item->LoadCategory }}')" class="btn btn-sm btn-link {{ $item->LoadCategory == 'above 5kVa' ? 'text-danger' : 'text-primary' }}"><i class="fas fa-forward"></i></button>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -65,6 +65,19 @@
     
                                     </tbody>
                                 </table>
+
+                                <div id="power-load-area" class="gone">
+                                    <p><strong>Power Load Payables</strong></p>
+                                    <table class="table table-sm table-hover">
+                                        <thead>
+                                            <th>Particulars</th>
+                                            <th>Amount</th>
+                                        </thead>
+                                        <tbody>
+
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
                             <div class="col-lg-5 col-md-6">
@@ -72,6 +85,18 @@
                                     <div class="card-body">
                                         {{-- FORM --}}
                                         <table class="table table-borderless">
+                                            <tr id="power-load-row" class="gone">
+                                                <td>Power Load</td>
+                                                <td class="text-right">
+                                                    <input type="text" class="form-control text-right" style="font-size: 1.5em;" id="powerLoadAmount" readonly="true">
+                                                </td>
+                                            </tr>
+                                            <tr id="sa-row" class="gone">
+                                                <td>Service Application</td>
+                                                <td class="text-right">
+                                                    <input type="text" class="form-control text-right" style="font-size: 1.5em;" id="saAmount" readonly="true">
+                                                </td>
+                                            </tr>
                                             <tr>
                                                 <td>Total</td>
                                                 <td class="text-right">
@@ -116,9 +141,17 @@
 @push('page_scripts')
     <script>
         var activeId = null;
+        var total = 0;
+        var saTotal = 0;
+        var powerLoadTtl = 0;
+        var loadCategory = "";
 
-        function fetchPayables(id) {
+        function fetchPayables(id, category) {
             activeId = id;
+            total = 0;
+            saTotal = 0;
+            powerLoadTtl = 0;
+            loadCategory = category;
             $('#amountPaid').val('')
             $('#change').val('')
             $('#ornumber').val('')
@@ -131,13 +164,55 @@
                 },
                 success : function(res) {
                     if (jQuery.isEmptyObject(res)) {
-                        $('#totalAmount').val('')
+                        // $('#totalAmount').val('')
                         $('#consumerName').text('')
                         $('#address').text('')
                     } else {
-                        $('#totalAmount').val(res['Total'])
+                        total += parseFloat(res['Total'])
+                        saTotal = parseFloat(res['Total'])
                         $('#consumerName').text(res['ServiceAccountName'])
                         $('#address').text(res['Barangay'] + ', ' + res['Town'])
+                    }
+
+                    // IF POWER LOAD
+                    if (category == 'above 5kVa') {
+                        $('#power-load-area').removeClass('gone');
+                        $('#power-load-row').removeClass('gone');
+                        $('#sa-row').removeClass('gone');
+
+                        $.ajax({
+                            url : '/transaction_indices/get-power-load-payables',
+                            type : 'GET',
+                            data : {
+                                ServiceConnectionId : id,
+                            },
+                            success : function(res) {
+                                $('#power-load-area tbody tr').remove()
+                                if (!jQuery.isEmptyObject(res)) {
+                                    $('#power-load-area tbody').append(addRowToPowerLoad('Materials', res['SubTotal']))
+                                    $('#power-load-area tbody').append(addRowToPowerLoad('Transformer', res['TransformerTotal']))
+                                    $('#power-load-area tbody').append(addRowToPowerLoad('Total Labor Cost', res['LaborCost']))
+                                    $('#power-load-area tbody').append(addRowToPowerLoad('Handling Cost', res['HandlingCost']))
+                                    $('#power-load-area tbody').append(addRowToPowerLoad('VAT', res['TotalVAT']))
+                                    $('#power-load-area tbody').append(addRowToPowerLoad('Total', res['Total']))
+                                    total += parseFloat(res['Total'])
+                                }
+
+                                $('#totalAmount').val(Number(total.toFixed(2)).toLocaleString())
+                                $('#powerLoadAmount').val(Number(parseFloat(res['Total']).toFixed(2)).toLocaleString())
+                                $('#saAmount').val(Number(saTotal.toFixed(2)).toLocaleString())
+                            },
+                            error : function(error) {
+                                alert(error)
+                            }
+                        })
+                    } else {
+                        $('#power-load-area').addClass('gone');
+                        $('#power-load-row').addClass('gone');
+                        $('#sa-row').addClass('gone');
+                        $('#powerLoadAmount').val('')
+                        $('#saAmount').val('')
+                        $('#totalAmount').val(Number(total.toFixed(2)).toLocaleString())
                     }
                 }, 
                 error : function(err) {
@@ -171,20 +246,31 @@
             })
         }
 
+        function addRowToPowerLoad(particular, amount) {
+            return '<tr>' +
+                    '<td>' + particular + '</td>' +
+                    '<th class="text-right">' + Number(parseFloat(amount).toFixed(2)).toLocaleString() + '</th>' +
+                '</tr>';
+        }
+
         function addRowToTable(payables, amount, vat, total) {
             return "<tr>" + 
                         "<td>" + payables + "</td>" +
-                        "<td class='text-right'>" + (parseFloat(amount).toFixed(2)).toLocaleString() + "</td>" +
+                        "<td class='text-right'>" + Number(parseFloat(amount).toFixed(2)).toLocaleString() + "</td>" +
                         "<td class='text-right'>" + vat + "</td>" +
-                        "<td class='text-right'>" + total + "</td>" +
+                        "<th class='text-right'>" + total + "</th>" +
                     "</tr>"
+        }
+
+        function computeTotal(powerLoad, serviceConnection) {
+            return powerLoad + serviceConnection;
         }
 
         $(document).ready(function() {
             // ASSESS VALUE ON TYPE
             var change = 0;
             $('#amountPaid').keyup(function() {
-                change = parseFloat(this.value) - parseFloat($('#totalAmount').val())
+                change = parseFloat(this.value) - parseFloat(total)
 
                 if (parseFloat(change)) {
                     if (change > -1 && !jQuery.isEmptyObject($('#ornumber').val())) {
@@ -196,7 +282,7 @@
                         $('#checkBtn').attr('disabled', 'true')
                         $('#cardBtn').attr('disabled', 'true')
                     }
-                    $('#change').val(change)
+                    $('#change').val(Number(change.toFixed(2)).toLocaleString())
                 } else {
                     $('#change').val('')
                     $('#cashBtn').attr('disabled', 'true')
@@ -216,7 +302,7 @@
                         $('#checkBtn').attr('disabled', 'true')
                         $('#cardBtn').attr('disabled', 'true')
                     }
-                    $('#change').val(change)
+                    $('#change').val(Number(change.toFixed(2)).toLocaleString())
                 } else {
                     $('#change').val('')
                     $('#cashBtn').attr('disabled', 'true')
@@ -224,37 +310,6 @@
                     $('#cardBtn').attr('disabled', 'true')
                 }   
             })
-
-            // DETECT IF ENTER KEY IS PRESSED
-            // $('#amountPaid').keypress(function(event) {
-            //     if (parseFloat(change)) {
-            //         if (change > -1 && !jQuery.isEmptyObject($('#ornumber').val())) {
-            //             var keycode = (event.keyCode ? event.keyCode : event.which);
-            //             if(keycode == '13'){
-            //                 alert('You pressed a "enter" key in textbox');  
-            //             }                      
-            //         } else {
-
-            //         }
-            //     } else {
-
-            //     }                   
-            // })
-
-            // $('#ornumber').keypress(function(event) {
-            //     if (parseFloat(change)) {
-            //         if (change > -1 && !jQuery.isEmptyObject($('#ornumber').val())) {
-            //             var keycode = (event.keyCode ? event.keyCode : event.which);
-            //             if(keycode == '13'){
-            //                 alert('You pressed a "enter" key in textbox');  
-            //             }                      
-            //         } else {
-
-            //         }
-            //     } else {
-
-            //     }  
-            // })
 
             $(document).keypress(function(event){
                 if (parseFloat(change)) {
@@ -270,6 +325,18 @@
 
                 }  
             });
+
+            $('#cashBtn').on('click', function() {
+                if (parseFloat(change)) {
+                    if (change > -1 && !jQuery.isEmptyObject($('#ornumber').val())) {
+                        saveAndPrint('Cash')                    
+                    } else {
+
+                    }
+                } else {
+
+                }  
+            })
         })
 
         function saveAndPrint(paymentUsed) {
@@ -280,6 +347,8 @@
                     svcId : activeId,
                     ORNumber : $('#ornumber').val(),
                     PaymentUsed : paymentUsed,
+                    Total : total,
+                    LoadCategory : loadCategory,
                 },
                 success : function(res) {
                     window.location.href = "{{ url('/transaction_indices/print-or-service-connections') }}" + "/" + res['id'];

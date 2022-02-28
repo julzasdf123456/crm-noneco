@@ -31,6 +31,9 @@ class CreateTableCRMBillsOfMaterialsSummary extends Migration
             $table->string('Total', 25)->nullable();
             $table->string('TotalVAT', 20)->nullable();
             $table->string('TransformerTotal', 20)->nullable();
+            $table->string('IsPaid')->nullable();
+            $table->string('ORNumber')->nullable();
+            $table->date('ORDate')->nullable();
             $table->timestamps();
         });
     }
