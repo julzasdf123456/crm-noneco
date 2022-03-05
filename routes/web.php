@@ -368,6 +368,7 @@ Route::get('/transaction_indices/other-payments', [App\Http\Controllers\Transact
 Route::get('/transaction_indices/search-consumer', [App\Http\Controllers\TransactionIndexController::class, 'searchConsumer'])->name('transactionIndices.search-consumer');
 Route::get('/transaction_indices/fetch-account-details', [App\Http\Controllers\TransactionIndexController::class, 'fetchAccountDetails'])->name('transactionIndices.fetch-account-details');
 Route::get('/transaction_indices/fetch-payable-details', [App\Http\Controllers\TransactionIndexController::class, 'fetchPayableDetails'])->name('transactionIndices.fetch-payable-details');
+Route::get('/transaction_indices/print-other-payments/{transactionIndexId}', [App\Http\Controllers\TransactionIndexController::class, 'printOtherPayments'])->name('transactionIndices.print-other-payments');
 Route::resource('transactionIndices', App\Http\Controllers\TransactionIndexController::class);
 
 

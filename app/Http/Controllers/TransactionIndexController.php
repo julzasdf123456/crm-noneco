@@ -580,4 +580,14 @@ class TransactionIndexController extends AppBaseController
             return response()->json('Payable not found', 404);
         }
     }
+
+    public function printOtherPayments($transactionIndexId) {
+        $transactionIndex = TransactionIndex::find($transactionIndexId);
+        $transactionDetails = TransactionDetails::where('TransactionIndexId', $transactionIndexId)->get();
+
+        return view('/transaction_indices/print_other_payments', [
+            'transactionIndex' => $transactionIndex,
+            'transactionDetails' => $transactionDetails,
+        ]);
+    }
 }

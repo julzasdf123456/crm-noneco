@@ -300,7 +300,26 @@
          * SAVE TRANSACTION AND CLEAR CACHE
          */
         function saveOtherPayments(type) {
-            
+            $.ajax({
+                url : '/cache_other_payments/save-other-payments',
+                type : 'GET',
+                data : {
+                    AccountNumber : accountNo,
+                    PaymentTitle : $('#for').val(),
+                    ORNumber : $('#ornumber').val(),
+                    PaymentUsed : type,
+                },
+                success : function(res) {
+                    if (jQuery.isEmptyObject(res)) {
+
+                    } else {
+                        window.location.href = "{{ url('/transaction_indices/print-other-payments') }}" + "/" + res['id'];
+                    }
+                },
+                error : function(err) {
+
+                }
+            })
         }
 
         function addToPayablesTable(particular, amnt, vat, ttl, id) {

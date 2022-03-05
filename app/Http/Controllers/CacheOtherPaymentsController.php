@@ -9,6 +9,8 @@ use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
 use App\Models\IDGenerator;
 use App\Models\CacheOtherPayments;
+use App\Models\TransactionDetails;
+use App\Models\TransactionIndex;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Flash;
