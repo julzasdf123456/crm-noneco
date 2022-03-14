@@ -62,28 +62,30 @@
                 </div>
             </div>
             <div class="card-body table-responsive">
-                <table class="table table-hover table-borderless table-sm">
-                    <tr>
-                        <td>Brand</td>
-                        <td>{{ $meters->Brand }}</td>
-                    </tr>
-                    <tr>
-                        <td>Serial No</td>
-                        <td>{{ $meters->SerialNumber }}</td>
-                    </tr>
-                    <tr>
-                        <td>Status</td>
-                        <td>{{ $meters->Status }}</td>
-                    </tr>
-                    <tr>
-                        <td>Multiplier</td>
-                        <td>{{ $meters->Multiplier }}</td>
-                    </tr>
-                    <tr>
-                        <td>Connection Date</td>
-                        <td>{{ date('F d, Y', strtotime($meters->ConnectionDate)) }}</td>
-                    </tr>
-                </table>
+                @if ($meters != null)
+                    <table class="table table-hover table-borderless table-sm">
+                        <tr>
+                            <td>Brand</td>
+                            <td>{{ $meters->Brand }}</td>
+                        </tr>
+                        <tr>
+                            <td>Serial No</td>
+                            <td>{{ $meters->SerialNumber }}</td>
+                        </tr>
+                        <tr>
+                            <td>Status</td>
+                            <td>{{ $meters->Status }}</td>
+                        </tr>
+                        <tr>
+                            <td>Multiplier</td>
+                            <td>{{ $meters->Multiplier }}</td>
+                        </tr>
+                        <tr>
+                            <td>Connection Date</td>
+                            <td>{{ date('F d, Y', strtotime($meters->ConnectionDate)) }}</td>
+                        </tr>
+                    </table>                    
+                @endif
             </div>
         </div>
     </div>

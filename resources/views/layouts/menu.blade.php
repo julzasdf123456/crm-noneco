@@ -57,8 +57,9 @@ use Illuminate\Support\Facades\Auth;
     </li>    
 @endcanany
 
-<!-- SERVICE CONNECTION MENU -->
+
 @canany(['Super Admin', 'sc view'])
+    <!-- SERVICE CONNECTION MENU -->
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-plug nav-icon text-warning"></i>
@@ -328,12 +329,30 @@ use Illuminate\Support\Facades\Auth;
                     <i class="fas fa-clipboard-list nav-icon text-danger"></i><p>All Tickets</p>
                 </a>
             </li>
-            <li class="nav-item">
-                <a href="{{ route('tickets.create-select') }}"
-                class="nav-link {{ Request::is('tickets.create-select*') ? 'active' : '' }}">
-                    <i class="fas fa-plus-circle nav-icon text-danger"></i><p>New Ticket</p>
+            <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-plus-circle nav-icon text-danger"></i>
+                    <p>
+                        Create Ticket
+                        <i class="fas fa-angle-left right"></i>
+                    </p>
                 </a>
+                <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                        <a href="{{ route('tickets.create-select') }}"
+                        class="nav-link {{ Request::is('tickets.create-select*') ? 'active' : '' }}">
+                            <i class="fas fa-circle nav-icon text-danger"></i><p>Ordinary Complain</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('tickets.change-meter') }}"
+                        class="nav-link {{ Request::is('tickets.change-meter*') ? 'active' : '' }}">
+                            <i class="fas fa-circle nav-icon text-danger"></i><p>Change Meter</p>
+                        </a>
+                    </li>
+                </ul>
             </li>
+            
             <li class="nav-header">                
                 Settings and Others 
             </li>
@@ -397,7 +416,7 @@ use Illuminate\Support\Facades\Auth;
 @endcanany
 
 {{-- BILLS --}}
-@canany(['Super Admin'])
+@canany(['Super Admin', 'billing re-bill'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-wallet nav-icon text-primary"></i>
@@ -472,7 +491,7 @@ use Illuminate\Support\Facades\Auth;
 @endcanany
 
 <!-- TELLERING MENU -->
-@canany(['Super Admin'])
+@canany(['Super Admin', 'teller view'])
     <li class="nav-header">COLLECTION</li>
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">

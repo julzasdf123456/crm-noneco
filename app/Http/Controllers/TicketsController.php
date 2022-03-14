@@ -1049,4 +1049,73 @@ class TicketsController extends AppBaseController
 
         return response()->json($data, 200);
     }
+
+    public function changeMeter(Request $request) {
+        if ($request['params'] == null) {
+            $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
+                        ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                        ->paginate(15);
+        } else {
+            $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
+                        ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                        ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                        ->paginate(15);
+        }     
+
+        return view('/tickets/change_meter', ['serviceAccounts' => $serviceAccounts]);
+    }
+
+    public function createChangeMeter($accountNumber) {
+        if ($accountNumber != null) {
+            $serviceAccount = DB::table('Billing_ServiceAccounts')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->select('Billing_ServiceAccounts.ServiceAccountName', 
+                    'Billing_ServiceAccounts.id', 
+                    'CRM_Towns.Town', 
+                    'CRM_Barangays.Barangay', 
+                    'Billing_ServiceAccounts.Town as TownId',
+                    'Billing_ServiceAccounts.Barangay as BarangayId',
+                    'Billing_ServiceAccounts.Purok')
+                ->where('Billing_ServiceAccounts.id', $accountNumber)
+                ->first();
+        } else {
+            $serviceAccount = null;
+        }
+
+        $towns = Towns::orderBy('Town')->pluck('Town', 'id');
+
+        $cond = 'new';
+
+        $history = DB::table('CRM_Tickets')
+                        ->leftJoin('CRM_TicketsRepository', 'CRM_Tickets.Ticket', '=', 'CRM_TicketsRepository.id')
+                        ->leftJoin('CRM_Towns', 'CRM_Tickets.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'CRM_Tickets.Barangay', '=', 'CRM_Barangays.id')
+                        ->where('CRM_Tickets.AccountNumber', $accountNumber)
+                        ->select('CRM_Tickets.ConsumerName', 
+                            'CRM_Tickets.id',
+                            'CRM_Towns.Town',
+                            'CRM_Barangays.Barangay',
+                            'CRM_TicketsRepository.Name',
+                            'CRM_TicketsRepository.ParentTicket',
+                            'CRM_Tickets.created_at',
+                            'CRM_Tickets.Reason',
+                            'CRM_Tickets.Status',)
+                        ->orderByDesc('CRM_Tickets.created_at')
+                        ->get();
+
+        return view('/tickets/create_change_meter', [
+            'serviceAccount' => $serviceAccount,
+            'towns' => $towns,
+            'history' => $history,
+            'cond' => $cond,
+        ]);
+    }
 }

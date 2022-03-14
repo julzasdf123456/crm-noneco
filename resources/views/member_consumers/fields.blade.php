@@ -270,7 +270,7 @@ use App\Models\IDGenerator;
                 <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-info-circle"></i></span>
                 </div>
-                {!! Form::select('CivilStatus', ['' => 'Not Applicable', 'Single' => 'Single', 'Married' => 'Married', 'Widow' => 'Widow'], null, ['class' => 'form-control',]) !!}
+                {!! Form::select('CivilStatus', ['' => 'Not Applicable', 'Single' => 'Single', 'Married' => 'Married', 'Widow' => 'Widow', 'Separated' => 'Separated'], null, ['class' => 'form-control',]) !!}
             </div>
         </div>
     </div>    

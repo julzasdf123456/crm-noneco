@@ -279,6 +279,8 @@ Route::get('/tickets/kps-monitor', [App\Http\Controllers\TicketsController::clas
 Route::get('/tickets/get-kps-ticket-crew-graph', [App\Http\Controllers\TicketsController::class, 'getKpsTicketCrewGraph'])->name('tickets.get-kps-ticket-crew-graph');
 Route::get('/tickets/get-ticket-avg-hours', [App\Http\Controllers\TicketsController::class, 'getTicketCrewAverageHours'])->name('tickets.get-ticket-avg-hours');
 Route::get('/tickets/get-overall-avg-kps', [App\Http\Controllers\TicketsController::class, 'getOverAllAverageKps'])->name('tickets.get-overall-avg-kps');
+Route::get('/tickets/change-meter', [App\Http\Controllers\TicketsController::class, 'changeMeter'])->name('tickets.change-meter');
+Route::get('/tickets/create-change-meter/{accountNumber}', [App\Http\Controllers\TicketsController::class, 'createChangeMeter'])->name('tickets.create-change-meter');
 Route::resource('tickets', App\Http\Controllers\TicketsController::class);
 
 

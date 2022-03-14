@@ -183,4 +183,12 @@ class Tickets extends Model
     public static function getDisconnectionDelinquencyId() {
         return '1668541254423';
     }
+
+    public static function getMeterRelatedComplainsId() {
+        return ['1668541254390', '1668541254389']; // Change Meter, Pull Out
+    }
+
+    public static function getChangeMeter() {
+        return '1668541254390';
+    }
 }
