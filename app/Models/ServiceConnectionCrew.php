@@ -39,7 +39,9 @@ class ServiceConnectionCrew extends Model
         'StationName',
         'CrewLeader',
         'Members',
-        'Notes'
+        'Notes',
+        'Office',
+        'Grouping'
     ];
 
     /**
@@ -52,7 +54,9 @@ class ServiceConnectionCrew extends Model
         'StationName' => 'string',
         'CrewLeader' => 'string',
         'Members' => 'string',
-        'Notes' => 'string'
+        'Notes' => 'string',
+        'Office' => 'string',
+        'Grouping' => 'string'
     ];
 
     /**
@@ -67,7 +71,9 @@ class ServiceConnectionCrew extends Model
         'Members' => 'nullable|string|max:1500',
         'Notes' => 'nullable|string|max:1000',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'Office' => 'string|nullable',
+        'Grouping' => 'string|nullable'
     ];
 
     

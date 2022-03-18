@@ -352,6 +352,38 @@ use Illuminate\Support\Facades\Auth;
                     </li>
                 </ul>
             </li>
+
+            <li class="nav-header">                
+                Assessments 
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('tickets.assessments-change-meter') }}"
+                class="nav-link {{ Request::is('tickets.assessments-change-meter*') ? 'active' : '' }}">
+                    <i class="fas fa-circle nav-icon text-danger"></i><p>Change Meter Requests</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('tickets.assessments-ordinary-ticket') }}"
+                class="nav-link {{ Request::is('tickets.assessments-ordinary-ticket*') ? 'active' : '' }}">
+                    <i class="fas fa-circle nav-icon text-danger"></i><p>Crew Assigning</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('tickets.disconnection-assessments') }}"
+                class="nav-link {{ Request::is('tickets.disconnection-assessments*') ? 'active' : '' }}">
+                    <i class="fas fa-circle nav-icon text-danger"></i><p>Disconnection</p>
+                </a>
+            </li>
+
+            <li class="nav-header">                
+                Reports
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('tickets.ticket-summary-report') }}"
+                class="nav-link {{ Request::is('tickets.ticket-summary-report*') ? 'active' : '' }}">
+                    <i class="fas fa-file nav-icon text-danger"></i><p>Ticket Summary</p>
+                </a>
+            </li>
             
             <li class="nav-header">                
                 Settings and Others 

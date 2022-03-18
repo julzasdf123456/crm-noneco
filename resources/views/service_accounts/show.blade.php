@@ -32,13 +32,16 @@
                                 Technical Info</a></li>
                             <li class="nav-item"><a class="nav-link" href="#billing-hist" data-toggle="tab">
                                 <i class="fas fa-file-invoice"></i>
-                                </lord-icon>Billing History</a></li>
+                                Billing History</a></li>
                             <li class="nav-item"><a class="nav-link" href="#disco-hist" data-toggle="tab">
                                 <i class="fas fa-unlink"></i>
-                                </lord-icon>Disconnection History</a></li>
+                                Disconnection History</a></li>
                             <li class="nav-item"><a class="nav-link" href="#arrears" data-toggle="tab">
                                 <i class="fas fa-receipt"></i>
-                                </lord-icon>Arrears</a></li>
+                                Arrears</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#ticket-hist" data-toggle="tab">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Ticket History</a></li>
                         </ul>
                     </div>
 
@@ -58,6 +61,9 @@
 
                             <div class="tab-pane" id="arrears">
                                 @include('service_accounts.tab_arrears')
+                            </div>
+                            <div class="tab-pane" id="ticket-hist">
+                                @include('service_accounts.tab_ticket_history')
                             </div>
                         </div>
                     </div>

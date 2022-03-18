@@ -30,6 +30,7 @@ use App\Models\PaidBills;
 use App\Models\TransactionIndex;
 use App\Models\ArrearsLedgerDistribution;
 use App\Models\DisconnectionHistory;
+use App\Models\Tickets;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Flash;
 use Response;
@@ -241,6 +242,47 @@ class ServiceAccountsController extends AppBaseController
             return redirect(route('serviceAccounts.index'));
         }
 
+        // tickets
+        $complaints = DB::table('CRM_Tickets')
+            ->leftJoin('CRM_Barangays', 'CRM_Tickets.Barangay', '=', 'CRM_Barangays.id')                    
+            ->leftJoin('CRM_Towns', 'CRM_Tickets.Town', '=', 'CRM_Towns.id')                
+            ->leftJoin('CRM_TicketsRepository', 'CRM_Tickets.Ticket', '=', 'CRM_TicketsRepository.id')
+            ->select('CRM_Tickets.id as id',
+                            'CRM_TicketsRepository.Name as Ticket', 
+                            'CRM_Tickets.Status',  
+                            'CRM_Tickets.Sitio as Sitio', 
+                            'CRM_Tickets.Reason', 
+                            'CRM_Tickets.Ticket as TicketID', 
+                            'CRM_Tickets.created_at')
+            ->where(function ($query) {
+                                $query->where('CRM_Tickets.Trash', 'No')
+                                    ->orWhereNull('CRM_Tickets.Trash');
+                            }) 
+            ->where('CRM_Tickets.AccountNumber', $id)    
+            ->whereNotIn('CRM_Tickets.Ticket', Tickets::getViolations())         
+            ->orderByDesc('CRM_Tickets.created_at')
+            ->get();
+
+        // violations
+        $violations = DB::table('CRM_Tickets')
+            ->leftJoin('CRM_Barangays', 'CRM_Tickets.Barangay', '=', 'CRM_Barangays.id')                    
+            ->leftJoin('CRM_Towns', 'CRM_Tickets.Town', '=', 'CRM_Towns.id')                
+            ->leftJoin('CRM_TicketsRepository', 'CRM_Tickets.Ticket', '=', 'CRM_TicketsRepository.id')
+            ->select('CRM_Tickets.id as id',
+                            'CRM_TicketsRepository.Name as Ticket', 
+                            'CRM_Tickets.Status',  
+                            'CRM_Tickets.Sitio as Sitio', 
+                            'CRM_Tickets.Ticket as TicketID', 
+                            'CRM_Tickets.created_at')
+            ->where(function ($query) {
+                                $query->where('CRM_Tickets.Trash', 'No')
+                                    ->orWhereNull('CRM_Tickets.Trash');
+                            }) 
+            ->where('CRM_Tickets.AccountNumber', $id)    
+            ->whereIn('CRM_Tickets.Ticket', Tickets::getViolations())         
+            ->orderByDesc('CRM_Tickets.created_at')
+            ->get();
+
         return view('service_accounts.show', [
             'serviceAccounts' => $serviceAccounts,
             'meters' => $meters,
@@ -253,6 +295,8 @@ class ServiceAccountsController extends AppBaseController
             'checkLedger' => $checkLedger,
             'arrearTransactionHistory' => $arrearTransactionHistory,
             'disconnectionHistory' => $disconnectionHistory,
+            'complaints' => $complaints,
+            'violations' => $violations,
         ]);
     }
 

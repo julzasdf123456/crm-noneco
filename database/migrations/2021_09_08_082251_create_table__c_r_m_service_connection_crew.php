@@ -20,6 +20,8 @@ class CreateTableCRMServiceConnectionCrew extends Migration
             $table->string('CrewLeader', 300)->nullable();
             $table->string('Members', 1500)->nullable();
             $table->string('Notes', 1000)->nullable();
+            $table->string('Office')->nullable();
+            $table->string('Grouping')->nullable(); // Group, Individual
             $table->timestamps();
         });
     }

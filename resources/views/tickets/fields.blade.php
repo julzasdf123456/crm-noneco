@@ -1,12 +1,13 @@
 
 @php
     use App\Models\TicketsRepository;
+    use App\Models\Tickets;
 @endphp
 @if ($cond == 'new')
     <div class="form-group col-sm-12">
         <div class="row">
             <div class="col-lg-3 col-md-5">
-                {!! Form::label('ConsumerName', 'Consumer name:') !!}
+                {!! Form::label('ConsumerName', 'Consumer Name:') !!}
             </div>
 
             <div class="col-lg-9 col-md-7">
@@ -135,7 +136,7 @@
 <div class="form-group col-sm-12">
     <div class="row">
         <div class="col-lg-3 col-md-5">
-            {!! Form::label('ContactNumber', 'Contactnumber:') !!}
+            {!! Form::label('ContactNumber', 'Contact Number:') !!}
         </div>
 
         <div class="col-lg-9 col-md-7">
@@ -168,7 +169,7 @@
                     @foreach ($parentTickets as $items)
                         <optgroup label="{{ $items->Name }}">
                             @php
-                                $ticketsRep = TicketsRepository::where('ParentTicket', $items->id)->orderBy('Name')->get();
+                                $ticketsRep = TicketsRepository::where('ParentTicket', $items->id)->whereNotIn('Id', Tickets::getMeterRelatedComplainsId())->orderBy('Name')->get();
                             @endphp
                             @foreach ($ticketsRep as $item)
                                 <option value="{{ $item->id }}">{{ $item->Name }}</option>
@@ -203,7 +204,7 @@
 <div class="form-group col-sm-12">
     <div class="row">
         <div class="col-lg-3 col-md-5">
-            {!! Form::label('ReportedBy', 'Reportedby:') !!}
+            {!! Form::label('ReportedBy', 'Reported By:') !!}
         </div>
 
         <div class="col-lg-9 col-md-7">
@@ -217,7 +218,7 @@
     </div> 
 </div>
 
-<div class="divider"></div>
+{{-- <div class="divider"></div>
 <br>
 
 <!-- Ornumber Field -->
@@ -267,7 +268,7 @@
 @endpush
 
 <div class="divider"></div>
-<br>
+<br> --}}
 
 {{-- GEOLOCATION IS FETCHED FROM SERVICE ACCOUNTS --}}
 
@@ -308,7 +309,7 @@
 </div>
 
 <!-- Crewassigned Field -->
-<div class="form-group col-sm-12">
+{{-- <div class="form-group col-sm-12">
     <div class="row">
         <div class="col-lg-3 col-md-5">
             {!! Form::label('CrewAssigned', 'Crew Assigned:') !!}
@@ -323,7 +324,7 @@
             </div>
         </div>
     </div>    
-</div>
+</div> --}}
 
 <!-- Notes Field -->
 <div class="form-group col-sm-12">

@@ -67,7 +67,7 @@
                             <div class="form-group col-sm-12">
                                 <div class="row">
                                     <div class="col-lg-3 col-md-5">
-                                        {!! Form::label('ConsumerName', 'Consumer name:') !!}
+                                        {!! Form::label('ConsumerName', 'Consumer Name:') !!}
                                     </div>
 
                                     <div class="col-lg-9 col-md-7">
@@ -102,20 +102,20 @@
 
                             <!-- Barangay Field -->
                             <div class="form-group col-sm-12">
-                            <div class="row">
-                                <div class="col-lg-3 col-md-5">
-                                    {!! Form::label('Barangay', 'Barangay') !!}
-                                </div>
-
-                                <div class="col-lg-9 col-md-7">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                                        </div>
-                                        {!! Form::select('Barangay', [], null, ['class' => 'form-control',]) !!}
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-5">
+                                        {!! Form::label('Barangay', 'Barangay') !!}
                                     </div>
-                                </div>
-                            </div>    
+
+                                    <div class="col-lg-9 col-md-7">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                            </div>
+                                            {!! Form::select('Barangay', [], null, ['class' => 'form-control',]) !!}
+                                        </div>
+                                    </div>
+                                </div>    
                             </div>
 
 
@@ -159,20 +159,20 @@
 
                             <!-- Contactnumber Field -->
                             <div class="form-group col-sm-12">
-                            <div class="row">
-                                <div class="col-lg-3 col-md-5">
-                                    {!! Form::label('ContactNumber', 'Contactnumber:') !!}
-                                </div>
-
-                                <div class="col-lg-9 col-md-7">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                        </div>
-                                        {!! Form::text('ContactNumber', null, ['class' => 'form-control','maxlength' => 100,'maxlength' => 100, 'placeholder' => 'Contact Number']) !!}
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-5">
+                                        {!! Form::label('ContactNumber', 'Contact Number:') !!}
                                     </div>
-                                </div>
-                            </div> 
+
+                                    <div class="col-lg-9 col-md-7">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                            </div>
+                                            {!! Form::text('ContactNumber', null, ['class' => 'form-control','maxlength' => 100,'maxlength' => 100, 'placeholder' => 'Contact Number']) !!}
+                                        </div>
+                                    </div>
+                                </div> 
                             </div>
 
                             <div class="divider"></div>
@@ -180,77 +180,38 @@
 
                             <!-- Reason Field -->
                             <div class="form-group col-sm-12">
-                            <div class="row">
-                                <div class="col-lg-3 col-md-5">
-                                    {!! Form::label('Reason', 'Reason:') !!}
-                                </div>
-
-                                <div class="col-lg-9 col-md-7">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fas fa-file-video"></i></span>
-                                        </div>
-                                        {!! Form::textarea('Reason', null, ['class' => 'form-control','maxlength' => 2000,'maxlength' => 2000, 'placeholder' => 'Reason', 'rows' => 2]) !!}
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-5">
+                                        {!! Form::label('Reason', 'Reason:') !!}
                                     </div>
-                                </div>
-                            </div> 
+
+                                    <div class="col-lg-9 col-md-7">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-file-video"></i></span>
+                                            </div>
+                                            {!! Form::textarea('Reason', null, ['class' => 'form-control','maxlength' => 2000,'maxlength' => 2000, 'placeholder' => 'Reason', 'rows' => 2]) !!}
+                                        </div>
+                                    </div>
+                                </div> 
                             </div>
 
                             <!-- Reportedby Field -->
                             <div class="form-group col-sm-12">
-                            <div class="row">
-                                <div class="col-lg-3 col-md-5">
-                                    {!! Form::label('ReportedBy', 'Reportedby:') !!}
-                                </div>
-
-                                <div class="col-lg-9 col-md-7">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fas fa-user-check"></i></span>
-                                        </div>
-                                        {!! Form::text('ReportedBy', null, ['class' => 'form-control','maxlength' => 200,'maxlength' => 200, 'placeholder' => 'Personnel who reported']) !!}
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-5">
+                                        {!! Form::label('ReportedBy', 'Reported by:') !!}
                                     </div>
-                                </div>
-                            </div> 
-                            </div>
 
-                            <div class="divider"></div>
-                            <br>
-
-                            <!-- Ornumber Field -->
-                            <div class="form-group col-sm-12">
-                            <div class="row">
-                                <div class="col-lg-3 col-md-5">
-                                    {!! Form::label('ORNumber', 'Ornumber:') !!}
-                                </div>
-
-                                <div class="col-lg-9 col-md-7">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fas fa-money-check"></i></span>
+                                    <div class="col-lg-9 col-md-7">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-user-check"></i></span>
+                                            </div>
+                                            {!! Form::text('ReportedBy', null, ['class' => 'form-control','maxlength' => 200,'maxlength' => 200, 'placeholder' => 'Personnel who reported']) !!}
                                         </div>
-                                        {!! Form::text('ORNumber', null, ['class' => 'form-control','maxlength' => 200,'maxlength' => 200, 'placeholder' => 'OR Number']) !!}
                                     </div>
-                                </div>
-                            </div> 
-                            </div>
-
-                            <!-- Ordate Field -->
-                            <div class="form-group col-sm-12">
-                            <div class="row">
-                                <div class="col-lg-3 col-md-5">
-                                    {!! Form::label('ORDate', 'Ordate:') !!}
-                                </div>
-
-                                <div class="col-lg-9 col-md-7">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fas fa-money-check"></i></span>
-                                        </div>
-                                        {!! Form::text('ORDate', null, ['class' => 'form-control', 'placeholder' => 'OR Date']) !!}
-                                    </div>
-                                </div>
-                            </div> 
+                                </div> 
                             </div>
 
                             @push('page_scripts')
@@ -270,56 +231,56 @@
 
                             <!-- Neighbor1 Field -->
                             <div class="form-group col-sm-12">
-                            <div class="row">
-                                <div class="col-lg-3 col-md-5">
-                                    {!! Form::label('Neighbor1', 'Neighbor1:') !!}
-                                </div>
-
-                                <div class="col-lg-9 col-md-7">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fas fa-street-view"></i></span>
-                                        </div>
-                                        {!! Form::text('Neighbor1', null, ['class' => 'form-control', 'placeholder' => 'Neighbor 1']) !!}
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-5">
+                                        {!! Form::label('Neighbor1', 'Neighbor1:') !!}
                                     </div>
-                                </div>
-                            </div> 
+
+                                    <div class="col-lg-9 col-md-7">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-street-view"></i></span>
+                                            </div>
+                                            {!! Form::text('Neighbor1', null, ['class' => 'form-control', 'placeholder' => 'Neighbor 1']) !!}
+                                        </div>
+                                    </div>
+                                </div> 
                             </div>
 
                             <!-- Neighbor2 Field -->
                             <div class="form-group col-sm-12">
-                            <div class="row">
-                                <div class="col-lg-3 col-md-5">
-                                    {!! Form::label('Neighbor2', 'Neighbor2:') !!}
-                                </div>
-
-                                <div class="col-lg-9 col-md-7">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fas fa-street-view"></i></span>
-                                        </div>
-                                        {!! Form::text('Neighbor2', null, ['class' => 'form-control', 'placeholder' => 'Neighbor 2']) !!}
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-5">
+                                        {!! Form::label('Neighbor2', 'Neighbor2:') !!}
                                     </div>
-                                </div>
-                            </div> 
+
+                                    <div class="col-lg-9 col-md-7">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-street-view"></i></span>
+                                            </div>
+                                            {!! Form::text('Neighbor2', null, ['class' => 'form-control', 'placeholder' => 'Neighbor 2']) !!}
+                                        </div>
+                                    </div>
+                                </div> 
                             </div>
 
                             <!-- Notes Field -->
                             <div class="form-group col-sm-12">
-                            <div class="row">
-                                <div class="col-lg-3 col-md-5">
-                                    {!! Form::label('Notes', 'Notes:') !!}
-                                </div>
-
-                                <div class="col-lg-9 col-md-7">
-                                    <div class="input-group input-group-sm">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fas fa-file-video"></i></span>
-                                        </div>
-                                        {!! Form::textarea('Notes', null, ['class' => 'form-control','maxlength' => 2000,'maxlength' => 2000, 'placeholder' => 'Notes/Remarks', 'rows' => 2]) !!}
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-5">
+                                        {!! Form::label('Notes', 'Notes:') !!}
                                     </div>
-                                </div>
-                            </div> 
+
+                                    <div class="col-lg-9 col-md-7">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-file-video"></i></span>
+                                            </div>
+                                            {!! Form::textarea('Notes', null, ['class' => 'form-control','maxlength' => 2000,'maxlength' => 2000, 'placeholder' => 'Notes/Remarks', 'rows' => 2]) !!}
+                                        </div>
+                                    </div>
+                                </div> 
                             </div>
 
                             @if ($cond == 'new')

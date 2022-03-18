@@ -281,6 +281,16 @@ Route::get('/tickets/get-ticket-avg-hours', [App\Http\Controllers\TicketsControl
 Route::get('/tickets/get-overall-avg-kps', [App\Http\Controllers\TicketsController::class, 'getOverAllAverageKps'])->name('tickets.get-overall-avg-kps');
 Route::get('/tickets/change-meter', [App\Http\Controllers\TicketsController::class, 'changeMeter'])->name('tickets.change-meter');
 Route::get('/tickets/create-change-meter/{accountNumber}', [App\Http\Controllers\TicketsController::class, 'createChangeMeter'])->name('tickets.create-change-meter');
+Route::get('/tickets/assessments-change-meter', [App\Http\Controllers\TicketsController::class, 'changeMeterAssessments'])->name('tickets.assessments-change-meter');
+Route::get('/tickets/assessments-ordinary-ticket', [App\Http\Controllers\TicketsController::class, 'ordinaryTicketsAssessment'])->name('tickets.assessments-ordinary-ticket');
+Route::get('/tickets/assess-change-meter-form/{ticketId}', [App\Http\Controllers\TicketsController::class, 'assessChangeMeterForm'])->name('tickets.assess-change-meter-form');
+Route::post('/tickets/update-change-meter-assessment', [App\Http\Controllers\TicketsController::class, 'updateChangeMeterAssessment'])->name('tickets.update-change-meter-assessment');
+Route::post('/tickets/update-ordinary-ticket-assessment', [App\Http\Controllers\TicketsController::class, 'updateOrdinaryTicketAssessment'])->name('tickets.update-ordinary-ticket-assessment');
+Route::get('/tickets/ticket-summary-report', [App\Http\Controllers\TicketsController::class, 'ticketSummaryReport'])->name('tickets.ticket-summary-report');
+Route::get('/tickets/get-ticket-summary-report', [App\Http\Controllers\TicketsController::class, 'getTicketSummaryResults'])->name('tickets.get-ticket-summary-report');
+Route::get('/tickets/ticket-summary-report-download-route', [App\Http\Controllers\TicketsController::class, 'ticketSummaryReportDownloadRoute'])->name('tickets.ticket-summary-report-download-route');
+Route::get('/tickets/download-tickets-summary-report/{ticketParam}/{from}/{to}/{area}', [App\Http\Controllers\TicketsController::class, 'downloadTicketsSummaryReport'])->name('tickets.download-tickets-summary-report');
+Route::get('/tickets/disconnection-assessments', [App\Http\Controllers\TicketsController::class, 'disconnectionAssessments'])->name('tickets.disconnection-assessments');
 Route::resource('tickets', App\Http\Controllers\TicketsController::class);
 
 
