@@ -84,6 +84,7 @@ class Tickets extends Model
         'NewMeterNo',
         'NewMeterBrand',
         'NewMeterReading',
+        'ServicePeriod'
     ];
 
     /**
@@ -124,6 +125,7 @@ class Tickets extends Model
         'NewMeterNo' => 'string',
         'NewMeterBrand' => 'string',
         'NewMeterReading' => 'string',
+        'ServicePeriod' => 'string'
     ];
 
     /**
@@ -166,6 +168,7 @@ class Tickets extends Model
         'NewMeterNo' => 'nullable|string',
         'NewMeterBrand' => 'nullable|string',
         'NewMeterReading' => 'nullable|string',
+        'ServicePeriod' => 'nullable|string'
     ];
 
     public static function getAddress($ticket) {

@@ -291,6 +291,9 @@ Route::get('/tickets/get-ticket-summary-report', [App\Http\Controllers\TicketsCo
 Route::get('/tickets/ticket-summary-report-download-route', [App\Http\Controllers\TicketsController::class, 'ticketSummaryReportDownloadRoute'])->name('tickets.ticket-summary-report-download-route');
 Route::get('/tickets/download-tickets-summary-report/{ticketParam}/{from}/{to}/{area}', [App\Http\Controllers\TicketsController::class, 'downloadTicketsSummaryReport'])->name('tickets.download-tickets-summary-report');
 Route::get('/tickets/disconnection-assessments', [App\Http\Controllers\TicketsController::class, 'disconnectionAssessments'])->name('tickets.disconnection-assessments');
+Route::get('/tickets/get-disconnection-results', [App\Http\Controllers\TicketsController::class, 'getDisconnectionResults'])->name('tickets.get-disconnection-results');
+Route::get('/tickets/disconnection-results-route', [App\Http\Controllers\TicketsController::class, 'disconnectionResultsRoute'])->name('tickets.disconnection-results-route');
+Route::get('/tickets/create-and-print-disconnection-tickets/{period}/{route}', [App\Http\Controllers\TicketsController::class, 'createAndPrintDisconnectionTickets'])->name('tickets.create-and-print-disconnection-tickets');
 Route::resource('tickets', App\Http\Controllers\TicketsController::class);
 
 

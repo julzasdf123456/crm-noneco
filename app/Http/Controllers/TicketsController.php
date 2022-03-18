@@ -16,6 +16,8 @@ use App\Models\Tickets;
 use App\Models\TicketLogs;
 use App\Models\IDGenerator;
 use App\Models\Readings;
+use App\Models\ServiceAccounts;
+use App\Models\DisconnectionHistory;
 use App\Exports\TicketSummaryReportDownloadExport;
 use Illuminate\Support\Facades\Auth;
 use Flash;
@@ -1556,8 +1558,189 @@ class TicketsController extends AppBaseController
     }
 
     public function disconnectionAssessments() {
+        $towns = Towns::orderBy('Town')->get();
+
         return view('/tickets/assessments_disconnection', [
-            
+            'towns' => $towns,
+        ]);
+    }
+
+    public function getDisconnectionResults(Request $request) {
+        $period = $request['Period'];
+        $route = $request['Route'];
+
+        $disconnectionList = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('Cashier_PaidBills.ServicePeriod', $period)->pluck('Cashier_PaidBills.ObjectSourceId'))
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->where('Billing_ServiceAccounts.AreaCode', $route)
+            ->whereRaw('DATEDIFF(dd, Billing_Bills.BillingDate, GETDATE()) > ?', [DisconnectionHistory::noOfDaysTillDisconnection()])
+            ->where('Billing_ServiceAccounts.AccountStatus', 'ACTIVE')
+            ->select('Billing_Bills.id as BillId',
+                'Billing_ServiceAccounts.id AS AccountNumber',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.Town',
+                'Billing_ServiceAccounts.Barangay',
+                'Billing_ServiceAccounts.Purok',
+                'Billing_ServiceAccounts.AreaCode',
+                'Billing_ServiceAccounts.GroupCode',
+                'Billing_ServiceAccounts.Latitude',
+                'Billing_ServiceAccounts.Longitude',
+                'Billing_ServiceAccounts.SequenceCode',
+                'Billing_Bills.KwhUsed',
+                'Billing_Bills.EffectiveRate',
+                'Billing_Bills.NetAmount',
+                'Billing_Bills.AdditionalCharges',
+                'Billing_Bills.Deductions',
+                'Billing_Bills.BillingDate',
+                'Billing_Bills.ServiceDateFrom',
+                'Billing_Bills.ServiceDateTo',
+                'Billing_Bills.DueDate',
+                'Billing_Bills.ConsumerType',
+                'Billing_Bills.MeterNumber',
+                'Billing_Bills.ServicePeriod',
+                'Billing_Bills.BillNumber')
+            ->get();
+
+        $results = "";
+        foreach ($disconnectionList as $item) {
+            $results .= '
+                <tr>
+                    <td>' . $item->AccountNumber . '</td>
+                    <td>' . $item->ServiceAccountName . '</td>
+                    <td>' . ServiceAccounts::getAddress($item) . '</td>
+                    <td>' . date('F d, Y', strtotime($item->DueDate)) . '</td>
+                    <td>' . number_format($item->KwhUsed, 2) . '</td>
+                </tr>
+            ';
+        }
+
+        return response()->json($results, 200);
+    }
+
+    public function disconnectionResultsRoute(Request $request) {
+        $period = $request['Period'];
+        $route = $request['Route'];
+
+        return response()->json(['Period' => $period, 'Route' => $route], 200);
+    }
+
+    public function createAndPrintDisconnectionTickets($period, $route) {
+        $disconnectionList = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('Cashier_PaidBills.ServicePeriod', $period)->pluck('Cashier_PaidBills.ObjectSourceId'))
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->where('Billing_ServiceAccounts.AreaCode', $route)
+            ->whereRaw('DATEDIFF(dd, Billing_Bills.BillingDate, GETDATE()) > ?', [DisconnectionHistory::noOfDaysTillDisconnection()])
+            ->where('Billing_ServiceAccounts.AccountStatus', 'ACTIVE')
+            ->select('Billing_Bills.id as BillId',
+                'Billing_ServiceAccounts.id AS AccountNumber',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.ContactNumber',
+                'Billing_ServiceAccounts.Town',
+                'Billing_ServiceAccounts.Barangay',
+                'Billing_ServiceAccounts.Purok',
+                'Billing_ServiceAccounts.AreaCode',
+                'Billing_ServiceAccounts.GroupCode',
+                'Billing_ServiceAccounts.Latitude',
+                'Billing_ServiceAccounts.Longitude',
+                'Billing_ServiceAccounts.SequenceCode',
+                'Billing_Bills.KwhUsed',
+                'Billing_Bills.EffectiveRate',
+                'Billing_Bills.NetAmount',
+                'Billing_Bills.AdditionalCharges',
+                'Billing_Bills.Deductions',
+                'Billing_Bills.BillingDate',
+                'Billing_Bills.ServiceDateFrom',
+                'Billing_Bills.ServiceDateTo',
+                'Billing_Bills.DueDate',
+                'Billing_Bills.ConsumerType',
+                'Billing_Bills.MeterNumber',
+                'Billing_Bills.ServicePeriod',
+                'Billing_Bills.BillNumber')
+            ->get();
+
+        // create tickets
+        $i = 1;
+        foreach($disconnectionList as $item) {
+            // FILTER IF TICKET HAS ALREADY CREATED
+            $ticket = Tickets::where('ServicePeriod', $period)
+                ->where('AccountNumber', $item->AccountNumber)
+                ->where('Ticket', Tickets::getDisconnectionDelinquencyId())
+                ->first();
+
+            if ($ticket != null) {
+
+            } else {
+                $ticket = new Tickets;
+                $ticket->id = $i . IDGenerator::generateID();
+                $ticket->AccountNumber = $item->AccountNumber;
+                $ticket->ConsumerName = $item->ServiceAccountName;
+                $ticket->Town = $item->Town;
+                $ticket->Barangay = $item->Barangay;
+                $ticket->Sitio = $item->Purok;
+                $ticket->Ticket = Tickets::getDisconnectionDelinquencyId();
+                $ticket->ContactNumber = $item->ContactNumber != null ? $item->ContactNumber : 'none';
+                $ticket->GeoLocation = $item->Latitude != null ? ($item->Latitude . ',' . $item->Longitude) : '';
+                $ticket->Status = 'Received';
+                $ticket->UserId = Auth::id();
+                $ticket->Office = env('APP_LOCATION');
+                $ticket->CurrentMeterNo = $item->MeterNumber;
+                $ticket->ServicePeriod = $period;
+                $ticket->save();
+
+                // CREATE LOG
+                $ticketLog = new TicketLogs;
+                $ticketLog->id = IDGenerator::generateIDandRandString();
+                $ticketLog->TicketId = $ticket->id;
+                $ticketLog->Log = "Ticket Filed";
+                $ticketLog->LogDetails = "Ticket automatically created via Disconnection Automation Module";
+                $ticketLog->UserId = Auth::id();
+                $ticketLog->save();
+            }
+
+            $i++;
+        }
+
+        $tickets = DB::table('CRM_Tickets')
+            ->leftJoin('CRM_Barangays', 'CRM_Tickets.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('CRM_Towns', 'CRM_Tickets.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_TicketsRepository', 'CRM_Tickets.Ticket', '=', 'CRM_TicketsRepository.id')
+            ->leftJoin('CRM_ServiceConnectionCrew', 'CRM_Tickets.CrewAssigned', '=', 'CRM_ServiceConnectionCrew.id')
+            ->where('CRM_Tickets.ServicePeriod', $period)
+            ->where('CRM_Tickets.Ticket', Tickets::getDisconnectionDelinquencyId())
+            ->select('CRM_Tickets.id',
+                'CRM_Tickets.AccountNumber',
+                'CRM_Tickets.ConsumerName',
+                'CRM_Towns.Town',
+                'CRM_Barangays.Barangay',
+                'CRM_Tickets.Sitio',
+                'CRM_TicketsRepository.ParentTicket',
+                'CRM_TicketsRepository.Name as Ticket',
+                'CRM_TicketsRepository.Type as TicketType',
+                'CRM_Tickets.Reason',
+                'CRM_Tickets.ContactNumber',
+                'CRM_Tickets.ReportedBy',
+                'CRM_Tickets.ORNumber',
+                'CRM_Tickets.ORDate',
+                'CRM_Tickets.GeoLocation',
+                'CRM_Tickets.Neighbor1',
+                'CRM_Tickets.Neighbor2',
+                'CRM_Tickets.Notes',
+                'CRM_Tickets.Status',
+                'CRM_Tickets.DateTimeDownloaded',
+                'CRM_Tickets.DateTimeLinemanArrived',
+                'CRM_Tickets.DateTimeLinemanExecuted',
+                'CRM_Tickets.UserId',
+                'CRM_ServiceConnectionCrew.StationName',
+                'CRM_Tickets.created_at',
+                'CRM_Tickets.updated_at',
+                'CRM_Tickets.Trash')
+            ->get();
+
+        return view('/tickets/print_ticket_bulk', [
+            'tickets' => $tickets
         ]);
     }
 }

@@ -350,6 +350,12 @@ use Illuminate\Support\Facades\Auth;
                             <i class="fas fa-circle nav-icon text-danger"></i><p>Change Meter</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('tickets.disconnection-assessments') }}"
+                        class="nav-link {{ Request::is('tickets.disconnection-assessments*') ? 'active' : '' }}">
+                            <i class="fas fa-circle nav-icon text-danger"></i><p>Disconnection</p>
+                        </a>
+                    </li>
                 </ul>
             </li>
 
@@ -366,12 +372,6 @@ use Illuminate\Support\Facades\Auth;
                 <a href="{{ route('tickets.assessments-ordinary-ticket') }}"
                 class="nav-link {{ Request::is('tickets.assessments-ordinary-ticket*') ? 'active' : '' }}">
                     <i class="fas fa-circle nav-icon text-danger"></i><p>Crew Assigning</p>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('tickets.disconnection-assessments') }}"
-                class="nav-link {{ Request::is('tickets.disconnection-assessments*') ? 'active' : '' }}">
-                    <i class="fas fa-circle nav-icon text-danger"></i><p>Disconnection</p>
                 </a>
             </li>
 

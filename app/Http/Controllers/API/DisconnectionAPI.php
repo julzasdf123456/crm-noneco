@@ -78,23 +78,23 @@ class DisconnectionAPI extends Controller {
         $discoHist->save();
 
         // CREATE DISCONNECTION TICKET
-        $ticket = new Tickets;
-        $ticket->id = IDGenerator::generateIDandRandString();
-        $ticket->AccountNumber = $request['AccountNumber'];
-        $ticket->ConsumerName = $request['ServiceAccountName'];
-        $ticket->Town = $request['Town'];
-        $ticket->Barangay = $request['Barangay'];
-        $ticket->Sitio = $request['Purok'];
-        $ticket->Ticket = Tickets::getDisconnectionDelinquencyId();
-        $ticket->Reason = 'Delinquency';
-        $ticket->GeoLocation = $request['LatitudeCaptured'] . ',' . $request['LongitudeCaptured'];
-        $ticket->Status = 'Executed';
-        $ticket->DateTimeDownloaded = $request['DateDisconnected'] . ' ' . $request['TimeDisconnected'];
-        $ticket->DateTimeLinemanArrived = $request['DateDisconnected'] . ' ' . $request['TimeDisconnected'];
-        $ticket->DateTimeLinemanExecuted = $request['DateDisconnected'] . ' ' . $request['TimeDisconnected'];
-        $ticket->UserId = $request['UserId'];
-        $ticket->Office = env('APP_LOCATION');
-        $ticket->save();
+        // $ticket = new Tickets;
+        // $ticket->id = IDGenerator::generateIDandRandString();
+        // $ticket->AccountNumber = $request['AccountNumber'];
+        // $ticket->ConsumerName = $request['ServiceAccountName'];
+        // $ticket->Town = $request['Town'];
+        // $ticket->Barangay = $request['Barangay'];
+        // $ticket->Sitio = $request['Purok'];
+        // $ticket->Ticket = Tickets::getDisconnectionDelinquencyId();
+        // $ticket->Reason = 'Delinquency';
+        // $ticket->GeoLocation = $request['LatitudeCaptured'] . ',' . $request['LongitudeCaptured'];
+        // $ticket->Status = 'Executed';
+        // $ticket->DateTimeDownloaded = $request['DateDisconnected'] . ' ' . $request['TimeDisconnected'];
+        // $ticket->DateTimeLinemanArrived = $request['DateDisconnected'] . ' ' . $request['TimeDisconnected'];
+        // $ticket->DateTimeLinemanExecuted = $request['DateDisconnected'] . ' ' . $request['TimeDisconnected'];
+        // $ticket->UserId = $request['UserId'];
+        // $ticket->Office = env('APP_LOCATION');
+        // $ticket->save();
 
         return response()->json($discoHist, $this->successStatus);
     }
