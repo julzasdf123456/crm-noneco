@@ -10,47 +10,87 @@ use App\Models\DisconnectionHistory;
 use App\Models\ServiceAccounts;
 use App\Models\IDGenerator;
 use App\Models\Tickets;
+use App\Models\TicketLogs;
 use App\Http\Requests\CreateReadingsRequest;
 
 class DisconnectionAPI extends Controller {
     public $successStatus = 200;
 
     public function getDisconnectionList(Request $request) {
-        $disconnectionList = DB::table('Billing_Bills')
-            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
-            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('Cashier_PaidBills.ServicePeriod', $request['ServicePeriod'])->pluck('Cashier_PaidBills.ObjectSourceId'))
-            ->where('Billing_Bills.ServicePeriod', $request['ServicePeriod'])
-            ->where('Billing_ServiceAccounts.AreaCode', $request['Area'])
-            ->whereRaw('DATEDIFF(dd, Billing_Bills.BillingDate, GETDATE()) > ?', [DisconnectionHistory::noOfDaysTillDisconnection()])
-            ->where('Billing_ServiceAccounts.AccountStatus', 'ACTIVE')
-            ->select('Billing_Bills.id as BillId',
-                'Billing_ServiceAccounts.id AS AccountNumber',
-                'Billing_ServiceAccounts.ServiceAccountName',
-                'Billing_ServiceAccounts.AccountStatus',
-                'Billing_ServiceAccounts.Town',
-                'Billing_ServiceAccounts.Barangay',
-                'Billing_ServiceAccounts.Purok',
-                'Billing_ServiceAccounts.AreaCode',
-                'Billing_ServiceAccounts.GroupCode',
-                'Billing_ServiceAccounts.Latitude',
-                'Billing_ServiceAccounts.Longitude',
-                'Billing_ServiceAccounts.SequenceCode',
-                'Billing_Bills.KwhUsed',
-                'Billing_Bills.EffectiveRate',
-                'Billing_Bills.NetAmount',
-                'Billing_Bills.AdditionalCharges',
-                'Billing_Bills.Deductions',
-                'Billing_Bills.BillingDate',
-                'Billing_Bills.ServiceDateFrom',
-                'Billing_Bills.ServiceDateTo',
-                'Billing_Bills.DueDate',
-                'Billing_Bills.ConsumerType',
-                'Billing_Bills.MeterNumber',
-                'Billing_Bills.ServicePeriod',
-                'Billing_Bills.BillNumber')
+        // $disconnectionList = DB::table('Billing_Bills')
+        //     ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+        //     ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('Cashier_PaidBills.ServicePeriod', $request['ServicePeriod'])->pluck('Cashier_PaidBills.ObjectSourceId'))
+        //     ->where('Billing_Bills.ServicePeriod', $request['ServicePeriod'])
+        //     ->where('Billing_ServiceAccounts.AreaCode', $request['Area'])
+        //     ->whereRaw('DATEDIFF(dd, Billing_Bills.BillingDate, GETDATE()) > ?', [DisconnectionHistory::noOfDaysTillDisconnection()])
+        //     ->where('Billing_ServiceAccounts.AccountStatus', 'ACTIVE')
+        //     ->select('Billing_Bills.id as BillId',
+        //         'Billing_ServiceAccounts.id AS AccountNumber',
+        //         'Billing_ServiceAccounts.ServiceAccountName',
+        //         'Billing_ServiceAccounts.AccountStatus',
+        //         'Billing_ServiceAccounts.Town',
+        //         'Billing_ServiceAccounts.Barangay',
+        //         'Billing_ServiceAccounts.Purok',
+        //         'Billing_ServiceAccounts.AreaCode',
+        //         'Billing_ServiceAccounts.GroupCode',
+        //         'Billing_ServiceAccounts.Latitude',
+        //         'Billing_ServiceAccounts.Longitude',
+        //         'Billing_ServiceAccounts.SequenceCode',
+        //         'Billing_Bills.KwhUsed',
+        //         'Billing_Bills.EffectiveRate',
+        //         'Billing_Bills.NetAmount',
+        //         'Billing_Bills.AdditionalCharges',
+        //         'Billing_Bills.Deductions',
+        //         'Billing_Bills.BillingDate',
+        //         'Billing_Bills.ServiceDateFrom',
+        //         'Billing_Bills.ServiceDateTo',
+        //         'Billing_Bills.DueDate',
+        //         'Billing_Bills.ConsumerType',
+        //         'Billing_Bills.MeterNumber',
+        //         'Billing_Bills.ServicePeriod',
+        //         'Billing_Bills.BillNumber')
+        //     ->get();
+        $disconnectionList = DB::table('CRM_Tickets')
+            ->leftJoin('Billing_ServiceAccounts', 'CRM_Tickets.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->leftJoin('CRM_Barangays', 'CRM_Tickets.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('CRM_Towns', 'CRM_Tickets.Town', '=', 'CRM_Towns.id')
+            ->where('CRM_Tickets.Ticket', Tickets::getDisconnectionDelinquencyId())
+            ->where('CRM_Tickets.Status', 'Received')
+            ->where('CRM_Tickets.Office', env('APP_LOCATION'))
+            ->whereNotNull('CRM_Tickets.ServicePeriod')
+            ->select('Billing_ServiceAccounts.id as AccountNumber',
+                    'CRM_Tickets.id as TicketId',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_ServiceAccounts.Purok as Sitio',
+                    'Billing_ServiceAccounts.AccountType as ConsumerType',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.Latitude',
+                    'Billing_ServiceAccounts.Longitude',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'CRM_Tickets.ServicePeriod',
+                    DB::raw("'No' AS IsUploaded"))
             ->get();
 
-        return response()->json($disconnectionList, $this->successStatus);
+        $arr = [];
+        foreach($disconnectionList as $item) {
+            array_push($arr, [
+                'AccountNumber' => $item->AccountNumber,
+                'TicketId' => $item->TicketId,
+                'ServiceAccountName' => $item->ServiceAccountName,
+                'Address' => Tickets::getAddress($item),
+                'ConsumerType' => $item->ConsumerType,
+                'AreaCode' => $item->AreaCode,
+                'Latitude' => $item->Latitude,
+                'Longitude' => $item->Longitude,
+                'SequenceCode' => $item->SequenceCode,
+                'ServicePeriod' => $item->ServicePeriod,
+                'IsUploaded' => $item->IsUploaded,
+            ]);
+        }
+
+        return response()->json($arr, $this->successStatus);
     }
 
     public function receiveDisconnectionUploads(Request $request) {
@@ -58,7 +98,7 @@ class DisconnectionAPI extends Controller {
         $account = ServiceAccounts::find($request['AccountNumber']);
 
         if ($account != null) {
-            $account->AccountStatus = $request['AccountStatus'];
+            $account->AccountStatus = 'DISCONNECTED';
             $account->DateDisconnected = $request['DateDisconnected'];
             $account->save();
         }
@@ -70,12 +110,31 @@ class DisconnectionAPI extends Controller {
         $discoHist->ServicePeriod = $request['ServicePeriod'];
         $discoHist->Latitude = $request['LatitudeCaptured'];
         $discoHist->Longitude = $request['LongitudeCaptured'];
-        $discoHist->BillId = $request['BillId'];
-        $discoHist->Status = $request['AccountStatus'];
+        $discoHist->Status = 'DISCONNECTED';
         $discoHist->UserId = $request['UserId'];
         $discoHist->DateDisconnected = $request['DateDisconnected'];
         $discoHist->TimeDisconnected = $request['TimeDisconnected'];
         $discoHist->save();
+
+        // UPDATE TICKETS
+        $ticket = Tickets::find($request['TicketId']);
+
+        if ($ticket != null) {
+            $ticket->DateTimeLinemanArrived = $request['DateDisconnected'] . ' ' . $request['TimeDisconnected'];
+            $ticket->DateTimeLinemanExecuted = $request['DateDisconnected'] . ' ' . $request['TimeDisconnected'];
+            $ticket->Status = 'Executed';
+            // ASSIGN CREW LATER
+            $ticket->save();
+
+            // CREATE LOG
+            $ticketLog = new TicketLogs;
+            $ticketLog->id = IDGenerator::generateIDandRandString();
+            $ticketLog->TicketId = $ticket->id;
+            $ticketLog->Log = "Disconnected and Uploaded";
+            $ticketLog->LogDetails = "Ticket automatically updated via Disconnection App Upload Module";
+            $ticketLog->UserId = $request['UserId'];
+            $ticketLog->save();
+        }
 
         // CREATE DISCONNECTION TICKET
         // $ticket = new Tickets;
