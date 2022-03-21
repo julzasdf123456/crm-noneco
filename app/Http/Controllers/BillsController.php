@@ -621,4 +621,12 @@ class BillsController extends AppBaseController
             return abort(404, "No Rate for this service period yet.");
         }
     }
+
+    public function adjustBill($billNumber) {
+        $bill = Bills::find($billNumber);
+
+        $account = ServiceAccounts::find($bill->AccountNumber);
+
+        echo json_encode(Bills::computeRegularBill($account, $bill->id, $bill->KwhUsed, $bill->PreviousKwh, $bill->PresentKwh, $bill->ServicePeriod, $bill->BillingDate, $bill->AdditionalCharges, $bill->Deductions), JSON_PRETTY_PRINT);
+    }
 }

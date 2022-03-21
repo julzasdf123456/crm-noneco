@@ -92,6 +92,38 @@
                                                 @endforeach
                                             </tr>
                                             <tr>
+                                                <th>Other Generation Rate Adjustment (OGA) (KWH)</th>
+                                                @foreach ($rates as $item)
+                                                    @if ($item->RateFor == $categoryValue->RateFor)
+                                                        <td class="text-right">{{ $item->OtherGenerationRateAdjustment==null ? '' : number_format($item->OtherGenerationRateAdjustment, 4) }}</td>
+                                                    @endif
+                                                @endforeach
+                                            </tr>
+                                            <tr>
+                                                <th>Other Transmission Cost Adjustment (OTCA) (KW)</th>
+                                                @foreach ($rates as $item)
+                                                    @if ($item->RateFor == $categoryValue->RateFor)
+                                                        <td class="text-right">{{ $item->OtherTransmissionCostAdjustmentKW==null ? '' : number_format($item->OtherTransmissionCostAdjustmentKW, 4) }}</td>
+                                                    @endif
+                                                @endforeach
+                                            </tr>
+                                            <tr>
+                                                <th>Other Transmission Cost Adjustment (OTCA) (KWH)</th>
+                                                @foreach ($rates as $item)
+                                                    @if ($item->RateFor == $categoryValue->RateFor)
+                                                        <td class="text-right">{{ $item->OtherTransmissionCostAdjustmentKWH==null ? '' : number_format($item->OtherTransmissionCostAdjustmentKWH, 4) }}</td>
+                                                    @endif
+                                                @endforeach
+                                            </tr>
+                                            <tr>
+                                                <th>Other System Loss Cost Adjustment (OSLA) (KWH)</th>
+                                                @foreach ($rates as $item)
+                                                    @if ($item->RateFor == $categoryValue->RateFor)
+                                                        <td class="text-right">{{ $item->OtherSystemLossCostAdjustment==null ? '' : number_format($item->OtherSystemLossCostAdjustment, 4) }}</td>
+                                                    @endif
+                                                @endforeach
+                                            </tr>
+                                            <tr>
                                                 <th>DISTRIBUTION/SUPPLY/METERING CHARGES:</th>
                                             </tr>
                                             <tr>
@@ -186,6 +218,22 @@
                                                 @endforeach
                                             </tr>
                                             <tr>
+                                                <th>Other Lifeline Rate Cost Adjustment (OLRA) (KWH)</th>
+                                                @foreach ($rates as $item)
+                                                    @if ($item->RateFor == $categoryValue->RateFor)
+                                                        <td class="text-right">{{ $item->OtherLifelineRateCostAdjustment==null ? '' : number_format($item->OtherLifelineRateCostAdjustment, 4) }}</td>
+                                                    @endif
+                                                @endforeach
+                                            </tr>
+                                            <tr>
+                                                <th>Senior Citizen Discount & Subsidy Adjustment (KWH)</th>
+                                                @foreach ($rates as $item)
+                                                    @if ($item->RateFor == $categoryValue->RateFor)
+                                                        <td class="text-right">{{ $item->SeniorCitizenDiscountAndSubsidyAdjustment==null ? '' : number_format($item->SeniorCitizenDiscountAndSubsidyAdjustment, 4) }}</td>
+                                                    @endif
+                                                @endforeach
+                                            </tr>
+                                            <tr>
                                                 <th>UNIVERSAL CHARGE:</th>
                                             </tr>
                                             <tr>
@@ -245,6 +293,14 @@
                                                 @endforeach
                                             </tr>
                                             <tr>
+                                                <th>TOTAL RATE PER KWH (VAT NOT INCLUDED, WITH ADJ.)</th>
+                                                @foreach ($rates as $item)
+                                                    @if ($item->RateFor == $categoryValue->RateFor)
+                                                        <th class="text-right">{{ $item->TotalRateVATExcludedWithAdjustments==null ? '' : number_format($item->TotalRateVATExcludedWithAdjustments, 4) }}</th>
+                                                    @endif
+                                                @endforeach
+                                            </tr>
+                                            <tr>
                                                 <td>VAT Rate: Generation</td>
                                                 @foreach ($rates as $item)
                                                     @if ($item->RateFor == $categoryValue->RateFor)
@@ -273,6 +329,22 @@
                                                 @foreach ($rates as $item)
                                                     @if ($item->RateFor == $categoryValue->RateFor)
                                                         <td class="text-right">{{ $item->DistributionVAT==null ? '' : number_format($item->DistributionVAT, 4) }}</td>
+                                                    @endif
+                                                @endforeach
+                                            </tr>
+                                            <tr>
+                                                <td>Franchise Tax</td>
+                                                @foreach ($rates as $item)
+                                                    @if ($item->RateFor == $categoryValue->RateFor)
+                                                        <td class="text-right">{{ $item->FranchiseTax==null ? '' : number_format($item->FranchiseTax, 4) }}</td>
+                                                    @endif
+                                                @endforeach
+                                            </tr>
+                                            <tr>
+                                                <td>Business Tax</td>
+                                                @foreach ($rates as $item)
+                                                    @if ($item->RateFor == $categoryValue->RateFor)
+                                                        <td class="text-right">{{ $item->BusinessTax==null ? '' : number_format($item->BusinessTax, 4) }}</td>
                                                     @endif
                                                 @endforeach
                                             </tr>

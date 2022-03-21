@@ -43,7 +43,7 @@
                     </div>
 
                     <!-- RateFor Field -->
-                    <div class="form-group col-lg-8 offset-lg-2 col-md-12 col-sm-12">
+                    {{-- <div class="form-group col-lg-8 offset-lg-2 col-md-12 col-sm-12">
                         {!! Form::label('RateFor', 'Rates For District:') !!}
                         <select name="RateFor" id="RateFor" class="form-control">
                             <option value="OVERALL">OVERALL</option>
@@ -57,7 +57,7 @@
                             <option value="TOBOSO">TOBOSO</option>
                             <option value="VICTORIAS">VICTORIAS</option>
                         </select>
-                    </div>
+                    </div> --}}
 
                     <div class="form-group col-lg-8 offset-lg-2 col-md-12 col-sm-12">
                         {!! Form::label('file', 'Select Rate Template (.xls, .xlsx):') !!}

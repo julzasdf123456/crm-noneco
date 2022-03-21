@@ -18,6 +18,7 @@ use App\Imports\IndustrialHVRate;
 use App\Imports\CommercialHVRate;
 use App\Imports\PublicBuildingHVRate;
 use App\Models\Rates;
+use App\Models\RateUploadHelper;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Flash;
@@ -181,72 +182,62 @@ class RatesController extends AppBaseController
         if ($request->file('file') != null) {
 
             $period = $request['ServicePeriod'];
-            $district = $request['RateFor'];
             $file = $request->file('file');
             $userId = Auth::id();
 
-            $areaCode = '';
-            if ($district == 'VICTORIAS') {
-                $areaCode = '04';
-            } elseif ($district == 'TOBOSO') {
-                $areaCode = '09';
-            } elseif ($district == 'SAN CARLOS') {
-                $areaCode = '05';
-            } elseif ($district == 'SAGAY') {
-                $areaCode = '06';
-            } elseif ($district == 'MANAPLA') {
-                $areaCode = '03';
-            } elseif ($district == 'ESCALANTE') {
-                $areaCode = '07';
-            } elseif ($district == 'E.B. MAGALONA') {
-                $areaCode = '02';
-            } elseif ($district == 'CALATRAVA') {
-                $areaCode = '08';
-            } elseif ($district == 'CADIZ') {
-                $areaCode = '01';
-            } else {
-                $areaCode = '00';
+            $districts = [
+                new RateUploadHelper('02', 'E.B. MAGALONA', 63),
+                new RateUploadHelper('04', 'VICTORIAS', 118),
+                new RateUploadHelper('05', 'MANAPLA', 173),
+                new RateUploadHelper('01', 'CADIZ', 228),
+                new RateUploadHelper('06', 'SAGAY', 283),
+                new RateUploadHelper('07', 'ESCALANTE', 338),
+                new RateUploadHelper('09', 'TOBOSO', 393),
+                new RateUploadHelper('08', 'CALATRAVA', 448),
+                new RateUploadHelper('05', 'SAN CARLOS', 503),
+            ];
+
+            foreach($districts as $item) {
+                // RESIDENTIAL
+                $residentialRates = new ResidentialRate($period, $userId, $item->districtName, $item->area, $item->startingCell, 0);
+                Excel::import($residentialRates, $file);
+
+                // COMMERCIAL
+                $commercialRates = new CommercialRate($period, $userId, $item->districtName, $item->area, $item->startingCell, 0);
+                Excel::import($commercialRates, $file);
+
+                 // INDUSTRIAL
+                $industrialRates = new IndustrialRate($period, $userId, $item->districtName, $item->area, $item->startingCell, 0);
+                Excel::import($industrialRates, $file);
+
+                // WATER SYSTEMS
+                $waterSystemsRates = new WaterSystemsRate($period, $userId, $item->districtName, $item->area, $item->startingCell, 0);
+                Excel::import($waterSystemsRates, $file);
+
+                // PUBLIC BUILDING
+                $publicBuildingRates = new PublicBuildingRate($period, $userId, $item->districtName, $item->area, $item->startingCell, 0);
+                Excel::import($publicBuildingRates, $file);
+
+                // STREETLIGHTS
+                $streetlightsRates = new StreetlightsRate($period, $userId, $item->districtName, $item->area, $item->startingCell, 0);
+                Excel::import($streetlightsRates, $file);
+
+                // INDUSTRIAL HIGH VOLTAGE
+                $industrialHvRates = new IndustrialHVRate($period, $userId, $item->districtName, $item->area, $item->startingCell, 0);
+                Excel::import($industrialHvRates, $file);
+
+                // COMMERCIAL HIGH VOLTAGE
+                $commercialHvRates = new CommercialHVRate($period, $userId, $item->districtName, $item->area, $item->startingCell, 0);
+                Excel::import($commercialHvRates, $file);
+
+                // PUBLIC BUILDING
+                $publicBuildingHVRates = new PublicBuildingHVRate($period, $userId, $item->districtName, $item->area, $item->startingCell, 0);
+                Excel::import($publicBuildingHVRates, $file);
             }
 
-            // RESIDENTIAL
-            $residentialRates = new ResidentialRate($period, $userId, $district, $areaCode);
-            Excel::import($residentialRates, $file);
+            Flash::success('Rates for ' . date('F Y', strtotime($period)) . ' uploaded successfully.');
 
-            // COMMERCIAL
-            $commercialRates = new CommercialRate($period, $userId, $district, $areaCode);
-            Excel::import($commercialRates, $file);
-
-            // INDUSTRIAL
-            $industrialRates = new IndustrialRate($period, $userId, $district, $areaCode);
-            Excel::import($industrialRates, $file);
-
-            // WATER SYSTEMS
-            $waterSystemsRates = new WaterSystemsRate($period, $userId, $district, $areaCode);
-            Excel::import($waterSystemsRates, $file);
-
-            // PUBLIC BUILDING
-            $publicBuildingRates = new PublicBuildingRate($period, $userId, $district, $areaCode);
-            Excel::import($publicBuildingRates, $file);
-
-            // STREETLIGHTS
-            $streetlightsRates = new StreetlightsRate($period, $userId, $district, $areaCode);
-            Excel::import($streetlightsRates, $file);
-
-            // INDUSTRIAL HIGH VOLTAGE
-            $industrialHvRates = new IndustrialHVRate($period, $userId, $district, $areaCode);
-            Excel::import($industrialHvRates, $file);
-
-            // COMMERCIAL HIGH VOLTAGE
-            $commercialHvRates = new CommercialHVRate($period, $userId, $district, $areaCode);
-            Excel::import($commercialHvRates, $file);
-
-            // PUBLIC BUILDING
-            $publicBuildingHVRates = new PublicBuildingHVRate($period, $userId, $district, $areaCode);
-            Excel::import($publicBuildingHVRates, $file);
-
-            Flash::success('Rates for ' . $district . ' uploaded successfully.');
-
-            return redirect(route('rates.upload-rate'));
+            return redirect(route('rates.index'));
         } else {
             return abort(404, "No file specified!");
         }
@@ -279,3 +270,4 @@ class RatesController extends AppBaseController
         return redirect(route('rates.index'));
     }
 }
+

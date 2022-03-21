@@ -70,7 +70,9 @@ You can also check out our other paid products on [CodeCanyon](https://codecanyo
 - Disconnection Delinquency Ticket ID - in Tickets, configure the ID of the Disconnection Delinquency inside Tickets.getDisconnectionDelinquencyId() function
 
 ### Billing - Rates
-- In the "Rates Template", make sure to add the Real Property Tax (RPT) to the overall rate during deployment
+- In the "Rates Template", make sure to add the Real Property Tax (RPT) to the overall rate during deployment (optional)
+- Make Sure to use the FOR UPLOAD Sheet or FILE
+- Also, make sure that the arrangement of Districts on the For Upload Template is not interchanged
 
 ### User - Special Authentication
 - In UsersController.authenticate(), update the permissions

@@ -354,6 +354,7 @@ Route::get('/bills/zero-readings-view/{readingId}', [App\Http\Controllers\BillsC
 Route::get('/bills/average-bill/{readingId}', [App\Http\Controllers\BillsController::class, 'averageBill'])->name('bills.average-bill');
 Route::get('/bills/rebill-reading-adjustment/{readingId}', [App\Http\Controllers\BillsController::class, 'rebillReadingAdjustment'])->name('bills.rebill-reading-adjustment');
 Route::post('/bills/rebill/{readingId}', [App\Http\Controllers\BillsController::class, 'rebill'])->name('bills.rebill');
+Route::get('/bills/adjust-bill/{billId}', [App\Http\Controllers\BillsController::class, 'adjustBill'])->name('bills.adjust-bill');
 Route::resource('bills', App\Http\Controllers\BillsController::class);
 
 

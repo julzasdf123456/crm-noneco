@@ -23,7 +23,7 @@
                         <td>{{ $item->PostingDate != null ? date('F d, Y', strtotime($item->PostingDate)) : '-' }}</td>
                         <td class="text-right">
                             @if ($item->PostingDate == null)
-                                <button class="btn btn-link btn-sm text-warning" title="Adjust Reading"><i class="fas fa-pen"></i></button>
+                                <a href="{{ route('bills.adjust-bill', [$item->id]) }}" class="btn btn-link btn-sm text-warning" title="Adjust Reading"><i class="fas fa-pen"></i></a>
                             @endif
                             <a class="btn btn-link" title="View Bill"><i class="fas fa-eye"></i></a>
                         </td>

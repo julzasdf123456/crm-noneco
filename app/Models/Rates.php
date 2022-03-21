@@ -97,7 +97,16 @@ class Rates extends Model
         'TotalRateVATIncluded',
         'UserId',
         'RealPropertyTax',
-        'AreaCode'
+        'AreaCode',
+        'OtherGenerationRateAdjustment',
+        'OtherTransmissionCostAdjustmentKW',
+        'OtherTransmissionCostAdjustmentKWH',
+        'OtherSystemLossCostAdjustment',
+        'OtherLifelineRateCostAdjustment',
+        'SeniorCitizenDiscountAndSubsidyAdjustment',
+        'FranchiseTax',
+        'BusinessTax',
+        'TotalRateVATExcludedWithAdjustments'
     ];
 
     /**
@@ -140,7 +149,16 @@ class Rates extends Model
         'TotalRateVATIncluded' => 'string',
         'UserId' => 'string',
         'RealPropertyTax' => 'string',
-        'AreaCode' => 'string'
+        'AreaCode' => 'string',
+        'OtherGenerationRateAdjustment' => 'string',
+        'OtherTransmissionCostAdjustmentKW' => 'string',
+        'OtherTransmissionCostAdjustmentKWH' => 'string',
+        'OtherSystemLossCostAdjustment' => 'string',
+        'OtherLifelineRateCostAdjustment' => 'string',
+        'SeniorCitizenDiscountAndSubsidyAdjustment' => 'string',
+        'FranchiseTax' => 'string',
+        'BusinessTax' => 'string',
+        'TotalRateVATExcludedWithAdjustments' => 'string'
     ];
 
     /**
@@ -185,7 +203,16 @@ class Rates extends Model
         'created_at' => 'nullable',
         'updated_at' => 'nullable',
         'RealPropertyTax' => 'nullable|string',
-        'AreaCode' => 'nullable|string'
+        'AreaCode' => 'nullable|string',
+        'OtherGenerationRateAdjustment' => 'nullable|string',
+        'OtherTransmissionCostAdjustmentKW' => 'nullable|string',
+        'OtherTransmissionCostAdjustmentKWH' => 'nullable|string',
+        'OtherSystemLossCostAdjustment' => 'nullable|string',
+        'OtherLifelineRateCostAdjustment' => 'nullable|string',
+        'SeniorCitizenDiscountAndSubsidyAdjustment' => 'nullable|string',
+        'FranchiseTax' => 'nullable|string',
+        'BusinessTax' => 'nullable|string',
+        'TotalRateVATExcludedWithAdjustments' => 'nullable|string'
     ];
 
     public static function floatRate($rate) {
