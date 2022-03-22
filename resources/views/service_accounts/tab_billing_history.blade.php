@@ -25,7 +25,7 @@
                             @if ($item->PostingDate == null)
                                 <a href="{{ route('bills.adjust-bill', [$item->id]) }}" class="btn btn-link btn-sm text-warning" title="Adjust Reading"><i class="fas fa-pen"></i></a>
                             @endif
-                            <a class="btn btn-link" title="View Bill"><i class="fas fa-eye"></i></a>
+                            <a href="{{ route('bills.show', [$item->id]) }}" class="btn btn-link" title="View Bill"><i class="fas fa-eye"></i></a>
                         </td>
                     </tr>
                 @endforeach

@@ -69,6 +69,16 @@ class CreateTableBills extends Migration
             $table->string('SystemLossVAT', 20)->nullable();
             $table->string('DistributionVAT', 20)->nullable();
             $table->string('RealPropertyTax', 20)->nullable();
+            $table->string('OtherGenerationRateAdjustment', 20)->nullable();
+            $table->string('OtherTransmissionCostAdjustmentKW', 20)->nullable();
+            $table->string('OtherTransmissionCostAdjustmentKWH', 20)->nullable();
+            $table->string('OtherSystemLossCostAdjustment', 20)->nullable();
+            $table->string('OtherLifelineRateCostAdjustment', 20)->nullable();
+            $table->string('SeniorCitizenDiscountAndSubsidyAdjustment', 20)->nullable();
+            $table->string('FranchiseTax', 20)->nullable();
+            $table->string('BusinessTax', 20)->nullable();
+
+            $table->string('AdjustmentType', 30)->nullable(); // Direct, etc
 
             $table->string('Notes', 2500)->nullable();
             $table->string('UserId')->nullable();

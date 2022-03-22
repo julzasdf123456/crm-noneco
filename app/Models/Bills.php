@@ -145,6 +145,15 @@ class Bills extends Model
         'BilledFrom',
         'AveragedCount',
         'MergedToCollectible',
+        'OtherGenerationRateAdjustment',
+        'OtherTransmissionCostAdjustmentKW',
+        'OtherTransmissionCostAdjustmentKWH',
+        'OtherSystemLossCostAdjustment',
+        'OtherLifelineRateCostAdjustment',
+        'SeniorCitizenDiscountAndSubsidyAdjustment',
+        'FranchiseTax',
+        'BusinessTax',
+        'AdjustmentType'
     ];
 
     /**
@@ -208,7 +217,16 @@ class Bills extends Model
         'UserId' => 'string',
         'BilledFrom' => 'string',
         'AveragedCount' => 'string',
-        'MergedToCollectible' => 'string'
+        'MergedToCollectible' => 'string',
+        'OtherGenerationRateAdjustment' => 'string',
+        'OtherTransmissionCostAdjustmentKW' => 'string',
+        'OtherTransmissionCostAdjustmentKWH' => 'string',
+        'OtherSystemLossCostAdjustment' => 'string',
+        'OtherLifelineRateCostAdjustment' => 'string',
+        'SeniorCitizenDiscountAndSubsidyAdjustment' => 'string',
+        'FranchiseTax' => 'string',
+        'BusinessTax' => 'string',
+        'AdjustmentType' => 'string'
     ];
 
     /**
@@ -274,7 +292,16 @@ class Bills extends Model
         'created_at' => 'nullable',
         'updated_at' => 'nullable',
         'AveragedCount' => 'nullable|string',
-        'MergedToCollectible' => 'nullable|string'
+        'MergedToCollectible' => 'nullable|string',
+        'OtherGenerationRateAdjustment' => 'nullable|string',
+        'OtherTransmissionCostAdjustmentKW' => 'nullable|string',
+        'OtherTransmissionCostAdjustmentKWH' => 'nullable|string',
+        'OtherSystemLossCostAdjustment' => 'nullable|string',
+        'OtherLifelineRateCostAdjustment' => 'nullable|string',
+        'SeniorCitizenDiscountAndSubsidyAdjustment' => 'nullable|string',
+        'FranchiseTax' => 'nullable|string',
+        'BusinessTax' => 'nullable|string',
+        'AdjustmentType' => 'nullable|string'
     ];
 
     public static function createDueDate($readDate) {
@@ -338,7 +365,15 @@ class Bills extends Model
                 $bill->TransmissionVAT +
                 $bill->SystemLossVAT +
                 $bill->DistributionVAT + 
-                $bill->RealPropertyTax;
+                $bill->RealPropertyTax +
+                $bill->OtherGenerationRateAdjustment +
+                $bill->OtherTransmissionCostAdjustmentKW +
+                $bill->OtherTransmissionCostAdjustmentKWH +
+                $bill->OtherSystemLossCostAdjustment +
+                $bill->OtherLifelineRateCostAdjustment +
+                $bill->SeniorCitizenDiscountAndSubsidyAdjustment +
+                $bill->FranchiseTax +
+                $bill->BusinessTax;
 
         return round($amount, 4);
     }
@@ -431,6 +466,15 @@ class Bills extends Model
                     $bill->SystemLossVAT = round($kwh * Rates::floatRate($rate->SystemLossVAT), 4);
                     $bill->DistributionVAT = round($kwh * Rates::floatRate($rate->DistributionVAT), 4);
                     $bill->RealPropertyTax = round($kwh * Rates::floatRate($rate->RealPropertyTax), 4);
+                    
+                    $bill->OtherGenerationRateAdjustment = round($kwh * Rates::floatRate($rate->OtherGenerationRateAdjustment), 4);
+                    $bill->OtherTransmissionCostAdjustmentKW = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKW), 4);
+                    $bill->OtherTransmissionCostAdjustmentKWH = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKWH), 4);
+                    $bill->OtherSystemLossCostAdjustment = round($kwh * Rates::floatRate($rate->OtherSystemLossCostAdjustment), 4);
+                    $bill->OtherLifelineRateCostAdjustment = round($kwh * Rates::floatRate($rate->OtherLifelineRateCostAdjustment), 4);
+                    $bill->SeniorCitizenDiscountAndSubsidyAdjustment = round($kwh * Rates::floatRate($rate->SeniorCitizenDiscountAndSubsidyAdjustment), 4);
+                    $bill->FranchiseTax = round($kwh * Rates::floatRate($rate->FranchiseTax), 4);
+                    $bill->BusinessTax = round($kwh * Rates::floatRate($rate->BusinessTax), 4);
 
                     $bill->LifelineRate = round(Bills::computeLifeLine($bill, $rate), 4);
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
@@ -489,6 +533,15 @@ class Bills extends Model
                     $bill->DistributionVAT = round($kwh * Rates::floatRate($rate->DistributionVAT), 4);
                     $bill->RealPropertyTax = round($kwh * Rates::floatRate($rate->RealPropertyTax), 4);
 
+                    $bill->OtherGenerationRateAdjustment = round($kwh * Rates::floatRate($rate->OtherGenerationRateAdjustment), 4);
+                    $bill->OtherTransmissionCostAdjustmentKW = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKW), 4);
+                    $bill->OtherTransmissionCostAdjustmentKWH = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKWH), 4);
+                    $bill->OtherSystemLossCostAdjustment = round($kwh * Rates::floatRate($rate->OtherSystemLossCostAdjustment), 4);
+                    $bill->OtherLifelineRateCostAdjustment = round($kwh * Rates::floatRate($rate->OtherLifelineRateCostAdjustment), 4);
+                    $bill->SeniorCitizenDiscountAndSubsidyAdjustment = round($kwh * Rates::floatRate($rate->SeniorCitizenDiscountAndSubsidyAdjustment), 4);
+                    $bill->FranchiseTax = round($kwh * Rates::floatRate($rate->FranchiseTax), 4);
+                    $bill->BusinessTax = round($kwh * Rates::floatRate($rate->BusinessTax), 4);
+
                     $bill->LifelineRate = round(Bills::computeLifeLine($bill, $rate), 4);
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
                     
@@ -546,6 +599,15 @@ class Bills extends Model
                     $bill->SystemLossVAT = round($kwh * Rates::floatRate($rate->SystemLossVAT), 4);
                     $bill->DistributionVAT = round($kwh * Rates::floatRate($rate->DistributionVAT), 4);
                     $bill->RealPropertyTax = round($kwh * Rates::floatRate($rate->RealPropertyTax), 4);
+
+                    $bill->OtherGenerationRateAdjustment = round($kwh * Rates::floatRate($rate->OtherGenerationRateAdjustment), 4);
+                    $bill->OtherTransmissionCostAdjustmentKW = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKW), 4);
+                    $bill->OtherTransmissionCostAdjustmentKWH = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKWH), 4);
+                    $bill->OtherSystemLossCostAdjustment = round($kwh * Rates::floatRate($rate->OtherSystemLossCostAdjustment), 4);
+                    $bill->OtherLifelineRateCostAdjustment = round($kwh * Rates::floatRate($rate->OtherLifelineRateCostAdjustment), 4);
+                    $bill->SeniorCitizenDiscountAndSubsidyAdjustment = round($kwh * Rates::floatRate($rate->SeniorCitizenDiscountAndSubsidyAdjustment), 4);
+                    $bill->FranchiseTax = round($kwh * Rates::floatRate($rate->FranchiseTax), 4);
+                    $bill->BusinessTax = round($kwh * Rates::floatRate($rate->BusinessTax), 4);
 
                     $bill->LifelineRate = round(Bills::computeLifeLine($bill, $rate), 4);
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);

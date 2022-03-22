@@ -14,6 +14,7 @@ use App\Models\ReadingImages;
 use App\Models\ServiceAccounts;
 use App\Models\Rates;
 use App\Models\Bills;
+use App\Models\BillingMeters;
 use App\Models\IDGenerator;
 use App\Models\ArrearsLedgerDistribution;
 use App\Repositories\ReadingsRepository;
@@ -84,6 +85,46 @@ class BillsController extends AppBaseController
     public function show($id)
     {
         $bills = $this->billsRepository->find($id);
+        $account = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.ForDistribution',
+                    'Billing_ServiceAccounts.Organization',
+                    'Billing_ServiceAccounts.Main',
+                    'Billing_ServiceAccounts.GroupCode',
+                    'Billing_ServiceAccounts.Multiplier',
+                    'Billing_ServiceAccounts.Coreloss',
+                    'Billing_ServiceAccounts.ConnectionDate',
+                    'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.SeniorCitizen',
+                    'Billing_ServiceAccounts.Evat5Percent',
+                    'Billing_ServiceAccounts.Ewt2Percent',
+                    'Billing_ServiceAccounts.Contestable',
+                    'Billing_ServiceAccounts.NetMetered',
+                    'Billing_ServiceAccounts.AccountRetention',
+                    'Billing_ServiceAccounts.DurationInMonths',
+                    'Billing_ServiceAccounts.AccountExpiration',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->where('Billing_ServiceAccounts.id', $bills->AccountNumber)
+            ->first();
+
+        $meters = BillingMeters::where('ServiceAccountId', $bills->AccountNumber)
+            ->orderByDesc('created_at')
+            ->first();
+
+        $rate = Rates::where('ServicePeriod', $bills->ServicePeriod)
+            ->where('ConsumerType', $bills->ConsumerType)
+            ->first();
 
         if (empty($bills)) {
             Flash::error('Bills not found');
@@ -91,7 +132,12 @@ class BillsController extends AppBaseController
             return redirect(route('bills.index'));
         }
 
-        return view('bills.show')->with('bills', $bills);
+        return view('bills.show', [
+            'bills' => $bills,
+            'account' => $account,
+            'meters' => $meters,
+            'rate' => $rate,
+        ]);
     }
 
     /**
@@ -136,7 +182,7 @@ class BillsController extends AppBaseController
 
         Flash::success('Bills updated successfully.');
 
-        return redirect(route('bills.index'));
+        return redirect(route('serviceAccounts.show', [$bills->AccountNumber]));
     }
 
     /**
@@ -627,6 +673,17 @@ class BillsController extends AppBaseController
 
         $account = ServiceAccounts::find($bill->AccountNumber);
 
-        echo json_encode(Bills::computeRegularBill($account, $bill->id, $bill->KwhUsed, $bill->PreviousKwh, $bill->PresentKwh, $bill->ServicePeriod, $bill->BillingDate, $bill->AdditionalCharges, $bill->Deductions), JSON_PRETTY_PRINT);
+        return view('/bills/adjust_bill', [
+            'bill' => $bill,
+            'account' => $account,
+        ]);
+    }
+
+    public function fetchBillAdjustmentData(Request $request) {
+        $bill = Bills::find($request['BillId']);
+
+        $account = ServiceAccounts::find($request['AccountNumber']);
+
+        return response()->json(Bills::computeRegularBill($account, $bill->id, $request['KwhUsed'], $bill->PreviousKwh, $bill->PresentKwh, $bill->ServicePeriod, $bill->BillingDate, 0, 0), 200);
     }
 }

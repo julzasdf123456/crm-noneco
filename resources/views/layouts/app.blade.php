@@ -154,6 +154,10 @@
             color: var(--form-control-disabled);
             cursor: not-allowed;
         }
+
+        .indent-td {
+            padding-left: 28px !important;
+        }
     </style>
 
     @yield('third_party_stylesheets')
