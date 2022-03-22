@@ -5,7 +5,7 @@
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h4>Adjust {{ $account->ServiceAccountName }}'s Bill</h4>
+                <h4>Adjust {{ $account->ServiceAccountName }}'s Bill (Account No: <strong>{{ $bill->AccountNumber }}</strong>)</h4>
             </div>
         </div>
     </div>
@@ -16,7 +16,7 @@
         <div class="card">
             {!! Form::model($bill, ['route' => ['bills.update', $bill->id], 'method' => 'patch']) !!}
             <div class="card-header">
-                <span class="card-title">Bill Number : <strong>{{ $bill->BillNumber }}</strong> | Account No: <strong>{{ $bill->AccountNumber }}</strong> | Billing Month: <strong>{{ date('F Y', strtotime($bill->ServicePeriod)) }}</strong></span>
+                <span class="card-title">Bill Number : <strong>{{ $bill->BillNumber }}</strong> | Rate: <strong>{{ number_format($bill->EffectiveRate, 4) }}</strong> | Billing Month: <strong>{{ date('F Y', strtotime($bill->ServicePeriod)) }}</strong></span>
                 
                 <div class="card-tools">
                     <button type="submit" class="btn btn-primary">Save and Proceed</button>

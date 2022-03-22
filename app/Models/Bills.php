@@ -380,7 +380,7 @@ class Bills extends Model
 
     // MODIFY THIS
     public static function computeLifeLine($bill, $rate) {
-        $kwhUsed = floatval($bill->KwhUsed);
+        $kwhUsed = floatval($bill->KwhUsed) + floatval($bill->Multiplier);
         // MODIFY THIS
         $deductibles = $bill->GenerationSystemCharge +
                     $bill->TransmissionDeliveryChargeKWH;
@@ -396,7 +396,7 @@ class Bills extends Model
 
     // MODIFY HIS
     public static function computeSeniorCitizen($account, $bill, $rate) {
-        $kwhUsed = floatval($bill->KwhUsed);
+        $kwhUsed = floatval($bill->KwhUsed) + floatval($bill->Multiplier);
         // MODIFY THIS
         $deductibles = $bill->GenerationSystemCharge +
                     $bill->TransmissionDeliveryChargeKWH;
@@ -421,7 +421,9 @@ class Bills extends Model
         if ($rate != null) {            
             // VARIABLES
             $effectiveRate = Rates::floatRate($rate->TotalRateVATIncluded);
-            $kwhAmount = round(floatval($kwh), 4);
+            $kwhAmountUsed = round(floatval($kwh), 4);
+            $multiplier = round(floatval($account->Multiplier != null ? $account->Multiplier : 1), 4);
+            $kwh = $kwhAmountUsed * $multiplier;
             $additionalCharges = round(floatval($additionalCharges));
             $deductions = round(floatval($deductions));
 
@@ -430,8 +432,8 @@ class Bills extends Model
                 $bill = Bills::find($billId);
 
                 if ($bill != null) {
-                    $bill->KwhUsed = $kwhAmount;
-                    $bill->KwhAmount = round($kwhAmount * $effectiveRate, 2);
+                    $bill->KwhUsed = $kwhAmountUsed;
+                    $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
                     $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
@@ -440,6 +442,8 @@ class Bills extends Model
                     $bill->MeterNumber = $meter != null ? $meter->SerialNumber : null;
                     $bill->ConsumerType = $account->AccountType;
                     $bill->BillType = $account->AccountType;    
+                    $bill->Multiplier = $account->Multiplier;  
+                    $bill->Coreloss = $account->Coreloss;  
 
                     // CHARGES
                     $bill->GenerationSystemCharge = round($kwh * Rates::floatRate($rate->GenerationSystemCharge), 4);
@@ -496,8 +500,8 @@ class Bills extends Model
                     ->first();
 
                 if ($bill != null) {
-                    $bill->KwhUsed = $kwhAmount;
-                    $bill->KwhAmount = round($kwhAmount * $effectiveRate, 2);
+                    $bill->KwhUsed = $kwhAmountUsed;
+                    $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
                     $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
@@ -506,6 +510,8 @@ class Bills extends Model
                     $bill->MeterNumber = $meter != null ? $meter->SerialNumber : null;
                     $bill->ConsumerType = $account->AccountType;
                     $bill->BillType = $account->AccountType;    
+                    $bill->Multiplier = $account->Multiplier;  
+                    $bill->Coreloss = $account->Coreloss;   
 
                     // CHARGES
                     $bill->GenerationSystemCharge = round($kwh * Rates::floatRate($rate->GenerationSystemCharge), 4);
@@ -560,11 +566,11 @@ class Bills extends Model
                     $bill->ServicePeriod = $period;
                     $bill->Multiplier = $account->Multiplier;
                     $bill->Coreloss = $account->Coreloss;
-                    $bill->KwhUsed = $kwhAmount;
+                    $bill->KwhUsed = $kwhAmountUsed;
                     $bill->PreviousKwh = round(floatval($prev), 4);
                     $bill->PresentKwh = round(floatval($pres), 4);
                     $bill->EffectiveRate = $effectiveRate;
-                    $bill->KwhAmount = round($kwhAmount * $effectiveRate, 2);
+                    $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
                     $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
@@ -572,7 +578,9 @@ class Bills extends Model
                     $bill->DueDate = Bills::createDueDate($readDate);
                     $bill->MeterNumber = $meter != null ? $meter->SerialNumber : null;
                     $bill->ConsumerType = $account->AccountType;
-                    $bill->BillType = $account->AccountType;    
+                    $bill->BillType = $account->AccountType;  
+                    $bill->Multiplier = $account->Multiplier;  
+                    $bill->Coreloss = $account->Coreloss;     
 
                     // CHARGES
                     $bill->GenerationSystemCharge = round($kwh * Rates::floatRate($rate->GenerationSystemCharge), 4);
