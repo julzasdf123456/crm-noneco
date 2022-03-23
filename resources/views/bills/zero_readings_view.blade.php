@@ -1,7 +1,9 @@
 @php
     use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Facades\Auth;
     use App\Models\ServiceAccounts;
     use App\Models\Users;
+    use App\Models\IDGenerator;
 
     $files = Storage::disk('public')->allFiles('/documents/' . $reading->AccountNumber . '/images');
 @endphp
@@ -42,7 +44,7 @@
                         <span class="card-title">Reading Details</span>
 
                         <div class="card-tools">
-                            <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#modal-sa"><i class="fas fa-shield-alt ico-tab-mini"></i>Adjust Reading</button>
+                            {{-- <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#modal-sa"><i class="fas fa-shield-alt ico-tab-mini"></i>Adjust Reading</button> --}}
                             <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modal-confirm">Average Bill</button>
                         </div>
                     </div>
@@ -93,6 +95,20 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <div class="card-footer">
+                        <p>Adjust Reading</p>
+
+                        <div class="row">
+                            <div class="form-group col-lg-6">
+                                <input type="number" step="any" class="form-control" id="KwhUsed" placeholder="Kwh Used" value="{{ $pendingAdjustments != null ? $pendingAdjustments->KwhUsed : '' }}">
+                            </div>
+
+                            <div class="col-lg-6">
+                                <button class="btn btn-primary" id="adjustBtn">Adjust</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -217,6 +233,32 @@
                     console.log(error)
                     alert('Password authentication failed')
                 }
+            })
+        })
+
+        $(document).ready(function() {
+            $('#adjustBtn').on('click', function() {
+                $.ajax({
+                    url : '/pendingBillAdjustments/',
+                    type : 'POST',
+                    data : {
+                        _token : "{{ csrf_token() }}",
+                        id : "{{ IDGenerator::generateIDandRandString() }}",
+                        ReadingId : "{{ $reading->id }}",
+                        KwhUsed : $('#KwhUsed').val(),
+                        AccountNumber : "{{ $reading->AccountNumber }}",
+                        ServicePeriod : "{{ $reading->ServicePeriod }}",
+                        ReadDate : "{{ date('Y-m-d', strtotime($reading->ReadingTimestamp)) }}",
+                        UserId : "{{ Auth::id() }}",
+                        Office : "{{ env('APP_LOCATION') }}",
+                    },
+                    success : function(res) {
+                        window.location.href = "{{ url('/bills/unbilled-readings-console') }}" + "/" + "{{ $reading->ServicePeriod }}"
+                    },
+                    error : function(err) {
+                        alert('An error occurred while adjusting this reading')
+                    }
+                })
             })
         })
     </script>

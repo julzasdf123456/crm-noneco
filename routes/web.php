@@ -180,6 +180,8 @@ Route::get('/service_accounts/merge-all-bill-arrears/{id}', [App\Http\Controller
 Route::get('/service_accounts/unmerge-all-bill-arrears/{id}', [App\Http\Controllers\ServiceAccountsController::class,  'unmergeAllBillArrears'])->name('serviceAccounts.unmerge-all-bill-arrears');
 Route::get('/service_accounts/unmerge-bill-arrear/{billId}', [App\Http\Controllers\ServiceAccountsController::class,  'unmergeBillArrear'])->name('serviceAccounts.unmerge-bill-arrear');
 Route::get('/service_accounts/merge-bill-arrear/{billId}', [App\Http\Controllers\ServiceAccountsController::class,  'mergeBillArrear'])->name('serviceAccounts.merge-bill-arrear');
+Route::get('/service_accounts/accounts-map-view', [App\Http\Controllers\ServiceAccountsController::class,  'accountsMapView'])->name('serviceAccounts.accounts-map-view');
+Route::get('/service_accounts/get-accounts-by-town', [App\Http\Controllers\ServiceAccountsController::class,  'getAccountsByTown'])->name('serviceAccounts.get-accounts-by-town');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 
@@ -415,3 +417,9 @@ Route::resource('accountPayables', App\Http\Controllers\AccountPayablesControlle
 Route::get('/cache_other_payments/fetch-cached', [App\Http\Controllers\CacheOtherPaymentsController::class, 'fetchCached'])->name('cacheOtherPayments.fetch-cached');
 Route::get('/cache_other_payments/save-other-payments', [App\Http\Controllers\CacheOtherPaymentsController::class, 'saveOtherPayments'])->name('cacheOtherPayments.save-other-payments');
 Route::resource('cacheOtherPayments', App\Http\Controllers\CacheOtherPaymentsController::class);
+
+
+Route::get('/pending_bill_adjustments/open-reading-adjustments/{servicePeriod}', [App\Http\Controllers\PendingBillAdjustmentsController::class, 'openReadingAdjustments'])->name('pendingBillAdjustments.open-reading-adjustments');
+Route::get('/pending_bill_adjustments/confirm-all-adjustments/{servicePeriod}', [App\Http\Controllers\PendingBillAdjustmentsController::class, 'confirmAllAdjustments'])->name('pendingBillAdjustments.confirm-all-adjustments');
+Route::get('/pending_bill_adjustments/confirm-adjustment/{pendingAdjustmentId}', [App\Http\Controllers\PendingBillAdjustmentsController::class, 'confirmAdjustment'])->name('pendingBillAdjustments.confirm-adjustment');
+Route::resource('pendingBillAdjustments', App\Http\Controllers\PendingBillAdjustmentsController::class);

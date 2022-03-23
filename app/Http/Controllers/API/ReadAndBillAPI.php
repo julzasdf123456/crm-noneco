@@ -54,6 +54,8 @@ class ReadAndBillAPI extends Controller {
 
         $accounts = DB::table('Billing_ServiceAccounts')
             ->leftJoin('Billing_Collectibles', 'Billing_ServiceAccounts.id', '=', 'Billing_Collectibles.AccountNumber')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
             ->where('Billing_ServiceAccounts.AreaCode', $request['AreaCode'])
             ->where('Billing_ServiceAccounts.GroupCode', $request['GroupCode'])
             ->whereNotIn('Billing_ServiceAccounts.id', DB::table('Billing_Readings')->where('ServicePeriod', $request['ServicePeriod'])->pluck('AccountNumber'))
@@ -83,6 +85,9 @@ class ReadAndBillAPI extends Controller {
                 'Billing_ServiceAccounts.SeniorCitizen',
                 'Billing_ServiceAccounts.Evat5Percent',
                 'Billing_ServiceAccounts.Ewt2Percent',
+                'CRM_Towns.Town as TownFull',
+                'CRM_Barangays.Barangay as BarangayFull',
+                'Billing_ServiceAccounts.Purok',
                 'Billing_Collectibles.Balance',
                 DB::raw("(SELECT TOP 1 Amount FROM Billing_ArrearsLedgerDistribution WHERE AccountNumber=Billing_ServiceAccounts.id AND IsPaid IS NULL AND ServicePeriod='" . $request['ServicePeriod'] . "') AS ArrearsLedger"),
                 DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE ServicePeriod='" . $prevMonth . "' AND AccountNumber=Billing_ServiceAccounts.id) AS KwhUsed"),

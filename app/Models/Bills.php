@@ -153,7 +153,8 @@ class Bills extends Model
         'SeniorCitizenDiscountAndSubsidyAdjustment',
         'FranchiseTax',
         'BusinessTax',
-        'AdjustmentType'
+        'AdjustmentType',
+        'Form2307Amount'
     ];
 
     /**
@@ -226,7 +227,8 @@ class Bills extends Model
         'SeniorCitizenDiscountAndSubsidyAdjustment' => 'string',
         'FranchiseTax' => 'string',
         'BusinessTax' => 'string',
-        'AdjustmentType' => 'string'
+        'AdjustmentType' => 'string',
+        'Form2307Amount' => 'string'
     ];
 
     /**
@@ -301,7 +303,8 @@ class Bills extends Model
         'SeniorCitizenDiscountAndSubsidyAdjustment' => 'nullable|string',
         'FranchiseTax' => 'nullable|string',
         'BusinessTax' => 'nullable|string',
-        'AdjustmentType' => 'nullable|string'
+        'AdjustmentType' => 'nullable|string',
+        'Form2307Amount' => 'nullable|string'
     ];
 
     public static function createDueDate($readDate) {
@@ -373,7 +376,9 @@ class Bills extends Model
                 $bill->OtherLifelineRateCostAdjustment +
                 $bill->SeniorCitizenDiscountAndSubsidyAdjustment +
                 $bill->FranchiseTax +
-                $bill->BusinessTax;
+                $bill->BusinessTax +
+                $bill->AdditionalCharges -
+                $bill->Deductions;
 
         return round($amount, 4);
     }
@@ -408,7 +413,19 @@ class Bills extends Model
         }
     }
 
-    public static function computeRegularBill($account, $billId, $kwh, $prev, $pres, $period, $readDate, $additionalCharges, $deductions) {
+    public static function get2307($bill) {
+        $taxables = $bill->GenerationVAT +
+            $bill->TransmissionVAT +
+            $bill->SystemLossVAT +
+            $bill->DistributionVAT +
+            $bill->FranchiseTax +
+            $bill->RealPropertyTax +
+            $bill->BusinessTax;
+
+        return $taxables * (2/12);
+    }
+
+    public static function computeRegularBill($account, $billId, $kwh, $prev, $pres, $period, $readDate, $additionalCharges, $deductions, $is2307) {
         $rate = Rates::where('ConsumerType', $account->AccountType)
             ->where('ServicePeriod', $period)
             ->first();
@@ -424,8 +441,8 @@ class Bills extends Model
             $kwhAmountUsed = round(floatval($kwh), 4);
             $multiplier = round(floatval($account->Multiplier != null ? $account->Multiplier : 1), 4);
             $kwh = $kwhAmountUsed * $multiplier;
-            $additionalCharges = round(floatval($additionalCharges));
-            $deductions = round(floatval($deductions));
+            $additionalCharges = round(floatval($additionalCharges), 4);
+            $deductions = round(floatval($deductions), 4);
 
             // IF BILL UPDATE
             if ($billId != null) {
@@ -482,12 +499,23 @@ class Bills extends Model
 
                     $bill->LifelineRate = round(Bills::computeLifeLine($bill, $rate), 4);
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
+
+                    if ($is2307 == 'true') {
+                        $form2307 = Bills::get2307($bill);
+                        $bill->Form2307Amount = $form2307;
+
+                        // TO BE CREATED DYNAMICALLY
+                        $bill->NetAmount = Bills::computeNetAmount($bill) - $form2307;
+                    } else {
+                        $form2307 = -floatval($bill->Form2307Amount);
+                        $bill->Form2307Amount = null;
+
+                        // TO BE CREATED DYNAMICALLY
+                        $bill->NetAmount = Bills::computeNetAmount($bill);
+                    }
                     
                     $bill->BilledFrom = 'WEB';
                     $bill->UserId = Auth::id();
-
-                    // TO BE CREATED DYNAMICALLY
-                    $bill->NetAmount = Bills::computeNetAmount($bill);
 
                     $bill->save();
                 } else {
@@ -550,12 +578,23 @@ class Bills extends Model
 
                     $bill->LifelineRate = round(Bills::computeLifeLine($bill, $rate), 4);
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
+
+                    if ($is2307 == 'true') {
+                        $form2307 = Bills::get2307($bill);
+                        $bill->Form2307Amount = $form2307;
+
+                        // TO BE CREATED DYNAMICALLY
+                        $bill->NetAmount = Bills::computeNetAmount($bill) - $form2307;
+                    } else {
+                        $form2307 = -floatval($bill->Form2307Amount);
+                        $bill->Form2307Amount = null;
+
+                        // TO BE CREATED DYNAMICALLY
+                        $bill->NetAmount = Bills::computeNetAmount($bill);
+                    }
                     
                     $bill->BilledFrom = 'WEB';
                     $bill->UserId = Auth::id();
-
-                    // TO BE CREATED DYNAMICALLY
-                    $bill->NetAmount = Bills::computeNetAmount($bill);
 
                     $bill->save();
                 } else {
@@ -619,12 +658,23 @@ class Bills extends Model
 
                     $bill->LifelineRate = round(Bills::computeLifeLine($bill, $rate), 4);
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
+
+                    if ($is2307 == 'true') {
+                        $form2307 = Bills::get2307($bill);
+                        $bill->Form2307Amount = $form2307;
+
+                        // TO BE CREATED DYNAMICALLY
+                        $bill->NetAmount = Bills::computeNetAmount($bill) - $form2307;
+                    } else {
+                        $form2307 = -floatval($bill->Form2307Amount);
+                        $bill->Form2307Amount = null;
+
+                        // TO BE CREATED DYNAMICALLY
+                        $bill->NetAmount = Bills::computeNetAmount($bill);
+                    }
                     
                     $bill->BilledFrom = 'WEB';
                     $bill->UserId = Auth::id();
-
-                    // TO BE CREATED DYNAMICALLY
-                    $bill->NetAmount = Bills::computeNetAmount($bill);
 
                     $bill->save();
                 }

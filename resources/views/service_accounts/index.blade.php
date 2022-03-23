@@ -3,6 +3,7 @@
 @section('content')
     <section class="content-header">
         <div class="container-fluid">
+            <a href="{{ route('serviceAccounts.accounts-map-view') }}" class="btn btn-xs btn-warning float-right"><i class="fas fa-map-marker-alt ico-tab-mini"></i>Go to Map View</a>
             {!! Form::open(['route' => 'serviceAccounts.index', 'method' => 'GET']) !!}
                 <div class="row mb-2">
                     <div class="col-md-6 offset-md-3">

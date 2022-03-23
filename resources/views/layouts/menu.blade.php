@@ -470,6 +470,17 @@ use Illuminate\Support\Facades\Auth;
                     <i class="fas fa-exclamation-triangle nav-icon text-primary"></i><p>Unbilled Readings</p>
                 </a>
             </li>
+
+            <li class="nav-header">                
+                Others
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('pendingBillAdjustments.index') }}"
+                   class="nav-link {{ Request::is('pendingBillAdjustments*') ? 'active' : '' }}">
+                   <i class="fas fa-circle nav-icon text-primary"></i><p>Zero Reading Adj.</p>
+                </a>
+            </li>
+
             <li class="nav-header">                
                 Meter Reading 
             </li>
@@ -644,3 +655,6 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
+
+
+

@@ -84,6 +84,8 @@ class CreateTableBills extends Migration
             $table->string('UserId')->nullable();
             $table->string('BilledFrom')->nullable();
 
+            $table->string('Form2307Amount')->nullable();
+
             $table->string('MergedToCollectible')->nullable(); // Yes - if merged to Collectibles, No - if not
 
             $table->string('AveragedCount')->nullable(); // Number of months that the bill is averaged

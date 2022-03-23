@@ -56,6 +56,29 @@
                         <label for="Notes">Remarks/Comments</label>
                         <input type="text" name="Notes" id="Notes" value="{{ $bill->Notes }}" class="form-control text-right">
                     </div>
+
+                    <div class="form-group col-lg-3">
+                        <label for="AdditionalCharges">Additional Charges</label>
+                        <input type="number" step="any" name="AdditionalCharges" id="AdditionalCharges" value="{{ $bill->AdditionalCharges }}" class="form-control text-right">
+                    </div>
+
+                    <div class="form-group col-lg-3">
+                        <label for="Deductions">Deductions</label>
+                        <input type="number" step="any" name="Deductions" id="Deductions" value="{{ $bill->Deductions }}" class="form-control text-right">
+                    </div>
+
+                    <div class="col-lg-3">
+                        {!! Form::label('Form 2307:') !!}
+                        <div class="input-group">
+                            <input type="hidden" value="" name="Form2307">
+                            <input type="checkbox" value="{{ $bill->Form2307Amount }}" name="Form2307" id="Form2307" class="custom-checkbox" {{ $bill->Form2307Amount != null ? 'checked' : '' }}>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-lg-3">
+                        <label for="Form2307Amount">Form 2307 Amount</label>
+                        <input type="number" step="any" name="Form2307Amount" id="Form2307Amount" value="{{ $bill->Form2307Amount }}" class="form-control text-right">
+                    </div>
                 </div>
 
                 <div class="divider"></div>
@@ -321,22 +344,58 @@
 @push('page_scripts')
     <script>
         $(document).ready(function() {
+            var is2307Checked = false
+
+            if($('#Form2307').prop('checked')) {
+                is2307Checked = true                    
+            } else {
+                is2307Checked = false
+            }
+
             $('#KwhUsed').keyup(function() {
-                adjustBill(this.value)
+                adjustBill(this.value, $('#AdditionalCharges').val(), $('#Deductions').val(), is2307Checked)
             })
 
             $('#KwhUsed').on('change', function() {
-                adjustBill(this.value)
+                adjustBill(this.value, $('#AdditionalCharges').val(), $('#Deductions').val(), is2307Checked)
+            })
+
+            $('#AdditionalCharges').keyup(function() {
+                adjustBill($('#KwhUsed').val(), this.value, $('#Deductions').val(), is2307Checked)
+            })
+
+            $('#AdditionalCharges').on('change', function() {
+                adjustBill($('#KwhUsed').val(), this.value, $('#Deductions').val(), is2307Checked)
+            })
+
+            $('#Deductions').keyup(function() {
+                adjustBill($('#KwhUsed').val(), $('#AdditionalCharges').val(), this.value, is2307Checked)
+            })
+
+            $('#Deductions').on('change', function() {
+                adjustBill($('#KwhUsed').val(), $('#AdditionalCharges').val(), this.value, is2307Checked)
+            })
+
+            $('#Form2307').change(function() {
+                if($('#Form2307').prop('checked')) {
+                    is2307Checked = true                    
+                } else {
+                    is2307Checked = false
+                }
+                adjustBill($('#KwhUsed').val(), $('#AdditionalCharges').val(), $('#Deductions').val(), is2307Checked)
             })
         })
 
-        function adjustBill(kwh) {
+        function adjustBill(kwh, additionalCharges, deductions, is2307) {
             $.ajax({
                     url : '/bills/fetch-bill-adjustment-data',
                     type : 'GET',
                     data : {
                         BillId : "{{ $bill->id }}",
                         AccountNumber : "{{ $bill->AccountNumber }}",
+                        AdditionalCharges : additionalCharges,
+                        Deductions : deductions,
+                        Is2307 : is2307,
                         KwhUsed : kwh,
                     },
                     success : function(res) {
@@ -375,6 +434,7 @@
                         $('#SeniorCitizenSubsidy').val(res['SeniorCitizenSubsidy'])
                         $('#OtherLifelineRateCostAdjustment').val(res['OtherLifelineRateCostAdjustment'])
                         $('#SeniorCitizenDiscountAndSubsidyAdjustment').val(res['SeniorCitizenDiscountAndSubsidyAdjustment'])
+                        $('#Form2307Amount').val(res['Form2307Amount'])
                     },
                     error : function(error) {
                         alert('An error occurred while adjusting the bill.')

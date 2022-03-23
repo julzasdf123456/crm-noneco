@@ -16,6 +16,7 @@ use App\Models\Rates;
 use App\Models\Bills;
 use App\Models\BillingMeters;
 use App\Models\IDGenerator;
+use App\Models\PendingBillAdjustments;
 use App\Models\ArrearsLedgerDistribution;
 use App\Repositories\ReadingsRepository;
 use Flash;
@@ -230,6 +231,7 @@ class BillsController extends AppBaseController
             ->whereNotIn('Billing_Readings.AccountNumber', DB::table('Billing_Bills')->where('Billing_Bills.ServicePeriod', $servicePeriod)->pluck('Billing_Bills.AccountNumber'))
             ->where('Billing_Readings.ServicePeriod', $servicePeriod)
             ->where('Billing_ServiceAccounts.AccountStatus', 'ACTIVE')
+            ->whereNotIn('Billing_Readings.id', DB::table('Billing_PendingBillAdjustments')->where('ServicePeriod', $servicePeriod)->whereNull('Confirmed')->pluck('ReadingId'))
             ->select('Billing_Readings.AccountNumber',
                 'Billing_Readings.id',
                 'Billing_ServiceAccounts.ServiceAccountName',
@@ -275,12 +277,15 @@ class BillsController extends AppBaseController
             ->orderByDesc('created_at')
             ->first();
 
+        $pendingAdjustments = PendingBillAdjustments::where('ReadingId', $readingId)->first();
+
         return view('/bills/zero_readings_view', [
             'reading' => $reading,
             'account' => $account,
             'images' => $images,
             'previousBills' => $previousBills,
             'meterInfo' => $meterInfo,
+            'pendingAdjustments' => $pendingAdjustments,
         ]);
     }
 
@@ -684,6 +689,9 @@ class BillsController extends AppBaseController
 
         $account = ServiceAccounts::find($request['AccountNumber']);
 
-        return response()->json(Bills::computeRegularBill($account, $bill->id, $request['KwhUsed'], $bill->PreviousKwh, $bill->PresentKwh, $bill->ServicePeriod, $bill->BillingDate, 0, 0), 200);
+        $additionalCharges = $request['AdditionalCharges'] != null ? floatval($request['AdditionalCharges']) : 0;
+        $deductions = $request['Deductions'] != null ? floatval($request['Deductions']) : 0;
+
+        return response()->json(Bills::computeRegularBill($account, $bill->id, $request['KwhUsed'], $bill->PreviousKwh, $bill->PresentKwh, $bill->ServicePeriod, $bill->BillingDate, $additionalCharges, $deductions, $request['Is2307']), 200);
     }
 }

@@ -603,4 +603,18 @@ class ServiceAccountsController extends AppBaseController
             return abort(404, 'Bill not found');
         }        
     }
+
+    public function accountsMapView() {
+        $towns = Towns::orderBy('Town')->get();
+        return view('/service_accounts/accounts_map_view', [
+            'towns' => $towns,
+        ]);
+    }
+
+    public function getAccountsByTown(Request $request) {
+        $accounts = ServiceAccounts::where('Town', $request['Town'])
+            ->get();
+
+        return response()->json($accounts, 200);
+    }
 }
