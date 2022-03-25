@@ -13,6 +13,7 @@ use App\Models\ServiceAccounts;
 use App\Models\Bills;
 use App\Models\IDGenerator;
 use App\Models\PaidBills;
+use App\Models\ORAssigning;
 use Flash;
 use Response;
 
@@ -37,9 +38,14 @@ class PaidBillsController extends AppBaseController
     public function index(Request $request)
     {
         $paidBills = $this->paidBillsRepository->all();
+        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+            ->orderByDesc('created_at')
+            ->first();
 
-        return view('paid_bills.index')
-            ->with('paidBills', $paidBills);
+        return view('paid_bills.index', [
+            'paidBills' => $paidBills,
+            'orAssignedLast' => $orAssignedLast,
+        ]);
     }
 
     /**
@@ -300,8 +306,25 @@ class PaidBillsController extends AppBaseController
         $paidBill->NetAmount = $request['NetAmount'];
         $paidBill->Source = 'MONTHLY BILL';
         $paidBill->ObjectSourceId = $request['BillId'];
+        $paidBill->ORNumber = $request['ORNumber'];
+        $paidBill->ORDate = date('Y-m-d');
         $paidBill->UserId = Auth::id();
         $paidBill->save();
+
+        // SAVE OR
+        $saveOR = ORAssigning::where('ORNumber', $paidBill->ORNumber)
+            ->where('UserId', Auth::id())
+            ->first();        
+        if ($saveOR == null) {
+            $saveOR = new ORAssigning;
+            $saveOR->id = IDGenerator::generateIDandRandString();
+            $saveOR->ORNumber = $paidBill->ORNumber;
+            $saveOR->UserId = Auth::id();
+            $saveOR->DateAssigned = $paidBill->ORDate;
+            $saveOR->TimeAssigned = date('H:i:s');
+            $saveOR->Office = env('APP_LOCATION');
+            $saveOR->save();
+        }        
 
         return response()->json($paidBill, 200);
     }

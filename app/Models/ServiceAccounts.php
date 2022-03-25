@@ -94,7 +94,9 @@ class ServiceAccounts extends Model
         'AccountExpiration',
         'DurationInMonths',
         'Contestable',
-        'NetMetered'
+        'NetMetered',
+        'Notes',
+        'Migrated'
     ];
 
     /**
@@ -147,7 +149,9 @@ class ServiceAccounts extends Model
         'AccountExpiration' => 'string',
         'DurationInMonths' => 'string',
         'Contestable' => 'string',
-        'NetMetered' => 'string'
+        'NetMetered' => 'string',
+        'Notes' => 'string',
+        'Migrated' => 'string'
     ];
 
     /**
@@ -202,7 +206,9 @@ class ServiceAccounts extends Model
         'AccountExpiration' => 'nullable|string',
         'DurationInMonths' => 'nullable|string',
         'Contestable' => 'nullable|string',
-        'NetMetered' => 'nullable|string'
+        'NetMetered' => 'nullable|string',
+        'Notes' => 'nullable|string',
+        'Migrated' => 'nullable|string'
     ];
 
     public static function getAddress($serviceAccount) {
@@ -210,6 +216,8 @@ class ServiceAccounts extends Model
             return $serviceAccount->Barangay . ', ' . $serviceAccount->Town;
         } elseif($serviceAccount->Purok!=null && ($serviceAccount->Barangay!=null && $serviceAccount->Town!=null)) {
             return $serviceAccount->Purok . ', ' . $serviceAccount->Barangay . ', ' . $serviceAccount->Town;
+        } elseif($serviceAccount->Barangay == null) {
+            return $serviceAccount->Purok;
         }
     }
 

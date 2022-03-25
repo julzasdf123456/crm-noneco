@@ -1,3 +1,7 @@
+@php
+    use App\Models\ORAssigning;
+@endphp
+
 @extends('layouts.app')
 
 @section('content')
@@ -98,7 +102,7 @@
                             <tr>
                                 <td>OR Number</td>
                                 <td class="text-right">
-                                    <input type="number" class="form-control text-right" style="font-size: 1.5em;" id="ornumber" step="any" autofocus>
+                                    <input type="number" class="form-control text-right" style="font-size: 1.5em;" id="ornumber" value="{{ ORAssigning::getORIncrement(1, $orAssignedLast) }}" autofocus>
                                 </td>
                             </tr>
                             <tr>

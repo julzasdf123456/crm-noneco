@@ -459,6 +459,12 @@ use Illuminate\Support\Facades\Auth;
         </a>
         <ul class="nav nav-treeview">
             <li class="nav-item">
+                <a href="{{ route('bills.all-bills') }}"
+                   class="nav-link {{ Request::is('bills.all-bills*') ? 'active' : '' }}">
+                    <i class="fas fa-list nav-icon text-primary"></i><p>All Bills</p>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="{{ route('rates.index') }}"
                    class="nav-link {{ Request::is('rates*') ? 'active' : '' }}">
                     <i class="fas fa-percentage nav-icon text-primary"></i><p>Rate Management</p>
@@ -655,6 +661,5 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
-
 
 

@@ -358,6 +358,7 @@ Route::get('/bills/rebill-reading-adjustment/{readingId}', [App\Http\Controllers
 Route::post('/bills/rebill/{readingId}', [App\Http\Controllers\BillsController::class, 'rebill'])->name('bills.rebill');
 Route::get('/bills/adjust-bill/{billId}', [App\Http\Controllers\BillsController::class, 'adjustBill'])->name('bills.adjust-bill');
 Route::get('/bills/fetch-bill-adjustment-data', [App\Http\Controllers\BillsController::class, 'fetchBillAdjustmentData'])->name('bills.etch-bill-adjustment-data');
+Route::get('/bills/all-bills', [App\Http\Controllers\BillsController::class,  'allBills'])->name('bills.all-bills');
 Route::resource('bills', App\Http\Controllers\BillsController::class);
 
 
@@ -423,3 +424,6 @@ Route::get('/pending_bill_adjustments/open-reading-adjustments/{servicePeriod}',
 Route::get('/pending_bill_adjustments/confirm-all-adjustments/{servicePeriod}', [App\Http\Controllers\PendingBillAdjustmentsController::class, 'confirmAllAdjustments'])->name('pendingBillAdjustments.confirm-all-adjustments');
 Route::get('/pending_bill_adjustments/confirm-adjustment/{pendingAdjustmentId}', [App\Http\Controllers\PendingBillAdjustmentsController::class, 'confirmAdjustment'])->name('pendingBillAdjustments.confirm-adjustment');
 Route::resource('pendingBillAdjustments', App\Http\Controllers\PendingBillAdjustmentsController::class);
+
+
+Route::resource('oRAssignings', App\Http\Controllers\ORAssigningController::class);

@@ -1,3 +1,6 @@
+@php
+    use App\Models\ServiceAccounts;
+@endphp
 <table class="table table-hover">
     <thead>
         <th>Account Number</th>
@@ -10,7 +13,7 @@
             <tr>
                 <td>{{ $item->id }}</td>
                 <td>{{ $item->ServiceAccountName }} {{ $item->AccountCount != null ? '(# ' . $item->AccountCount . ')' : '' }}</td>                
-                <td>{{ $item->Barangay }}, {{ $item->Town }}</td>
+                <td>{{ ServiceAccounts::getAddress($item) }}</td>
                 <td width="120">
                     {!! Form::open(['route' => ['serviceAccounts.destroy', $item->id], 'method' => 'delete']) !!}
                     <div class='btn-group'>

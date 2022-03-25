@@ -694,4 +694,46 @@ class BillsController extends AppBaseController
 
         return response()->json(Bills::computeRegularBill($account, $bill->id, $request['KwhUsed'], $bill->PreviousKwh, $bill->PresentKwh, $bill->ServicePeriod, $bill->BillingDate, $additionalCharges, $deductions, $request['Is2307']), 200);
     }
+
+    public function allBills(Request $request) {
+        if ($request['params'] == null) {
+            $bills = DB::table('Billing_Bills')
+                        ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.ServiceAccountName', 
+                            'Billing_ServiceAccounts.id as AccountNumber', 
+                            'CRM_Towns.Town', 
+                            'CRM_Barangays.Barangay', 
+                            'Billing_ServiceAccounts.AccountCount',
+                            'Billing_Bills.BillNumber',
+                            'Billing_Bills.id',
+                            'Billing_Bills.ServicePeriod')
+                        ->orderByDesc('Billing_Bills.created_at')
+                        ->limit(60)
+                        ->paginate(15);
+        } else {
+            $bills = DB::table('Billing_Bills')
+                        ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.ServiceAccountName', 
+                            'Billing_ServiceAccounts.id as AccountNumber', 
+                            'CRM_Towns.Town', 
+                            'CRM_Barangays.Barangay', 
+                            'Billing_ServiceAccounts.AccountCount',
+                            'Billing_Bills.BillNumber',
+                            'Billing_Bills.id',
+                            'Billing_Bills.ServicePeriod')
+                        ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_Bills.BillNumber', 'LIKE', '%' . $request['params'] . '%')
+                        ->orderByDesc('Billing_Bills.created_at')
+                        ->paginate(15);
+        }    
+
+        return view('/bills/all_bills', [
+            'bills' => $bills,
+        ]);
+    }
 }

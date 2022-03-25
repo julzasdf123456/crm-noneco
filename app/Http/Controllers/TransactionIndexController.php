@@ -19,6 +19,7 @@ use App\Models\ServiceAccounts;
 use App\Models\BillsOfMaterialsSummary;
 use App\Models\IDGenerator;
 use App\Models\AccountPayables;
+use App\Models\ORAssigning;
 use Flash;
 use Response;
 
@@ -173,8 +174,14 @@ class TransactionIndexController extends AppBaseController
             ->whereNull('ORNumber')
             ->whereNull('ORDate')
             ->get();
+
+        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+            ->orderByDesc('created_at')
+            ->first();
+
         return view('/transaction_indices/service_connection_collection', [
             'applications' => $applications,
+            'orAssignedLast' => $orAssignedLast,
         ]);
     }
 
@@ -296,6 +303,21 @@ class TransactionIndexController extends AppBaseController
             }            
         }
 
+        // SAVE OR
+        $saveOR = ORAssigning::where('ORNumber', $transactionIndex->ORNumber)
+            ->where('UserId', Auth::id())
+            ->first();        
+        if ($saveOR == null) {
+            $saveOR = new ORAssigning;
+            $saveOR->id = IDGenerator::generateIDandRandString();
+            $saveOR->ORNumber = $transactionIndex->ORNumber;
+            $saveOR->UserId = Auth::id();
+            $saveOR->DateAssigned = $transactionIndex->ORDate;
+            $saveOR->TimeAssigned = date('H:i:s');
+            $saveOR->Office = env('APP_LOCATION');
+            $saveOR->save();
+        }   
+
         // UPDATE Service Connection OR
         $serviceConnection = ServiceConnections::find($request['svcId']);
         $serviceConnection->ORNumber = $transactionIndex->ORNumber;
@@ -316,7 +338,13 @@ class TransactionIndexController extends AppBaseController
     }
 
     public function uncollectedArrears() {
-        return view('/transaction_indices/uncollected_arrears');
+        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+            ->orderByDesc('created_at')
+            ->first();
+
+        return view('/transaction_indices/uncollected_arrears', [
+            'orAssignedLast' => $orAssignedLast,
+        ]);
     }
 
     public function searchArrearCollectibles(Request $request) {
@@ -428,6 +456,21 @@ class TransactionIndexController extends AppBaseController
             $collectibles->save();
         }
 
+        // SAVE OR
+        $saveOR = ORAssigning::where('ORNumber', $transactionIndex->ORNumber)
+            ->where('UserId', Auth::id())
+            ->first();        
+        if ($saveOR == null) {
+            $saveOR = new ORAssigning;
+            $saveOR->id = IDGenerator::generateIDandRandString();
+            $saveOR->ORNumber = $transactionIndex->ORNumber;
+            $saveOR->UserId = Auth::id();
+            $saveOR->DateAssigned = $transactionIndex->ORDate;
+            $saveOR->TimeAssigned = date('H:i:s');
+            $saveOR->Office = env('APP_LOCATION');
+            $saveOR->save();
+        }  
+
         return response()->json($transactionIndex, 200);
     }
 
@@ -435,11 +478,15 @@ class TransactionIndexController extends AppBaseController
         $account = ServiceAccounts::find($accountNo);
         $collectibles = Collectibles::where('AccountNumber', $accountNo)->first();
         $ledger = ArrearsLedgerDistribution::where('AccountNumber', $accountNo)->orderBy('ServicePeriod')->get();
+        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+            ->orderByDesc('created_at')
+            ->first();
 
         return view('/transaction_indices/ledger_arrears_collection', [
             'account' => $account,
             'collectibles' => $collectibles,
             'ledger' => $ledger,
+            'orAssignedLast' => $orAssignedLast,
         ]);
     }
 
@@ -497,6 +544,21 @@ class TransactionIndexController extends AppBaseController
             $collectibles->save();
         }
 
+        // SAVE OR
+        $saveOR = ORAssigning::where('ORNumber', $transactionIndex->ORNumber)
+            ->where('UserId', Auth::id())
+            ->first();        
+        if ($saveOR == null) {
+            $saveOR = new ORAssigning;
+            $saveOR->id = IDGenerator::generateIDandRandString();
+            $saveOR->ORNumber = $transactionIndex->ORNumber;
+            $saveOR->UserId = Auth::id();
+            $saveOR->DateAssigned = $transactionIndex->ORDate;
+            $saveOR->TimeAssigned = date('H:i:s');
+            $saveOR->Office = env('APP_LOCATION');
+            $saveOR->save();
+        } 
+
         return response()->json($transactionIndex, 200);
     }
 
@@ -512,8 +574,12 @@ class TransactionIndexController extends AppBaseController
 
     public function otherPayments() {
         $payables = AccountPayables::all();
+        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+            ->orderByDesc('created_at')
+            ->first();
         return view('/transaction_indices/other_payments', [
             'payables' => $payables,
+            'orAssignedLast' => $orAssignedLast,
         ]);
     }
 

@@ -1,3 +1,9 @@
+@php
+    use Illuminate\Support\Facades\Auth; 
+    use App\Models\IDGenerator;
+    use App\Models\ORAssigning;
+@endphp
+
 @extends('layouts.app')
 
 @section('content')
@@ -8,7 +14,8 @@
                     <h4>Bills Payment Console</h4>
                 </div>
                 <div class="col-sm-6">
-                    <button class="btn btn-success float-right" title="Search Consumer"  data-toggle="modal" data-target="#modal-search"><i class="fas fa-search-dollar ico-tab"></i>Search</button>
+                    {{-- <button class="btn btn-warning float-right" title="Search initial OR Number"  data-toggle="modal" data-target="#modal-set" style="margin-left: 20px;"><i class="fas fa-tools ico-tab"></i>Set Start OR</button> --}}
+                    <button class="btn btn-success float-right" title="Search Consumer"  data-toggle="modal" data-target="#modal-search"><i class="fas fa-search-dollar ico-tab"></i>Search</button>                   
                 </div>
             </div>
         </div>
@@ -115,6 +122,12 @@
                                         <th class="text-right">
                                             <h1 class="text-right" id="total-amount"></h1>
                                         </th>
+                                    </tr>                                    
+                                    <tr>
+                                        <td>OR Number</td>
+                                        <td class="text-right">
+                                            <input type="number" class="form-control text-right" style="font-size: 1.5em;" id="orNumber" value="{{ ORAssigning::getORIncrement(1, $orAssignedLast) }}">
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>Amount Paid</td>
@@ -188,6 +201,31 @@
     </div>
 </div>
 
+{{-- MODAL FOR SETTING OR NO --}}
+<div class="modal fade" id="modal-set" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Set Initial OR Number</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {{-- SEARCH --}}
+                <div class="row">                    
+                    <div class="form-group col-lg-12">
+                        <input type="number" id="orno" placeholder="Input OR Number Start" class="form-control" autofocus="true">
+                    </div>
+                </div>                
+            </div>
+            <div class="modal-footer">
+                <button id="setOr" class="btn btn-primary btn-sm"><i class="fas fa-check ico-tab-mini"></i> Set</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('page_scripts')
     <script>
         var change = 0
@@ -225,10 +263,10 @@
 
                 if (parseFloat(change)) {
                     $('#change').val(change)
-                    if (change < 0) {
-                        buttonEnablers(false)
+                    if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(acctNo)) {
+                        buttonEnablers(true)                        
                     } else {
-                        buttonEnablers(true)
+                        buttonEnablers(false)
                     }
                 } else {
                     $('#change').val('')
@@ -247,6 +285,47 @@
                 } else {
 
                 }  
+            })
+
+            // OR NO ON KEY PRESSED
+            $('#orNumber').keyup(function() {
+                change = (parseFloat($('#amountPaid').val()) - totalAmount).toFixed(2).toLocaleString()
+
+                if (parseFloat(change)) {
+                    $('#change').val(change)
+                    if (change > -1 && !jQuery.isEmptyObject(this.value) && !jQuery.isEmptyObject(acctNo)) {
+                        buttonEnablers(true)                        
+                    } else {
+                        buttonEnablers(false)
+                    }
+                } else {
+                    $('#change').val('')
+                    buttonEnablers(false)
+                }                
+            })
+
+            // SET INIT OR
+            $('#setOr').on('click', function() {
+                $.ajax({
+                    url : '/oRAssignings/',
+                    type : 'POST',
+                    data : {
+                        _token : "{{ csrf_token() }}",
+                        id : "{{ IDGenerator::generateIDandRandString() }}",
+                        ORNumber : $('#orno').val(),
+                        UserId : "{{ Auth::id() }}",
+                        DateAssigned : "{{ date('Y-m-d') }}",
+                        IsSetManually : "Yes",
+                        TimeAssigned : "{{ date('H:i:s') }}",
+                        Office : "{{ env('APP_LOCATION') }}",
+                    },
+                    success : function(res) {
+                        location.reload()
+                    },
+                    error : function(err) {
+                        alert('An error occurred while setting initial OR. Contact IT for support')
+                    }
+                });
             })
         })
 
@@ -430,7 +509,7 @@
         // DETECT ENTER
         $(document).keypress(function(event){
             if (parseFloat(change)) {
-                if (change > -1) {
+                if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(acctNo)) {
                     var keycode = (event.keyCode ? event.keyCode : event.which);
                     if(keycode == '13'){
                         // saveAndPrint('Cash')
@@ -458,6 +537,7 @@
                     Deductions : deductions,
                     NetAmount : totalAmount,
                     BillId : billId,
+                    ORNumber : $('#orNumber').val(),
                 }, 
                 success : function(res) {
                     window.location.href = "{{ url('/paid_bills/print-bill-payment') }}" + "/" + res['id']

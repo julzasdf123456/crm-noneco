@@ -76,6 +76,8 @@ class CreateTableBillingServiceAccounts extends Migration
 
             $table->string('Contestable')->nullable();
             $table->string('NetMetered')->nullable();
+            $table->string('Notes', 500)->nullable();
+            $table->string('Migrated')->nullable();
 
             $table->string('UserId', 50)->nullable();
         });
