@@ -3,7 +3,8 @@
 @endphp
 <table class="table table-hover">
     <thead>
-        <th>Account Number</th>
+        <th>Account ID</th>
+        <th>Legacy Account No.</th>
         <th>Service Account Name</th>
         <th>Address</th>
         <th></th>
@@ -12,6 +13,7 @@
         @foreach ($serviceAccounts as $item)
             <tr>
                 <td>{{ $item->id }}</td>
+                <td>{{ $item->OldAccountNo != null ? $item->OldAccountNo : '-' }}</td>
                 <td>{{ $item->ServiceAccountName }} {{ $item->AccountCount != null ? '(# ' . $item->AccountCount . ')' : '' }}</td>                
                 <td>{{ ServiceAccounts::getAddress($item) }}</td>
                 <td width="120">

@@ -113,5 +113,7 @@ class TransactionIndex extends Model
         'PaymentUsed' => 'nullable|string',
     ];
 
-    
+    public static function getReconnectionFeeId() {
+        return '1645770252818-S6Soo3slq1KNMJU2tcYIoLjXb2XtUI';
+    }
 }

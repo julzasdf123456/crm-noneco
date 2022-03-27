@@ -327,6 +327,14 @@ class Bills extends Model
         }
     }
 
+    public static function getFinalPenalty($bill) {
+        if ($bill->ConsumerType == 'RESIDENTIAL' || $bill->ConsumerType == 'RESIDENTIAL RURAL') {
+            return 0;
+        } else {
+            return round(floatval($bill->NetAmount) * .05, 2);
+        }
+    }
+
     public static function getServiceDateFrom($accountNumber, $readDate, $period) {
         $bill = Bills::where('AccountNumber', $accountNumber)
             ->where('ServicePeriod', date('Y-m-d', strtotime($period . ' -1 month')))

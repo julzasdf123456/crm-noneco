@@ -198,4 +198,8 @@ class Tickets extends Model
     public static function getViolations() {
         return ['1668541254425']; // Pilferage
     }
+
+    public static function getReconnection() {
+        return '1668541254428';
+    }
 }

@@ -570,6 +570,12 @@ use Illuminate\Support\Facades\Auth;
                 </a>
             </li>
             <li class="nav-item">
+                <a href="{{ route('transactionIndices.reconnection-collection') }}"
+                class="nav-link {{ Request::is('transactionIndices.reconnection-collection*') ? 'active' : '' }}">
+                <i class="fas fa-link nav-icon text-info"></i><p>Reconnection</p>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="{{ route('transactionIndices.other-payments') }}"
                 class="nav-link {{ Request::is('transactionIndices.other-payments*') ? 'active' : '' }}">
                 <i class="fas fa-coins nav-icon text-info"></i><p>Other Payments</p>

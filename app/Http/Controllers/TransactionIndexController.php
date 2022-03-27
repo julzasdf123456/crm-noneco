@@ -20,6 +20,9 @@ use App\Models\BillsOfMaterialsSummary;
 use App\Models\IDGenerator;
 use App\Models\AccountPayables;
 use App\Models\ORAssigning;
+use App\Models\Bills;
+use App\Models\Tickets;
+use App\Models\TicketLogs;
 use Flash;
 use Response;
 
@@ -655,5 +658,155 @@ class TransactionIndexController extends AppBaseController
             'transactionIndex' => $transactionIndex,
             'transactionDetails' => $transactionDetails,
         ]);
+    }
+
+    public function reconnectionCollection() {
+        $reconnectionPayable = AccountPayables::where('id', TransactionIndex::getReconnectionFeeId())->first();
+        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+            ->orderByDesc('created_at')
+            ->first();
+        return view('/transaction_indices/reconnection_collection', [
+            'reconnectionPayable' => $reconnectionPayable,
+            'orAssignedLast' => $orAssignedLast,
+        ]);
+    }
+
+    public function searchDisconnectedConsumers(Request $request) {
+        $results = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->where('Billing_ServiceAccounts.AccountStatus', 'DISCONNECTED')
+            ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['query'] . '%')
+            ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['query'] . '%')
+            ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['query'] . '%')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+            ->get();
+
+        $output = "";
+
+        if (count($results) > 0) {
+            foreach($results as $item) {
+                $output .= '
+                        <tr>
+                            <td>' . $item->id . '</td>
+                            <td>' . $item->ServiceAccountName . '</td>
+                            <td>' . ServiceAccounts::getAddress($item) . '</td>
+                            <td>' . $item->AccountStatus . '</td>
+                            <td>
+                                <button class="btn btn-link text-primary" onclick=fetchAccountDetails("' . $item->id . '")><i class="fas fa-forward"></i></button>
+                            </td>
+                        </tr>
+                    '; 
+            }
+
+            return response()->json($output, 200);
+        } else {
+            return response()->json([], 200);
+        }        
+    }
+
+    public function getArrearsData(Request $request) {
+        $billArrears = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->where('Billing_Bills.AccountNumber', $request['AccountNumber'])
+            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->pluck('Cashier_PaidBills.ObjectSourceId'))
+            ->select('Billing_Bills.*')
+            ->orderByDesc('Billing_Bills.ServicePeriod')
+            ->get();
+
+        $output = "";
+
+        if (count($billArrears) > 0) {
+            foreach($billArrears as $item) {
+                $output .= '
+                        <tr>
+                            <td>' . date('F Y', strtotime($item->ServicePeriod)) . '</td>
+                            <td>' . number_format($item->NetAmount, 2) . '</td>
+                            <td>' . Bills::getFinalPenalty($item) . '</td>
+                            <td>' . number_format((floatval($item->NetAmount) + Bills::getFinalPenalty($item)), 2) . '</td>
+                        </tr>
+                    '; 
+            }
+
+            return response()->json($output, 200);
+        } else {
+            return response()->json([], 200);
+        }       
+    }
+
+    public function saveReconnectionTransaction(Request $request) {
+        // SAVE TRANSACTION
+        $id = IDGenerator::generateID();
+
+        $reconnectionPayable = AccountPayables::where('id', TransactionIndex::getReconnectionFeeId())->first();
+
+        $serviceAccount = ServiceAccounts::find($request['AccountNumber']);
+
+        $transactionIndex = new TransactionIndex;
+        $transactionIndex->id = $id;
+        $transactionIndex->TransactionNumber = env('APP_LOCATION') . '-' . $id;
+        $transactionIndex->PaymentTitle = "Reconnection Payment for Account Name " . $serviceAccount->ServiceAccountName;
+        $transactionIndex->ORNumber = $request['ORNumber'];
+        $transactionIndex->ORDate = date('Y-m-d');
+        $transactionIndex->SubTotal = round(floatval($request['SubTotal']), 2);
+        $transactionIndex->VAT = round(floatval($request['VAT']), 2);
+        $transactionIndex->Total = round(floatval($request['Total']), 2);
+        $transactionIndex->ObjectId = $request['AccountNumber'];
+        $transactionIndex->Source = 'Reconnection Payments';
+        $transactionIndex->Notes = "Object Id: Account Number";
+        $transactionIndex->PaymentUsed = $request['PaymentUsed'];
+        $transactionIndex->UserId = Auth::id();
+        $transactionIndex->save();
+
+        // SAVE TRANSACTION DETAILS
+        $transactionDetails = new TransactionDetails;
+        $transactionDetails->id = IDGenerator::generateIDandRandString();
+        $transactionDetails->TransactionIndexId = $id;
+        $transactionDetails->Particular = $reconnectionPayable != null ? $reconnectionPayable->AccountTitle : 'Reconnection Fee';
+        $transactionDetails->Amount = round(floatval($request['SubTotal']), 2);
+        $transactionDetails->VAT = round(floatval($request['VAT']), 2);
+        $transactionDetails->Total = round(floatval($request['Total']), 2);
+        $transactionDetails->AccountCode = $reconnectionPayable->AccountCode;
+        $transactionDetails->save();
+
+        // CREATE RECONNECTION TICKET
+        $ticket = new Tickets;
+        $ticket->id = IDGenerator::generateIDandRandString();
+        $ticket->AccountNumber = $request['AccountNumber'];
+        $ticket->ConsumerName = $serviceAccount->ServiceAccountName;
+        $ticket->Town =$serviceAccount->Town;
+        $ticket->Barangay = $serviceAccount->Barangay;
+        $ticket->Sitio = $serviceAccount->Purok;
+        $ticket->Ticket = Tickets::getReconnection();
+        $ticket->Reason = 'Delinquency';
+        $ticket->GeoLocation = $serviceAccount->Latitude . ',' . $serviceAccount->Longitude;
+        $ticket->Status = 'Received';
+        $ticket->UserId = Auth::id();
+        $ticket->Office = env('APP_LOCATION');
+        $ticket->save();
+
+        // CREATE LOG
+        $ticketLog = new TicketLogs;
+        $ticketLog->id = IDGenerator::generateIDandRandString();
+        $ticketLog->TicketId = $ticket->id;
+        $ticketLog->Log = "Ticket Filed";
+        $ticketLog->LogDetails = "Ticket automatically created via Reconnection Payment Module";
+        $ticketLog->UserId = Auth::id();
+        $ticketLog->save();
+
+        return response()->json($transactionIndex, 200);
     }
 }
