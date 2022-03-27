@@ -442,7 +442,12 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-user-alt-slash nav-icon text-primary"></i><p>Pending Accounts</p>
                 </a>
             </li>
-            
+            <li class="nav-item">
+                <a href="{{ route('serviceAccounts.bapa') }}"
+                   class="nav-link {{ Request::is('serviceAccounts.bapa*') ? 'active' : '' }}">                   
+                   <i class="fas fa-layer-group nav-icon text-primary"></i><p>BAPA</p>
+                </a>
+            </li>
         </ul>
     </li>
 @endcanany

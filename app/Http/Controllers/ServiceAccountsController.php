@@ -470,12 +470,18 @@ class ServiceAccountsController extends AppBaseController
         $serviceConnection = ServiceConnections::find($serviceAccount->ServiceConnectionId);
         $meters = BillingMeters::find($serviceAccount->MeterDetailsId);
         $meterAndTransformer = ServiceConnectionMtrTrnsfrmr::where('ServiceConnectionId', $serviceAccount->ServiceConnectionId)->first();
+        $bapa = DB::table('Billing_ServiceAccounts')
+            ->select('OrganizationParentAccount')
+            ->groupBy('OrganizationParentAccount')
+            ->orderBy('OrganizationParentAccount')
+            ->get();
 
         return view('/service_accounts/account_migration_step_three', [
             'serviceAccount' => $serviceAccount,
             'meterAndTransformer' => $meterAndTransformer,
             'serviceConnection' => $serviceConnection,
-            'meters' => $meters
+            'meters' => $meters,
+            'bapa' => $bapa,
         ]);
     }
 
@@ -617,5 +623,72 @@ class ServiceAccountsController extends AppBaseController
             ->get();
 
         return response()->json($accounts, 200);
+    }
+
+    public function bapa() {
+        $bapa = DB::table('Billing_ServiceAccounts')
+            ->select('OrganizationParentAccount',
+                DB::raw('COUNT(id) AS MembersTotal'),
+            )
+            ->groupBy('OrganizationParentAccount')
+            ->orderBy('OrganizationParentAccount')
+            ->get();
+
+        return view('/service_accounts/bapa', [
+            'bapa' => $bapa,
+        ]);
+    }
+
+    public function createBapa() {
+        $towns = Towns::orderBy('id')->get();
+        return view('/service_accounts/create_bapa', [
+            'towns' => $towns,
+        ]);
+    }
+
+    public function getRoutesFromDistrict(Request $request) {
+        $routes = DB::table('Billing_ServiceAccounts')
+            ->where('Town', $request['Town'])
+            ->select('AreaCode')
+            ->groupBy('AreaCode')
+            ->orderBy('AreaCode')
+            ->get();
+
+        $output = "";
+        if (count($routes) > 0) {
+            foreach($routes as $item) {
+                $output .= '<tr>
+                                <td>' . $item->AreaCode . '</td>
+                                <td class="text-right">
+                                    <button class="btn btn-primary btn-xs" onclick=addToBapa("' . $item->AreaCode . '")>Add</button>
+                                </td>
+                            </tr>';
+            }
+
+            return response()->json($output, 200);
+        } else {
+            return response()->json([], 200);
+        }
+    }
+
+    public function addToBapa(Request $request) {
+        ServiceAccounts::where('AreaCode', $request['AreaCode'])
+            ->update(['OrganizationParentAccount' => $request['BAPAName']]);
+
+        $accounts = ServiceAccounts::where('OrganizationParentAccount', $request['BAPAName'])
+            ->orderBy('ServiceAccountName')
+            ->get();
+
+        $output = "";
+
+        foreach($accounts as $item) {
+            $output .= '<tr>
+                            <td>' . $item->id . '</td>
+                            <td>' . $item->OldAccountNo . '</td>
+                            <td>' . $item->ServiceAccountName . '</td>
+                        </tr>';
+        }
+
+        return response()->json($output, 200);
     }
 }

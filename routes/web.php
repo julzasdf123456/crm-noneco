@@ -182,6 +182,10 @@ Route::get('/service_accounts/unmerge-bill-arrear/{billId}', [App\Http\Controlle
 Route::get('/service_accounts/merge-bill-arrear/{billId}', [App\Http\Controllers\ServiceAccountsController::class,  'mergeBillArrear'])->name('serviceAccounts.merge-bill-arrear');
 Route::get('/service_accounts/accounts-map-view', [App\Http\Controllers\ServiceAccountsController::class,  'accountsMapView'])->name('serviceAccounts.accounts-map-view');
 Route::get('/service_accounts/get-accounts-by-town', [App\Http\Controllers\ServiceAccountsController::class,  'getAccountsByTown'])->name('serviceAccounts.get-accounts-by-town');
+Route::get('/service_accounts/bapa', [App\Http\Controllers\ServiceAccountsController::class,  'bapa'])->name('serviceAccounts.bapa');
+Route::get('/service_accounts/create-bapa', [App\Http\Controllers\ServiceAccountsController::class,  'createBapa'])->name('serviceAccounts.create-bapa');
+Route::get('/service_accounts/get-routes-from-district', [App\Http\Controllers\ServiceAccountsController::class,  'getRoutesFromDistrict'])->name('serviceAccounts.get-routes-from-district');
+Route::get('/service_accounts/add-to-bapa', [App\Http\Controllers\ServiceAccountsController::class,  'addToBapa'])->name('serviceAccounts.add-to-bapa');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 

@@ -69,6 +69,7 @@ class BillingTransformersController extends AppBaseController
         $serviceAccount->UserId = Auth::id();
         $serviceAccount->Main = $request['Main'];
         $serviceAccount->Organization = $request['BAPA'];
+        $serviceAccount->OrganizationParentAccount = $request['OrganizationParentAccount'];
         $serviceAccount->TransformerDetailsId = $input['id'];
         $serviceAccount->Locked = 'Yes';
         $serviceAccount->Evat5Percent = $request['Evat5Percent'];

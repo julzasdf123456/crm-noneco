@@ -77,17 +77,6 @@
             </div>
         </div>
 
-        <!-- BAPA Field -->
-        <div class="col-lg-1 col-md-1">
-            {!! Form::label('BAPA', 'BAPA:') !!}
-        </div>
-
-        <div class="col-lg-1 col-md-1">
-            <div class="input-group">
-                {{ Form::checkbox('BAPA', 'BAPA', true, ['class' => 'custom-checkbox']) }}
-            </div>
-        </div>
-
         <!-- 5% Field -->
         <div class="col-lg-1 col-md-1">
             {!! Form::label('Evat5Percent', '5% EVAT:') !!}
@@ -111,3 +100,58 @@
         </div>
     </div> 
 </div>
+
+<div class="divider"></div>
+
+<div class="form-group col-lg-12">
+    <div class="row">
+        <!-- BAPA Field -->
+        <div class="col-lg-1 col-md-1">
+            {!! Form::label('BAPA', 'BAPA:') !!}
+        </div>
+
+        <div class="col-lg-1 col-md-1">
+            <div class="input-group">
+                {{ Form::checkbox('BAPA', 'BAPA', false, ['class' => 'custom-checkbox']) }}
+            </div>
+        </div>
+
+        <!-- OrganizationParentAccount/BAPA NAME Field -->
+        <div class="col-lg-1 col-md-1">
+            {!! Form::label('OrganizationParentAccount', 'Select BAPA:') !!}
+        </div>
+
+        <div class="col-lg-3 col-md-4">
+            <div class="input-group">
+                <select class="custom-select select2"  name="OrganizationParentAccount" id="OrganizationParentAccount" disabled>
+                    <option value="NULL">-- Select --</option>
+                    @foreach ($bapa as $item)
+                        <option value="{{ $item->OrganizationParentAccount }}">{{ $item->OrganizationParentAccount }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('page_scripts')
+    <script>
+        $(document).ready(function() {
+            checkBapa()
+
+            $('#BAPA').change(function() {
+                checkBapa()
+            })
+        })
+
+        function checkBapa() {
+            if ($('#BAPA').is(':checked')) {
+                $('#OrganizationParentAccount').removeAttr('disabled')
+            } else {
+                $('#OrganizationParentAccount').attr('disabled', 'disabled')
+                $("#OrganizationParentAccount").val("NULL").change()
+            }
+        }
+    </script>
+@endpush
+

@@ -241,7 +241,7 @@
                             $('#payable-table tbody').append(addRowToTable(res[index]['Particular'], res[index]['Amount'], res[index]['Vat'], res[index]['Total']))
                         })
                     }
-                    $('#ornumber').focus()
+                    $('#amountPaid').focus()
                 }, 
                 error : function(err) {
                     alert('An error occurred while fetching payables for this application')
