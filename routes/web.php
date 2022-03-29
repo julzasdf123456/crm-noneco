@@ -186,6 +186,12 @@ Route::get('/service_accounts/bapa', [App\Http\Controllers\ServiceAccountsContro
 Route::get('/service_accounts/create-bapa', [App\Http\Controllers\ServiceAccountsController::class,  'createBapa'])->name('serviceAccounts.create-bapa');
 Route::get('/service_accounts/get-routes-from-district', [App\Http\Controllers\ServiceAccountsController::class,  'getRoutesFromDistrict'])->name('serviceAccounts.get-routes-from-district');
 Route::get('/service_accounts/add-to-bapa', [App\Http\Controllers\ServiceAccountsController::class,  'addToBapa'])->name('serviceAccounts.add-to-bapa');
+Route::get('/service_accounts/bapa-view/{bapaName}', [App\Http\Controllers\ServiceAccountsController::class,  'bapaView'])->name('serviceAccounts.bapa-view');
+Route::get('/service_accounts/remove-bapa-by-route', [App\Http\Controllers\ServiceAccountsController::class,  'removeBapaByRoute'])->name('serviceAccounts.remove-bapa-by-route');
+Route::get('/service_accounts/remove-bapa-by-account', [App\Http\Controllers\ServiceAccountsController::class,  'removeBapaByAccount'])->name('serviceAccounts.remove-bapa-by-account');
+Route::get('/service_accounts/update-bapa/{bapaName}', [App\Http\Controllers\ServiceAccountsController::class,  'updateBapa'])->name('serviceAccounts.update-bapa');
+Route::get('/service_accounts/search-accout-bapa', [App\Http\Controllers\ServiceAccountsController::class,  'searchAccountBapa'])->name('serviceAccounts.search-accout-bapa');
+Route::get('/service_accounts/add-single-account-to-bapa', [App\Http\Controllers\ServiceAccountsController::class,  'addSingleAccountToBapa'])->name('serviceAccounts.add-single-account-to-bapa');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 

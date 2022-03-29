@@ -649,7 +649,8 @@ class ServiceAccountsController extends AppBaseController
     public function getRoutesFromDistrict(Request $request) {
         $routes = DB::table('Billing_ServiceAccounts')
             ->where('Town', $request['Town'])
-            ->select('AreaCode')
+            ->select('AreaCode',
+                DB::raw('COUNT(id) AS NoOfConsumers'))
             ->groupBy('AreaCode')
             ->orderBy('AreaCode')
             ->get();
@@ -659,8 +660,9 @@ class ServiceAccountsController extends AppBaseController
             foreach($routes as $item) {
                 $output .= '<tr>
                                 <td>' . $item->AreaCode . '</td>
+                                <td>' . $item->NoOfConsumers . '</td>
                                 <td class="text-right">
-                                    <button class="btn btn-primary btn-xs" onclick=addToBapa("' . $item->AreaCode . '")>Add</button>
+                                    <button id="btn-' . $item->AreaCode . '" class="btn btn-primary btn-xs" onclick=addToBapa("' . $item->AreaCode . '")>Add</button>
                                 </td>
                             </tr>';
             }
@@ -673,7 +675,8 @@ class ServiceAccountsController extends AppBaseController
 
     public function addToBapa(Request $request) {
         ServiceAccounts::where('AreaCode', $request['AreaCode'])
-            ->update(['OrganizationParentAccount' => $request['BAPAName']]);
+            ->whereNull('OrganizationParentAccount')
+            ->update(['OrganizationParentAccount' => $request['BAPAName'], 'Organization' => 'BAPA']);
 
         $accounts = ServiceAccounts::where('OrganizationParentAccount', $request['BAPAName'])
             ->orderBy('ServiceAccountName')
@@ -690,5 +693,144 @@ class ServiceAccountsController extends AppBaseController
         }
 
         return response()->json($output, 200);
+    }
+
+    public function bapaView($bapaName) {
+        $bapaName = urldecode($bapaName);
+        $serviceAccounts = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.ForDistribution',
+                    'Billing_ServiceAccounts.Organization',
+                    'Billing_ServiceAccounts.Main',
+                    'Billing_ServiceAccounts.GroupCode',
+                    'Billing_ServiceAccounts.Multiplier',
+                    'Billing_ServiceAccounts.Coreloss',
+                    'Billing_ServiceAccounts.ConnectionDate',
+                    'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.SeniorCitizen',
+                    'Billing_ServiceAccounts.Evat5Percent',
+                    'Billing_ServiceAccounts.Ewt2Percent',
+                    'Billing_ServiceAccounts.Contestable',
+                    'Billing_ServiceAccounts.NetMetered',
+                    'Billing_ServiceAccounts.AccountRetention',
+                    'Billing_ServiceAccounts.DurationInMonths',
+                    'Billing_ServiceAccounts.AccountExpiration',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+            ->orderBy('Billing_ServiceAccounts.AreaCode')
+            ->get();
+
+        $routes = DB::table('Billing_ServiceAccounts')
+            ->where('OrganizationParentAccount', $bapaName)
+            ->select('AreaCode',
+                DB::raw("COUNT(id) AS NoOfConsumers"))
+            ->groupBy('AreaCode')
+            ->get();
+
+        return view('/service_accounts/bapa_view', [
+            'serviceAccounts' => $serviceAccounts,
+            'bapaName' => $bapaName,
+            'routes' => $routes,
+        ]);
+    }
+
+    public function removeBapaByRoute(Request $request) {
+        $bapaName = $request['BAPAName'];
+        $route = $request['Route'];
+
+        ServiceAccounts::where('OrganizationParentAccount', $bapaName)
+            ->where('AreaCode', $route)
+            ->update(['OrganizationParentAccount' => null, 'Organization' => null]);
+
+        return response()->json('ok', 200);
+    }
+
+    public function removeBapaByAccount(Request $request) {
+        $accountNo = $request['AccountNumber'];
+
+        ServiceAccounts::where('id', $accountNo)
+            ->update(['OrganizationParentAccount' => null, 'Organization' => null]);
+
+        return response()->json('ok', 200);
+    }
+
+    public function updateBapa($bapaName) {
+        $towns = Towns::orderBy('id')->get();
+        $accounts = ServiceAccounts::where('OrganizationParentAccount', urldecode($bapaName))
+            ->orderBy('ServiceAccountName')
+            ->get();
+        return view('/service_accounts/update_bapa', [
+            'towns' => $towns,
+            'bapaName' => $bapaName,
+            'accounts' => $accounts,
+        ]);
+    }
+
+    public function searchAccountBapa(Request $request) {
+        $results = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->whereNull('Billing_ServiceAccounts.Organization')
+            ->whereNull('Billing_ServiceAccounts.OrganizationParentAccount')
+            ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['query'] . '%')
+            ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['query'] . '%')
+            ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['query'] . '%')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+            ->get();
+
+        $output = "";
+
+        if (count($results) > 0) {
+            foreach($results as $item) {
+                $output .= '
+                        <tr>
+                            <td>' . $item->id . '</td>
+                            <td>' . $item->ServiceAccountName . '</td>
+                            <td>' . ServiceAccounts::getAddress($item) . '</td>
+                            <td>' . $item->AccountStatus . '</td>
+                            <td>
+                                <button class="btn btn-link text-primary" onclick=addAccountToBapa("' . $item->id . '")><i class="fas fa-forward"></i></button>
+                            </td>
+                        </tr>
+                    '; 
+            }
+
+            return response()->json($output, 200);
+        } else {
+            return response()->json([], 200);
+        }        
+    }
+
+    public function addSingleAccountToBapa(Request $request) {
+        $id = $request['id'];
+        $bapaName = $request['BAPAName'];
+
+        ServiceAccounts::where('id', $id)
+            ->whereNull('OrganizationParentAccount')
+            ->update(['OrganizationParentAccount' => $bapaName, 'Organization' => 'BAPA']);
+
+        return response()->json('ok', 200);
     }
 }

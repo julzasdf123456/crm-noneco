@@ -32,7 +32,7 @@
                         <td>{{ $item->OrganizationParentAccount }}</td>
                         <td>{{ $item->MembersTotal }}</td>
                         <td class="text-right">
-                            <a href="" class="btn btn-xs btn-primary"><i class="fas fa-eye ico-tab-mini"></i> View</a>
+                            <a href="{{ route('serviceAccounts.bapa-view', [urlencode($item->OrganizationParentAccount)]) }}" class="btn btn-xs btn-primary"><i class="fas fa-eye ico-tab-mini"></i> View</a>
                         </td>
                     </tr>
                     @endif                    
