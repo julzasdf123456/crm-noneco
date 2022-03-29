@@ -435,3 +435,8 @@ Route::resource('pendingBillAdjustments', App\Http\Controllers\PendingBillAdjust
 
 
 Route::resource('oRAssignings', App\Http\Controllers\ORAssigningController::class);
+
+
+Route::post('/kwh_sales/generate-new/', [App\Http\Controllers\KwhSalesController::class, 'generateNew'])->name('kwhSales.generate-new');
+Route::post('/kwh_sales/save-sales-report', [App\Http\Controllers\KwhSalesController::class, 'saveSalesReport'])->name('kwhSales.save-sales-report');
+Route::resource('kwhSales', App\Http\Controllers\KwhSalesController::class);

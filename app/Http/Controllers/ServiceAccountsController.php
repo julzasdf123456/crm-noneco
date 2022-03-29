@@ -225,7 +225,7 @@ class ServiceAccountsController extends AppBaseController
                     'CRM_Barangays.Barangay',
                     'Billing_Bills.*')
             ->orderByDesc('Billing_Bills.ServicePeriod')
-            ->offset(1)
+            // ->offset(1)
             ->get();
 
         $disconnectionHistory = DisconnectionHistory::where('AccountNumber', $id)
@@ -600,7 +600,7 @@ class ServiceAccountsController extends AppBaseController
             } else {
                 $collectibles = new Collectibles;
                 $collectibles->id = IDGenerator::generateIDandRandString();
-                $collectibles->AccountNumber = $id;
+                $collectibles->AccountNumber = $bill->AccountNumber;
                 $collectibles->Balance = Bills::computePenalty($bill->NetAmount);
                 $collectibles->save();
             }

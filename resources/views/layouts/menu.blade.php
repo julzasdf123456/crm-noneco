@@ -515,6 +515,27 @@ use Illuminate\Support\Facades\Auth;
             </li>
         </ul>
     </li>
+
+    <li class="nav-item has-treeview">
+        <a href="#" class="nav-link">
+            <i class="fas fa-file nav-icon text-primary"></i>
+            <p>
+                Reports
+                <i class="fas fa-angle-left right"></i>
+            </p>
+        </a>
+        <ul class="nav nav-treeview">
+            <li class="nav-header">                
+                CorPlan 
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('kwhSales.index') }}"
+                   class="nav-link {{ Request::is('kwhSales.index*') ? 'active' : '' }}">                   
+                   <i class="fas fa-plug nav-icon text-primary"></i><p>KWH Sales</p>
+                </a>
+            </li>
+        </ul>
+    </li>
 @endcanany
 
 {{-- DISCONNECTION --}}

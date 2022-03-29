@@ -46,7 +46,7 @@ class ReadAndBillAPI extends Controller {
     }
 
     public function downloadAccounts(Request $request) {
-        $accounts = ServiceAccounts::where('AreaCode', $request['AreaCode'])
+        $accounts = ServiceAccounts::where('Town', $request['AreaCode'])
             ->where('GroupCode', $request['GroupCode'])
             ->get();
 
@@ -56,7 +56,7 @@ class ReadAndBillAPI extends Controller {
             ->leftJoin('Billing_Collectibles', 'Billing_ServiceAccounts.id', '=', 'Billing_Collectibles.AccountNumber')
             ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-            ->where('Billing_ServiceAccounts.AreaCode', $request['AreaCode'])
+            ->where('Billing_ServiceAccounts.Town', $request['AreaCode'])
             ->where('Billing_ServiceAccounts.GroupCode', $request['GroupCode'])
             ->whereNotIn('Billing_ServiceAccounts.id', DB::table('Billing_Readings')->where('ServicePeriod', $request['ServicePeriod'])->pluck('AccountNumber'))
             ->whereNotIn('Billing_ServiceAccounts.AccountType', ['PUBLIC BUILDING HIGH VOLTAGE', 'COMMERCIAL HIGH VOLTAGE', 'INDUSTRIAL HIGH VOLTAGE'])
@@ -107,8 +107,7 @@ class ReadAndBillAPI extends Controller {
             return response()->json($accounts, $this->successStatus);
         } else {
             return response()->json([], 404);
-        }
-        
+        }        
     }
 
     public function downloadRates(Request $request) {
