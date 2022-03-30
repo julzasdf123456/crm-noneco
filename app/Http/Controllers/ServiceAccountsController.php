@@ -31,6 +31,8 @@ use App\Models\TransactionIndex;
 use App\Models\ArrearsLedgerDistribution;
 use App\Models\DisconnectionHistory;
 use App\Models\Tickets;
+use App\Models\PrePaymentBalance;
+use App\Models\PrePaymentTransHistory;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Flash;
 use Response;
@@ -284,6 +286,16 @@ class ServiceAccountsController extends AppBaseController
             ->orderByDesc('CRM_Tickets.created_at')
             ->get();
 
+        // transaction balance
+        $prepaymentBalance = PrePaymentBalance::where('AccountNumber', $id)->first();
+        $prepaymentHistory = DB::table('Billing_PrePaymentTransactionHistory')
+            ->leftJoin('users', 'Billing_PrePaymentTransactionHistory.UserId', '=', 'users.id')
+            ->where('Billing_PrePaymentTransactionHistory.AccountNumber', $id)
+            ->select('Billing_PrePaymentTransactionHistory.*',
+                'users.name')
+            ->orderByDesc('Billing_PrePaymentTransactionHistory.created_at')
+            ->get();
+
         return view('service_accounts.show', [
             'serviceAccounts' => $serviceAccounts,
             'meters' => $meters,
@@ -298,6 +310,8 @@ class ServiceAccountsController extends AppBaseController
             'disconnectionHistory' => $disconnectionHistory,
             'complaints' => $complaints,
             'violations' => $violations,
+            'prepaymentBalance' => $prepaymentBalance,
+            'prepaymentHistory' => $prepaymentHistory,
         ]);
     }
 

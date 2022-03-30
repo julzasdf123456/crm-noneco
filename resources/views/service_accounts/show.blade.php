@@ -39,6 +39,9 @@
                             <li class="nav-item"><a class="nav-link" href="#arrears" data-toggle="tab">
                                 <i class="fas fa-receipt"></i>
                                 Arrears</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#prepayments" data-toggle="tab">
+                                <i class="fas fa-piggy-bank"></i>
+                                Pre-Payments/Deposits</a></li>
                             <li class="nav-item"><a class="nav-link" href="#ticket-hist" data-toggle="tab">
                                 <i class="fas fa-exclamation-triangle"></i>
                                 Ticket History</a></li>
@@ -61,6 +64,9 @@
 
                             <div class="tab-pane" id="arrears">
                                 @include('service_accounts.tab_arrears')
+                            </div>
+                            <div class="tab-pane" id="prepayments">
+                                @include('service_accounts.tab_prepayments')
                             </div>
                             <div class="tab-pane" id="ticket-hist">
                                 @include('service_accounts.tab_ticket_history')

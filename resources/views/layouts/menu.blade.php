@@ -607,16 +607,48 @@ use Illuminate\Support\Facades\Auth;
                 <i class="fas fa-coins nav-icon text-info"></i><p>Other Payments</p>
                 </a>
             </li>
-            <li class="nav-header">                
-                Settings
+        </ul>
+    </li>
+    <li class="nav-item has-treeview">
+        <a href="#" class="nav-link">
+            <i class="fas fa-ban nav-icon text-info"></i>
+            <p>
+                OR Cancellations
+                <i class="fas fa-angle-left right"></i>
+            </p>
+        </a>
+        <ul class="nav nav-treeview">
+            <li class="nav-item">
+                <a href="{{ route('paidBills.or-cancellation') }}"
+                class="nav-link {{ Request::is('paidBills.or-cancellation*') ? 'active' : '' }}">
+                <i class="fas fa-file-invoice-dollar nav-icon text-info"></i><p>Bills Payment</p>
+                </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('accountPayables.index') }}"
-                   class="nav-link {{ Request::is('accountPayables*') ? 'active' : '' }}">
-                   <i class="fas fa-circle nav-icon text-info"></i><p>Account Payables</p>
+                <a href="{{ route('transactionIndices.service-connection-collection') }}"
+                class="nav-link {{ Request::is('transactionIndices.service-connection-collection*') ? 'active' : '' }}">
+                <i class="fas fa-plug nav-icon text-info"></i><p>Other Payments</p>
                 </a>
             </li>
         </ul>
+    </li>
+    <li class="nav-header">                
+        Others
+    </li>
+    <li class="nav-item">
+        <a href="{{ route('prePaymentBalances.index') }}"
+           class="nav-link {{ Request::is('prePaymentBalances.index*') ? 'active' : '' }}">
+           <i class="fas fa-piggy-bank nav-icon text-info"></i><p>Pre-Payments/Deposits</p>
+        </a>
+    </li>
+    <li class="nav-header">                
+        Settings
+    </li>
+    <li class="nav-item">
+        <a href="{{ route('accountPayables.index') }}"
+           class="nav-link {{ Request::is('accountPayables*') ? 'active' : '' }}">
+           <i class="fas fa-circle nav-icon text-info"></i><p>Account Payables</p>
+        </a>
     </li>
 @endcanany
 
@@ -693,5 +725,3 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
-
-

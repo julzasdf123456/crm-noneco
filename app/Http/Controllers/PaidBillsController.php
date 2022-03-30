@@ -193,7 +193,7 @@ class PaidBillsController extends AppBaseController
         if (count($results) > 0) {
             foreach($results as $item) {
                 $output .= '
-                        <tr>
+                        <tr onclick=fetchDetails("' . $item->id . '")>
                             <td>' . $item->id . '</td>
                             <td>' . $item->ServiceAccountName . '</td>
                             <td>' . ServiceAccounts::getAddress($item) . '</td>
@@ -335,6 +335,42 @@ class PaidBillsController extends AppBaseController
         return view('/paid_bills/print_bill_payment', [
             'paidBill' => $paidBill
         ]);
+    }
+
+    public function orCancellation() {
+        return view('/paid_bills/or_cancellation', [
+
+        ]);
+    }
+
+    public function searchOR(Request $request) {
+        $regex = $request['query'];
+        
+        $results = DB::table('Cashier_PaidBills')
+            ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $regex . '%')
+            ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $regex . '%')
+            ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $regex . '%')
+            ->orWhere('Cashier_PaidBills.ORNumber', 'LIKE', '%' . $regex . '%')
+            ->select('Billing_ServiceAccounts.id AS AccountNumber',
+                'Cashier_PaidBills.ORNumber',
+                'Cashier_PaidBills.id',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Cashier_PaidBills.NetAmount')
+            ->get();
+
+        $output = "";
+
+        foreach($results as $item) {
+            $output .= '<tr>
+                            <td>' . $item->ORNumber . '</td>
+                            <td>' . $item->AccountNumber . '</td>
+                            <td>' . $item->ServiceAccountName . '</td>
+                            <td>' . number_format($item->NetAmount) . '</td>
+                        </tr>';
+        }
+
+        return response()->json($output, 200);
     }
 }
 

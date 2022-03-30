@@ -414,6 +414,8 @@ Route::get('/paid_bills/fetch-account', [App\Http\Controllers\PaidBillsControlle
 Route::get('/paid_bills/fetch-payable', [App\Http\Controllers\PaidBillsController::class, 'fetchPayable'])->name('paidBills.fetch-payable');
 Route::get('/paid_bills/save-paid-bill-and-print', [App\Http\Controllers\PaidBillsController::class, 'savePaidBillAndPrint'])->name('paidBills.save-paid-bill-and-print');
 Route::get('/paid_bills/print-bill-payment/{paidBillId}', [App\Http\Controllers\PaidBillsController::class, 'printBillPayment'])->name('paidBills.print-bill-payment');
+Route::get('/paid_bills/or-cancellation', [App\Http\Controllers\PaidBillsController::class, 'orCancellation'])->name('paidBills.or-cancellation');
+Route::get('/paid_bills/search-or', [App\Http\Controllers\PaidBillsController::class, 'searchOR'])->name('paidBills.search-or');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);
 
 
@@ -446,3 +448,11 @@ Route::resource('oRAssignings', App\Http\Controllers\ORAssigningController::clas
 Route::post('/kwh_sales/generate-new/', [App\Http\Controllers\KwhSalesController::class, 'generateNew'])->name('kwhSales.generate-new');
 Route::post('/kwh_sales/save-sales-report', [App\Http\Controllers\KwhSalesController::class, 'saveSalesReport'])->name('kwhSales.save-sales-report');
 Route::resource('kwhSales', App\Http\Controllers\KwhSalesController::class);
+
+
+Route::get('/pre_payment_balances/search', [App\Http\Controllers\PrePaymentBalanceController::class, 'search'])->name('prePaymentBalances.search');
+Route::get('/pre_payment_balances/get-balance-details', [App\Http\Controllers\PrePaymentBalanceController::class, 'getBalanceDetails'])->name('prePaymentBalances.get-balance-details');
+Route::resource('prePaymentBalances', App\Http\Controllers\PrePaymentBalanceController::class);
+
+
+Route::resource('prePaymentTransHistories', App\Http\Controllers\PrePaymentTransHistoryController::class);

@@ -71,7 +71,12 @@ class PaidBills extends Model
         'NetAmount',
         'Source',
         'ObjectSourceId',
-        'UserId'
+        'UserId',
+        'Status',
+        'FiledBy',
+        'ApprovedBy',
+        'AuditedBy',
+        'Notes'
     ];
 
     /**
@@ -99,7 +104,12 @@ class PaidBills extends Model
         'NetAmount' => 'string',
         'Source' => 'string',
         'ObjectSourceId' => 'string',
-        'UserId' => 'string'
+        'UserId' => 'string',
+        'Status' => 'string',
+        'FiledBy' => 'string',
+        'ApprovedBy' => 'string',
+        'AuditedBy' => 'string',
+        'Notes' => 'string'
     ];
 
     /**
@@ -130,7 +140,12 @@ class PaidBills extends Model
         'ObjectSourceId' => 'nullable|string|max:255',
         'UserId' => 'nullable|string|max:255',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'Status' => 'nullable|string',
+        'FiledBy' => 'nullable|string',
+        'ApprovedBy' => 'nullable|string',
+        'AuditedBy' => 'nullable|string',
+        'Notes' => 'nullable|string'
     ];
 
     public static function roundDecimal($val, $precision) {

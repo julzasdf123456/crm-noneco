@@ -15,7 +15,7 @@
                 </div>
                 <div class="col-sm-6">
                     {{-- <button class="btn btn-warning float-right" title="Search initial OR Number"  data-toggle="modal" data-target="#modal-set" style="margin-left: 20px;"><i class="fas fa-tools ico-tab"></i>Set Start OR</button> --}}
-                    <button class="btn btn-success float-right" title="Search Consumer"  data-toggle="modal" data-target="#modal-search"><i class="fas fa-search-dollar ico-tab"></i>Search</button>                   
+                    <button class="btn btn-success float-right" title="Search Consumer"  data-toggle="modal" data-target="#modal-search"><i class="fas fa-search-dollar ico-tab"></i>Search <strong>(F2)</strong></button>                   
                 </div>
             </div>
         </div>
@@ -252,7 +252,7 @@
 
             $('#search-consumer').on('click', function() {
                 var letterCount = $('#search').val().length;
-                if (letterCount > 6) {
+                if (letterCount > 4) {
                     performSearch($('#search').val())
                 }
             })
@@ -326,6 +326,10 @@
                         alert('An error occurred while setting initial OR. Contact IT for support')
                     }
                 });
+            })
+
+            $('#modal-search').on('shown.bs.modal', function () {
+                $('#search').focus();
             })
         })
 
@@ -507,20 +511,22 @@
         }
 
         // DETECT ENTER
-        $(document).keypress(function(event){
-            if (parseFloat(change)) {
-                if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(acctNo)) {
-                    var keycode = (event.keyCode ? event.keyCode : event.which);
-                    if(keycode == '13'){
-                        // saveAndPrint('Cash')
-                        transact()
-                    }                      
+        $(document).keydown(function(event){
+            var keycode = (event.keyCode ? event.keyCode : event.which);  
+            if(keycode == '13'){
+                if (parseFloat(change)) {
+                    if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(acctNo)) {  
+                        transact()                     
+                    } else {
+
+                    }
                 } else {
 
                 }
-            } else {
-
-            }  
+            } else if (keycode == 113) {
+                $('#modal-search').modal('show')
+                console.log('test')
+            }
         });
 
         function transact() {

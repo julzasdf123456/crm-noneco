@@ -36,6 +36,11 @@ class CreateTableCashierPaidBills extends Migration
             $table->string('Source')->nullable(); // MONTHLY BILL, ARREARS
             $table->string('ObjectSourceId')->nullable(); // INHERITS FROM Source (Bill Id, Arrers Id, etc.)
             $table->string('UserId')->nullable();
+            $table->string('Status')->nullable(); // CANCELLED, etc
+            $table->string('FiledBy')->nullable(); // userid
+            $table->string('ApprovedBy')->nullable(); // userid
+            $table->string('AuditedBy')->nullable(); // userid
+            $table->string('Notes', 1000)->nullable(); // userid
             $table->timestamps();
         });
     }
