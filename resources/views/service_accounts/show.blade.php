@@ -27,10 +27,7 @@
                 <div class="card">
                     <div class="card-header p-2">
                         <ul class="nav nav-pills">
-                            <li class="nav-item"><a class="nav-link active" href="#technical" data-toggle="tab">
-                                <i class="fas fa-car-battery"></i>
-                                Technical Info</a></li>
-                            <li class="nav-item"><a class="nav-link" href="#billing-hist" data-toggle="tab">
+                            <li class="nav-item"><a class="nav-link active" href="#billing-hist" data-toggle="tab">
                                 <i class="fas fa-file-invoice"></i>
                                 Billing History</a></li>
                             <li class="nav-item"><a class="nav-link" href="#disco-hist" data-toggle="tab">
@@ -42,6 +39,9 @@
                             <li class="nav-item"><a class="nav-link" href="#prepayments" data-toggle="tab">
                                 <i class="fas fa-piggy-bank"></i>
                                 Pre-Payments/Deposits</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#technical" data-toggle="tab">
+                                <i class="fas fa-car-battery"></i>
+                                Technical Info</a></li>
                             <li class="nav-item"><a class="nav-link" href="#ticket-hist" data-toggle="tab">
                                 <i class="fas fa-exclamation-triangle"></i>
                                 Ticket History</a></li>
@@ -50,11 +50,7 @@
 
                     <div class="card-body">
                         <div class="tab-content">
-                            <div class="tab-pane active" id="technical">
-                               @include('service_accounts.tab_technical')
-                            </div>
-
-                            <div class="tab-pane" id="billing-hist">
+                            <div class="tab-pane active" id="billing-hist">
                                 @include('service_accounts.tab_billing_history')
                             </div>
 
@@ -67,6 +63,10 @@
                             </div>
                             <div class="tab-pane" id="prepayments">
                                 @include('service_accounts.tab_prepayments')
+                            </div>
+
+                            <div class="tab-pane" id="technical">
+                               @include('service_accounts.tab_technical')
                             </div>
                             <div class="tab-pane" id="ticket-hist">
                                 @include('service_accounts.tab_ticket_history')
