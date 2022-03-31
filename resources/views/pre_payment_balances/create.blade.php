@@ -78,13 +78,17 @@
                     </div>
                 </div>
                 <div class="card-footer row">
-                    <div class="form-group col-lg-6">
+                    <div class="form-group col-lg-4">
                         <label for="amount">Deposit Amount</label>
                         <input type="number" step="any" id="amount" class="form-control" placeholder="Enter Amount...">
                     </div>  
-                    <div class="form-group col-lg-6">
+                    <div class="form-group col-lg-4">
+                        <label for="amount">OR Number</label>
+                        <input type="number" id="orno" class="form-control" placeholder="Enter OR Number">
+                    </div> 
+                    <div class="form-group col-lg-4">
                         <label for="remarks">Notes/Comments/Remarks</label>
-                        <input type="tet" id="remarks" class="form-control" placeholder="Notes/Comments/Remarks...">
+                        <input type="text" id="remarks" class="form-control" placeholder="Notes/Comments/Remarks...">
                     </div>  
                     <div class="col-lg-12">
                         <button class="btn btn-primary" id="depositBtn">Deposit</button> 
@@ -99,8 +103,10 @@
     <script>
         var accountNo = ""
         var balance = 0
+        var orno = ""
 
         $(document).ready(function() {
+            getNextOr()
             $('#search-field').keyup(function() {
                 var letterCount = this.value.length;
 
@@ -118,7 +124,7 @@
             $('#depositBtn').on('click', function() {
                 var amountProvided = $('#amount').val()
 
-                if (!jQuery.isEmptyObject(amountProvided)) {
+                if (!jQuery.isEmptyObject(amountProvided) || !jQuery.isEmptyObject(orno) || !jQuery.isEmptyObject(accountNo)) {
                     deposit(amountProvided)
                 }                
             })
@@ -147,6 +153,20 @@
                     $('#res-table tbody tr').remove()
                     alert('Error fetching data')
                     console.log(error)
+                }
+            })
+        }
+
+        function getNextOr() {
+            $.ajax({
+                url : '/o_r_assignings/get-next-or',
+                type : 'GET',
+                success : function(res) {
+                    orno = res['ORNumber']
+                    $('#orno').val(orno)
+                },
+                error : function(err) {
+                    alert('Error getting OR Number')
                 }
             })
         }
@@ -189,12 +209,19 @@
                     id : id,
                     AccountNumber : accountNo,
                     Balance : amount,
-                    Remarks : $('#remarks').val()
+                    Remarks : $('#remarks').val(),
+                    ORNumber : orno,
                 },
                 success : function(res) {
-                    fetchDetails(res['AccountNumber'])
-                    $('#amount').val('')
-                    $('#remarks').val('')
+                    // fetchDetails(res['AccountNumber'])
+                    // $('#amount').val('')
+                    // $('#remarks').val('')
+                    // $('#orno').val(getNextOr())
+                    if (jQuery.isEmptyObject(res)) {
+
+                    } else {
+                        window.location.href = "{{ url('/transaction_indices/print-other-payments') }}" + "/" + res['id'];
+                    }
                 },
                 error : function(err) {
                     alert('An error occurred while depositing the amount')

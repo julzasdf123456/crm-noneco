@@ -8,6 +8,9 @@ use App\Repositories\ORAssigningRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
 use App\Models\IDGenerator;
+use App\Models\ORAssigning;
+use Illuminate\Support\Facades\DB;   
+use Illuminate\Support\Facades\Auth; 
 use Flash;
 use Response;
 
@@ -155,5 +158,23 @@ class ORAssigningController extends AppBaseController
         Flash::success('O R Assigning deleted successfully.');
 
         return redirect(route('oRAssignings.index'));
+    }
+
+    public function getLastOR() {
+        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+            ->orderByDesc('created_at')
+            ->first();
+
+        return response()->json($orAssignedLast, 200);
+    }
+
+    public function getNextOR() {
+        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+            ->orderByDesc('created_at')
+            ->first();
+
+        $orNext = intval($orAssignedLast->ORNumber) + 1;
+
+        return response()->json(['ORNumber' => $orNext], 200);
     }
 }

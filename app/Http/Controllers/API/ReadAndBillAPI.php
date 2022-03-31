@@ -15,6 +15,10 @@ use App\Models\Barangays;
 use App\Models\ServiceAccounts;
 use App\Models\Rates;
 use App\Models\ReadingImages;
+use App\Models\PrePaymentBalance;
+use App\Models\IDGenerator;
+use App\Models\PrePaymentTransHistory;
+use App\Models\PaidBills;
 
 class ReadAndBillAPI extends Controller {
     public $successStatus = 200;
@@ -58,6 +62,7 @@ class ReadAndBillAPI extends Controller {
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
             ->where('Billing_ServiceAccounts.Town', $request['AreaCode'])
             ->where('Billing_ServiceAccounts.GroupCode', $request['GroupCode'])
+            ->whereNull('Billing_ServiceAccounts.OrganizationParentAccount')
             ->whereNotIn('Billing_ServiceAccounts.id', DB::table('Billing_Readings')->where('ServicePeriod', $request['ServicePeriod'])->pluck('AccountNumber'))
             ->whereNotIn('Billing_ServiceAccounts.AccountType', ['PUBLIC BUILDING HIGH VOLTAGE', 'COMMERCIAL HIGH VOLTAGE', 'INDUSTRIAL HIGH VOLTAGE'])
             ->where(function ($query) {
@@ -93,6 +98,7 @@ class ReadAndBillAPI extends Controller {
                 DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE ServicePeriod='" . $prevMonth . "' AND AccountNumber=Billing_ServiceAccounts.id) AS KwhUsed"),
                 DB::raw("(SELECT TOP 1 CAST(ReadingTimestamp AS DATE) FROM Billing_Readings WHERE ServicePeriod='" . $prevMonth . "' AND AccountNumber=Billing_ServiceAccounts.id) AS ReadingTimestamp"),
                 DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE AccountNumber=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterSerial"),
+                DB::raw("(SELECT TOP 1 Balance FROM Billing_PrePaymentBalance WHERE AccountNumber=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS Deposit"),
                 DB::raw("(SELECT SUM(CAST(NetAmount AS DECIMAL(10, 2))) FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND MergedToCollectible IS NULL AND id NOT IN (SELECT ObjectSourceId FROM Cashier_PaidBills WHERE AccountNumber=Billing_Bills.id)) AS ArrearsTotal"),
                 DB::raw("'" . date('Y-m-d', strtotime($request['ServicePeriod'])) . "' AS ServicePeriod"))
             ->get();
@@ -142,14 +148,138 @@ class ReadAndBillAPI extends Controller {
         $input = $request->all();
 
         $bills = Bills::where('ServicePeriod', $input['ServicePeriod'])
-            ->where('AccountNumber')
+            ->where('AccountNumber', $input['AccountNumber'])
             ->first();
+
+        $prepaymentBalance = PrePaymentBalance::where('AccountNumber', $input['AccountNumber'])->first();
         
         if ($bills != null) {
             // update
+            if ($prepaymentBalance != null) {
+                if ($input['ExcessDeposit'] != null) {
+                    $prepaymentBalance->Balance = $input['ExcessDeposit'];
+                    $prepaymentBalance->save();
+                    
+                    // ADD TRANSACTION HISTORY
+                    $transHistory = new PrePaymentTransHistory;
+                    $transHistory->id = IDGenerator::generateIDandRandString();
+                    $transHistory->AccountNumber = $input['AccountNumber'];
+                    $transHistory->Method = 'DEDUCT';
+                    $transHistory->Amount = $input['DeductedDeposit'];
+                    $transHistory->UserId = $input['UserId']; 
+                    $transHistory->save();
+                } else {
+                    $prepaymentBalance->Balance = "0";
+                    $prepaymentBalance->save();
+
+                    // ADD TRANSACTION HISTORY
+                    $transHistory = new PrePaymentTransHistory;
+                    $transHistory->id = IDGenerator::generateIDandRandString();
+                    $transHistory->AccountNumber = $input['AccountNumber'];
+                    $transHistory->Method = 'DEDUCT';
+                    $transHistory->Amount = $input['DeductedDeposit'];
+                    $transHistory->UserId = $input['UserId']; 
+                    $transHistory->save();
+                }
+
+                // MARK AS PAID
+                $netAmnt = intval($input['NetAmount']);
+                if ($netAmnt == 0) {
+                    // GET LAST OR OF DEPOSIT FIRST
+                    $histLast = PrePaymentTransHistory::where('AccountNumber', $input['AccountNumber'])
+                        ->where('Method', 'DEPOSIT')
+                        ->orderByDesc('created_at')
+                        ->first();
+                    
+                    if ($histLast != null) {
+                        // INSERT TO PAID BILLS
+                        $paidBills = new PaidBills;
+                        $paidBills->id = IDGenerator::generateIDandRandString();
+                        $paidBills->BillNumber = $input['BillNumber'];
+                        $paidBills->AccountNumber = $input['AccountNumber'];
+                        $paidBills->ServicePeriod = $input['ServicePeriod'];
+                        $paidBills->ORNumber = $histLast->ORNumber;
+                        $paidBills->ORDate = date('Y-m-d');
+                        $paidBills->KwhUsed = $input['KwhUsed'];
+                        $paidBills->Teller = $histLast->UserId;
+                        $paidBills->OfficeTransacted = env('APP_LOCATION');
+                        $paidBills->PostingDate = date('Y-m-d');
+                        $paidBills->PostingTime = date('H:i:s');
+                        $paidBills->Surcharge = 0;
+                        $paidBills->Deductions = $input['DeductedDeposit'];
+                        $paidBills->NetAmount = "0";
+                        $paidBills->Source = 'MONTHLY BILL - Pre-Payments';
+                        $paidBills->ObjectSourceId = $input['id'];
+                        $paidBills->UserId = $input['UserId'];
+                        $paidBills->save();
+                    }
+                }
+            }
+            
             $bill = Bills::update($request->all(), $bills->id);
         } else {
             //create
+            if ($prepaymentBalance != null) {
+                if ($input['ExcessDeposit'] != null) {
+                    $prepaymentBalance->Balance = $input['ExcessDeposit'];
+                    $prepaymentBalance->save();
+                    
+                    // ADD TRANSACTION HISTORY
+                    $transHistory = new PrePaymentTransHistory;
+                    $transHistory->id = IDGenerator::generateIDandRandString();
+                    $transHistory->AccountNumber = $input['AccountNumber'];
+                    $transHistory->Method = 'DEDUCT';
+                    $transHistory->Amount = $input['DeductedDeposit'];
+                    $transHistory->UserId = $input['UserId']; 
+                    $transHistory->save();
+                } else {
+                    $prepaymentBalance->Balance = "0";
+                    $prepaymentBalance->save();
+
+                    // ADD TRANSACTION HISTORY
+                    $transHistory = new PrePaymentTransHistory;
+                    $transHistory->id = IDGenerator::generateIDandRandString();
+                    $transHistory->AccountNumber = $input['AccountNumber'];
+                    $transHistory->Method = 'DEDUCT';
+                    $transHistory->Amount = $input['DeductedDeposit'];
+                    $transHistory->UserId = $input['UserId']; 
+                    $transHistory->save();
+                }
+
+                // MARK AS PAID
+                $netAmnt = intval($input['NetAmount']);
+                if ($netAmnt == 0) {
+                    // GET LAST OR OF DEPOSIT FIRST
+                    $histLast = PrePaymentTransHistory::where('AccountNumber', $input['AccountNumber'])
+                        ->where('Method', 'DEPOSIT')
+                        ->orderByDesc('created_at')
+                        ->first();
+                    
+                    if ($histLast != null) {
+                        // INSERT TO PAID BILLS
+                        $paidBills = new PaidBills;
+                        $paidBills->id = IDGenerator::generateIDandRandString();
+                        $paidBills->BillNumber = $input['BillNumber'];
+                        $paidBills->AccountNumber = $input['AccountNumber'];
+                        $paidBills->ServicePeriod = $input['ServicePeriod'];
+                        $paidBills->ORNumber = $histLast->ORNumber;
+                        $paidBills->ORDate = date('Y-m-d');
+                        $paidBills->KwhUsed = $input['KwhUsed'];
+                        $paidBills->Teller = $histLast->UserId;
+                        $paidBills->OfficeTransacted = env('APP_LOCATION');
+                        $paidBills->PostingDate = date('Y-m-d');
+                        $paidBills->PostingTime = date('H:i:s');
+                        $paidBills->Surcharge = 0;
+                        $paidBills->Deductions = $input['DeductedDeposit'];
+                        $paidBills->NetAmount = "0";
+                        $paidBills->Source = 'MONTHLY BILL - Pre-Payments';
+                        $paidBills->ObjectSourceId = $input['id'];
+                        $paidBills->UserId = $input['UserId'];
+                        $paidBills->save();
+                    }
+                }
+            }
+
             $bill = Bills::create($input);
         }
 

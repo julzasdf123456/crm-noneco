@@ -35,7 +35,7 @@
                         <div class="row">
                             @php
                                 // GET PREVIOUS MONTHS
-                                for ($i = 0; $i <= 12; $i++) {
+                                for ($i = -1; $i <= 12; $i++) {
                                     $months[] = date("Y-m-01", strtotime( date( 'Y-m-01' )." -$i months"));
                                 }
 

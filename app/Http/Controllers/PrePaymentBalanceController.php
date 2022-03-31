@@ -11,6 +11,9 @@ use App\Models\ServiceAccounts;
 use App\Models\PrePaymentBalance;
 use App\Models\PrePaymentTransHistory;
 use App\Models\IDGenerator;
+use App\Models\ORAssigning;
+use App\Models\TransactionDetails;
+use App\Models\TransactionIndex;
 use Illuminate\Support\Facades\DB;   
 use Illuminate\Support\Facades\Auth; 
 use Flash;
@@ -84,9 +87,50 @@ class PrePaymentBalanceController extends AppBaseController
         $transHistory->Amount = $input['Balance'];
         $transHistory->UserId = Auth::id(); 
         $transHistory->Notes = $input['Remarks'];
+        $transHistory->ORNumber = $input['ORNumber'];
         $transHistory->save();
 
-        return response()->json($prePaymentBalance, 200);
+        // SAVE OR
+        $saveOR = ORAssigning::where('ORNumber',  $input['ORNumber'])
+            ->where('UserId', Auth::id())
+            ->first();        
+        if ($saveOR == null) {
+            $saveOR = new ORAssigning;
+            $saveOR->id = IDGenerator::generateIDandRandString();
+            $saveOR->ORNumber = $input['ORNumber'];
+            $saveOR->UserId = Auth::id();
+            $saveOR->DateAssigned = date('Y-m-d');
+            $saveOR->TimeAssigned = date('H:i:s');
+            $saveOR->Office = env('APP_LOCATION');
+            $saveOR->save();
+        }     
+
+        // SAVE TRANSACTION
+        $id = IDGenerator::generateID();
+
+        $transactionIndex = new TransactionIndex;
+        $transactionIndex->id = $id;
+        $transactionIndex->TransactionNumber = env('APP_LOCATION') . '-' . $id;
+        $transactionIndex->PaymentTitle = "Pre-payment Deposit for Account No. " . $input['AccountNumber'];
+        $transactionIndex->ORNumber = $input['ORNumber'];
+        $transactionIndex->ORDate = date('Y-m-d');
+        $transactionIndex->Total = $input['Balance'];
+        $transactionIndex->Source = 'Pre-Payment Deposits';
+        $transactionIndex->ObjectId = $transHistory->id;
+        $transactionIndex->PaymentUsed = 'Cash';
+        $transactionIndex->UserId = Auth::id();
+        $transactionIndex->save();
+
+        // SAVE TRANSACTION DETAILS
+        $transactionDetails = new TransactionDetails;
+        $transactionDetails->id = IDGenerator::generateIDandRandString();
+        $transactionDetails->TransactionIndexId = $id;
+        $transactionDetails->Particular = 'Pre-Payment Deposit';
+        $transactionDetails->Amount = $input['Balance'];
+        $transactionDetails->Total = $input['Balance'];
+        $transactionDetails->save();
+
+        return response()->json($transactionIndex, 200);
     }
 
     /**

@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h4>Reading Schedules</h4>
+                    <h4>Meter Reader Scheduler Console</h4>
                 </div>
                 <div class="col-sm-6">
                     {{-- <a class="btn btn-primary float-right"

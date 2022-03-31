@@ -491,14 +491,28 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-circle nav-icon text-primary"></i><p>Zero Reading Adj.</p>
                 </a>
             </li>
+        </ul>
+    </li>
 
-            <li class="nav-header">                
-                Meter Reading 
-            </li>
+    <li class="nav-item has-treeview">
+        <a href="#" class="nav-link">
+            <i class="fas fa-tachometer-alt nav-icon text-primary"></i>
+            <p>
+                Meter Reading
+                <i class="fas fa-angle-left right"></i>
+            </p>
+        </a>
+        <ul class="nav nav-treeview">
             <li class="nav-item">
                 <a href="{{ route('readingSchedules.index') }}"
                    class="nav-link {{ Request::is('readingSchedules.index*') ? 'active' : '' }}">                   
-                   <i class="fas fa-calendar-week nav-icon text-primary"></i><p>Reading Scheduler</p>
+                   <i class="fas fa-calendar-week nav-icon text-primary"></i><p>M. Reader Scheduler</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('serviceAccounts.reading-account-grouper') }}"
+                   class="nav-link {{ Request::is('serviceAccounts.reading-account-grouper*') ? 'active' : '' }}">                   
+                   <i class="fas fa-calendar-alt nav-icon text-primary"></i><p>Reading Schedules</p>
                 </a>
             </li>
             <li class="nav-item">

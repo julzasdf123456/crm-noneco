@@ -154,7 +154,9 @@ class Bills extends Model
         'FranchiseTax',
         'BusinessTax',
         'AdjustmentType',
-        'Form2307Amount'
+        'Form2307Amount',
+        'DeductedDeposit',
+        'ExcessDeposit'
     ];
 
     /**
@@ -228,7 +230,9 @@ class Bills extends Model
         'FranchiseTax' => 'string',
         'BusinessTax' => 'string',
         'AdjustmentType' => 'string',
-        'Form2307Amount' => 'string'
+        'Form2307Amount' => 'string',
+        'DeductedDeposit' => 'string',
+        'ExcessDeposit' => 'string'
     ];
 
     /**
@@ -304,7 +308,9 @@ class Bills extends Model
         'FranchiseTax' => 'nullable|string',
         'BusinessTax' => 'nullable|string',
         'AdjustmentType' => 'nullable|string',
-        'Form2307Amount' => 'nullable|string'
+        'Form2307Amount' => 'nullable|string',
+        'DeductedDeposit' => 'nullable|string',
+        'ExcessDeposit' => 'nullable|string'
     ];
 
     public static function createDueDate($readDate) {

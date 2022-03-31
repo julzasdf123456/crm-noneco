@@ -371,7 +371,19 @@
                                     <div class="divider"></div>
 
                                     <div class="col-lg-12">
-                                        <table class="table table-borderless">
+                                        <table class="table table-borderless table-sm">
+                                            <tr>
+                                                <td>Additional Charges</td>
+                                                <td class="text-right">+ {{ number_format($bills->AdditionalCharges, 2) }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Other Deductions</td>
+                                                <td class="text-right">- {{ number_format($bills->Deductions, 2) }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Deposit/Pre-Payment Deductions</td>
+                                                <td class="text-right">- {{ number_format($bills->DeductedDeposit, 2) }}</td>
+                                            </tr>
                                             <tr>
                                                 <td>Net Amount</td>
                                                 <th class="text-right"><h4><strong>₱ {{ number_format($bills->NetAmount, 2) }}</strong></h4></th>

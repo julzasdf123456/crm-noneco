@@ -69,6 +69,7 @@
     window.print();
 
     window.setTimeout(function(){
-        window.location.href = "{{ route('transactionIndices.other-payments') }}";
+        // window.location.href = "{{ route('transactionIndices.other-payments') }}";
+        history.go(-1)
     }, 800);
 </script>

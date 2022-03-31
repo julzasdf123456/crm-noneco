@@ -847,4 +847,39 @@ class ServiceAccountsController extends AppBaseController
 
         return response()->json('ok', 200);
     }
+
+    public function readingAccountGrouper() {
+        $towns = DB::table('CRM_Towns')
+            ->select('id',
+                'Town',
+                DB::raw("(SELECT COUNT(id) FROM Billing_ServiceAccounts WHERE Town=CRM_Towns.id) AS ConsumerCount"))
+            ->orderBy('id')
+            ->get();
+
+        return view('/service_accounts/reading_account_grouper', [
+            'towns' => $towns
+        ]);
+    }
+
+    public function accountGrouperView($townCode) {
+        $town = Towns::find($townCode);
+
+        $groupings = DB::table('Billing_ServiceAccounts')
+            ->select('GroupCode',
+                DB::raw('COUNT(id) AS ConsumerCount'))
+            ->where('Town', $townCode)
+            ->groupBy('GroupCode')
+            ->get();
+
+        return view('/service_accounts/account_grouper_view', [
+            'town' => $town,
+            'groupings' => $groupings
+        ]);
+    }
+
+    public function accountGrouperOrganizer($townCode, $groupCode) {
+        return view('/service_accounts/account_grouper_organizer', [
+
+        ]);
+    }
 }

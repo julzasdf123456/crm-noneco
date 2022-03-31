@@ -41,7 +41,8 @@ class PrePaymentTransHistory extends Model
         'Method',
         'Amount',
         'UserId',
-        'Notes'
+        'Notes',
+        'ORNumber'
     ];
 
     /**
@@ -55,7 +56,8 @@ class PrePaymentTransHistory extends Model
         'Method' => 'string',
         'Amount' => 'string',
         'UserId' => 'string',
-        'Notes' => 'string'
+        'Notes' => 'string',
+        'ORNumber' => 'string'
     ];
 
     /**
@@ -71,7 +73,8 @@ class PrePaymentTransHistory extends Model
         'UserId' => 'nullable|string|max:255',
         'Notes' => 'nullable|string|max:1000',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'ORNumber' => 'nullable|string'
     ];
 
     

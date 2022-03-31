@@ -192,6 +192,9 @@ Route::get('/service_accounts/remove-bapa-by-account', [App\Http\Controllers\Ser
 Route::get('/service_accounts/update-bapa/{bapaName}', [App\Http\Controllers\ServiceAccountsController::class,  'updateBapa'])->name('serviceAccounts.update-bapa');
 Route::get('/service_accounts/search-accout-bapa', [App\Http\Controllers\ServiceAccountsController::class,  'searchAccountBapa'])->name('serviceAccounts.search-accout-bapa');
 Route::get('/service_accounts/add-single-account-to-bapa', [App\Http\Controllers\ServiceAccountsController::class,  'addSingleAccountToBapa'])->name('serviceAccounts.add-single-account-to-bapa');
+Route::get('/service_accounts/reading-account-grouper', [App\Http\Controllers\ServiceAccountsController::class,  'readingAccountGrouper'])->name('serviceAccounts.reading-account-grouper');
+Route::get('/service_accounts/account-grouper-view/{townCode}', [App\Http\Controllers\ServiceAccountsController::class,  'accountGrouperView'])->name('serviceAccounts.account-grouper-view');
+Route::get('/service_accounts/account-grouper-organizer/{townCode}/{groupCode}', [App\Http\Controllers\ServiceAccountsController::class,  'accountGrouperOrganizer'])->name('serviceAccounts.account-grouper-organizer');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 
@@ -442,6 +445,8 @@ Route::get('/pending_bill_adjustments/confirm-adjustment/{pendingAdjustmentId}',
 Route::resource('pendingBillAdjustments', App\Http\Controllers\PendingBillAdjustmentsController::class);
 
 
+Route::get('/o_r_assignings/get-last-or', [App\Http\Controllers\ORAssigningController::class, 'getLastOR'])->name('oRAssignings.get-last-or');
+Route::get('/o_r_assignings/get-next-or', [App\Http\Controllers\ORAssigningController::class, 'getNextOR'])->name('oRAssignings.get-next-or');
 Route::resource('oRAssignings', App\Http\Controllers\ORAssigningController::class);
 
 

@@ -21,6 +21,7 @@ class CreateTableBillingPrepaymentTransactionHistory extends Migration
             $table->string('Amount')->nullable();
             $table->string('UserId')->nullable();
             $table->string('Notes', 1000)->nullable();
+            $table->string('ORNumber')->nullable();
             $table->timestamps();
         });
     }
