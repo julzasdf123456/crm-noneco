@@ -419,6 +419,8 @@ Route::get('/paid_bills/save-paid-bill-and-print', [App\Http\Controllers\PaidBil
 Route::get('/paid_bills/print-bill-payment/{paidBillId}', [App\Http\Controllers\PaidBillsController::class, 'printBillPayment'])->name('paidBills.print-bill-payment');
 Route::get('/paid_bills/or-cancellation', [App\Http\Controllers\PaidBillsController::class, 'orCancellation'])->name('paidBills.or-cancellation');
 Route::get('/paid_bills/search-or', [App\Http\Controllers\PaidBillsController::class, 'searchOR'])->name('paidBills.search-or');
+Route::get('/paid_bills/fetch-or-details', [App\Http\Controllers\PaidBillsController::class, 'fetchORDetails'])->name('paidBills.fetch-or-details');
+Route::get('/paid_bills/request-cancel-or', [App\Http\Controllers\PaidBillsController::class, 'requestCancelOR'])->name('paidBills.request-cancel-or');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);
 
 
@@ -461,3 +463,6 @@ Route::resource('prePaymentBalances', App\Http\Controllers\PrePaymentBalanceCont
 
 
 Route::resource('prePaymentTransHistories', App\Http\Controllers\PrePaymentTransHistoryController::class);
+
+
+Route::resource('notifiers', App\Http\Controllers\NotifiersController::class);

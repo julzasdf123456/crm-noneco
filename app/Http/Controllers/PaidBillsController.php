@@ -14,6 +14,7 @@ use App\Models\Bills;
 use App\Models\IDGenerator;
 use App\Models\PaidBills;
 use App\Models\ORAssigning;
+use App\Models\Notifiers;
 use Flash;
 use Response;
 
@@ -348,10 +349,13 @@ class PaidBillsController extends AppBaseController
         
         $results = DB::table('Cashier_PaidBills')
             ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
-            ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $regex . '%')
-            ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $regex . '%')
-            ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $regex . '%')
-            ->orWhere('Cashier_PaidBills.ORNumber', 'LIKE', '%' . $regex . '%')
+            ->whereNull('Cashier_PaidBills.Status')
+            ->where(function($query) use ($regex) {
+                $query->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $regex . '%')
+                    ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $regex . '%')
+                    ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $regex . '%')
+                    ->orWhere('Cashier_PaidBills.ORNumber', 'LIKE', '%' . $regex . '%');
+            })            
             ->select('Billing_ServiceAccounts.id AS AccountNumber',
                 'Cashier_PaidBills.ORNumber',
                 'Cashier_PaidBills.id',
@@ -362,7 +366,7 @@ class PaidBillsController extends AppBaseController
         $output = "";
 
         foreach($results as $item) {
-            $output .= '<tr>
+            $output .= '<tr onclick=fetchDetails("' . $item->id . '")>
                             <td>' . $item->ORNumber . '</td>
                             <td>' . $item->AccountNumber . '</td>
                             <td>' . $item->ServiceAccountName . '</td>
@@ -371,6 +375,85 @@ class PaidBillsController extends AppBaseController
         }
 
         return response()->json($output, 200);
+    }
+
+    public function fetchORDetails(Request $request) {
+        $id = $request['id'];
+
+        $paidBill = DB::table('Cashier_PaidBills')
+            ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->leftJoin('users', 'Cashier_PaidBills.Teller', '=', 'users.id')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->where('Cashier_PaidBills.id', $id)
+            ->whereNull('Cashier_PaidBills.Status')
+            ->select('Cashier_PaidBills.id', 
+                'Cashier_PaidBills.ORNumber',
+                'Cashier_PaidBills.ORDate',
+                'Cashier_PaidBills.PostingDate',
+                'Cashier_PaidBills.PostingTime',
+                'Cashier_PaidBills.KwhUsed',
+                'Cashier_PaidBills.BillNumber',
+                'Cashier_PaidBills.ServicePeriod',
+                'Cashier_PaidBills.AdditionalCharges',
+                'Cashier_PaidBills.Deductions',
+                'Cashier_PaidBills.NetAmount',
+                'Cashier_PaidBills.ObjectSourceId',
+                'users.name',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.id as AccountNumber',
+                'CRM_Towns.Town',
+                'CRM_Barangays.Barangay',
+                'Billing_ServiceAccounts.Purok')
+            ->first();
+        
+        $res = [];
+        $res['id'] = $paidBill->id;
+        $res['ORNumber'] = $paidBill->ORNumber;
+        $res['AccountNumber'] = $paidBill->AccountNumber;
+        $res['ORDate'] = date('F d, Y', strtotime($paidBill->ORDate));
+        $res['PostingDate'] = date('F d, Y', strtotime($paidBill->PostingDate));
+        $res['PostingTime'] = $paidBill->PostingTime;
+        $res['KwhUsed'] = $paidBill->KwhUsed;
+        $res['BillNumber'] = $paidBill->BillNumber;
+        $res['ServicePeriod'] = date('F d, Y', strtotime($paidBill->ServicePeriod));
+        $res['AdditionalCharges'] = number_format($paidBill->AdditionalCharges, 2);
+        $res['Deductions'] = number_format($paidBill->Deductions, 2);
+        $res['NetAmount'] = number_format($paidBill->NetAmount, 2);
+        $res['ObjectSourceId'] = $paidBill->ObjectSourceId;
+        $res['name'] = $paidBill->name;
+        $res['ServiceAccountName'] = $paidBill->ServiceAccountName;
+        $res['Address'] = ServiceAccounts::getAddress($paidBill);
+
+        return response()->json($res, 200);
+    }
+
+    public function requestCancelOR(Request $request) {
+        $id = $request['id'];
+
+        $paidBill = PaidBills::find($id);
+
+        if ($paidBill != null) {
+            $paidBill->Status = 'PENDING CANCEL';
+            $paidBill->FiledBy = Auth::id();
+            $paidBill->Notes = $request['Notes'];
+            $paidBill->save();
+
+            // ADD NOTIFICATION
+            $notifier = new Notifiers;
+            $notifier->id = IDGenerator::generateIDandRandString();
+            $notifier->Notification = 'OR Cancellation requested by ' . Auth::user()->name . ' with OR Number ' . $paidBill->ORNumber;
+            $notifier->From = Auth::id();
+            $notifier->To = env('APP_CASHIER_HEAD_ID');
+            $notifier->Status = 'SENT';
+            $notifier->Intent = ""; // change later to or cancellation confirmations
+            $notifier->ObjectId = $paidBill->id;
+            $notifier->save();
+
+            return response()->json('ok', 200);
+        } else {
+            return response()->json('paid bill not found', 404);
+        }
     }
 }
 
