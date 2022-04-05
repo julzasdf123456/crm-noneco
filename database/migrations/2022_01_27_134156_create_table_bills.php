@@ -91,6 +91,9 @@ class CreateTableBills extends Migration
             $table->string('ExcessDeposit')->nullable(); // FROM DEPOSITS/PREPAYMENTS
 
             $table->string('AveragedCount')->nullable(); // Number of months that the bill is averaged
+
+            $table->string('IsUnlockedForPayment')->nullable(); // Yes, Requested, Null
+            $table->string('UnlockedBy')->nullable();
             $table->timestamps();
         });
     }

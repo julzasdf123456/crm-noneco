@@ -24,7 +24,7 @@
     <div class="content">
         <div class="row">
             {{-- QUEUE --}}
-            <div class="col-lg-4 col-md-5">
+            <div class="col-lg-8 col-md-6">
                 <div class="card" style="height: 60vh;">
                     <div class="card-header border-0">
                         <span class="card-title">
@@ -49,100 +49,63 @@
             </div>
 
             {{-- PAYMENT SECTION --}}
-            <div class="col-lg-8 col-md-7">
+            <div class="col-lg-4 col-md-6">
                 <div class="card">
                     <div class="card-header border-0">
                         
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            {{-- INVOICE DETAILS --}}
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-body table-responsive table-borderless px-0">
-                                        <table class="table">
-                                            <tr>
-                                                <td>Bill Number</td>
-                                                <th class="text-right" id="bill-no"></th>
-                                            </tr>
-                                            <tr>
-                                                <td>Service From</td>
-                                                <th class="text-right" id="service-from"></th>
-                                            </tr>
-                                            <tr>
-                                                <td>Service To</td>
-                                                <th class="text-right" id="service-to"></th>
-                                            </tr>
-                                            <tr>
-                                                <td>Due Date</td>
-                                                <th class="text-right" id="due-date"></th>
-                                            </tr>
-                                            <tr>
-                                                <td>Kwh Consumed</td>
-                                                <th class="text-right" id="kwh-used"></th>
-                                            </tr> 
-                                            <tr>
-                                                <td>Rate</td>
-                                                <th class="text-right" id="rate"></th>
-                                            </tr> 
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- AMOUNT --}}
-                            <div class="col-lg-6">
-                                <table class="table table-borderless table-sm">
-                                    <tr>
-                                        <td>Amount Due</td>
-                                        <td class="text-right">
-                                            <h4 class="text-right" id="amount-due"></h4>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Deductions/Subsidies</td>
-                                        <td class="text-right">
-                                            <h4 class="text-right" id="deductions"></h4>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Additional Charges</td>
-                                        <td class="text-right">
-                                            <h4 class="text-right" id="additional-charges"></h4>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Surcharges</td>
-                                        <td class="text-right">
-                                            <h4 class="text-right" id="surcharges"></h4>
-                                        </td>
-                                    </tr>
-                                    <tr style="border-top: 1px solid #dcdcdc">
-                                        <th>Total Amount Due</th>
-                                        <th class="text-right">
-                                            <h1 class="text-right" id="total-amount"></h1>
-                                        </th>
-                                    </tr>                                    
-                                    <tr>
-                                        <td>OR Number</td>
-                                        <td class="text-right">
-                                            <input type="number" class="form-control text-right" style="font-size: 1.5em;" id="orNumber" value="{{ ORAssigning::getORIncrement(1, $orAssignedLast) }}">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Amount Paid</td>
-                                        <td class="text-right">
-                                            <input type="number" class="form-control text-right" style="font-size: 1.5em;" id="amountPaid" step="any">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Change</td>
-                                        <td class="text-right">
-                                            <input type="text" class="form-control text-right" style="font-size: 1.5em;" id="change" readonly="true">
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
+                            <table class="table table-borderless table-sm">
+                                <tr>
+                                    <td>Amount Due</td>
+                                    <td class="text-right">
+                                        <h4 class="text-right" id="amount-due"></h4>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Deductions/Subsidies</td>
+                                    <td class="text-right">
+                                        <h4 class="text-right" id="deductions"></h4>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Additional Charges</td>
+                                    <td class="text-right">
+                                        <h4 class="text-right" id="additional-charges"></h4>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Surcharges</td>
+                                    <td class="text-right">
+                                        <h4 class="text-right" id="surcharges"></h4>
+                                    </td>
+                                </tr>
+                                <tr style="border-top: 1px solid #dcdcdc">
+                                    <th>Total Amount Due</th>
+                                    <th class="text-right">
+                                        <h1 class="text-right" id="total-amount"></h1>
+                                    </th>
+                                </tr>                                    
+                                <tr>
+                                    <td>OR Number</td>
+                                    <td class="text-right">
+                                        <input type="number" class="form-control text-right" style="font-size: 1.5em;" id="orNumber" value="{{ ORAssigning::getORIncrement(1, $orAssignedLast) }}">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Amount Paid</td>
+                                    <td class="text-right">
+                                        <input type="number" class="form-control text-right" style="font-size: 1.5em;" id="amountPaid" step="any">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Change</td>
+                                    <td class="text-right">
+                                        <input type="text" class="form-control text-right" style="font-size: 1.5em;" id="change" readonly="true">
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                     <div class="card-footer">
@@ -241,6 +204,8 @@
         var kwhUsed = ''
         var billId = ''
 
+        var selectedPayments = []
+
         $(document).ready(function() {
             $('#search').keyup(function() {
                 var letterCount = this.value.length;
@@ -263,7 +228,7 @@
 
                 if (parseFloat(change)) {
                     $('#change').val(change)
-                    if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(acctNo)) {
+                    if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(selectedPayments)) {
                         buttonEnablers(true)                        
                     } else {
                         buttonEnablers(false)
@@ -293,7 +258,7 @@
 
                 if (parseFloat(change)) {
                     $('#change').val(change)
-                    if (change > -1 && !jQuery.isEmptyObject(this.value) && !jQuery.isEmptyObject(acctNo)) {
+                    if (change > -1 && !jQuery.isEmptyObject(this.value) && !jQuery.isEmptyObject(selectedPayments)) {
                         buttonEnablers(true)                        
                     } else {
                         buttonEnablers(false)
@@ -332,6 +297,77 @@
                 $('#search').focus();
             })
         })
+
+        function addToPayables(id) {
+            if ($('#' + id).attr('ischecked') == 'false') {
+                $('#' + id).removeClass('text-muted').addClass('text-primary')
+
+                // ADD TO ARRAY
+                selectedPayments.push(id)
+
+                $('#' + id).attr('ischecked', 'true')
+            } else {
+                $('#' + id).removeClass('text-primary').addClass('text-muted')
+
+                // REMOVE ITEM FROM ARRAY
+                removeItemFromArray(id)
+
+                $('#' + id).attr('ischecked', 'false')
+            }
+
+            // VALIDATE FORM
+            computePayables(selectedPayments)
+            $('#amount-due').text('P ' + Number(totalAmount.toFixed(2)).toLocaleString())
+            $('#total-amount').text('P ' + Number(totalAmount.toFixed(2)).toLocaleString())
+            $('#additional-charges').text('P ' + Number(additionals.toFixed(2)).toLocaleString())
+            $('#deductions').text('P ' + Number(deductions.toFixed(2)).toLocaleString())
+            $('#surcharges').text('P ' + Number(surcharge.toFixed(2)).toLocaleString())
+            $('#amountPaid').focus()
+
+            // VALIDATE BUTTONS
+            change = (parseFloat($('#amountPaid').val()) - totalAmount).toFixed(2).toLocaleString()
+
+            if (parseFloat(change)) {
+                $('#change').val(change)
+                if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(selectedPayments)) {
+                    buttonEnablers(true)                        
+                } else {
+                    buttonEnablers(false)
+                }
+            } else {
+                $('#change').val('')
+                buttonEnablers(false)
+            } 
+        }
+
+        function computePayables() {
+            var len = selectedPayments.length
+            totalAmount = 0.0
+            deductions = 0
+            additionals = 0
+            surcharge = 0
+
+            for(var i=0; i<len; i++) {
+                var amount = parseFloat($('#' + selectedPayments[i]).attr('amount'))
+                totalAmount += amount
+
+                var additionalCharges = parseFloat($('#' + selectedPayments[i]).attr('additionalCharges'))
+                additionals += additionalCharges
+
+                var deductibles = (parseFloat($('#' + selectedPayments[i]).attr('deductions')) ? parseFloat($('#' + selectedPayments[i]).attr('deductions')) : 0)
+                deductions += deductibles
+
+                var surcharges = parseFloat($('#' + selectedPayments[i]).attr('surcharge'))
+                surcharge += surcharges
+            }
+        }
+
+        function removeItemFromArray(id) {
+            var index = selectedPayments.indexOf(id)
+            if (index > -1) {
+                selectedPayments.splice(index, 1)
+            }
+        }
 
         function buttonEnablers(bool) {
             if (bool) {
@@ -515,7 +551,7 @@
             var keycode = (event.keyCode ? event.keyCode : event.which);  
             if(keycode == '13'){
                 if (parseFloat(change)) {
-                    if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(acctNo)) {  
+                    if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(selectedPayments)) {  
                         transact()                     
                     } else {
 
@@ -544,9 +580,10 @@
                     NetAmount : totalAmount,
                     BillId : billId,
                     ORNumber : $('#orNumber').val(),
+                    BillsId : selectedPayments,
                 }, 
                 success : function(res) {
-                    window.location.href = "{{ url('/paid_bills/print-bill-payment') }}" + "/" + res['id']
+                    window.location.href = "{{ url('/paid_bills/print-bill-payment') }}" + "/" + res['ORNumber']
                 },
                 error : function(err) {
                     alert('An error occurred while performing the transaction. Contact support for more.')

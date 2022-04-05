@@ -48,19 +48,20 @@
     <br>
     <br>
     <br>
-    <span style="margin-left: 140px;">{{ $paidBill->BillNumber }}</span>
-    <span style="margin-left: 90px;">{{ $paidBill->PostingDate }}</span>
+    <span style="margin-left: 140px;">{{ $paidBillSingle != null ? $paidBillSingle->ORNumber : '-' }}</span>
+    <span style="margin-left: 140px;">{{ $account != null ? $account->ServiceAccountName : '-' }}</span>
     <br>
     <table style="margin-top: 30px;">
-        <tbody>            
-            <tr>
-                <td style="padding-left: 20px;">Add Particulars Here</td>
-                <td style="padding-left: 150px; float: right;">Add Particulars Here</td>
-            </tr>
+        <tbody>     
+            @foreach ($paidBill as $item)
+                <tr>
+                    <td style="padding-left: 20px;">{{ $item->BillNumber }}</td>
+                    <td style="padding-left: 150px; float: right;">{{ date('M d, Y', strtotime($item->ServicePeriod)) }}</td>
+                    <td style="padding-left: 150px; float: right;">{{ number_format($item->NetAmount, 2) }}</td>
+                </tr>
+            @endforeach      
         </tbody>
     </table>
-    <br>
-    <span style="margin-left: 320px;">{{ number_format($paidBill->NetAmount, 2) }}</span>
     <br>
 </div>
 <script type="text/javascript">

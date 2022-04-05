@@ -15,6 +15,7 @@ use App\Models\IDGenerator;
 use App\Models\PaidBills;
 use App\Models\ORAssigning;
 use App\Models\Notifiers;
+use App\Models\ORCancellations;
 use Flash;
 use Response;
 
@@ -239,25 +240,40 @@ class PaidBillsController extends AppBaseController
         if (count($unpaidBills) > 0) {
             foreach($unpaidBills as $item) {
                 if (date('Y-m-d', strtotime($item->DueDate)) < date('Y-m-d')) {
-                    // SURCHARGE
-                    $output .= '
-                        <tr>
-                            <td>' . $item->BillNumber . '</td>
-                            <td>' . date('F Y', strtotime($item->ServicePeriod)) . '</td>
-                            <th class="text-danger">₱ ' . number_format($item->NetAmount, 2) . ' + penalty</th>
-                            <td class="text-right">
-                                <button class="btn btn-link text-primary" onclick=fetchPayable("' . $item->id . '")><i class="fas fa-forward"></i></button>
-                            </td>
-                        </tr>
-                    '; 
+                    // ARREARS
+
+                    // IF ARREARS IS LONG DUE, IT SHOULD FIRST BE UNLOCKED BY ADMINS TO BE ABLE TO PAY
+                    if ($item->IsUnlockedForPayment == 'Yes') {
+                        $output .= '
+                            <tr onclick=addToPayables("' . $item->id . '")>
+                                <td>' . $item->BillNumber . '</td>
+                                <td>' . date('F Y', strtotime($item->ServicePeriod)) . '</td>
+                                <th class="text-danger">₱ ' . number_format($item->NetAmount, 2) . ' + ' . Bills::getFinalPenalty($item) . '</th>
+                                <td class="text-right">
+                                    <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" surcharge="' . Bills::getFinalPenalty($item) . '" amount="' . $item->NetAmount . '" class="btn btn-link text-muted" onclick=addToPayables("' . $item->id . '")><i class="fas fa-check-circle"></i></button>
+                                </td>
+                            </tr>
+                        '; 
+                    } else {
+                        $output .= '
+                            <tr>
+                                <td>' . $item->BillNumber . '</td>
+                                <td>' . date('F Y', strtotime($item->ServicePeriod)) . '</td>
+                                <th class="text-danger">₱ ' . number_format($item->NetAmount, 2) . ' + ' . Bills::getFinalPenalty($item) . '</th>
+                                <td class="text-right">
+                                    <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" surcharge="' . Bills::getFinalPenalty($item) . '" amount="' . $item->NetAmount . '" class="btn btn-link text-muted"><i class="fas fa-lock"></i></button>
+                                </td>
+                            </tr>
+                        '; 
+                    }                    
                 } else {
                     $output .= '
-                        <tr>
+                        <tr onclick=addToPayables("' . $item->id . '")>
                             <td>' . $item->BillNumber . '</td>
                             <td>' . date('F Y', strtotime($item->ServicePeriod)) . '</td>
                             <th>₱ ' . number_format($item->NetAmount, 2) . '</th>
                             <td class="text-right">
-                                <button class="btn btn-link text-primary" onclick=fetchPayable("' . $item->id . '")><i class="fas fa-forward"></i></button>
+                                <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" surcharge="' . Bills::getFinalPenalty($item) . '" amount="' . $item->NetAmount . '" class="btn btn-link text-muted" onclick=addToPayables("' . $item->id . '")><i class="fas fa-check-circle"></i></button>
                             </td>
                         </tr>
                     '; 
@@ -289,52 +305,72 @@ class PaidBillsController extends AppBaseController
     }
 
     public function savePaidBillAndPrint(Request $request) {
-        $paidBill = new PaidBills;
-        $paidBill->id = IDGenerator::generateIDandRandString();
-        $paidBill->BillNumber = $request['BillNumber'];
-        $paidBill->AccountNumber = $request['AccountNumber'];
-        $paidBill->ServicePeriod = $request['ServicePeriod'];
-        $paidBill->KwhUsed = $request['KwhUsed'];
-        $paidBill->Teller = Auth::id();
-        $paidBill->OfficeTransacted = env('APP_LOCATION');
-        $paidBill->PostingDate = date('Y-m-d');
-        $paidBill->PostingTime = date('H:i:s');
-        $paidBill->Surcharge = $request['Surcharge'];
-        $paidBill->Form2307TwoPercent = $request['Form2307TwoPercent'];
-        $paidBill->Form2307FivePercent = $request['Form2307FivePercent'];
-        $paidBill->AdditionalCharges = $request['AdditionalCharges'];
-        $paidBill->Deductions = $request['Deductions'];
-        $paidBill->NetAmount = $request['NetAmount'];
-        $paidBill->Source = 'MONTHLY BILL';
-        $paidBill->ObjectSourceId = $request['BillId'];
-        $paidBill->ORNumber = $request['ORNumber'];
-        $paidBill->ORDate = date('Y-m-d');
-        $paidBill->UserId = Auth::id();
-        $paidBill->save();
+        $billsId = $request['BillsId'];
+        $len = count($billsId);
 
+        for ($i=0; $i<$len; $i++) {
+            $bill = Bills::find($billsId[$i]);
+
+            if ($bill != null) {
+                $paidBill = new PaidBills;
+                $paidBill->id = IDGenerator::generateIDandRandString();
+                $paidBill->BillNumber = $bill->BillNumber;
+                $paidBill->AccountNumber = $bill->AccountNumber;
+                $paidBill->ServicePeriod = $bill->ServicePeriod;
+                $paidBill->KwhUsed = $bill->KwhUsed;
+                $paidBill->Teller = Auth::id();
+                $paidBill->OfficeTransacted = env('APP_LOCATION');
+                $paidBill->PostingDate = date('Y-m-d');
+                $paidBill->PostingTime = date('H:i:s');
+                if (date('Y-m-d', strtotime($bill->DueDate)) < date('Y-m-d')) {
+                    $paidBill->Surcharge = Bills::getFinalPenalty($item);
+                } else {
+                    $paidBill->Surcharge = "0";
+                }
+               
+                $paidBill->AdditionalCharges = $bill->AdditionalCharges;
+                $paidBill->Deductions = $bill->Deductions;
+                $paidBill->NetAmount = $bill->NetAmount;
+                $paidBill->Source = 'MONTHLY BILL';
+                $paidBill->ObjectSourceId = $bill->id;
+                $paidBill->ORNumber = $request['ORNumber'];
+                $paidBill->ORDate = date('Y-m-d');
+                $paidBill->UserId = Auth::id();
+                $paidBill->save();
+            }            
+        }  
+        
         // SAVE OR
-        $saveOR = ORAssigning::where('ORNumber', $paidBill->ORNumber)
+        $saveOR = ORAssigning::where('ORNumber', $request['ORNumber'])
             ->where('UserId', Auth::id())
             ->first();        
         if ($saveOR == null) {
             $saveOR = new ORAssigning;
             $saveOR->id = IDGenerator::generateIDandRandString();
-            $saveOR->ORNumber = $paidBill->ORNumber;
+            $saveOR->ORNumber = $request['ORNumber'];
             $saveOR->UserId = Auth::id();
-            $saveOR->DateAssigned = $paidBill->ORDate;
+            $saveOR->DateAssigned = date('Y-m-d');
             $saveOR->TimeAssigned = date('H:i:s');
             $saveOR->Office = env('APP_LOCATION');
             $saveOR->save();
-        }        
+        }  
 
-        return response()->json($paidBill, 200);
+        return response()->json(['ORNumber' => $request['ORNumber'], 'Teller' => Auth::id()], 200);
     }
 
     public function printBillPayment($paidBillId) {
-        $paidBill = PaidBills::find($paidBillId);
+        $paidBill = PaidBills::where('ORNumber', $paidBillId)->get();
+
+        $paidBillTmp = PaidBills::where('ORNumber', $paidBillId)->first();
+    
+        if ($paidBillTmp != null) {
+            $account = ServiceAccounts::find($paidBillTmp->AccountNumber);
+        }
 
         return view('/paid_bills/print_bill_payment', [
-            'paidBill' => $paidBill
+            'paidBill' => $paidBill,
+            'paidBillSingle' => $paidBillTmp,
+            'account' => $account,
         ]);
     }
 
@@ -439,6 +475,16 @@ class PaidBillsController extends AppBaseController
             $paidBill->Notes = $request['Notes'];
             $paidBill->save();
 
+            // SAVE TO OR CANCELLATIONS
+            $cancellation = new ORCancellations;
+            $cancellation->id = IDGenerator::generateIDandRandString();
+            $cancellation->ORNumber = $paidBill->ORNumber;
+            $cancellation->ORDate = $paidBill->ORDate;
+            $cancellation->From = 'PaidBills';
+            $cancellation->ObjectId = $paidBill->id;
+            $cancellation->DateTimeFiled = date('Y-m-d H:i:s');
+            $cancellation->save();
+
             // ADD NOTIFICATION
             $notifier = new Notifiers;
             $notifier->id = IDGenerator::generateIDandRandString();
@@ -446,7 +492,8 @@ class PaidBillsController extends AppBaseController
             $notifier->From = Auth::id();
             $notifier->To = env('APP_CASHIER_HEAD_ID');
             $notifier->Status = 'SENT';
-            $notifier->Intent = ""; // change later to or cancellation confirmations
+            $notifier->Intent = "OR CANCELLATION"; 
+            $notifier->IntentLink = ""; // change later to or cancellation confirmations
             $notifier->ObjectId = $paidBill->id;
             $notifier->save();
 

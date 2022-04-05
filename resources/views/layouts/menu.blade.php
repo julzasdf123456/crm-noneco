@@ -639,9 +639,26 @@ use Illuminate\Support\Facades\Auth;
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('transactionIndices.service-connection-collection') }}"
-                class="nav-link {{ Request::is('transactionIndices.service-connection-collection*') ? 'active' : '' }}">
+                <a href="{{ route('oRCancellations.other-payments') }}"
+                class="nav-link {{ Request::is('oRCancellations.other-payments*') ? 'active' : '' }}">
                 <i class="fas fa-plug nav-icon text-info"></i><p>Other Payments</p>
+                </a>
+            </li>
+        </ul>
+    </li>
+    <li class="nav-item has-treeview">
+        <a href="#" class="nav-link">
+            <i class="fas fa-check nav-icon text-info"></i>
+            <p>
+                Approvals
+                <i class="fas fa-angle-left right"></i>
+            </p>
+        </a>
+        <ul class="nav nav-treeview">
+            <li class="nav-item">
+                <a href="{{ route('oRCancellations.index') }}"
+                class="nav-link {{ Request::is('oRCancellations.index*') ? 'active' : '' }}">
+                <i class="fas fa-ban nav-icon text-info"></i><p>OR Cancellations</p>
                 </a>
             </li>
         </ul>
@@ -739,6 +756,7 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
+
 
 
 

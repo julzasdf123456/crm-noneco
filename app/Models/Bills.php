@@ -156,7 +156,9 @@ class Bills extends Model
         'AdjustmentType',
         'Form2307Amount',
         'DeductedDeposit',
-        'ExcessDeposit'
+        'ExcessDeposit',
+        'IsUnlockedForPayment',
+        'UnlockedBy'
     ];
 
     /**
@@ -232,7 +234,9 @@ class Bills extends Model
         'AdjustmentType' => 'string',
         'Form2307Amount' => 'string',
         'DeductedDeposit' => 'string',
-        'ExcessDeposit' => 'string'
+        'ExcessDeposit' => 'string',
+        'IsUnlockedForPayment' => 'string',
+        'UnlockedBy' => 'string'
     ];
 
     /**
@@ -310,7 +314,9 @@ class Bills extends Model
         'AdjustmentType' => 'nullable|string',
         'Form2307Amount' => 'nullable|string',
         'DeductedDeposit' => 'nullable|string',
-        'ExcessDeposit' => 'nullable|string'
+        'ExcessDeposit' => 'nullable|string',
+        'IsUnlockedForPayment' => 'nullable|string',
+        'UnlockedBy' => 'nullable|string'
     ];
 
     public static function createDueDate($readDate) {

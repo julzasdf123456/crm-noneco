@@ -31,6 +31,11 @@ class CreateTableCashierTransactionIndex extends Migration
             $table->string('ObjectId')->nullable(); // OTHER PAYABLES
             $table->string('Source')->nullable(); // ServiceConnection, Tickets, Others
             $table->string('PaymentUsed')->nullable(); // Cash, Check, Debit/Credit Card
+            $table->string('Status')->nullable();
+            $table->string('FiledBy')->nullable();
+            $table->string('ApprovedBy')->nullable();
+            $table->string('AuditedBy')->nullable();
+            $table->string('CancellationNotes')->nullable();
             $table->timestamps();
         });
     }

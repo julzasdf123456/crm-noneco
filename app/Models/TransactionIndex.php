@@ -60,7 +60,12 @@ class TransactionIndex extends Model
         'TicketId',
         'ObjectId',
         'Source',
-        'PaymentUsed'
+        'PaymentUsed',
+        'Status',
+        'FiledBy',
+        'ApprovedBy',
+        'AuditedBy',
+        'CancellationNotes'
     ];
 
     /**
@@ -74,7 +79,7 @@ class TransactionIndex extends Model
         'PaymentTitle' => 'string',
         'PaymentDetails' => 'string',
         'ORNumber' => 'string',
-        'ORDate' => 'date',
+        'ORDate' => 'string',
         'SubTotal' => 'string',
         'VAT' => 'string',
         'Total' => 'string',
@@ -84,7 +89,12 @@ class TransactionIndex extends Model
         'TicketId' => 'string',
         'ObjectId' => 'string',
         'Source' => 'string',
-        'PaymentUsed' => 'string'
+        'PaymentUsed' => 'string',
+        'Status' => 'string',
+        'FiledBy' => 'string',
+        'ApprovedBy' => 'string',
+        'AuditedBy' => 'string',
+        'CancellationNotes' => 'string'
     ];
 
     /**
@@ -111,6 +121,11 @@ class TransactionIndex extends Model
         'ObjectId' => 'nullable|string|max:50',
         'Source' => 'nullable|string|max:50',
         'PaymentUsed' => 'nullable|string',
+        'Status' => 'nullable|string',
+        'FiledBy' => 'nullable|string',
+        'ApprovedBy' => 'nullable|string',
+        'AuditedBy' => 'nullable|string',
+        'CancellationNotes' => 'nullable|string'
     ];
 
     public static function getReconnectionFeeId() {
