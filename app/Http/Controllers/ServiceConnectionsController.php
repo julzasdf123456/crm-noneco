@@ -423,9 +423,9 @@ class ServiceConnectionsController extends AppBaseController
             
             if ($query != '' ) {
                 $data = DB::table('CRM_MemberConsumers')
-                    ->join('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
-                    ->join('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
-                    ->join('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
+                    ->leftJoin('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
                     ->select('CRM_MemberConsumers.Id as ConsumerId',
                                     'CRM_MemberConsumers.MembershipType as MembershipType', 
                                     'CRM_MemberConsumers.FirstName as FirstName', 
@@ -449,15 +449,16 @@ class ServiceConnectionsController extends AppBaseController
                                     'CRM_Barangays.Barangay as Barangay')
                     ->where('CRM_MemberConsumers.LastName', 'LIKE', '%' . $query . '%')
                     ->orWhere('CRM_MemberConsumers.Id', 'LIKE', '%' . $query . '%')
+                    ->orWhere('CRM_MemberConsumers.OrganizationName', 'LIKE', '%' . $query . '%')
                     ->orWhere('CRM_MemberConsumers.MiddleName', 'LIKE', '%' . $query . '%')
                     ->orWhere('CRM_MemberConsumers.FirstName', 'LIKE', '%' . $query . '%')
                     ->orderBy('CRM_MemberConsumers.FirstName')
                     ->get();
             } else {
                 $data = DB::table('CRM_MemberConsumers')
-                    ->join('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
-                    ->join('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
-                    ->join('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
+                    ->leftJoin('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
                     ->select('CRM_MemberConsumers.Id as ConsumerId',
                                     'CRM_MemberConsumers.MembershipType as MembershipType', 
                                     'CRM_MemberConsumers.FirstName as FirstName', 

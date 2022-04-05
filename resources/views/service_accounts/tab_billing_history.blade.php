@@ -9,20 +9,22 @@
                 <th class="text-right">Kwh Used</th>
                 <th class="text-right">Rate</th>
                 <th class="text-right">Net Amount</th>
-                <th>Payment Date</th>
+                <th class="text-right">OR Number</th>
+                <th class="text-right">Payment Date</th>
                 <th width="10%"></th>
             </thead>
             <tbody>
                 @foreach ($bills as $item)
                     <tr>
-                        <td><i class="fas {{ $item->PostingDate != null ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger' }} ico-tab"></i>{{ $item->BillNumber }}</td>
+                        <td><i class="fas {{ $item->ORDate != null ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger' }} ico-tab"></i>{{ $item->BillNumber }}</td>
                         <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
                         <td class="text-right">{{ $item->KwhUsed != null ? number_format($item->KwhUsed, 2) : '0' }}</td>
                         <td class="text-right">{{ $item->EffectiveRate != null ? number_format($item->EffectiveRate, 4) : '0' }}</td>
                         <td class="text-right">{{ $item->NetAmount != null ? number_format($item->NetAmount, 2) : '0' }}</td>
-                        <td>{{ $item->PostingDate != null ? date('F d, Y', strtotime($item->PostingDate)) : '-' }}</td>
+                        <td class="text-right">{{ $item->ORNumber != null ? $item->ORNumber : '-' }}</td>
+                        <td class="text-right">{{ $item->ORDate != null ? date('F d, Y', strtotime($item->ORDate)) : '-' }}</td>
                         <td class="text-right">
-                            @if ($item->PostingDate == null)
+                            @if ($item->ORDate == null)
                                 <a href="{{ route('bills.adjust-bill', [$item->id]) }}" class="btn btn-link btn-sm text-warning" title="Adjust Reading"><i class="fas fa-pen"></i></a>
                             @endif
                             <a href="{{ route('bills.show', [$item->id]) }}" class="btn btn-link" title="View Bill"><i class="fas fa-eye"></i></a>

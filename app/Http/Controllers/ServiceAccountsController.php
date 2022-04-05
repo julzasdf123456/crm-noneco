@@ -167,12 +167,10 @@ class ServiceAccountsController extends AppBaseController
             ->first();
 
         $bills = DB::table('Billing_Bills')
-            ->leftJoin('Cashier_PaidBills', 'Billing_Bills.id', '=', 'Cashier_PaidBills.ObjectSourceId')
             ->where('Billing_Bills.AccountNumber', $id)
             ->select('Billing_Bills.*',
-                'Cashier_PaidBills.PostingDate', 
-                'Cashier_PaidBills.id AS PostingId',
-                'Cashier_PaidBills.Teller')
+                DB::raw("(SELECT TOP 1 ORNumber FROM Cashier_PaidBills WHERE ObjectSourceId=Billing_Bills.id AND Status IS NULL) AS ORNumber"),
+                DB::raw("(SELECT TOP 1 ORDate FROM Cashier_PaidBills WHERE ObjectSourceId=Billing_Bills.id AND Status IS NULL) AS ORDate"))
             ->orderByDesc('Billing_Bills.ServicePeriod')
             ->get();
         

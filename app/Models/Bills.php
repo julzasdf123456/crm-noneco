@@ -158,7 +158,9 @@ class Bills extends Model
         'DeductedDeposit',
         'ExcessDeposit',
         'IsUnlockedForPayment',
-        'UnlockedBy'
+        'UnlockedBy',
+        'Evat2Percent',
+        'Evat5Percent'
     ];
 
     /**
@@ -236,7 +238,9 @@ class Bills extends Model
         'DeductedDeposit' => 'string',
         'ExcessDeposit' => 'string',
         'IsUnlockedForPayment' => 'string',
-        'UnlockedBy' => 'string'
+        'UnlockedBy' => 'string',
+        'Evat2Percent' => 'string',
+        'Evat5Percent' => 'string'
     ];
 
     /**
@@ -316,7 +320,9 @@ class Bills extends Model
         'DeductedDeposit' => 'nullable|string',
         'ExcessDeposit' => 'nullable|string',
         'IsUnlockedForPayment' => 'nullable|string',
-        'UnlockedBy' => 'nullable|string'
+        'UnlockedBy' => 'nullable|string',
+        'Evat2Percent' => 'nullable|string',
+        'Evat5Percent' => 'nullable|string'
     ];
 
     public static function createDueDate($readDate) {
@@ -782,5 +788,55 @@ class Bills extends Model
         } else {
             return null;
         }
+    }
+
+    /**
+     * 2%
+     */
+    public static function add2Percent($billId) {
+        $bill = Bills::find($billId);
+
+        $percentage = floatval($bill->NetAmount) * .02;
+
+        $bill->Evat2Percent = $percentage;
+        $bill->NetAmount = round(floatval($bill->NetAmount) - $percentage, 2);
+        $bill->save();
+
+        return $bill;
+    }
+
+    public static function remove2Percent($billId) {
+        $bill = Bills::find($billId);
+        
+        $bill->NetAmount = round(floatval($bill->NetAmount) + floatval($bill->Evat2Percent), 2);
+        $bill->Evat2Percent = null;
+        $bill->save();
+
+        return $bill;
+    }
+
+    /**
+     * 5%
+     */
+    public static function add5Percent($billId) {
+        $bill = Bills::find($billId);
+
+        $percentage = floatval($bill->NetAmount) * .05;
+
+        $bill->Evat5Percent = $percentage;
+        $bill->NetAmount = round(floatval($bill->NetAmount) - $percentage, 2);
+        $bill->save();
+
+        return $bill;
+    }
+
+    public static function remove5Percent($billId) {
+        $bill = Bills::find($billId);
+        
+        $bill->NetAmount = round(floatval($bill->NetAmount) + floatval($bill->Evat5Percent), 2);
+        $bill->Evat5Percent = null;
+        $bill->save();
+
+        return $bill;
     }
 }

@@ -25,6 +25,7 @@ class CreateTableBillingServiceAccounts extends Migration
             $table->string('ContactNumber', 60)->nullable();
             $table->string('EmailAddress', 60)->nullable();
             $table->string('ServiceConnectionId', 30)->nullable();
+            $table->string('MemberConsumerId', 50)->nullable();
             $table->string('AccountCount', 10)->nullable();
             // NEW
             $table->string('MeterReader', 60)->nullable();

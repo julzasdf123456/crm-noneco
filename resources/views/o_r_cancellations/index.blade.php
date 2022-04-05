@@ -40,7 +40,7 @@
                                 <td>{{ $item->ServiceAccountName }}</td>
                                 <td>{{ $item->name }}</td>
                                 <td class="text-right">
-                                    <a href="{{ route('oRCancellations.show', [$item->CancellationId]) }}"><i class="fas fa-eye"></i></a>
+                                    <a href="{{ route('oRCancellations.show', [$item->ORNumber]) }}"><i class="fas fa-eye"></i></a>
                                 </td>
                             </tr>
                         @endforeach

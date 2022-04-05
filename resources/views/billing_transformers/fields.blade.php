@@ -112,7 +112,7 @@
 
         <div class="col-lg-1 col-md-1">
             <div class="input-group">
-                {{ Form::checkbox('BAPA', 'BAPA', false, ['class' => 'custom-checkbox']) }}
+                {{ Form::checkbox('BAPA', 'BAPA', false, ['class' => 'custom-checkbox', 'id' => 'BAPA']) }}
             </div>
         </div>
 

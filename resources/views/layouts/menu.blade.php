@@ -481,6 +481,12 @@ use Illuminate\Support\Facades\Auth;
                     <i class="fas fa-exclamation-triangle nav-icon text-primary"></i><p>Unbilled Readings</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('bills.grouped-billing') }}"
+                   class="nav-link {{ Request::is('bills.grouped-billing*') ? 'active' : '' }}">
+                    <i class="fas fa-users nav-icon text-primary"></i><p>Grouped Billing</p>
+                </a>
+            </li>
 
             <li class="nav-header">                
                 Others
@@ -530,6 +536,26 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 
+    {{-- APPROVALS AND OVERRIDING --}}
+    <li class="nav-item has-treeview">
+        <a href="#" class="nav-link">
+            <i class="fas fa-check nav-icon text-primary"></i>
+            <p>
+                Approvals
+                <i class="fas fa-angle-left right"></i>
+            </p>
+        </a>
+        <ul class="nav nav-treeview">
+            <li class="nav-item">
+                <a href="{{ route('bills.bill-arrears-unlocking') }}"
+                   class="nav-link {{ Request::is('bills.bill-arrears-unlocking*') ? 'active' : '' }}">                   
+                   <i class="fas fa-unlock nav-icon text-primary"></i><p>Bill Arrears Unlocking</p>
+                </a>
+            </li>
+        </ul>
+    </li>
+
+    {{-- BILLING REPORTS --}}
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-file nav-icon text-primary"></i>

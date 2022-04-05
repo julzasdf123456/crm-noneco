@@ -220,7 +220,7 @@ class PaidBillsController extends AppBaseController
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
             ->where('Billing_Bills.AccountNumber', $request['AccountNumber'])
             ->whereNull('Billing_Bills.MergedToCollectible')
-            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->pluck('Cashier_PaidBills.ObjectSourceId'))
+            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->whereNull('Status')->pluck('Cashier_PaidBills.ObjectSourceId'))
             ->select('Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.AccountCount',
@@ -254,18 +254,29 @@ class PaidBillsController extends AppBaseController
                                 </td>
                             </tr>
                         '; 
-                    } else {
+                    } elseif ($item->IsUnlockedForPayment == 'Requested') {
                         $output .= '
                             <tr>
                                 <td>' . $item->BillNumber . '</td>
                                 <td>' . date('F Y', strtotime($item->ServicePeriod)) . '</td>
                                 <th class="text-danger">₱ ' . number_format($item->NetAmount, 2) . ' + ' . Bills::getFinalPenalty($item) . '</th>
                                 <td class="text-right">
-                                    <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" surcharge="' . Bills::getFinalPenalty($item) . '" amount="' . $item->NetAmount . '" class="btn btn-link text-muted"><i class="fas fa-lock"></i></button>
+                                    <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" surcharge="' . Bills::getFinalPenalty($item) . '" amount="' . $item->NetAmount . '" class="btn btn-link text-muted"><i class="fas fa-exclamation-circle"></i></button>
                                 </td>
                             </tr>
-                        '; 
-                    }                    
+                        ';
+                    }  else {
+                        $output .= '
+                            <tr>
+                                <td>' . $item->BillNumber . '</td>
+                                <td>' . date('F Y', strtotime($item->ServicePeriod)) . '</td>
+                                <th class="text-danger">₱ ' . number_format($item->NetAmount, 2) . ' + ' . Bills::getFinalPenalty($item) . '</th>
+                                <td class="text-right">
+                                    <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" surcharge="' . Bills::getFinalPenalty($item) . '" amount="' . $item->NetAmount . '" onclick=requestUnlock("' . $item->id . '") class="btn btn-link text-muted"><i id="lock-' . $item->id . '" class="fas fa-lock"></i></button>
+                                </td>
+                            </tr>
+                        ';
+                    }                  
                 } else {
                     $output .= '
                         <tr onclick=addToPayables("' . $item->id . '")>
@@ -323,7 +334,7 @@ class PaidBillsController extends AppBaseController
                 $paidBill->PostingDate = date('Y-m-d');
                 $paidBill->PostingTime = date('H:i:s');
                 if (date('Y-m-d', strtotime($bill->DueDate)) < date('Y-m-d')) {
-                    $paidBill->Surcharge = Bills::getFinalPenalty($item);
+                    $paidBill->Surcharge = Bills::getFinalPenalty($bill);
                 } else {
                     $paidBill->Surcharge = "0";
                 }
@@ -388,40 +399,43 @@ class PaidBillsController extends AppBaseController
             ->whereNull('Cashier_PaidBills.Status')
             ->where(function($query) use ($regex) {
                 $query->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $regex . '%')
-                    ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $regex . '%')
+                    ->orWhere('Cashier_PaidBills.AccountNumber', 'LIKE', '%' . $regex . '%')
                     ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $regex . '%')
                     ->orWhere('Cashier_PaidBills.ORNumber', 'LIKE', '%' . $regex . '%');
             })            
-            ->select('Billing_ServiceAccounts.id AS AccountNumber',
+            ->select('Cashier_PaidBills.AccountNumber',
                 'Cashier_PaidBills.ORNumber',
-                'Cashier_PaidBills.id',
+                'Cashier_PaidBills.ORDate',
+                'Billing_ServiceAccounts.ServiceAccountName',)
+            ->groupBy('Cashier_PaidBills.ORNumber',
+                'Cashier_PaidBills.ORDate',
                 'Billing_ServiceAccounts.ServiceAccountName',
-                'Cashier_PaidBills.NetAmount')
+                'Cashier_PaidBills.AccountNumber')
             ->get();
 
         $output = "";
-
         foreach($results as $item) {
-            $output .= '<tr onclick=fetchDetails("' . $item->id . '")>
+            $output .= '<tr onclick=fetchDetails("' . $item->ORNumber . '")>
                             <td>' . $item->ORNumber . '</td>
                             <td>' . $item->AccountNumber . '</td>
                             <td>' . $item->ServiceAccountName . '</td>
-                            <td>' . number_format($item->NetAmount) . '</td>
+                            <td>' . $item->ORDate . '</td>
                         </tr>';
+
         }
 
         return response()->json($output, 200);
     }
 
     public function fetchORDetails(Request $request) {
-        $id = $request['id'];
+        $orNo = $request['orNo'];
 
         $paidBill = DB::table('Cashier_PaidBills')
             ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
             ->leftJoin('users', 'Cashier_PaidBills.Teller', '=', 'users.id')
             ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-            ->where('Cashier_PaidBills.id', $id)
+            ->where('Cashier_PaidBills.ORNumber', $orNo)
             ->whereNull('Cashier_PaidBills.Status')
             ->select('Cashier_PaidBills.id', 
                 'Cashier_PaidBills.ORNumber',
@@ -441,66 +455,99 @@ class PaidBillsController extends AppBaseController
                 'CRM_Towns.Town',
                 'CRM_Barangays.Barangay',
                 'Billing_ServiceAccounts.Purok')
-            ->first();
+            ->get();
         
-        $res = [];
-        $res['id'] = $paidBill->id;
-        $res['ORNumber'] = $paidBill->ORNumber;
-        $res['AccountNumber'] = $paidBill->AccountNumber;
-        $res['ORDate'] = date('F d, Y', strtotime($paidBill->ORDate));
-        $res['PostingDate'] = date('F d, Y', strtotime($paidBill->PostingDate));
-        $res['PostingTime'] = $paidBill->PostingTime;
-        $res['KwhUsed'] = $paidBill->KwhUsed;
-        $res['BillNumber'] = $paidBill->BillNumber;
-        $res['ServicePeriod'] = date('F d, Y', strtotime($paidBill->ServicePeriod));
-        $res['AdditionalCharges'] = number_format($paidBill->AdditionalCharges, 2);
-        $res['Deductions'] = number_format($paidBill->Deductions, 2);
-        $res['NetAmount'] = number_format($paidBill->NetAmount, 2);
-        $res['ObjectSourceId'] = $paidBill->ObjectSourceId;
-        $res['name'] = $paidBill->name;
-        $res['ServiceAccountName'] = $paidBill->ServiceAccountName;
-        $res['Address'] = ServiceAccounts::getAddress($paidBill);
+        $output = "";
+        $total = 0;
+        foreach($paidBill as $item) {
+            $output .= '<tr>
+                            <td>' . $item->BillNumber . '</td>
+                            <td>' . $item->ServiceAccountName . '</td>
+                            <td>' . date('M d, Y', strtotime($item->ServicePeriod)) . '</td>
+                            <td>' . $item->ORNumber . '</td>                            
+                            <td>' . $item->ORDate . '</td>                            
+                            <td>' . number_format($item->NetAmount, 2) . '</td>
+                        </tr>';
 
-        return response()->json($res, 200);
+            
+            $total += floatval($item->NetAmount);
+        }
+
+        $output .= '<tr>
+                            <th>Total</th>
+                            <th></th>
+                            <th></th>                            
+                            <th></th>                            
+                            <th></th>                            
+                            <th>' . number_format($total, 2) . '</th>
+                        </tr>';
+
+        return response()->json($output, 200);
     }
 
     public function requestCancelOR(Request $request) {
-        $id = $request['id'];
+        $orNo = $request['orNo'];
 
-        $paidBill = PaidBills::find($id);
+        $paidBill = PaidBills::where('ORNumber', $orNo)->get();
 
-        if ($paidBill != null) {
-            $paidBill->Status = 'PENDING CANCEL';
-            $paidBill->FiledBy = Auth::id();
-            $paidBill->Notes = $request['Notes'];
-            $paidBill->save();
+        if (count($paidBill) > 0) {
+            foreach ($paidBill as $item) {
+                $item->Status = 'PENDING CANCEL';
+                $item->FiledBy = Auth::id();
+                $item->Notes = $request['Notes'];
+                $item->save();
 
-            // SAVE TO OR CANCELLATIONS
-            $cancellation = new ORCancellations;
-            $cancellation->id = IDGenerator::generateIDandRandString();
-            $cancellation->ORNumber = $paidBill->ORNumber;
-            $cancellation->ORDate = $paidBill->ORDate;
-            $cancellation->From = 'PaidBills';
-            $cancellation->ObjectId = $paidBill->id;
-            $cancellation->DateTimeFiled = date('Y-m-d H:i:s');
-            $cancellation->save();
+                // SAVE TO OR CANCELLATIONS
+                $cancellation = new ORCancellations;
+                $cancellation->id = IDGenerator::generateIDandRandString();
+                $cancellation->ORNumber = $item->ORNumber;
+                $cancellation->ORDate = $item->ORDate;
+                $cancellation->From = 'PaidBills';
+                $cancellation->ObjectId = $item->id;
+                $cancellation->DateTimeFiled = date('Y-m-d H:i:s');
+                $cancellation->save();
+            }
 
             // ADD NOTIFICATION
             $notifier = new Notifiers;
             $notifier->id = IDGenerator::generateIDandRandString();
-            $notifier->Notification = 'OR Cancellation requested by ' . Auth::user()->name . ' with OR Number ' . $paidBill->ORNumber;
+            $notifier->Notification = 'OR Cancellation requested by ' . Auth::user()->name . ' with OR Number ' . $orNo;
             $notifier->From = Auth::id();
             $notifier->To = env('APP_CASHIER_HEAD_ID');
             $notifier->Status = 'SENT';
             $notifier->Intent = "OR CANCELLATION"; 
             $notifier->IntentLink = ""; // change later to or cancellation confirmations
-            $notifier->ObjectId = $paidBill->id;
+            $notifier->ObjectId = $orNo;
             $notifier->save();
 
             return response()->json('ok', 200);
         } else {
             return response()->json('paid bill not found', 404);
         }
+    }
+
+    public function requestBillsPaymentUnlock(Request $request) {
+        $bill = Bills::find($request['id']);
+
+        if ($bill != null) {
+            $bill->IsUnlockedForPayment = 'Requested';
+            $bill->UnlockedBy = Auth::id();
+            $bill->save();
+
+            // ADD NOTIFICATION
+            $notifier = new Notifiers;
+            $notifier->id = IDGenerator::generateIDandRandString();
+            $notifier->Notification = 'Bill unlock requested for bill number ' . $bill->BillNumber;
+            $notifier->From = Auth::id();
+            $notifier->To = env('APP_BILLING_ANALYST_ID');
+            $notifier->Status = 'SENT';
+            $notifier->Intent = "BILL ARREAR PAYMENT UNLOCKING"; 
+            $notifier->IntentLink = ""; // change later to or cancellation confirmations
+            $notifier->ObjectId = $bill->id;
+            $notifier->save();
+        }
+
+        return response()->json($bill, 200);
     }
 }
 

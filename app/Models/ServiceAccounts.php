@@ -96,7 +96,8 @@ class ServiceAccounts extends Model
         'Contestable',
         'NetMetered',
         'Notes',
-        'Migrated'
+        'Migrated',
+        'MemberConsumerId'
     ];
 
     /**
@@ -151,7 +152,8 @@ class ServiceAccounts extends Model
         'Contestable' => 'string',
         'NetMetered' => 'string',
         'Notes' => 'string',
-        'Migrated' => 'string'
+        'Migrated' => 'string',
+        'MemberConsumerId' => 'string'
     ];
 
     /**
@@ -208,7 +210,8 @@ class ServiceAccounts extends Model
         'Contestable' => 'nullable|string',
         'NetMetered' => 'nullable|string',
         'Notes' => 'nullable|string',
-        'Migrated' => 'nullable|string'
+        'Migrated' => 'nullable|string',
+        'MemberConsumerId' => 'nullable|string'
     ];
 
     public static function getAddress($serviceAccount) {

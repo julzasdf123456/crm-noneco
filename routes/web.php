@@ -372,6 +372,24 @@ Route::post('/bills/rebill/{readingId}', [App\Http\Controllers\BillsController::
 Route::get('/bills/adjust-bill/{billId}', [App\Http\Controllers\BillsController::class, 'adjustBill'])->name('bills.adjust-bill');
 Route::get('/bills/fetch-bill-adjustment-data', [App\Http\Controllers\BillsController::class, 'fetchBillAdjustmentData'])->name('bills.etch-bill-adjustment-data');
 Route::get('/bills/all-bills', [App\Http\Controllers\BillsController::class,  'allBills'])->name('bills.all-bills');
+Route::get('/bills/bill-arrears-unlocking', [App\Http\Controllers\BillsController::class,  'billArrearsUnlocking'])->name('bills.bill-arrears-unlocking');
+Route::get('/bills/unlock-bill-arrear/{id}', [App\Http\Controllers\BillsController::class,  'unlockBillArrear'])->name('bills.unlock-bill-arrear');
+Route::get('/bills/reject-unlock-bill-arrear/{id}', [App\Http\Controllers\BillsController::class,  'rejectUnlockBillArrear'])->name('bills.reject-unlock-bill-arrear');
+Route::get('/bills/grouped-billing', [App\Http\Controllers\BillsController::class,  'groupedBilling'])->name('bills.grouped-billing');
+Route::get('/bills/create-group-billing-step-one', [App\Http\Controllers\BillsController::class,  'createGroupBillingStepOne'])->name('bills.create-group-billing-step-one');
+Route::get('/bills/create-group-billing-step-one-pre-select', [App\Http\Controllers\BillsController::class,  'createGroupBillingStepOnePreSelect'])->name('bills.create-group-billing-step-one-pre-select');
+Route::get('/bills/create-group-billing-step-two/{memberConsumerId}', [App\Http\Controllers\BillsController::class,  'createGroupBillingStepTwo'])->name('bills.create-group-billing-step-two');
+Route::post('/bills/store-group-billing-step-one', [App\Http\Controllers\BillsController::class,  'storeGroupBillingStepOne'])->name('bills.store-group-billing-step-one');
+Route::get('/bills/fetch-member-consumers', [App\Http\Controllers\BillsController::class,  'fetchMemberConsumers'])->name('bills.fetch-member-consumers');
+Route::get('/bills/search-account', [App\Http\Controllers\BillsController::class,  'searchAccount'])->name('bills.search-account');
+Route::get('/bills/add-to-group', [App\Http\Controllers\BillsController::class,  'addToGroup'])->name('bills.add-to-group');
+Route::get('/bills/remove-from-group', [App\Http\Controllers\BillsController::class,  'removeFromGroup'])->name('bills.remove-from-group');
+Route::get('/bills/grouped-billing-view/{memberConsumerId}', [App\Http\Controllers\BillsController::class,  'groupedBillingView'])->name('bills.grouped-billing-view');
+Route::get('/bills/grouped-billing-bill-view/{memberConsumerId}/{period}', [App\Http\Controllers\BillsController::class,  'groupedBillingBillView'])->name('bills.grouped-billing-bill-view');
+Route::get('/bills/add-two-percent', [App\Http\Controllers\BillsController::class,  'add2Percent'])->name('bills.add-two-percent');
+Route::get('/bills/remove-two-percent', [App\Http\Controllers\BillsController::class,  'remove2Percent'])->name('bills.remove-two-percent');
+Route::get('/bills/add-five-percent', [App\Http\Controllers\BillsController::class,  'add5Percent'])->name('bills.add-five-percent');
+Route::get('/bills/remove-five-percent', [App\Http\Controllers\BillsController::class,  'remove5Percent'])->name('bills.remove-five-percent');
 Route::resource('bills', App\Http\Controllers\BillsController::class);
 
 
@@ -421,6 +439,7 @@ Route::get('/paid_bills/or-cancellation', [App\Http\Controllers\PaidBillsControl
 Route::get('/paid_bills/search-or', [App\Http\Controllers\PaidBillsController::class, 'searchOR'])->name('paidBills.search-or');
 Route::get('/paid_bills/fetch-or-details', [App\Http\Controllers\PaidBillsController::class, 'fetchORDetails'])->name('paidBills.fetch-or-details');
 Route::get('/paid_bills/request-cancel-or', [App\Http\Controllers\PaidBillsController::class, 'requestCancelOR'])->name('paidBills.request-cancel-or');
+Route::get('/paid_bills/request-bills-payment-unlock', [App\Http\Controllers\PaidBillsController::class, 'requestBillsPaymentUnlock'])->name('paidBills.request-bills-payment-unlock');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);
 
 

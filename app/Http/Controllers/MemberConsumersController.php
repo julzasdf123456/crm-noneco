@@ -65,7 +65,13 @@ class MemberConsumersController extends AppBaseController
          * ASSESS PERMISSIONS
          */
         if(Auth::user()->hasAnyPermission(['create membership', 'sc create', 'Super Admin'])) {
-            return view('member_consumers.create', ['memberConsumers' => $memberConsumers, 'types' => $types, 'cond' => $cond, 'barangays' => $barangays, 'towns' => $towns]);
+            return view('member_consumers.create', [
+                'memberConsumers' => $memberConsumers, 
+                'types' => $types, 
+                'cond' => $cond, 
+                'barangays' => $barangays, 
+                'towns' => $towns
+            ]);
         } else {
             return abort(403, "You're not authorized to create a membership application.");
         }
@@ -104,9 +110,9 @@ class MemberConsumersController extends AppBaseController
     public function show($id)
     {
         $memberConsumers = DB::table('CRM_MemberConsumers')
-                            ->join('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
-                            ->join('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
-                            ->join('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
+                            ->leftJoin('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
+                            ->leftJoin('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
+                            ->leftJoin('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
                             ->select('CRM_MemberConsumers.Id as ConsumerId',
                                     'CRM_MemberConsumers.MembershipType as MembershipType', 
                                     'CRM_MemberConsumers.FirstName as FirstName', 
@@ -132,7 +138,7 @@ class MemberConsumersController extends AppBaseController
                             ->first();
 
         $memberConsumerSpouse = DB::table('CRM_MemberConsumerSpouse')
-                            ->join('CRM_MemberConsumers', 'CRM_MemberConsumerSpouse.MemberConsumerId', '=', 'CRM_MemberConsumers.id')
+                            ->leftJoin('CRM_MemberConsumers', 'CRM_MemberConsumerSpouse.MemberConsumerId', '=', 'CRM_MemberConsumers.id')
                             ->select('CRM_MemberConsumerSpouse.*')
                             ->where('CRM_MemberConsumerSpouse.MemberConsumerId', $id)
                             ->first();

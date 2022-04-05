@@ -16,6 +16,10 @@ use App\Models\Rates;
 use App\Models\Bills;
 use App\Models\BillingMeters;
 use App\Models\IDGenerator;
+use App\Models\Barangays;
+use App\Models\Towns;
+use App\Models\MemberConsumerTypes;
+use App\Models\MemberConsumers;
 use App\Models\PendingBillAdjustments;
 use App\Models\ArrearsLedgerDistribution;
 use App\Repositories\ReadingsRepository;
@@ -735,5 +739,437 @@ class BillsController extends AppBaseController
         return view('/bills/all_bills', [
             'bills' => $bills,
         ]);
+    }
+
+    public function billArrearsUnlocking() {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->leftJoin('users', 'Billing_Bills.UnlockedBy', '=', 'users.id')
+            ->where('Billing_Bills.IsUnlockedForPayment', 'Requested')
+            ->select('Billing_ServiceAccounts.ServiceAccountName',
+                'users.name',
+                'Billing_Bills.*')
+            ->get();
+
+        return view('/bills/bill_arrears_unlocking', [
+            'bills' => $bills
+        ]);
+    }
+
+    public function unlockBillArrear($id) {
+        $bill = Bills::find($id);
+
+        $bill->IsUnlockedForPayment = 'Yes';
+        $bill->UnlockedBy = Auth::id();
+        $bill->save();
+
+        return redirect(route('bills.bill-arrears-unlocking'));
+    }
+
+    public function rejectUnlockBillArrear($id) {
+        $bill = Bills::find($id);
+
+        $bill->IsUnlockedForPayment = null;
+        $bill->UnlockedBy = Auth::id();
+        $bill->save();
+
+        return redirect(route('bills.bill-arrears-unlocking'));
+    }
+
+    public function groupedBilling() {
+        $accounts = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_MemberConsumers', 'Billing_ServiceAccounts.MemberConsumerId', '=', 'CRM_MemberConsumers.id')
+            ->whereNotNull('Billing_ServiceAccounts.MemberConsumerId')
+            ->select('CRM_MemberConsumers.FirstName',
+                'CRM_MemberConsumers.MiddleName',
+                'CRM_MemberConsumers.LastName',
+                'CRM_MemberConsumers.Suffix',
+                'CRM_MemberConsumers.OrganizationName',
+                'CRM_MemberConsumers.MembershipType',
+                'Billing_ServiceAccounts.MemberConsumerId',
+                DB::raw("COUNT (Billing_ServiceAccounts.id) AS NoOfAccounts"))
+            ->groupBy('CRM_MemberConsumers.FirstName',
+                'CRM_MemberConsumers.MiddleName',
+                'CRM_MemberConsumers.LastName',
+                'CRM_MemberConsumers.Suffix',
+                'CRM_MemberConsumers.OrganizationName',
+                'CRM_MemberConsumers.MembershipType',
+                'Billing_ServiceAccounts.MemberConsumerId')
+            ->get();
+
+        return view('/bills/grouped_billing', [
+            'accounts' => $accounts
+        ]);
+    }
+
+    public function createGroupBillingStepOne() {
+        $types = MemberConsumerTypes::orderByDesc('Id')->pluck('Type', 'Id');
+
+        $barangays = Barangays::orderBy('Barangay')->pluck('Barangay', 'id');
+
+        $towns = Towns::orderBy('Town')->pluck('Town', 'id');
+        return view('/bills/create_group_billing_step_one', [
+            'types' => $types, 
+            'barangays' => $barangays, 
+            'towns' => $towns
+        ]);
+    }
+
+    public function storeGroupBillingStepOne(Request $request) {
+        $input = $request->all();
+
+        $memberConsumers = MemberConsumers::create($input);
+
+        return redirect(route('bills.create-group-billing-step-two', [$input['Id']]));
+    }
+
+    public function createGroupBillingStepTwo($memberConsumerId) {
+        $accounts = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->where('Billing_ServiceAccounts.MemberConsumerId', $memberConsumerId)
+            ->select('Billing_ServiceAccounts.ServiceAccountName', 
+                'Billing_ServiceAccounts.id', 
+                'Billing_ServiceAccounts.Purok', 
+                'Billing_ServiceAccounts.OldAccountNo', 
+                'CRM_Towns.Town', 
+                'CRM_Barangays.Barangay')
+            ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+            ->get();
+
+        return view('/bills/create_group_billing_step_two', [
+            'memberConsumerId' => $memberConsumerId,
+            'accounts' => $accounts,
+        ]);
+    }
+
+    public function createGroupBillingStepOnePreSelect() {
+        return view('/bills/create_group_billing_step_one_pre_select', [
+        ]);
+    }
+
+    public function fetchMemberConsumers(Request $request) {
+        $query = $request['query'];
+            
+        if ($query != '') {
+            $data = DB::table('CRM_MemberConsumers')
+                ->leftJoin('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
+                ->leftJoin('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
+                ->leftJoin('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
+                ->select('CRM_MemberConsumers.Id as ConsumerId',
+                                'CRM_MemberConsumers.MembershipType as MembershipType', 
+                                'CRM_MemberConsumers.FirstName as FirstName', 
+                                'CRM_MemberConsumers.MiddleName as MiddleName', 
+                                'CRM_MemberConsumers.LastName as LastName', 
+                                'CRM_MemberConsumers.OrganizationName as OrganizationName', 
+                                'CRM_MemberConsumers.Suffix as Suffix', 
+                                'CRM_MemberConsumers.Birthdate as Birthdate', 
+                                'CRM_MemberConsumers.Barangay as Barangay', 
+                                'CRM_MemberConsumers.ApplicationStatus as ApplicationStatus',
+                                'CRM_MemberConsumers.DateApplied as DateApplied', 
+                                'CRM_MemberConsumers.CivilStatus as CivilStatus', 
+                                'CRM_MemberConsumers.DateApproved as DateApproved', 
+                                'CRM_MemberConsumers.ContactNumbers as ContactNumbers', 
+                                'CRM_MemberConsumers.EmailAddress as EmailAddress',  
+                                'CRM_MemberConsumers.Notes as Notes', 
+                                'CRM_MemberConsumers.Gender as Gender', 
+                                'CRM_MemberConsumers.Sitio as Sitio', 
+                                'CRM_MemberConsumerTypes.*',
+                                'CRM_Towns.Town as Town',
+                                'CRM_Barangays.Barangay as Barangay')
+                ->where('CRM_MemberConsumers.LastName', 'LIKE', '%' . $query . '%')
+                ->orWhere('CRM_MemberConsumers.Id', 'LIKE', '%' . $query . '%')
+                ->orWhere('CRM_MemberConsumers.OrganizationName', 'LIKE', '%' . $query . '%')
+                ->orWhere('CRM_MemberConsumers.MiddleName', 'LIKE', '%' . $query . '%')
+                ->orWhere('CRM_MemberConsumers.FirstName', 'LIKE', '%' . $query . '%')
+                ->orderBy('CRM_MemberConsumers.FirstName')
+                ->get();
+        } else {
+            $data = DB::table('CRM_MemberConsumers')
+                ->leftJoin('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
+                ->leftJoin('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
+                ->leftJoin('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
+                ->select('CRM_MemberConsumers.Id as ConsumerId',
+                                'CRM_MemberConsumers.MembershipType as MembershipType', 
+                                'CRM_MemberConsumers.FirstName as FirstName', 
+                                'CRM_MemberConsumers.MiddleName as MiddleName', 
+                                'CRM_MemberConsumers.LastName as LastName', 
+                                'CRM_MemberConsumers.OrganizationName as OrganizationName', 
+                                'CRM_MemberConsumers.Suffix as Suffix', 
+                                'CRM_MemberConsumers.Birthdate as Birthdate', 
+                                'CRM_MemberConsumers.Barangay as Barangay', 
+                                'CRM_MemberConsumers.ApplicationStatus as ApplicationStatus',
+                                'CRM_MemberConsumers.DateApplied as DateApplied', 
+                                'CRM_MemberConsumers.CivilStatus as CivilStatus', 
+                                'CRM_MemberConsumers.DateApproved as DateApproved', 
+                                'CRM_MemberConsumers.ContactNumbers as ContactNumbers', 
+                                'CRM_MemberConsumers.EmailAddress as EmailAddress',  
+                                'CRM_MemberConsumers.Notes as Notes', 
+                                'CRM_MemberConsumers.Gender as Gender', 
+                                'CRM_MemberConsumers.Sitio as Sitio', 
+                                'CRM_MemberConsumerTypes.*',
+                                'CRM_Towns.Town as Town',
+                                'CRM_Barangays.Barangay as Barangay')
+                ->orderByDesc('CRM_MemberConsumers.created_at')
+                ->take(30)
+                ->get();
+        }
+
+        $output = "";
+        foreach($data as $item) {
+            $output .= '<tr>
+                            <td>' . $item->ConsumerId . '</td>
+                            <td>' . MemberConsumers::serializeMemberName($item) . '</td>
+                            <td>' . $item->Barangay . ', ' . $item->Town . '</td>
+                            <td>
+                                <a href="' . route('bills.create-group-billing-step-two', [$item->ConsumerId]) . '" class="btn btn-xs btn-primary">Proceed</a>
+                            <td>
+                        </tr>';
+        }
+        
+        return response()->json($output, 200);
+    }
+
+    public function searchAccount(Request $request) {
+        $results = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->whereNull('Billing_ServiceAccounts.MemberConsumerId')
+            ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['query'] . '%')
+            ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['query'] . '%')
+            ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['query'] . '%')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+            ->get();
+
+        $output = "";
+
+        if (count($results) > 0) {
+            foreach($results as $item) {
+                $output .= '
+                        <tr>
+                            <td>' . $item->id . '</td>
+                            <td>' . $item->OldAccountNo . '</td>
+                            <td>' . $item->ServiceAccountName . '</td>
+                            <td>' . ServiceAccounts::getAddress($item) . '</td>
+                            <td>
+                                <button class="btn btn-link text-primary" onclick=addToGroup("' . $item->id . '")><i class="fas fa-plus"></i></button>
+                            </td>
+                        </tr>
+                    '; 
+            }
+
+            return response()->json($output, 200);
+        } else {
+            return response()->json([], 200);
+        }        
+    }
+
+    public function addToGroup(Request $request) {
+        $account = ServiceAccounts::find($request['id']);
+
+        if ($account != null) {
+            $account->MemberConsumerId = $request['MemberConsumerId'];
+            $account->save();
+        }
+
+        return response()->json($account, 200);
+    }
+
+    public function removeFromGroup(Request $request) {
+        $account = ServiceAccounts::find($request['id']);
+
+        if ($account != null) {
+            $account->MemberConsumerId = null;
+            $account->save();
+        }
+
+        return response()->json($account, 200);
+    }
+
+    public function groupedBillingView($memberConsumerId) {
+        $accounts = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->select('Billing_ServiceAccounts.ServiceAccountName', 
+                'Billing_ServiceAccounts.id', 
+                'Billing_ServiceAccounts.Purok', 
+                'Billing_ServiceAccounts.OldAccountNo', 
+                'CRM_Towns.Town', 
+                'CRM_Barangays.Barangay')
+            ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+            ->where('Billing_ServiceAccounts.MemberConsumerId', $memberConsumerId)
+            ->get();
+        $memberConsumer = DB::table('CRM_MemberConsumers')
+            ->leftJoin('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
+            ->leftJoin('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
+            ->select('CRM_MemberConsumers.Id as ConsumerId',
+                    'CRM_MemberConsumers.MembershipType as MembershipType', 
+                    'CRM_MemberConsumers.FirstName as FirstName', 
+                    'CRM_MemberConsumers.MiddleName as MiddleName', 
+                    'CRM_MemberConsumers.LastName as LastName', 
+                    'CRM_MemberConsumers.OrganizationName as OrganizationName', 
+                    'CRM_MemberConsumers.Suffix as Suffix', 
+                    'CRM_MemberConsumers.Birthdate as Birthdate', 
+                    'CRM_MemberConsumers.Barangay as Barangay', 
+                    'CRM_MemberConsumers.ApplicationStatus as ApplicationStatus',
+                    'CRM_MemberConsumers.DateApplied as DateApplied', 
+                    'CRM_MemberConsumers.CivilStatus as CivilStatus', 
+                    'CRM_MemberConsumers.DateApproved as DateApproved', 
+                    'CRM_MemberConsumers.ContactNumbers as ContactNumbers', 
+                    'CRM_MemberConsumers.EmailAddress as EmailAddress',  
+                    'CRM_MemberConsumers.Notes as Notes', 
+                    'CRM_MemberConsumers.Gender as Gender', 
+                    'CRM_MemberConsumers.Sitio as Sitio', 
+                    'CRM_MemberConsumerTypes.*',
+                    'CRM_Towns.Town as Town',
+                    'CRM_Barangays.Barangay as Barangay')
+            ->where('CRM_MemberConsumers.Id', $memberConsumerId)
+            ->first();
+        $ledgers = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_ServiceAccounts.MemberConsumerId', $memberConsumerId)
+            ->select('Billing_ServiceAccounts.MemberConsumerId',
+                'Billing_Bills.ServicePeriod',
+                DB::raw("COUNT(Billing_Bills.id) AS BillCount"))
+            ->groupBy('Billing_ServiceAccounts.MemberConsumerId',
+                'Billing_Bills.ServicePeriod')
+            ->orderByDesc('Billing_Bills.ServicePeriod')
+            ->get();
+
+        return view('/bills/grouped_billing_view', [
+            'accounts' => $accounts,
+            'memberConsumer' => $memberConsumer,
+            'ledgers' => $ledgers,
+        ]);
+    }
+
+    public function groupedBillingBillView($memberConsumerId, $period) {
+        $ledgers = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_ServiceAccounts.MemberConsumerId', $memberConsumerId)
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->select('Billing_ServiceAccounts.MemberConsumerId',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_Bills.*',
+                'Billing_ServiceAccounts.ServiceAccountName')
+            ->get();
+
+        $memberConsumer = DB::table('CRM_MemberConsumers')
+            ->leftJoin('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
+            ->leftJoin('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
+            ->select('CRM_MemberConsumers.Id as ConsumerId',
+                    'CRM_MemberConsumers.MembershipType as MembershipType', 
+                    'CRM_MemberConsumers.FirstName as FirstName', 
+                    'CRM_MemberConsumers.MiddleName as MiddleName', 
+                    'CRM_MemberConsumers.LastName as LastName', 
+                    'CRM_MemberConsumers.OrganizationName as OrganizationName', 
+                    'CRM_MemberConsumers.Suffix as Suffix', 
+                    'CRM_MemberConsumers.Birthdate as Birthdate', 
+                    'CRM_MemberConsumers.Barangay as Barangay', 
+                    'CRM_MemberConsumers.ApplicationStatus as ApplicationStatus',
+                    'CRM_MemberConsumers.DateApplied as DateApplied', 
+                    'CRM_MemberConsumers.CivilStatus as CivilStatus', 
+                    'CRM_MemberConsumers.DateApproved as DateApproved', 
+                    'CRM_MemberConsumers.ContactNumbers as ContactNumbers', 
+                    'CRM_MemberConsumers.EmailAddress as EmailAddress',  
+                    'CRM_MemberConsumers.Notes as Notes', 
+                    'CRM_MemberConsumers.Gender as Gender', 
+                    'CRM_MemberConsumers.Sitio as Sitio', 
+                    'CRM_MemberConsumerTypes.*',
+                    'CRM_Towns.Town as Town',
+                    'CRM_Barangays.Barangay as Barangay')
+            ->where('CRM_MemberConsumers.Id', $memberConsumerId)
+            ->first();
+
+        return view('/bills/group_billing_bill_view', [
+            'ledgers' => $ledgers,
+            'memberConsumer' => $memberConsumer,
+            'servicePeriod' => $period
+        ]);
+    }
+
+    public function add2Percent(Request $request) {
+        $memberConsumerId = $request['MemberConsumerId'];
+        $period = $request['Period'];
+
+        $ledgers = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_ServiceAccounts.MemberConsumerId', $memberConsumerId)
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->select('Billing_Bills.*')
+            ->get();
+
+        foreach($ledgers as $item) {
+            Bills::add2Percent($item->id);
+        }
+
+        return response()->json('ok', 200);
+    }
+
+    public function remove2Percent(Request $request) {
+        $memberConsumerId = $request['MemberConsumerId'];
+        $period = $request['Period'];
+
+        $ledgers = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_ServiceAccounts.MemberConsumerId', $memberConsumerId)
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->select('Billing_Bills.*')
+            ->get();
+
+        foreach($ledgers as $item) {
+            Bills::remove2Percent($item->id);
+        }
+
+        return response()->json('ok', 200);
+    }
+
+    public function add5Percent(Request $request) {
+        $memberConsumerId = $request['MemberConsumerId'];
+        $period = $request['Period'];
+
+        $ledgers = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_ServiceAccounts.MemberConsumerId', $memberConsumerId)
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->select('Billing_Bills.*')
+            ->get();
+
+        foreach($ledgers as $item) {
+            Bills::add5Percent($item->id);
+        }
+
+        return response()->json('ok', 200);
+    }
+
+    public function remove5Percent(Request $request) {
+        $memberConsumerId = $request['MemberConsumerId'];
+        $period = $request['Period'];
+
+        $ledgers = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_ServiceAccounts.MemberConsumerId', $memberConsumerId)
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->select('Billing_Bills.*')
+            ->get();
+
+        foreach($ledgers as $item) {
+            Bills::remove5Percent($item->id);
+        }
+
+        return response()->json('ok', 200);
     }
 }

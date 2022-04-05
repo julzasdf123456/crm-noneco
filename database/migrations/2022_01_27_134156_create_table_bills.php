@@ -85,6 +85,8 @@ class CreateTableBills extends Migration
             $table->string('BilledFrom')->nullable();
 
             $table->string('Form2307Amount')->nullable();
+            $table->string('Evat2Percent')->nullable();
+            $table->string('Evat5Percent')->nullable();
 
             $table->string('MergedToCollectible')->nullable(); // Yes - if merged to Collectibles, No - if not
             $table->string('DeductedDeposit')->nullable(); // FROM DEPOSITS/PREPAYMENTS

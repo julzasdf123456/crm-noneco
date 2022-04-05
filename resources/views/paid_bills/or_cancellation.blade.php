@@ -39,7 +39,7 @@
                             <th>OR Number</th>
                             <th>Account No</th>
                             <th>Consumer Name</th>
-                            <th>Amount</th>
+                            <th>OR Date</th>
                         </thead>
                         <tbody>
                             
@@ -63,61 +63,18 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="invoice p-3 mb-3">
-                        <div class="row">
-                            <div class="col-12">
-                                <p>
-                                    <small class="float-right">Transaction Date: <strong id="posting-date"></strong></small>
-                                </p>
-                            </div>
-                            <!-- /.col -->
-                        </div>
-    
-                        <div class="row invoice-info">
-                            <div class="col-lg-6 invoice-col">
-                                <address>
-                                    <strong id="account-name"></strong><br>
-                                    <span id="account-no"></span><br>
-                                    <span id="account-address"></span><br>
-                                </address>
-                            </div>
-                            <!-- /.col -->
-                            <div class="col-lg-6 invoice-col">
-                                <address>
-                                    <strong id="or-number">OR No: </strong><br>
-                                    <span id="or-date">OR Date: </span><br>
-                                    <span id="bill-number">Bill No: </span><br>
-                                </address>
-                            </div>
-                            <!-- /.col -->                            
-                        </div>    
-                    </div>
+                    <table class="table table-sm table-hover" id="bills-table">
+                        <thead>
+                            <th>Bill No.</th>
+                            <th>Account Name</th>
+                            <th>Billing Month</th>
+                            <th>OR Number</th>
+                            <th>OR Date</th>
+                            <th>Amount Due</th>
+                        </thead>
+                        <tbody>
 
-                    <table class="table table-sm table-borderless">
-                        <tr>
-                            <td>Teller/Cashier:</td>
-                            <th id="teller"></th>
-                        </tr>
-                        <tr>
-                            <td>Billing Month:</td>
-                            <th id="period"></th>
-                        </tr>
-                        <tr>
-                            <td>Kwh Used:</td>
-                            <th id="kwh-used"></th>
-                        </tr>
-                        <tr>
-                            <td>Additional Charges:</td>
-                            <th id="additional-charges"></th>
-                        </tr>
-                        <tr>
-                            <td>Deductions:</td>
-                            <th id="deductions"></th>
-                        </tr>
-                        <tr>
-                            <td>Amount Due:</td>
-                            <th><h4 id="amount-due"></h4></th>
-                        </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -127,15 +84,18 @@
 
 @push('page_scripts')
     <script>
-        var paidBillId = ""
+        var orNumberActive = ""
 
         $(document).ready(function() {
-            $('#search-field').keyup(function() {
+            $('#search-field').bind("keyup", function(event) {  
+                event.preventDefault()
                 var letterCount = this.value.length;
 
                 if (letterCount > 4) {
                     performSearchOR(this.value)
-                }                
+                }   
+                
+                return false;
             })
 
             $('#search-btn').on('click', function() {
@@ -143,7 +103,7 @@
             })
 
             $('#cancel-or-btn').on('click', function() {
-                if (jQuery.isEmptyObject(paidBillId)) {
+                if (jQuery.isEmptyObject(orNumberActive)) {
                     alert('Select payment first!')
                 } else {
                     if (confirm('Are you sure you want to cancel this OR?')) {
@@ -151,7 +111,7 @@
                             url : '/paid_bills/request-cancel-or',
                             type : 'GET',
                             data : {
-                                id : paidBillId,
+                                orNo : orNumberActive,
                                 Notes : $('#notes').val(),
                             },
                             success : function(res) {
@@ -184,30 +144,20 @@
             })
         }
 
-        function fetchDetails(id) {
-            paidBillId = id
+        function fetchDetails(orNo) {
+            $('#bills-table tbody tr').remove()
+            orNumberActive = orNo
             $.ajax({
                 url : '/paid_bills/fetch-or-details',
                 type : 'GET',
                 data : {
-                    id : id,
+                    orNo : orNo,
                 },
                 success : function(res) {
                     if (jQuery.isEmptyObject(res)) {
 
                     } else {
-                        $('#posting-date').text(res['PostingDate'])
-                        $('#account-name').text(res['ServiceAccountName'])
-                        $('#account-no').text(res['AccountNumber'])
-                        $('#account-address').text(res['Address'])
-                        $('#or-number').text('OR No: ' + res['ORNumber'])
-                        $('#or-date').text('OR Date: ' + res['ORDate'])
-                        $('#bill-number').text('Bill No: ' + res['BillNumber'])
-                        $('#teller').text(res['name'])
-                        $('#kwh-used').text(res['KwhUsed'])
-                        $('#additional-charges').text(res['AdditionalCharges'])
-                        $('#deductions').text(res['Deductions'])
-                        $('#amount-due').text(res['NetAmount'])
+                        $('#bills-table tbody').append(res)
                     }
                 },
                 error : function(err) {

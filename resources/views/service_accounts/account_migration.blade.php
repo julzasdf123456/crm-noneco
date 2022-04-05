@@ -51,6 +51,7 @@
                     <input type="hidden" value="{{ $inspection->GeoMeteringPole }}" name="GPSMeter">
                     <input type="hidden" value="{{ $serviceConnection->AccountCount }}" name="AccountCount">
                     <input type="hidden" value="{{ $serviceConnection != null ? $serviceConnection->DateTimeOfEnergization : null }}" name="ConnectionDate">
+                    <input type="hidden" value="{{ $serviceConnection != null ? $serviceConnection->MemberConsumerId : null }}" name="MemberConsumerId">
 
                     <input type="hidden" name="Latitude" value="{{ ServiceAccounts::getLatitude($inspection->GeoMeteringPole) }}"/>
                     <input type="hidden" name="Longitude" value="{{ ServiceAccounts::getLongitude($inspection->GeoMeteringPole) }}"/>

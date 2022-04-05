@@ -348,18 +348,36 @@
             surcharge = 0
 
             for(var i=0; i<len; i++) {
-                var amount = parseFloat($('#' + selectedPayments[i]).attr('amount'))
+                var amount = (parseFloat($('#' + selectedPayments[i]).attr('amount')) ? parseFloat($('#' + selectedPayments[i]).attr('amount')) : 0)
                 totalAmount += amount
 
-                var additionalCharges = parseFloat($('#' + selectedPayments[i]).attr('additionalCharges'))
+                var additionalCharges = (parseFloat($('#' + selectedPayments[i]).attr('additionalCharges')) ? parseFloat($('#' + selectedPayments[i]).attr('additionalCharges')) : 0)
                 additionals += additionalCharges
 
                 var deductibles = (parseFloat($('#' + selectedPayments[i]).attr('deductions')) ? parseFloat($('#' + selectedPayments[i]).attr('deductions')) : 0)
                 deductions += deductibles
 
-                var surcharges = parseFloat($('#' + selectedPayments[i]).attr('surcharge'))
+                var surcharges = (parseFloat($('#' + selectedPayments[i]).attr('surcharge')) ? parseFloat($('#' + selectedPayments[i]).attr('surcharge')) : 0)
                 surcharge += surcharges
             }
+        }
+
+        function requestUnlock(id) {
+            $.ajax({
+                url : '/paid_bills/request-bills-payment-unlock',
+                type : 'GET',
+                data : {
+                    id : id
+                },
+                success : function(res) {
+                    $('#lock-' + id).removeClass('fa-lock')
+                    $('#lock-' + id).addClass('fa-exclamation-circle')
+                    alert('Unlocking Requested')
+                },
+                error : function(err) {
+                    alert('An error occurred while trying to request unlocking')
+                }
+            })
         }
 
         function removeItemFromArray(id) {

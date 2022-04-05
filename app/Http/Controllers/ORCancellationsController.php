@@ -44,15 +44,14 @@ class ORCancellationsController extends AppBaseController
             ->leftJoin('Cashier_ORCancellations', 'Cashier_PaidBills.id', '=', 'Cashier_ORCancellations.ObjectId')
             ->leftJoin('users', 'Cashier_PaidBills.FiledBy', '=', 'users.id')
             ->where('Cashier_PaidBills.Status', 'PENDING CANCEL')
-            ->select('Cashier_ORCancellations.id AS CancellationId',
-                'Cashier_PaidBills.id AS PaidBillsId',
-                'Cashier_PaidBills.ORNumber',
+            ->select('Cashier_PaidBills.ORNumber',
                 'Cashier_PaidBills.ORDate',
                 'Billing_ServiceAccounts.ServiceAccountName',
-                'Cashier_PaidBills.AccountNumber',
-                'Cashier_PaidBills.Notes',
                 'users.name')
-            ->orderByDesc('Cashier_ORCancellations.created_at')
+            ->groupBy('Cashier_PaidBills.ORNumber',
+                    'Cashier_PaidBills.ORDate',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'users.name')
             ->get();
 
         $transactionCancellations = DB::table('Cashier_TransactionIndex')
@@ -109,7 +108,7 @@ class ORCancellationsController extends AppBaseController
      */
     public function show($id)
     {
-        $oRCancellations = $this->oRCancellationsRepository->find($id);
+        $oRCancellations = ORCancellations::where('ORNumber', $id)->get();
 
         if (empty($oRCancellations)) {
             Flash::error('O R Cancellations not found');
@@ -117,15 +116,26 @@ class ORCancellationsController extends AppBaseController
             return redirect(route('oRCancellations.index'));
         }
 
-        $paidBill = PaidBills::find($oRCancellations->ObjectId);
-        $account = ServiceAccounts::find($paidBill->AccountNumber);
-        $user = DB::table('users')->where('id', $paidBill->FiledBy)->first();
+        $paidBill = DB::table('Cashier_PaidBills')
+            ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->leftJoin('Cashier_ORCancellations', 'Cashier_PaidBills.id', '=', 'Cashier_ORCancellations.ObjectId')
+            ->leftJoin('users', 'Cashier_PaidBills.FiledBy', '=', 'users.id')
+            ->where('Cashier_PaidBills.Status', 'PENDING CANCEL')
+            ->select('Cashier_PaidBills.ORNumber',
+                'Cashier_PaidBills.ORDate',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Cashier_PaidBills.AccountNumber',
+                'Cashier_PaidBills.NetAmount',
+                'Cashier_PaidBills.id as PaidBillsId',
+                'Cashier_ORCancellations.id as ORCancellationId',
+                'Cashier_PaidBills.ServicePeriod',
+                'users.name')
+            ->get();
 
         return view('o_r_cancellations.show', [
             'orCancellations' => $oRCancellations,
             'paidBill' => $paidBill,
-            'account' => $account,
-            'user' => $user,
+            'orNo' => $id
         ]);
     }
 
@@ -201,32 +211,39 @@ class ORCancellationsController extends AppBaseController
     }
 
     public function approveBillsORCancellation($orCancellationId) {
-        $oRCancellations = $this->oRCancellationsRepository->find($orCancellationId);
-        $paidBill = PaidBills::find($oRCancellations->ObjectId);
+        $oRCancellations = ORCancellations::where('ORNumber', $orCancellationId)->get();
+        $paidBill = PaidBills::where('ORNumber', $orCancellationId)->get();
 
         if ($oRCancellations != null) {
-            $oRCancellations->DateTimeApproved = date('Y-m-d H:i:s');
-            $oRCancellations->save();
+            foreach($oRCancellations as $item) {
+                $item->DateTimeApproved = date('Y-m-d H:i:s');
+                $item->save();
+            }            
         }
 
         if ($paidBill != null) {
-            $paidBill->Status = 'CANCELLED';
-            $paidBill->ApprovedBy = Auth::id();
-            $paidBill->save();
+            $filedBy = "";
+            foreach($paidBill as $item) {
+                $filedBy = $item->FiledBy;
+
+                $item->Status = 'CANCELLED';
+                $item->ApprovedBy = Auth::id();
+                $item->save();
+            }
 
             // ADD NOTIFICATION
             $notifier = new Notifiers;
             $notifier->id = IDGenerator::generateIDandRandString();
-            $notifier->Notification = 'Your OR cancellation request for account no. ' . $paidBill->AccountNumber . ' has been approved by ' . Auth::user()->name;
+            $notifier->Notification = 'Your OR cancellation request for OR No. ' . $orCancellationId . ' has been approved by ' . Auth::user()->name;
             $notifier->From = Auth::id();
-            $notifier->To = $paidBill->FiledBy;
+            $notifier->To = $filedBy;
             $notifier->Status = 'SENT';
             $notifier->Intent = "OR CANCELLATION"; 
             $notifier->IntentLink = ""; // change later to or cancellation confirmations
-            $notifier->ObjectId = $paidBill->id;
+            $notifier->ObjectId = $orCancellationId;
             $notifier->save();
 
-            Flash::success('OR number ' . $paidBill->ORNumber . ' cancelled');
+            Flash::success('OR number ' . $orCancellationId . ' cancelled');
         }
 
         return redirect(route('oRCancellations.index'));
