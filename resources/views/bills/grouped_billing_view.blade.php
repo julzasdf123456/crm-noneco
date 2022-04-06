@@ -70,7 +70,7 @@
                                 <td>{{ date('F d, Y', strtotime($item->ServicePeriod)) }}</td>
                                 <td>{{ $item->BillCount }}</td>
                                 <td class="text-right">
-                                    <a href="" class="text-warning ico-tab"><i class="fas fa-print"></i></a>
+                                    <a href="{{ route('bills.print-group-billing', [$memberConsumer->ConsumerId, $item->ServicePeriod]) }}" class="text-warning ico-tab"><i class="fas fa-print"></i></a>
                                     <a href="{{ route('bills.grouped-billing-bill-view', [$memberConsumer->ConsumerId, $item->ServicePeriod]) }}"><i class="fas fa-eye"></i></a>
                                 </td>
                             </tr>

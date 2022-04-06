@@ -158,4 +158,14 @@ class MemberConsumers extends Model
             return $memberconsumer->LastName . ', ' . $memberconsumer->FirstName . ' ' . $memberconsumer->Suffix;
         }
     }
+
+    public static function getAddress($memberconsumer) {
+        if ($memberconsumer->Sitio==null && ($memberconsumer->Barangay!=null && $memberconsumer->Town!=null)) {
+            return $memberconsumer->Barangay . ', ' . $memberconsumer->Town;
+        } elseif($memberconsumer->Sitio!=null && ($memberconsumer->Barangay!=null && $memberconsumer->Town!=null)) {
+            return $memberconsumer->Sitio . ', ' . $memberconsumer->Barangay . ', ' . $memberconsumer->Town;
+        } elseif($memberconsumer->Barangay == null) {
+            return $memberconsumer->Sitio;
+        }
+    }
 }

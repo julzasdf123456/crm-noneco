@@ -348,9 +348,6 @@
             surcharge = 0
 
             for(var i=0; i<len; i++) {
-                var amount = (parseFloat($('#' + selectedPayments[i]).attr('amount')) ? parseFloat($('#' + selectedPayments[i]).attr('amount')) : 0)
-                totalAmount += amount
-
                 var additionalCharges = (parseFloat($('#' + selectedPayments[i]).attr('additionalCharges')) ? parseFloat($('#' + selectedPayments[i]).attr('additionalCharges')) : 0)
                 additionals += additionalCharges
 
@@ -359,6 +356,9 @@
 
                 var surcharges = (parseFloat($('#' + selectedPayments[i]).attr('surcharge')) ? parseFloat($('#' + selectedPayments[i]).attr('surcharge')) : 0)
                 surcharge += surcharges
+
+                var amount = (parseFloat($('#' + selectedPayments[i]).attr('amount')) ? parseFloat($('#' + selectedPayments[i]).attr('amount')) : 0)
+                totalAmount += (amount + surcharges)
             }
         }
 

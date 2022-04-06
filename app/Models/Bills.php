@@ -353,6 +353,14 @@ class Bills extends Model
         }
     }
 
+    public static function assessDueBillAndGetSurcharge($bill) {
+        if (date('Y-m-d', strtotime($bill->DueDate)) < date('Y-m-d')) {
+            return Bills::getFinalPenalty($bill);
+        } else {
+            return 0;
+        }
+    }
+
     public static function getServiceDateFrom($accountNumber, $readDate, $period) {
         $bill = Bills::where('AccountNumber', $accountNumber)
             ->where('ServicePeriod', date('Y-m-d', strtotime($period . ' -1 month')))
@@ -799,7 +807,7 @@ class Bills extends Model
         $percentage = floatval($bill->NetAmount) * .02;
 
         $bill->Evat2Percent = $percentage;
-        $bill->NetAmount = round(floatval($bill->NetAmount) - $percentage, 2);
+        $bill->NetAmount = round(floatval($bill->NetAmount) + $percentage, 2);
         $bill->save();
 
         return $bill;
@@ -808,7 +816,7 @@ class Bills extends Model
     public static function remove2Percent($billId) {
         $bill = Bills::find($billId);
         
-        $bill->NetAmount = round(floatval($bill->NetAmount) + floatval($bill->Evat2Percent), 2);
+        $bill->NetAmount = round(floatval($bill->NetAmount) - floatval($bill->Evat2Percent), 2);
         $bill->Evat2Percent = null;
         $bill->save();
 
@@ -824,7 +832,7 @@ class Bills extends Model
         $percentage = floatval($bill->NetAmount) * .05;
 
         $bill->Evat5Percent = $percentage;
-        $bill->NetAmount = round(floatval($bill->NetAmount) - $percentage, 2);
+        $bill->NetAmount = round(floatval($bill->NetAmount) + $percentage, 2);
         $bill->save();
 
         return $bill;
@@ -833,7 +841,7 @@ class Bills extends Model
     public static function remove5Percent($billId) {
         $bill = Bills::find($billId);
         
-        $bill->NetAmount = round(floatval($bill->NetAmount) + floatval($bill->Evat5Percent), 2);
+        $bill->NetAmount = round(floatval($bill->NetAmount) - floatval($bill->Evat5Percent), 2);
         $bill->Evat5Percent = null;
         $bill->save();
 

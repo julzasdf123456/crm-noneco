@@ -341,7 +341,7 @@ class PaidBillsController extends AppBaseController
                
                 $paidBill->AdditionalCharges = $bill->AdditionalCharges;
                 $paidBill->Deductions = $bill->Deductions;
-                $paidBill->NetAmount = $bill->NetAmount;
+                $paidBill->NetAmount = round(floatval($bill->NetAmount) + floatval($paidBill->Surcharge), 2);
                 $paidBill->Source = 'MONTHLY BILL';
                 $paidBill->ObjectSourceId = $bill->id;
                 $paidBill->ORNumber = $request['ORNumber'];
@@ -401,6 +401,7 @@ class PaidBillsController extends AppBaseController
                 $query->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $regex . '%')
                     ->orWhere('Cashier_PaidBills.AccountNumber', 'LIKE', '%' . $regex . '%')
                     ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $regex . '%')
+                    ->orWhere('Cashier_PaidBills.BillNumber', 'LIKE', '%' . $regex . '%')
                     ->orWhere('Cashier_PaidBills.ORNumber', 'LIKE', '%' . $regex . '%');
             })            
             ->select('Cashier_PaidBills.AccountNumber',

@@ -390,6 +390,7 @@ Route::get('/bills/add-two-percent', [App\Http\Controllers\BillsController::clas
 Route::get('/bills/remove-two-percent', [App\Http\Controllers\BillsController::class,  'remove2Percent'])->name('bills.remove-two-percent');
 Route::get('/bills/add-five-percent', [App\Http\Controllers\BillsController::class,  'add5Percent'])->name('bills.add-five-percent');
 Route::get('/bills/remove-five-percent', [App\Http\Controllers\BillsController::class,  'remove5Percent'])->name('bills.remove-five-percent');
+Route::get('/bills/print-group-billing/{memberConsumerId}/{period}', [App\Http\Controllers\BillsController::class,  'printGroupBilling'])->name('bills.print-group-billing');
 Route::resource('bills', App\Http\Controllers\BillsController::class);
 
 
