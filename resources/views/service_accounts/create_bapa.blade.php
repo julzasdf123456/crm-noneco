@@ -108,11 +108,12 @@
                 alert('Input BAPA Name first')
             } else {
                 $.ajax({
-                    url : '/service_accounts/add-to-bapa',
+                    url : '{{ route("servieAccounts.add-to-bapa") }}',
                     type : 'GET',
                     data : {
                         AreaCode : route,
                         BAPAName : bapaName,
+                        Town : $('#Town').val()
                     },
                     success : function(res) {
                         console.log(res)

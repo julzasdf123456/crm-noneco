@@ -72,6 +72,9 @@ Route::get('update-downloaded-status', [ReadAndBillAPI::class, 'updateDownloaded
 Route::post('receive-readings', [ReadAndBillAPI::class, 'receiveReadings']);
 Route::post('receive-bills', [ReadAndBillAPI::class, 'receiveBills']);
 Route::post('save-reading-images', [ReadAndBillAPI::class, 'saveReadingImages']);
+Route::get('get-bapa-list', [ReadAndBillAPI::class, 'getBapaList']);
+Route::get('get-bapa-account-list', [ReadAndBillAPI::class, 'getBapaAccountList']);
+Route::get('get-available-bapa-schedule', [ReadAndBillAPI::class, 'getAvailableBapaSchedule']);
 
 // DISCONNECTION
 Route::get('get-disconnection-list', [DisconnectionAPI::class, 'getDisconnectionList']);

@@ -19,6 +19,7 @@ use App\Models\PrePaymentBalance;
 use App\Models\IDGenerator;
 use App\Models\PrePaymentTransHistory;
 use App\Models\PaidBills;
+use App\Models\BAPAReadingSchedules;
 
 class ReadAndBillAPI extends Controller {
     public $successStatus = 200;
@@ -65,6 +66,7 @@ class ReadAndBillAPI extends Controller {
             ->whereNull('Billing_ServiceAccounts.OrganizationParentAccount')
             ->whereNotIn('Billing_ServiceAccounts.id', DB::table('Billing_Readings')->where('ServicePeriod', $request['ServicePeriod'])->pluck('AccountNumber'))
             ->whereNotIn('Billing_ServiceAccounts.AccountType', ['PUBLIC BUILDING HIGH VOLTAGE', 'COMMERCIAL HIGH VOLTAGE', 'INDUSTRIAL HIGH VOLTAGE'])
+            ->whereNull('Billing_ServiceAccounts.OrganizationParentAccount')
             ->where(function ($query) {
                 $query->where(function($queryX) {
                         $queryX->where('Billing_ServiceAccounts.AccountExpiration', '>', date('Y-m-d'))
@@ -309,5 +311,101 @@ class ReadAndBillAPI extends Controller {
                 "file" => ''
           ], 401);
         }
+    }
+
+    /**
+     * BAPA
+     */
+    public function getBapaList(Request $request) {
+        $townCode = $request['Town'];
+
+        $bapas = DB::table('Billing_ServiceAccounts')
+            ->select('OrganizationParentAccount')
+            ->where('Town', $townCode)
+            ->groupBy('OrganizationParentAccount')
+            ->orderBy('OrganizationParentAccount')
+            ->get();
+
+        return response()->json($bapas, 200);
+    }
+
+    public function getAvailableBapaSchedule(Request $request) {
+        $bapaName = $request['BAPAName'];
+
+        $sched = BAPAReadingSchedules::where('BAPAName', $bapaName)
+            ->whereNull('Status')
+            ->orderByDesc('ServicePeriod')
+            ->get();
+
+        if ($sched != null) {
+            return response()->json($sched, 200);
+        } else {
+            return response()->json([], 200);
+        }
+    }
+
+    public function getBapaAccountList(Request $request) {
+        $bapaName = $request['BAPAName'];
+        $period = $request['ServicePeriod'];
+
+        $prevMonth = date('Y-m-01', strtotime($period . ' -1 month'));
+
+        $accounts = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('Billing_Collectibles', 'Billing_ServiceAccounts.id', '=', 'Billing_Collectibles.AccountNumber')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+            ->whereNotIn('Billing_ServiceAccounts.id', DB::table('Billing_Readings')->where('ServicePeriod', $period)->pluck('AccountNumber'))
+            ->where(function ($query) {
+                $query->where(function($queryX) {
+                        $queryX->where('Billing_ServiceAccounts.AccountExpiration', '>', date('Y-m-d'))
+                            ->where('Billing_ServiceAccounts.AccountRetention', 'Temporary');
+                    })
+                    ->orWhere('Billing_ServiceAccounts.AccountRetention', 'Permanent')
+                    ->orWhereNull('Billing_ServiceAccounts.AccountExpiration');
+            })
+            ->select('Billing_ServiceAccounts.id', 
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.Multiplier',
+                'Billing_ServiceAccounts.Coreloss',
+                'Billing_ServiceAccounts.AccountType',
+                'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.AreaCode',
+                'Billing_ServiceAccounts.GroupCode',
+                'Billing_ServiceAccounts.Town',
+                'Billing_ServiceAccounts.Barangay',
+                'Billing_ServiceAccounts.Latitude',
+                'Billing_ServiceAccounts.Longitude',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.SequenceCode',
+                'Billing_ServiceAccounts.SeniorCitizen',
+                'Billing_ServiceAccounts.Evat5Percent',
+                'Billing_ServiceAccounts.Ewt2Percent',
+                'Billing_ServiceAccounts.OrganizationParentAccount',
+                'CRM_Towns.Town as TownFull',
+                'CRM_Barangays.Barangay as BarangayFull',
+                'Billing_ServiceAccounts.Purok',
+                'Billing_Collectibles.Balance',
+                DB::raw("(SELECT TOP 1 Amount FROM Billing_ArrearsLedgerDistribution WHERE AccountNumber=Billing_ServiceAccounts.id AND IsPaid IS NULL AND ServicePeriod='" . $period . "') AS ArrearsLedger"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE ServicePeriod='" . $prevMonth . "' AND AccountNumber=Billing_ServiceAccounts.id) AS KwhUsed"),
+                DB::raw("(SELECT TOP 1 CAST(ReadingTimestamp AS DATE) FROM Billing_Readings WHERE ServicePeriod='" . $prevMonth . "' AND AccountNumber=Billing_ServiceAccounts.id) AS ReadingTimestamp"),
+                DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE AccountNumber=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterSerial"),
+                DB::raw("(SELECT TOP 1 Balance FROM Billing_PrePaymentBalance WHERE AccountNumber=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS Deposit"),
+                DB::raw("(SELECT SUM(CAST(NetAmount AS DECIMAL(10, 2))) FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND MergedToCollectible IS NULL AND id NOT IN (SELECT ObjectSourceId FROM Cashier_PaidBills WHERE AccountNumber=Billing_Bills.id)) AS ArrearsTotal"),
+                DB::raw("'" . date('Y-m-d', strtotime($period)) . "' AS ServicePeriod"))
+            ->get();
+
+            
+        /**
+         * CHECK IF RATE IS AVAILABLE
+         */
+        $rates = Rates::where('ServicePeriod', $period) 
+            ->get();
+
+        if (count($rates) > 0) {
+            return response()->json($accounts, $this->successStatus);
+        } else {
+            return response()->json([], 404);
+        }       
     }
 }

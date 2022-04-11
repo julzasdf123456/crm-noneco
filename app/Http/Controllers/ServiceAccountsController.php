@@ -687,6 +687,7 @@ class ServiceAccountsController extends AppBaseController
 
     public function addToBapa(Request $request) {
         ServiceAccounts::where('AreaCode', $request['AreaCode'])
+            ->where('Town', $request['Town'])
             ->whereNull('OrganizationParentAccount')
             ->update(['OrganizationParentAccount' => $request['BAPAName'], 'Organization' => 'BAPA']);
 

@@ -1220,4 +1220,143 @@ class BillsController extends AppBaseController
             'servicePeriod' => $period
         ]);
     }
+
+    public function printSingleBillNewFormat($billId) {
+        $bills = $this->billsRepository->find($billId);
+        $account = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.ForDistribution',
+                    'Billing_ServiceAccounts.Organization',
+                    'Billing_ServiceAccounts.Main',
+                    'Billing_ServiceAccounts.GroupCode',
+                    'Billing_ServiceAccounts.Multiplier',
+                    'Billing_ServiceAccounts.Coreloss',
+                    'Billing_ServiceAccounts.ConnectionDate',
+                    'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.SeniorCitizen',
+                    'Billing_ServiceAccounts.Evat5Percent',
+                    'Billing_ServiceAccounts.Ewt2Percent',
+                    'Billing_ServiceAccounts.Contestable',
+                    'Billing_ServiceAccounts.NetMetered',
+                    'Billing_ServiceAccounts.AccountRetention',
+                    'Billing_ServiceAccounts.DurationInMonths',
+                    'Billing_ServiceAccounts.AccountExpiration',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->where('Billing_ServiceAccounts.id', $bills->AccountNumber)
+            ->first();
+
+        $meters = BillingMeters::where('ServiceAccountId', $bills->AccountNumber)
+            ->orderByDesc('created_at')
+            ->first();
+
+        $rate = Rates::where('ServicePeriod', $bills->ServicePeriod)
+            ->where('ConsumerType', $bills->ConsumerType)
+            ->first();
+
+        return view('/bills/print_single_bill_new_format', [
+            'bills' => $bills,
+            'account' => $account,
+            'meters' => $meters,
+            'rate' => $rate,
+        ]);
+    }
+
+    public function printSingleBillOld($billId) {
+        $bills = $this->billsRepository->find($billId);
+        $account = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.ForDistribution',
+                    'Billing_ServiceAccounts.Organization',
+                    'Billing_ServiceAccounts.Main',
+                    'Billing_ServiceAccounts.GroupCode',
+                    'Billing_ServiceAccounts.Multiplier',
+                    'Billing_ServiceAccounts.Coreloss',
+                    'Billing_ServiceAccounts.ConnectionDate',
+                    'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.SeniorCitizen',
+                    'Billing_ServiceAccounts.Evat5Percent',
+                    'Billing_ServiceAccounts.Ewt2Percent',
+                    'Billing_ServiceAccounts.Contestable',
+                    'Billing_ServiceAccounts.NetMetered',
+                    'Billing_ServiceAccounts.AccountRetention',
+                    'Billing_ServiceAccounts.DurationInMonths',
+                    'Billing_ServiceAccounts.AccountExpiration',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->where('Billing_ServiceAccounts.id', $bills->AccountNumber)
+            ->first();
+
+        $meters = BillingMeters::where('ServiceAccountId', $bills->AccountNumber)
+            ->orderByDesc('created_at')
+            ->first();
+
+        $rate = Rates::where('ServicePeriod', $bills->ServicePeriod)
+            ->where('ConsumerType', $bills->ConsumerType)
+            ->first();
+
+        return view('/bills/print_single_bill_old', [
+            'bills' => $bills,
+            'account' => $account,
+            'meters' => $meters,
+            'rate' => $rate,
+        ]);
+    }
+
+    public function bulkPrintBill() {
+        $towns = Towns::orderBy('id')->get();
+        return view('/bills/bulk_print_bill', [
+            'towns' => $towns,
+        ]);
+    }
+
+    public function getRoutesFromTown(Request $request) {
+        $routes = DB::table('Billing_ServiceAccounts')
+            ->where('Town', $request['Town'])
+            ->select('AreaCode')
+            ->groupBy('AreaCode')
+            ->orderBy('AreaCode')
+            ->get();
+
+        $output = "";
+        foreach($routes as $item) {
+            $output .= '<option value="' . $item->AreaCode . '">' . $item->AreaCode . '</option>';
+        }
+
+        return response()->json($output, 200);
+    }
+
+    public function printBulkBillNewFormat($period, $town, $route) {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->where('Billing_ServiceAccounts.Town', $town)
+            ->where('Billing_ServiceAccounts.AreaCode', $route)
+            ->select('Billing_Bills.*')
+            ->get();
+
+        return view('/bills/print_bulk_bill_new_format', [
+            'bills' => $bills
+        ]);
+    }
 }

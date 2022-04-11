@@ -222,4 +222,12 @@ class Rates extends Model
             return 0;
         }
     }
+
+    public static function filterConsumerType($consumerType) {
+        if ($consumerType == 'RURAL RESIDENTIAL') {
+            return 'RESIDENTIAL';
+        } else {
+            return $consumerType;
+        }
+    }
 }

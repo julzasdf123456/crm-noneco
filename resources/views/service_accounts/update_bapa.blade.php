@@ -120,6 +120,7 @@
                     data : {
                         AreaCode : route,
                         BAPAName : bapaName,
+                        Town : $('#Town').val()
                     },
                     success : function(res) {
                         console.log(res)

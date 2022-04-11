@@ -32,6 +32,12 @@
         <div class="row">
             <div class="col-lg-10 offset-lg-1 col-md-12">
                 <div class="card">
+                    <div class="card-header">
+                        <div class="card-tools">
+                            <a href="{{ route('bills.print-single-bill-new-format', [$bills->id]) }}" class="btn btn-link" title="Print New Formatted Bill"><i class="fas fa-print"></i></a>
+                            <a href="{{ route('bills.print-single-bill-old', [$bills->id]) }}" class="btn btn-link text-warning" title="Print Pre-Formatted Bill (Old)"><i class="fas fa-print"></i></a>
+                        </div>
+                    </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-lg-12">

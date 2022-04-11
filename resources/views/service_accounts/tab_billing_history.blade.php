@@ -11,12 +11,12 @@
                 <th class="text-right">Net Amount</th>
                 <th class="text-right">OR Number</th>
                 <th class="text-right">Payment Date</th>
-                <th width="10%"></th>
+                <th></th>
             </thead>
             <tbody>
                 @foreach ($bills as $item)
                     <tr>
-                        <td><i class="fas {{ $item->ORDate != null ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger' }} ico-tab"></i>{{ $item->BillNumber }}</td>
+                        <td><i class="fas {{ $item->ORDate != null ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger' }} ico-tab"></i><a href="{{ route('bills.show', [$item->id]) }}">{{ $item->BillNumber }}</a></td>
                         <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
                         <td class="text-right">{{ $item->KwhUsed != null ? number_format($item->KwhUsed, 2) : '0' }}</td>
                         <td class="text-right">{{ $item->EffectiveRate != null ? number_format($item->EffectiveRate, 4) : '0' }}</td>
@@ -27,7 +27,8 @@
                             @if ($item->ORDate == null)
                                 <a href="{{ route('bills.adjust-bill', [$item->id]) }}" class="btn btn-link btn-sm text-warning" title="Adjust Reading"><i class="fas fa-pen"></i></a>
                             @endif
-                            <a href="{{ route('bills.show', [$item->id]) }}" class="btn btn-link" title="View Bill"><i class="fas fa-eye"></i></a>
+                            <a href="{{ route('bills.print-single-bill-new-format', [$item->id]) }}" class="btn btn-link" title="Print New Formatted Bill"><i class="fas fa-print"></i></a>
+                            <a href="{{ route('bills.print-single-bill-old', [$item->id]) }}" class="btn btn-link text-warning" title="Print Pre-Formatted Bill (Old)"><i class="fas fa-print"></i></a>
                         </td>
                     </tr>
                 @endforeach

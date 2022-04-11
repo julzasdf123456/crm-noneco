@@ -391,6 +391,11 @@ Route::get('/bills/remove-two-percent', [App\Http\Controllers\BillsController::c
 Route::get('/bills/add-five-percent', [App\Http\Controllers\BillsController::class,  'add5Percent'])->name('bills.add-five-percent');
 Route::get('/bills/remove-five-percent', [App\Http\Controllers\BillsController::class,  'remove5Percent'])->name('bills.remove-five-percent');
 Route::get('/bills/print-group-billing/{memberConsumerId}/{period}', [App\Http\Controllers\BillsController::class,  'printGroupBilling'])->name('bills.print-group-billing');
+Route::get('/bills/print-single-bill-new-format/{billId}', [App\Http\Controllers\BillsController::class,  'printSingleBillNewFormat'])->name('bills.print-single-bill-new-format');
+Route::get('/bills/print-single-bill-old/{billId}', [App\Http\Controllers\BillsController::class,  'printSingleBillOld'])->name('bills.print-single-bill-old');
+Route::get('/bills/bulk-print-bill', [App\Http\Controllers\BillsController::class,  'bulkPrintBill'])->name('bills.bulk-print-bill');
+Route::get('/bills/get-routes-from-town', [App\Http\Controllers\BillsController::class,  'getRoutesFromTown'])->name('bills.get-routes-from-town');
+Route::get('/bills/print-bulk-bill-new-format/{period}/{town}/{route}', [App\Http\Controllers\BillsController::class,  'printBulkBillNewFormat'])->name('bills.print-bulk-bill-new-format');
 Route::resource('bills', App\Http\Controllers\BillsController::class);
 
 
@@ -497,3 +502,10 @@ Route::get('/o_r_cancellations/attempt-cancel-transaction-or', [App\Http\Control
 Route::get('/o_r_cancellations/show-other-payments/{id}', [App\Http\Controllers\ORCancellationsController::class, 'showOtherPayments'])->name('oRCancellations.show-other-payments');
 Route::get('/o_r_cancellations/approve-transaction-cancellation/{id}', [App\Http\Controllers\ORCancellationsController::class, 'approveTransactionCancellation'])->name('oRCancellations.approve-transaction-cancellation');
 Route::resource('oRCancellations', App\Http\Controllers\ORCancellationsController::class);
+
+
+Route::get('/b_a_p_a_reading_schedules/show-schedules/{period}', [App\Http\Controllers\BAPAReadingSchedulesController::class, 'showSchedules'])->name('bAPAReadingSchedules.show-schedules');
+Route::get('/b_a_p_a_reading_schedules/add-schedule', [App\Http\Controllers\BAPAReadingSchedulesController::class, 'addSchedule'])->name('bAPAReadingSchedules.add-schedule');
+Route::get('/b_a_p_a_reading_schedules/get-bapas', [App\Http\Controllers\BAPAReadingSchedulesController::class, 'getBapas'])->name('bAPAReadingSchedules.get-bapas');
+Route::get('/b_a_p_a_reading_schedules/remove-bapa-from-sched', [App\Http\Controllers\BAPAReadingSchedulesController::class, 'removeBapaFromSched'])->name('bAPAReadingSchedules.remove-bapa-from-sched');
+Route::resource('bAPAReadingSchedules', App\Http\Controllers\BAPAReadingSchedulesController::class);

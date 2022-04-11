@@ -442,10 +442,30 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-user-alt-slash nav-icon text-primary"></i><p>Pending Accounts</p>
                 </a>
             </li>
+            
+        </ul>
+    </li>
+
+    {{-- BAKA --}}
+    <li class="nav-item has-treeview">
+        <a href="#" class="nav-link">
+            <i class="fas fa-layer-group nav-icon text-primary"></i>
+            <p>
+                BAPA
+                <i class="fas fa-angle-left right"></i>
+            </p>
+        </a>
+        <ul class="nav nav-treeview">
             <li class="nav-item">
                 <a href="{{ route('serviceAccounts.bapa') }}"
                    class="nav-link {{ Request::is('serviceAccounts.bapa*') ? 'active' : '' }}">                   
-                   <i class="fas fa-layer-group nav-icon text-primary"></i><p>BAPA</p>
+                   <i class="fas fa-list nav-icon text-primary"></i><p>All BAPA</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('bAPAReadingSchedules.index') }}"
+                   class="nav-link {{ Request::is('bAPAReadingSchedules.index*') ? 'active' : '' }}">                   
+                   <i class="fas fa-calendar nav-icon text-primary"></i><p>BAPA Reading Sched</p>
                 </a>
             </li>
         </ul>
@@ -454,6 +474,7 @@ use Illuminate\Support\Facades\Auth;
 
 {{-- BILLS --}}
 @canany(['Super Admin', 'billing re-bill'])
+    {{-- BILLS --}}
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-wallet nav-icon text-primary"></i>
@@ -487,6 +508,12 @@ use Illuminate\Support\Facades\Auth;
                     <i class="fas fa-users nav-icon text-primary"></i><p>Grouped Billing</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('bills.bulk-print-bill') }}"
+                   class="nav-link {{ Request::is('bills.bulk-print-bill*') ? 'active' : '' }}">
+                    <i class="fas fa-print nav-icon text-primary"></i><p>Bulk Printing</p>
+                </a>
+            </li>
 
             <li class="nav-header">                
                 Others
@@ -500,6 +527,7 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 
+    {{-- METER READING --}}
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-tachometer-alt nav-icon text-primary"></i>
