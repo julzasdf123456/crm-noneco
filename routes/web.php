@@ -195,6 +195,7 @@ Route::get('/service_accounts/add-single-account-to-bapa', [App\Http\Controllers
 Route::get('/service_accounts/reading-account-grouper', [App\Http\Controllers\ServiceAccountsController::class,  'readingAccountGrouper'])->name('serviceAccounts.reading-account-grouper');
 Route::get('/service_accounts/account-grouper-view/{townCode}', [App\Http\Controllers\ServiceAccountsController::class,  'accountGrouperView'])->name('serviceAccounts.account-grouper-view');
 Route::get('/service_accounts/account-grouper-organizer/{townCode}/{groupCode}', [App\Http\Controllers\ServiceAccountsController::class,  'accountGrouperOrganizer'])->name('serviceAccounts.account-grouper-organizer');
+Route::get('/bills/bapa-view-readings/{period}/{bapaName}', [App\Http\Controllers\ServiceAccountsController::class,  'bapaViewReadings'])->name('bills.bapa-view-readings');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 
@@ -446,6 +447,11 @@ Route::get('/paid_bills/search-or', [App\Http\Controllers\PaidBillsController::c
 Route::get('/paid_bills/fetch-or-details', [App\Http\Controllers\PaidBillsController::class, 'fetchORDetails'])->name('paidBills.fetch-or-details');
 Route::get('/paid_bills/request-cancel-or', [App\Http\Controllers\PaidBillsController::class, 'requestCancelOR'])->name('paidBills.request-cancel-or');
 Route::get('/paid_bills/request-bills-payment-unlock', [App\Http\Controllers\PaidBillsController::class, 'requestBillsPaymentUnlock'])->name('paidBills.request-bills-payment-unlock');
+Route::get('/paid_bills/bapa-payments', [App\Http\Controllers\PaidBillsController::class, 'bapaPayments'])->name('paidBills.bapa-payments');
+Route::get('/paid_bills/search-bapa', [App\Http\Controllers\PaidBillsController::class, 'searchBapa'])->name('paidBills.search-bapa');
+Route::get('/paid_bills/bapa-payment-console/{bapaName}', [App\Http\Controllers\PaidBillsController::class, 'bapaPaymentConsole'])->name('paidBills.bapa-payment-console');
+Route::get('/paid_bills/get-bills-from-bapa', [App\Http\Controllers\PaidBillsController::class, 'getBillsFromBapa'])->name('paidBills.get-bills-from-bapa');
+Route::get('/paid_bills/save-bapa-payments', [App\Http\Controllers\PaidBillsController::class, 'saveBapaPayments'])->name('paidBills.save-bapa-payments');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);
 
 
@@ -509,3 +515,6 @@ Route::get('/b_a_p_a_reading_schedules/add-schedule', [App\Http\Controllers\BAPA
 Route::get('/b_a_p_a_reading_schedules/get-bapas', [App\Http\Controllers\BAPAReadingSchedulesController::class, 'getBapas'])->name('bAPAReadingSchedules.get-bapas');
 Route::get('/b_a_p_a_reading_schedules/remove-bapa-from-sched', [App\Http\Controllers\BAPAReadingSchedulesController::class, 'removeBapaFromSched'])->name('bAPAReadingSchedules.remove-bapa-from-sched');
 Route::resource('bAPAReadingSchedules', App\Http\Controllers\BAPAReadingSchedulesController::class);
+
+
+Route::resource('bAPAPayments', App\Http\Controllers\BAPAPaymentsController::class);

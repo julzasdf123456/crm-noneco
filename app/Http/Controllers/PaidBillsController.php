@@ -16,6 +16,8 @@ use App\Models\PaidBills;
 use App\Models\ORAssigning;
 use App\Models\Notifiers;
 use App\Models\ORCancellations;
+use App\Models\Towns;
+use App\Models\BAPAPayments;
 use Flash;
 use Response;
 
@@ -549,6 +551,179 @@ class PaidBillsController extends AppBaseController
         }
 
         return response()->json($bill, 200);
+    }
+
+    public function bapaPayments() {
+        $towns = Towns::orderBy('id')->get();
+
+        return view('/paid_bills/bapa_payments', [
+            'towns' => $towns,
+        ]);
+    }
+
+    public function searchBapa(Request $request) {
+        $param = $request['BAPA'];
+        $town = $request['Town'];
+
+        if ($town == 'All') {
+            $bapas = DB::table('Billing_ServiceAccounts AS sa')
+            ->where('sa.OrganizationParentAccount', 'LIKE', '%' . $param . '%')
+            ->select('sa.OrganizationParentAccount', 
+                'sa.Town',
+                DB::raw("COUNT(sa.id) AS NoOfAccounts"),
+                DB::raw("(SELECT SUBSTRING((SELECT ',' + AreaCode AS 'data()' FROM Billing_ServiceAccounts WHERE OrganizationParentAccount=sa.OrganizationParentAccount GROUP BY AreaCode FOR XML PATH('')), 2 , 9999)) As Result"))
+            ->groupBy('sa.OrganizationParentAccount', 
+                'sa.Town')
+            ->orderBy('sa.OrganizationParentAccount')
+            ->get();
+        } else {
+            $bapas = DB::table('Billing_ServiceAccounts AS sa')
+            ->where('sa.OrganizationParentAccount', 'LIKE', '%' . $param . '%')
+            ->where('sa.Town', $town)
+            ->select('sa.OrganizationParentAccount', 
+                'sa.Town',
+                DB::raw("COUNT(sa.id) AS NoOfAccounts"),
+                DB::raw("(SELECT SUBSTRING((SELECT ',' + AreaCode AS 'data()' FROM Billing_ServiceAccounts WHERE OrganizationParentAccount=sa.OrganizationParentAccount GROUP BY AreaCode FOR XML PATH('')), 2 , 9999)) As Result"))
+            ->groupBy('sa.OrganizationParentAccount', 
+                'sa.Town')
+            ->orderBy('sa.OrganizationParentAccount')
+            ->get();
+        }
+
+        $output = "";
+        foreach($bapas as $item) {
+            if (strlen($item->OrganizationParentAccount) > 1) {
+                $output .= '<tr>
+                                <td><a href="' . route('paidBills.bapa-payment-console', [urlencode($item->OrganizationParentAccount)]) . '">' . $item->OrganizationParentAccount . '</a></td>
+                                <td>' . $item->Town . '</td>
+                                <td>' . number_format($item->NoOfAccounts) . '</td>
+                                <td>' . $item->Result . '</td>
+                            </tr>';
+            }
+            
+        }
+
+        return response()->json($output, 200);
+    }
+
+    public function bapaPaymentConsole($bapaName) {
+        $bapaName = urldecode($bapaName);
+
+        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+            ->orderByDesc('created_at')
+            ->first();
+
+        return view('/paid_bills/bapa_payment_console', [
+            'bapaName' => $bapaName,
+            'orAssignedLast' => $orAssignedLast,
+        ]);
+    }
+
+    public function getBillsFromBapa(Request $request) {
+        $bapaName = $request['BAPAName'];
+        $period = $request['Period'];
+
+        $accounts = DB::table('Billing_Readings')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_ServiceAccounts.id', '=', 'Billing_Readings.AccountNumber')
+            ->where('Billing_Readings.ServicePeriod', $period)
+            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+            ->select('Billing_ServiceAccounts.id AS AccountNumber',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.AccountStatus',
+                'Billing_Readings.KwhUsed',
+                'Billing_Readings.ServicePeriod',
+                DB::raw("(SELECT BillNumber FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod) AS BillNumber"),
+                DB::raw("(SELECT NetAmount FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod) AS NetAmount"),
+                DB::raw("(SELECT ORNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod AND Status IS NULL) AS ORNumber"),)
+            ->orderBy('Billing_ServiceAccounts.AccountStatus')
+            ->get();
+
+        return response()->json($accounts, 200);
+    }
+
+    public function saveBapaPayments(Request $request) {
+        $accounts = $request['AccountNumbers'];
+        $len = count($accounts);
+        $period = $request['Period'];
+
+        // SAVE EACH TRANSACTION
+        for($i=0; $i<$len; $i++) {
+            $bill = Bills::where('AccountNumber', $accounts[$i])
+                ->where('ServicePeriod', $period)
+                ->first();
+
+            if ($bill != null) {
+                $paidBill = new PaidBills;
+                $paidBill->id = IDGenerator::generateIDandRandString();
+                $paidBill->BillNumber = $bill->BillNumber;
+                $paidBill->AccountNumber = $bill->AccountNumber;
+                $paidBill->ServicePeriod = $bill->ServicePeriod;
+                $paidBill->KwhUsed = $bill->KwhUsed;
+                $paidBill->Teller = Auth::id();
+                $paidBill->OfficeTransacted = env('APP_LOCATION');
+                $paidBill->PostingDate = date('Y-m-d');
+                $paidBill->PostingTime = date('H:i:s');
+                if (date('Y-m-d', strtotime($bill->DueDate)) < date('Y-m-d')) {
+                    $paidBill->Surcharge = Bills::getFinalPenalty($bill);
+                } else {
+                    $paidBill->Surcharge = "0";
+                }
+
+                $threePercent = 0;
+                $fivePercent = 0;
+                // COMPUTE DISCOUNTS
+                if ($request['IsDiscount3'] == 'true') {
+                    $threePercent = floatval($bill->NetAmount) * .03;
+                }
+
+                if ($request['IsDiscount5'] == 'true') {
+                    $fivePercent = floatval($bill->NetAmount) * .05;
+                }               
+
+                $paidBill->AdditionalCharges = $bill->AdditionalCharges;
+                $paidBill->Deductions = round(floatval($bill->Deductions) + floatval($threePercent) + floatval($fivePercent), 2);
+                $paidBill->NetAmount = round((floatval($bill->NetAmount) + floatval($paidBill->Surcharge)) - floatval($paidBill->Deductions), 2);
+
+                $paidBill->Source = 'MONTHLY BILL';
+                $paidBill->ObjectSourceId = $bill->id;
+                $paidBill->ORNumber = $request['ORNumber'];
+                $paidBill->ORDate = date('Y-m-d');
+                $paidBill->UserId = Auth::id();
+                $paidBill->save();
+            }
+        }
+
+        // SAVE PAYMENT TO BAPA Payments
+        $bapaPayments = new BAPAPayments;
+        $bapaPayments->id = IDGenerator::generateIDandRandString();
+        $bapaPayments->BAPAName = urldecode($request['BAPAName']);
+        $bapaPayments->ServicePeriod = $period;
+        $bapaPayments->ORNumber = $request['ORNumber'];
+        $bapaPayments->ORDate = date('Y-m-d');
+        $bapaPayments->SubTotal = round(floatval($request['SubTotal']), 2);
+        $bapaPayments->TwoPercentDiscount = round(floatval($request['Discount3']), 2);
+        $bapaPayments->FivePercentDiscount = round(floatval($request['Discount5']), 2);
+        $bapaPayments->Total = round(floatval($request['TotalAmountPaid']), 2);
+        $bapaPayments->Teller = Auth::id();
+        $bapaPayments->NoOfConsumersPaid = $len;
+        $bapaPayments->save();
+
+        // SAVE OR
+        $saveOR = ORAssigning::where('ORNumber', $request['ORNumber'])
+            ->where('UserId', Auth::id())
+            ->first();        
+        if ($saveOR == null) {
+            $saveOR = new ORAssigning;
+            $saveOR->id = IDGenerator::generateIDandRandString();
+            $saveOR->ORNumber = $request['ORNumber'];
+            $saveOR->UserId = Auth::id();
+            $saveOR->DateAssigned = date('Y-m-d');
+            $saveOR->TimeAssigned = date('H:i:s');
+            $saveOR->Office = env('APP_LOCATION');
+            $saveOR->save();
+        }  
+
+        return response()->json($bapaPayments, 200);
     }
 }
 

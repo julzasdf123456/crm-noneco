@@ -460,7 +460,7 @@ use Illuminate\Support\Facades\Auth;
                 <a href="{{ route('serviceAccounts.bapa') }}"
                    class="nav-link {{ Request::is('serviceAccounts.bapa*') ? 'active' : '' }}">                   
                    <i class="fas fa-list nav-icon text-primary"></i><p>All BAPA</p>
-                </a>
+                </a>    
             </li>
             <li class="nav-item">
                 <a href="{{ route('bAPAReadingSchedules.index') }}"
@@ -652,6 +652,12 @@ use Illuminate\Support\Facades\Auth;
                 </a>
             </li>
             <li class="nav-item">
+                <a href="{{ route('paidBills.bapa-payments') }}"
+                class="nav-link {{ Request::is('paidBills.bapa-payments*') ? 'active' : '' }}">
+                <i class="fas fa-users nav-icon text-info"></i><p>BAPA Payments</p>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="{{ route('transactionIndices.service-connection-collection') }}"
                 class="nav-link {{ Request::is('transactionIndices.service-connection-collection*') ? 'active' : '' }}">
                 <i class="fas fa-plug nav-icon text-info"></i><p>Service Connection</p>
@@ -810,8 +816,3 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
-
-
-
-
-

@@ -108,7 +108,7 @@
                 alert('Input BAPA Name first')
             } else {
                 $.ajax({
-                    url : '{{ route("servieAccounts.add-to-bapa") }}',
+                    url : '{{ route("serviceAccounts.add-to-bapa") }}',
                     type : 'GET',
                     data : {
                         AreaCode : route,

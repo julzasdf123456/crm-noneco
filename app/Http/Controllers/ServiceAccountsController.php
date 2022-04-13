@@ -751,10 +751,21 @@ class ServiceAccountsController extends AppBaseController
             ->groupBy('AreaCode')
             ->get();
 
+        $readings = DB::table('Billing_Readings')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->select('Billing_Readings.ServicePeriod',
+                DB::raw("COUNT(Billing_Readings.id) AS NoOfReadings"),
+                DB::raw("(SELECT COUNT(id) FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "') AS NoOfConsumers"))
+            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+            ->groupBy('Billing_Readings.ServicePeriod')
+            ->orderByDesc('Billing_Readings.ServicePeriod')
+            ->get();
+
         return view('/service_accounts/bapa_view', [
             'serviceAccounts' => $serviceAccounts,
             'bapaName' => $bapaName,
             'routes' => $routes,
+            'readings' => $readings,
         ]);
     }
 
@@ -879,6 +890,30 @@ class ServiceAccountsController extends AppBaseController
     public function accountGrouperOrganizer($townCode, $groupCode) {
         return view('/service_accounts/account_grouper_organizer', [
 
+        ]);
+    }
+
+    public function bapaViewReadings($period, $bapaName) {
+        $bapaName = urldecode($bapaName);
+
+        $readings = DB::table('Billing_Readings')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->select('Billing_Readings.ServicePeriod',
+                'Billing_ServiceAccounts.id as AccountNumber',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_Readings.ReadingTimestamp',
+                'Billing_Readings.KwhUsed',
+                'Billing_ServiceAccounts.AccountStatus',
+                DB::raw("(SELECT NetAmount FROM Billing_Bills WHERE ServicePeriod='" . $period . "' AND AccountNumber=Billing_ServiceAccounts.id) AS NetAmount"),
+                DB::raw("(SELECT BillNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "' AND AccountNumber=Billing_ServiceAccounts.id) AS BillNumber"))
+            ->where('Billing_Readings.ServicePeriod', $period)
+            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+            ->get();
+
+        return view('/service_accounts/bapa_view_readings', [
+            'readings' => $readings,
+            'period' => $period,
+            'bapaName' => $bapaName,
         ]);
     }
 }

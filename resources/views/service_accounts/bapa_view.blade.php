@@ -1,7 +1,3 @@
-@php
-    use App\Models\ServiceAccounts;
-@endphp
-
 @extends('layouts.app')
 
 @section('content')
@@ -53,37 +49,26 @@
     {{-- ACCOUNTS --}}
     <div class="col-lg-8 col-md-7">
         <div class="card" style="height: 80vh;">
-            <div class="card-header border-0">
-                <span class="card-title">Accounts in this BAPA <i>(Press <strong>F3</strong> to Search)</i></span>
-                <div class="card-tools">
-                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modal-search">Add Account</button>                   
-                </div>
+            <div class="card-header p-2">
+                <ul class="nav nav-pills">
+                    <li class="nav-item"><a class="nav-link active" href="#all-accounts" data-toggle="tab">
+                        <i class="fas fa-file-invoice"></i>
+                        All Accounts</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#readings" data-toggle="tab">
+                        <i class="fas fa-unlink"></i>
+                        Readings</a></li>
+                </ul>
             </div>
             <div class="card-body table-responsive px-0">
-                <table class="table table-hover table-sm">
-                    <thead>
-                        <th>Account ID</th>
-                        <th>Account No</th>
-                        <th>Service Account Name</th>
-                        <th>Address</th>
-                        <th>Route</th>
-                        <th></th>
-                    </thead>
-                    <tbody>
-                        @foreach ($serviceAccounts as $item)
-                            <tr>
-                                <td><a href="{{ route('serviceAccounts.show', [$item->id]) }}">{{ $item->id }}</a></td>
-                                <td>{{ $item->OldAccountNo }}</td>
-                                <td>{{ $item->ServiceAccountName }}</td>
-                                <td>{{ ServiceAccounts::getAddress($item) }}</td>
-                                <td>{{ $item->AreaCode }}</td>
-                                <td class="text-right">
-                                    <button onclick="removeByAccount('{{ $item->id }}')" class="btn btn-sm btn-link text-danger"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="all-accounts">
+                        @include('service_accounts.bapa_tab_all_accounts')
+                    </div>
+                    <div class="tab-pane" id="readings">
+                        @include('service_accounts.bapa_tab_readings')
+                    </div>
+                </div>
+                
             </div>
             <div class="card-footer">
                 <span>Total Consumers: <strong>{{ count($serviceAccounts) }}</strong></span>
