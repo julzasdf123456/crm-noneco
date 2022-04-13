@@ -7,6 +7,9 @@ use App\Http\Requests\UpdateNotifiersRequest;
 use App\Repositories\NotifiersRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Models\Notifiers;
 use Flash;
 use Response;
 
@@ -153,5 +156,29 @@ class NotifiersController extends AppBaseController
         Flash::success('Notifiers deleted successfully.');
 
         return redirect(route('notifiers.index'));
+    }
+
+    public function getNotifications() {
+        $notifiers = Notifiers::where('To', Auth::id())
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get();
+
+        $output = "";
+        foreach($notifiers as $item) {
+            if ($item->Intent == 'OR CANCELLATION') {
+                $output .= '<div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; ">' . $item->Notification . '
+                                <span class="float-right text-muted text-sm">' . date('M d, Y h:i:s A', strtotime($item->created_at)) . '</span>
+                            </a>';
+            } else if ($item->Intent == 'BILL ARREAR PAYMENT UNLOCKING') {
+                $output .= '<div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; ">' . $item->Notification . '
+                            <span class="float-right text-muted text-sm">' . date('M d, Y h:i:s A', strtotime($item->created_at)) . '</span>
+                            </a>';
+            }
+        }
+
+        return response()->json($output, 200);
     }
 }

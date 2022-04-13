@@ -13,23 +13,50 @@
 
     <div class="content">
         <div class="row">
-            <div class="col-lg-3 col-md-4">
+            <div class="col-lg-4 col-md-5">
                 <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">Config</span>
-                    </div>
                     <div class="card-body">
-                        <div class="form-group">
-                            <label for="MeterReader">Select Meter Reader</label>
-                            <select name="MeterReader" id="MeterReader" class="form-control">
-                                @if (count($meterReaders) > 0)
-                                    @foreach ($meterReaders as $item)
-                                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                        <div class="row">
+                            <div class="form-group col-lg-6">
+                                <label for="MeterReader">Select Meter Reader</label>
+                                <select name="MeterReader" id="MeterReader" class="form-control">
+                                    @if (count($meterReaders) > 0)
+                                        @foreach ($meterReaders as $item)
+                                            <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                        @endforeach
+                                    @else
+                                        <option value="">No Meter Reader Found</option>
+                                    @endif
+                                </select>
+                            </div>
+
+                            <div class="form-group col-lg-3">
+                                <label for="Town">Select Town</label>
+                                <select name="Town" id="Town" class="form-control">
+                                    @foreach ($towns as $item)
+                                        <option value="{{ $item->id }}">{{ $item->Town }}</option>
                                     @endforeach
-                                @else
-                                    <option value="">No Meter Reader Found</option>
-                                @endif
-                            </select>
+                                </select>
+                            </div>
+    
+                            <div class="form-group col-lg-3">
+                                <label for="Day">Select Day</label>
+                                <select name="Day" id="Day" class="form-control">
+                                    <option value="01">01</option>
+                                    <option value="02">02</option>
+                                    <option value="03">03</option>
+                                    <option value="04">04</option>
+                                    <option value="05">05</option>
+                                    <option value="06">06</option>
+                                    <option value="07">07</option>
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                    <option value="13">13</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="card-footer">
@@ -37,9 +64,13 @@
                     </div>
                 </div>
 
-                <div class="card" style="height: 60vh;">
+                <div class="card" style="height: 65vh;">
                     <div class="card-header border-0">
-                        <span class="card-title">Read Accounts</span>
+                        <span class="card-title">Accounts Read</span>
+                        <div class="card-tools">
+                            <button class="btn btn-sm btn-default" disabled=true id="update-gps" data-toggle="modal" data-target="#modal-confirm-update-gps">Update GPS LatLong</button>
+                            <button class="btn btn-sm btn-default" disabled=true id="re-seq" data-toggle="modal" data-target="#modal-confirm-re-seq">Re-Sequence</button>
+                        </div>
                     </div>
                     <div class="card-body table-responsive px-0">
                         <table class="table table-sm table-hover" id="res-table">
@@ -47,6 +78,7 @@
                                 <th>Account No.</th>
                                 <th>Reading</th>
                                 <th>Timestamp</th>
+                                <th>Seq.</th>
                             </thead>
                             <tbody>
 
@@ -56,12 +88,54 @@
                 </div>
             </div>
 
-            <div class="col-lg-9 col-md-8">
+            <div class="col-lg-8 col-md-7">
                 <div id="map" style="width: 100%; height: 90vh;"></div>
             </div>
         </div>
     </div>
 @endsection
+
+{{-- RE SEQUENCE CONFIRMATION MODAL --}}
+<div class="modal fade" id="modal-confirm-re-seq" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Re-Sequence Based on Reading Time</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Re-sequencing will update all the sequence numbers of these accounts according to the chronological order of reading for this period. Do you wish to proceed?</p>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" id="proceed-resequence">Proceed</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- UPDATE GPS CONFIRMATION MODAL --}}
+<div class="modal fade" id="modal-confirm-update-gps" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Update GPS Coordinates</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>The GPS coordinates for all the accounts in this reading schedule will be updated accordingly. Do you wish to proceed?</p>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" id="proceed-update-gps">Proceed</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @push('page_scripts')
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.1/mapbox-gl.js"></script>
@@ -77,11 +151,13 @@
 
         function loadMapAndAccounts() {
             $.ajax({
-                url : '/readings/get-readings-from-meter-reader',
+                url : "{{ route('readings.get-readings-from-meter-reader') }}",
                 type : 'GET',
                 data : {
                     ServicePeriod : "{{ $servicePeriod }}",
                     MeterReader : $("#MeterReader").val(),
+                    Day : $("#Day").val(),
+                    Town : $('#Town').val(),
                 },
                 success : function(result) {
                     $('#res-table tbody tr').remove();
@@ -90,7 +166,7 @@
                     } else {
                         $.each(result, function(index, element) {
                             // ADD TO TABLE
-                            $('#res-table tbody').append(addRowToTable(result[index]['AccountNumber'], result[index]['KwhUsed'], result[index]['ReadingTimestamp']))
+                            $('#res-table tbody').append(addRowToTable(result[index]['AccountNumber'], result[index]['KwhUsed'], result[index]['ReadingTimestamp'], result[index]['SequenceCode']))
 
                             // ADD TO MAP
                             if (jQuery.isEmptyObject(result[index]['Longitude']) | jQuery.isEmptyObject(result[index]['Latitude'])) {
@@ -123,104 +199,88 @@
             })
         }
 
-        function addRowToTable(acctNo, kwhUsed, timestamp) {
+        function addRowToTable(acctNo, kwhUsed, timestamp, sequence) {
             return "<tr>" + 
                     "<td>" + acctNo + "</td>" +
                     "<td>" + kwhUsed + "</td>" +
                     "<td>" + moment(timestamp).format('MMMM DD, Y | h:mm:ss a') + "</td>" +
+                    "<td>" + sequence + "</td>" +
                 "</tr>"
         }
 
         map.on('load', () => {
             loadMapAndAccounts()
-            // $.ajax({
-            //     url : '/meter_reader_tracks/get-tracks-by-tracknameid',
-            //     type : 'GET',
-            //     data : {
-            //         TrackNameId : ""
-            //     }, 
-            //     success : function(res) {
-            //         if (jQuery.isEmptyObject(res)) {
-            //             alert('No tracks recorded in this track set')
-            //         } else {
-            //             var coordinates = [];
-
-            //             $.each(res, function(index, element) {
-            //                 coordinates.push([res[index]['Longitude'], res[index]['Latitude']])
-            //             })
-
-            //             map.addSource('route', {
-            //                 'type': 'geojson',
-            //                 'lineMetrics': true,
-            //                 'data': {
-            //                     'type': 'Feature',
-            //                     'properties': {},
-            //                     'geometry': {
-            //                         'type': 'LineString',
-            //                         'coordinates': coordinates
-            //                     }
-            //                 }
-            //             });
-
-            //             map.addLayer({
-            //                 'id': 'route',
-            //                 'type': 'line',
-            //                 'source': 'route',
-            //                 'layout': {
-            //                     'line-join': 'round',
-            //                     'line-cap': 'round'
-            //                 },
-            //                 'paint': {
-            //                     'line-color': 'red',
-            //                     'line-width': 8,
-            //                     'line-gradient': [
-            //                         'interpolate',
-            //                         ['linear'],
-            //                         ['line-progress'],
-            //                         0,
-            //                         'blue',
-            //                         0.1,
-            //                         'royalblue',
-            //                         0.3,
-            //                         'cyan',
-            //                         0.5,
-            //                         'lime',
-            //                         0.7,
-            //                         'yellow',
-            //                         1,
-            //                         'red'
-            //                     ]
-            //                 }
-            //             });
-
-            //             map.flyTo({
-            //                 center: coordinates[0],
-            //                 zoom: 15,
-            //                 bearing: 0,
-            //                 speed: 1, // make the flying slow
-            //                 curve: 1, // change the speed at which it zooms out
-            //                 easing: (t) => t,
-            //                 essential: true
-            //             });
-
-            //             new mapboxgl.Marker({ color: 'blue', rotation: 45 })
-            //                 .setLngLat(coordinates[0])
-            //                 .addTo(map);
-                        
-            //             new mapboxgl.Marker({ color: 'red', rotation: -45 })
-            //                 .setLngLat(coordinates[coordinates.length-1])
-            //                 .addTo(map);
-            //         }
-            //     },
-            //     error : function(err) {
-            //         alert('Error fetching tracks! Contact support for more.')
-            //         console.log(err)
-            //     }
-            // })
         })
 
+        // FETCH ACCOUNTS
         $('#view-btn').on('click', function() {
+            $('#update-gps').attr('disabled', false)
+            $('#re-seq').attr('disabled', false)
             loadMapAndAccounts()
+        })
+
+        // RE SEQUENCE
+        $('#proceed-resequence').on('click', function() {
+            $.ajax({
+                url : "{{ route('serviceAccounts.re-sequence-accounts') }}",
+                type : 'GET',
+                data : {
+                    ServicePeriod : "{{ $servicePeriod }}",
+                    MeterReader : $("#MeterReader").val(),
+                    Day : $("#Day").val(),
+                    Town : $('#Town').val(),
+                },
+                success : function(res) {
+                    $('#modal-confirm-re-seq').modal('hide')
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Re-Sequencing Successful',
+                        showConfirmButton: false,
+                        timer: 1800
+                    })
+                }, 
+                error : function(err) {
+                    $('#modal-confirm-re-seq').modal('hide')
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'An error occurred during re-sequencing',
+                    })
+                }
+            })            
+        })
+
+        // UPDATE GPS
+        $('#proceed-update-gps').on('click', function() {
+            $.ajax({
+                url : "{{ route('serviceAccounts.update-gps-coordinates') }}",
+                type : 'GET',
+                data : {
+                    ServicePeriod : "{{ $servicePeriod }}",
+                    MeterReader : $("#MeterReader").val(),
+                    Day : $("#Day").val(),
+                    Town : $('#Town').val(),
+                },
+                success : function(res) {
+                    $('#modal-confirm-update-gps').modal('hide')
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'GPS Coordinates Updated Successfully!',
+                        showConfirmButton: false,
+                        timer: 1800
+                    })
+                }, 
+                error : function(err) {
+                    $('#modal-confirm-update-gps').modal('hide')
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'An error occurred during the update',
+                    })
+                }
+            })            
         })
     </script>
 @endpush

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\Readings;
+use App\Models\Towns;
 use Flash;
 use Response;
 
@@ -175,17 +176,28 @@ class ReadingsController extends AppBaseController
 
     public function readingMonitorView($servicePeriod) {
         $meterReaders = User::role('Meter Reader')->orderBy('name')->get();
+        $towns = Towns::orderBy('id')->get();
 
         return view('/readings/reading_monitor_view', [
             'meterReaders' => $meterReaders,
             'servicePeriod' => $servicePeriod,
+            'towns' => $towns,
         ]);
     }
 
     public function getReadingsFromMeterReader(Request $request) {
-        $readings = Readings::where('ServicePeriod', $request['ServicePeriod'])
-            ->where('MeterReader', $request['MeterReader'])
-            ->orderBy('ReadingTimestamp')
+        $readings = DB::table('Billing_Readings')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Readings.MeterReader', $request['MeterReader'])
+            ->where('Billing_Readings.ServicePeriod', $request['ServicePeriod'])
+            ->where('Billing_ServiceAccounts.GroupCode', $request['Day'])
+            ->where('Billing_ServiceAccounts.Town', $request['Town'])
+            ->select('Billing_Readings.AccountNumber',
+                'Billing_Readings.ReadingTimestamp',
+                'Billing_Readings.KwhUsed',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.SequenceCode')
+            ->orderBy('Billing_Readings.ReadingTimestamp')
             ->get();
 
         return response()->json($readings, 200);

@@ -196,6 +196,8 @@ Route::get('/service_accounts/reading-account-grouper', [App\Http\Controllers\Se
 Route::get('/service_accounts/account-grouper-view/{townCode}', [App\Http\Controllers\ServiceAccountsController::class,  'accountGrouperView'])->name('serviceAccounts.account-grouper-view');
 Route::get('/service_accounts/account-grouper-organizer/{townCode}/{groupCode}', [App\Http\Controllers\ServiceAccountsController::class,  'accountGrouperOrganizer'])->name('serviceAccounts.account-grouper-organizer');
 Route::get('/bills/bapa-view-readings/{period}/{bapaName}', [App\Http\Controllers\ServiceAccountsController::class,  'bapaViewReadings'])->name('bills.bapa-view-readings');
+Route::get('/service_accounts/re-sequence-accounts', [App\Http\Controllers\ServiceAccountsController::class,  'reSequenceAccounts'])->name('serviceAccounts.re-sequence-accounts');
+Route::get('/service_accounts/update-gps-coordinates', [App\Http\Controllers\ServiceAccountsController::class,  'updateGPSCoordinates'])->name('serviceAccounts.update-gps-coordinates');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 
@@ -496,6 +498,7 @@ Route::resource('prePaymentBalances', App\Http\Controllers\PrePaymentBalanceCont
 Route::resource('prePaymentTransHistories', App\Http\Controllers\PrePaymentTransHistoryController::class);
 
 
+Route::get('/notifiers/get-notifications', [App\Http\Controllers\NotifiersController::class, 'getNotifications'])->name('notifiers.get-notifications');
 Route::resource('notifiers', App\Http\Controllers\NotifiersController::class);
 
 

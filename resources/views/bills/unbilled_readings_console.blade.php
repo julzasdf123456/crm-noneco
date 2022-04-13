@@ -19,7 +19,7 @@
         <div class="row">
             {{-- ZERO READINGS --}}
             <div class="col-lg-6">
-                <div class="card" style="height: 50vh;">
+                <div class="card" style="height: 80vh;">
                     <div class="card-header border-0">
                         <span class="card-title">Zero Readings ({{ count($zeroReadings) }})</span>
 
@@ -40,7 +40,7 @@
                                 @if (count($zeroReadings) > 0)
                                     @foreach ($zeroReadings as $item)
                                         <tr>
-                                            <td>{{ $item->AccountNumber }}</td>
+                                            <td><a href="{{ route('serviceAccounts.show', [$item->AccountNumber]) }}">{{ $item->AccountNumber }}</a></td>
                                             <td>{{ $item->ServiceAccountName }}</td>
                                             <td>{{ $item->FieldStatus }}</td>
                                             <td>
@@ -57,7 +57,7 @@
 
             {{-- DISCONNECTED ACCOUNTS --}}
             <div class="col-lg-6">
-                <div class="card" style="height: 50vh;">
+                <div class="card" style="height: 80vh;">
                     <div class="card-header border-0">
                         <span class="card-title">Disconnected Account Readings</span>
                     </div>
@@ -68,10 +68,19 @@
                                 <th>Account No</th>
                                 <th>Consumer Name</th>
                                 <th>Status</th>
-                                <th width="8%"></th>
+                                <th>Kwh Used</th>
                             </thead>
                             <tbody>
-                                
+                                @if (count($disconnectedReadings) > 0)
+                                    @foreach ($disconnectedReadings as $item)
+                                        <tr>
+                                            <td><a href="{{ route('serviceAccounts.show', [$item->AccountNumber]) }}">{{ $item->AccountNumber }}</a></td>
+                                            <td>{{ $item->ServiceAccountName }}</td>
+                                            <td>{{ $item->FieldStatus }}</td>
+                                            <td>{{ $item->KwhUsed }}</td>
+                                        </tr>
+                                    @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>

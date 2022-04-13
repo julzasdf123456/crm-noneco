@@ -916,4 +916,56 @@ class ServiceAccountsController extends AppBaseController
             'bapaName' => $bapaName,
         ]);
     }
+
+    public function reSequenceAccounts(Request $request) {
+        $readings = DB::table('Billing_Readings')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Readings.MeterReader', $request['MeterReader'])
+            ->where('Billing_Readings.ServicePeriod', $request['ServicePeriod'])
+            ->where('Billing_ServiceAccounts.GroupCode', $request['Day'])
+            ->where('Billing_ServiceAccounts.Town', $request['Town'])
+            ->select('Billing_Readings.AccountNumber',
+                'Billing_Readings.ReadingTimestamp',
+                'Billing_Readings.KwhUsed',
+                'Billing_ServiceAccounts.ServiceAccountName')
+            ->orderBy('Billing_Readings.ReadingTimestamp')
+            ->get();
+
+        $i = 0;
+        foreach($readings as $item) {
+            $account = ServiceAccounts::find($item->AccountNumber);
+            if ($account != null) {
+                $account->SequenceCode = $i;
+                $account->save();
+            }
+            $i++;
+        }
+
+        return response()->json('ok', 200);
+    }
+
+    public function updateGPSCoordinates(Request $request) {
+        $readings = DB::table('Billing_Readings')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Readings.MeterReader', $request['MeterReader'])
+            ->where('Billing_Readings.ServicePeriod', $request['ServicePeriod'])
+            ->where('Billing_ServiceAccounts.GroupCode', $request['Day'])
+            ->where('Billing_ServiceAccounts.Town', $request['Town'])
+            ->select('Billing_Readings.Latitude',
+                'Billing_Readings.Longitude',
+                'Billing_Readings.AccountNumber')
+            ->orderBy('Billing_Readings.ReadingTimestamp')
+            ->get();
+
+        foreach($readings as $item) {
+            $account = ServiceAccounts::find($item->AccountNumber);
+            if ($account != null) {
+                $account->Latitude = $item->Latitude;
+                $account->Longitude = $item->Longitude;
+                $account->save();
+            }
+        }
+
+        return response()->json('ok', 200);
+    }
 }

@@ -32,7 +32,8 @@
     {{-- CALENDAR --}}
     <link rel="stylesheet" href="https://adminlte.io/themes/v3/plugins/fullcalendar/main.css">
 
-    {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css" integrity="sha512-3JRrEUwaCkFUBLK1N8HehwQgu8e23jTH4np5NHOmQOobuC4ROQxFwFgBLTnhcnQRMs84muMh0PnnwXlPq5MGjg==" crossorigin="anonymous" /> --}}
+    {{-- SWEETALERT2 --}}
+    <link rel="stylesheet" href="{{ URL::asset('css/sweetalert2.min.css'); }} ">
 
     <style>
         :root {
@@ -203,25 +204,11 @@
                     <i class="far fa-bell"></i>
                     <span class="badge badge-warning navbar-badge">15</span>
                 </a>
-                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                    <span class="dropdown-item dropdown-header">15 Notifications</span>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item">
-                        <i class="fas fa-envelope mr-2"></i> 4 new messages
-                        <span class="float-right text-muted text-sm">3 mins</span>
-                    </a>
-                    <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item">
-                        <i class="fas fa-users mr-2"></i> 8 friend requests
-                        <span class="float-right text-muted text-sm">12 hours</span>
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item">
-                        <i class="fas fa-file mr-2"></i> 3 new reports
-                        <span class="float-right text-muted text-sm">2 days</span>
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
+                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right" id="notifier-bin">
+                    {{-- <span class="dropdown-item dropdown-header">15 Notifications</span> --}}
+                    <span>
+                        
+                    </span>                    
                 </div>
             </li>
             <li class="nav-item">
@@ -229,11 +216,6 @@
                     <i class="fas fa-expand-arrows-alt"></i>
                 </a>
             </li>
-            {{-- <li class="nav-item">
-              <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
-                <i class="fas fa-th-large"></i>
-              </a>
-            </li> --}}
         </ul>
 
         <ul class="navbar-nav">
@@ -332,6 +314,8 @@
 <script src="https://adminlte.io/themes/v3/plugins/jquery-ui/jquery-ui.min.js"></script>
 <script src="https://adminlte.io/themes/v3/plugins/fullcalendar/main.js"></script>
 
+{{-- SWEETALERT2 --}}
+<script src="{{ URL::asset('js/sweetalert2.all.min.js'); }}"></script>
 
 {{-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script> --}}
 {{--  --}}
@@ -424,7 +408,27 @@
                 
             }
         });
+
+        /**
+         * NOTIFICATIONS
+         **/
+        window.setInterval(getNotifications(), 2000)
+        
     });
+
+    function getNotifications() {
+        $.ajax({
+            url : "{{ route('notifiers.get-notifications') }}",
+            type : 'GET',
+            success : function(res) {
+                $('#notifier-bin span').remove()
+                $('#notifier-bin').append('<span>' + res + '</span>')
+            },
+            error : function(err) {
+                console.log('Error getting notifs')
+            }
+        })
+    }
 
     /**
      * FUNCTIONS
