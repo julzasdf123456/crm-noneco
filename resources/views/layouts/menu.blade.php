@@ -782,6 +782,13 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-map-marked-alt nav-icon"></i><p>Station Crews</p>
                 </a>
             </li>
+            
+            <li class="nav-item">
+                <a href="{{ route('rateItems.index') }}"
+                class="nav-link {{ Request::is('rateItems*') ? 'active' : '' }}">
+                <i class="fas fa-circle nav-icon"></i><p>Rate Items</p>
+                </a>
+            </li>
         </ul>
     </li>
 @endcanany
@@ -822,5 +829,7 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
+
+
 
 

@@ -528,3 +528,6 @@ Route::resource('bAPAPayments', App\Http\Controllers\BAPAPaymentsController::cla
 
 
 Route::resource('distributionSystemLosses', App\Http\Controllers\DistributionSystemLossController::class);
+
+
+Route::resource('rateItems', App\Http\Controllers\RateItemsController::class);

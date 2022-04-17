@@ -224,7 +224,7 @@ class KwhSalesController extends AppBaseController
     }
 
     public function salesDistributionView($period) {
-        $data = DB::table('CRM_Towns AS t')
+        $allData = DB::table('CRM_Towns AS t')
             ->select('t.Town',
                 DB::raw("(SELECT COUNT(b.id) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON b.AccountNumber=sa.id WHERE sa.Town=t.id AND b.ServicePeriod='" . $period . "') AS ConsumerCount"),
                 DB::raw("(SELECT SUM(CAST(b.KwhUsed AS decimal(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON b.AccountNumber=sa.id WHERE sa.Town=t.id AND b.ServicePeriod='" . $period . "' AND b.ConsumerType IN ('RESIDENTIAL', 'RURAL RESIDENTIAL', 'BAPA')) AS Residentials"),
@@ -233,7 +233,8 @@ class KwhSalesController extends AppBaseController
                 DB::raw("(SELECT SUM(CAST(b.KwhUsed AS decimal(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON b.AccountNumber=sa.id WHERE sa.Town=t.id AND b.ServicePeriod='" . $period . "' AND b.ConsumerType IN ('INDUSTRIAL', 'INDUSTRIAL HIGH VOLTAGE')) AS Industrial"),
                 DB::raw("(SELECT SUM(CAST(b.KwhUsed AS decimal(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON b.AccountNumber=sa.id WHERE sa.Town=t.id AND b.ServicePeriod='" . $period . "' AND b.ConsumerType IN ('PUBLIC BUILDING', 'PUBLIC BUILDING HIGH VOLTAGE')) AS PublicBldg"),
                 DB::raw("(SELECT SUM(CAST(b.KwhUsed AS decimal(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON b.AccountNumber=sa.id WHERE sa.Town=t.id AND b.ServicePeriod='" . $period . "' AND b.ConsumerType IN ('STREET LIGHTS')) AS Streetlights"),
-                DB::raw("(SELECT SUM(CAST(b.KwhUsed AS decimal(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON b.AccountNumber=sa.id WHERE sa.Town=t.id AND b.ServicePeriod='" . $period . "') AS TotalKwhused"),
+                DB::raw("(SELECT SUM(CAST(b.KwhUsed AS decimal(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON b.AccountNumber=sa.id WHERE sa.Town=t.id AND b.ServicePeriod='" . $period . "' AND b.ConsumerType IN ('COMMERCIAL HIGH VOLTAGE', 'INDUSTRIAL HIGH VOLTAGE', 'PUBLIC BUILDING HIGH VOLTAGE')) AS DemandKwh"),
+                DB::raw("(SELECT SUM(CAST(b.KwhUsed AS decimal(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON b.AccountNumber=sa.id WHERE sa.Town=t.id AND b.ServicePeriod='" . $period . "' AND b.ConsumerType IN ('COMMERCIAL', 'INDUSTRIAL', 'PUBLIC BUILDING', 'IRRIGATION/WATER SYSTEMS')) AS LowVoltKwh"),
                 DB::raw("(SELECT SUM(CAST(b.KwhUsed AS decimal(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON b.AccountNumber=sa.id WHERE sa.Town=t.id AND b.ServicePeriod='" . $period . "') AS KwhSold"),
                 DB::raw("(SELECT SUM(CAST(b.NetAmount AS decimal(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON b.AccountNumber=sa.id WHERE sa.Town=t.id AND b.ServicePeriod='" . $period . "') AS TotalAmount"),
                 DB::raw("(SELECT SUM(CAST(b.MissionaryElectrificationCharge AS decimal(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON b.AccountNumber=sa.id WHERE sa.Town=t.id AND b.ServicePeriod='" . $period . "') AS Missionary"),
@@ -253,8 +254,12 @@ class KwhSalesController extends AppBaseController
             ->orderBy("t.id")
             ->get();
 
+        $sales = DistributionSystemLoss::where('ServicePeriod', $period)->first();
+
         return view('/kwh_sales/sales_distribution_view', [
             'period' => $period,
+            'allData' => $allData,
+            'sales' => $sales,
         ]);
     }
 }
