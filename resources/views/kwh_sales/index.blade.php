@@ -36,19 +36,21 @@
                     <table class="table table-hover">
                         <thead>
                             <th>Billing Month</th>
-                            <th>Total No. of Consumers</th>
-                            <th>Total Kwh Sales</th>
                             <th>Total Demand</th>
+                            <th>Total Kwh Sales</th>
+                            <th>System Loss</th>
                             <th></th>
                         </thead>
                         <tbody>
                             @foreach ($kwhSales as $item)
                                 <tr>
                                     <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
-                                    <td>{{ number_format($item->TotalConsumers) }}</td>
-                                    <td>{{ number_format($item->ConsumedKwh, 2) }}</td>
-                                    <td>{{ number_format($item->BilledKwh, 2) }}</td>
-                                    <td></td>
+                                    <td>{{ number_format($item->TotalEnergyInput, 2) }}</td>
+                                    <td>{{ number_format($item->TotalEnergyOutput, 2) }}</td>
+                                    <td>{{ number_format($item->TotalSystemLoss, 2) }} ({{ number_format($item->TotalSystemLossPercentage, 2) }}%)</td>
+                                    <td>
+                                        <a href="{{ route('kwhSales.view-sales', [$item->id]) }}"><i class="fas fa-eye"></i></a>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

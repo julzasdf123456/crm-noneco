@@ -1,10 +1,3 @@
-@php
-    // GET PREVIOUS MONTHS
-    for ($i = 0; $i <= 12; $i++) {
-        $months[] = date("Y-m-01", strtotime( date( 'Y-m-01' )." -$i months"));
-    }
-@endphp
-
 @extends('layouts.app')
 
 @section('content')
@@ -19,49 +12,122 @@
 </section>
 
 <div class="row">
-    <div class="col-lg-12">
+    {{-- <div class="col-lg-3">
         <div class="card">
-            {!! Form::open(['route' => 'kwhSales.save-sales-report']) !!}
-            <div class="card-header border-0">
-                <span class="card-title">Sales Report for {{ date('F Y', strtotime($period)) }}</span>
+            <div class="card-header">
+                <span class="card-title">Settings</span>
             </div>
             <div class="card-body">
-                <table class="table table-hover">
-                    <thead>
-                        <th>Area</th>
-                        <th class="text-right">No. of Consumers</th>
-                        <th class="text-right">KWH Consumed</th>
-                        <th>Demand KWH</th>
-                    </thead>
-                    <tbody>
-                        @foreach ($data as $item)
-                        <tr>
-                            <td>
-                                {{ $item->Town }}
-                                <input type="hidden" name="ServicePeriod[]" value="{{ $period }}">
-                                <input type="hidden" name="Town[]" value="{{ $item->id }}">
-                            </td>
-                            <th class="text-right">
-                                {{ number_format($item->ConsumerCount) }}
-                                <input type="hidden" step="any" class="form-control" name="NoOfConsumers[]" placeholder="No. of Consumers" readonly="true" value="{{ $item->ConsumerCount }}">
-                            </th>
-                            <th class="text-right">
-                                {{ number_format($item->TotalKwhConsumption, 2) }}
-                                <input type="hidden" step="any" class="form-control" name="ConsumedKwh[]" placeholder="KWH Consumed" readonly="true" value="{{ $item->TotalKwhConsumption }}">
-                            </th>
-                            <td>
-                                <input type="number" step="any" class="form-control" name="BilledKwh[]" placeholder="Billed KWH">
-                            </td>
-                        </tr>
-                    @endforeach
-                    </tbody>
-                </table>
+
+            </div>
+        </div>
+    </div> --}}
+
+    <div class="col-lg-8 offset-lg-2">
+        {!! Form::open(['route' => 'distributionSystemLosses.store']) !!}
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    @include('distribution_system_losses.fields')
+                </div>
             </div>
             <div class="card-footer">
-                <button type="submit" class="btn btn-primary">Save</button>
+                {!! Form::submit('Save', ['class' => 'btn btn-primary']) !!}
+                <a href="{{ route('distributionSystemLosses.index') }}" class="btn btn-default">Cancel</a>
             </div>
-            {!! Form::close() !!}
         </div>
+        {!! Form::close() !!}   
     </div>
 </div>
 @endsection
+
+@push('page_scripts')
+    <script>
+        $(document).ready(function() {
+            getAllTotals()
+
+            $('#CalatravaSubstation').keyup(function() {
+                getAllTotals()
+            })
+            $('#VictoriasSubstation').keyup(function() {
+                getAllTotals()
+            })
+            $('#SagaySubstation').keyup(function() {
+                getAllTotals()
+            })
+            $('#SanCarlosSubstation').keyup(function() {
+                getAllTotals()
+            })
+            $('#EscalanteSubstation').keyup(function() {
+                getAllTotals()
+            })
+            $('#LopezSubstation').keyup(function() {
+                getAllTotals()
+            })
+            $('#CadizSubstation').keyup(function() {
+                getAllTotals()
+            })
+            $('#IpiSubstation').keyup(function() {
+                getAllTotals()
+            })
+            $('#TobosoCalatravaSubstation').keyup(function() {
+                getAllTotals()
+            })
+            $('#VictoriasMillingCompany').keyup(function() {
+                getAllTotals()
+            })
+            $('#SanCarlosBionergy').keyup(function() {
+                getAllTotals()
+            })
+            $('#EnergySales').keyup(function() {
+                getAllTotals()
+            })
+            $('#EnergyAdjustmentRecoveries').keyup(function() {
+                getAllTotals()
+            })
+        })
+
+        function getAllTotals() {
+            var totalInputSubs = getNumVal($('#CalatravaSubstation').val()) +
+                getNumVal($('#VictoriasSubstation').val()) +
+                getNumVal($('#SagaySubstation').val()) +
+                getNumVal($('#SanCarlosSubstation').val()) +
+                getNumVal($('#EscalanteSubstation').val()) +
+                getNumVal($('#LopezSubstation').val()) +
+                getNumVal($('#CadizSubstation').val()) +
+                getNumVal($('#IpiSubstation').val()) +
+                getNumVal($('#TobosoCalatravaSubstation').val())
+
+            var totalInputGenerators = getNumVal($('#VictoriasMillingCompany').val()) +
+                getNumVal($('#SanCarlosBionergy').val())
+
+            var totalEnergyOutput = getNumVal($('#EnergySales').val()) +
+                getNumVal($('#EnergyAdjustmentRecoveries').val())
+
+            var totalInputAll = totalInputGenerators + totalInputSubs
+
+            var totalSystemLoss = totalInputAll - totalEnergyOutput
+            var systemLossPercentage = (totalSystemLoss / totalInputAll) * 100
+            
+            $('#totalInputDelivered').val(totalInputSubs)
+            $('#generators').val(totalInputGenerators)
+            $('#TotalEnergyInput').val(totalInputAll)
+            $('#TotalEnergyOutput').val(totalEnergyOutput)
+            $('#TotalSystemLoss').val(totalSystemLoss.toFixed(2))
+            $('#TotalSystemLossPercentage').val(systemLossPercentage.toFixed(2))
+        }
+
+        function getNumVal(item) {
+            if (parseFloat(item)) {
+                if (jQuery.isEmptyObject(item)) {
+                    return 0
+                } else {
+                    return parseFloat(item)
+                }
+            } else {
+                return 0
+            }
+            
+        }
+    </script>
+@endpush

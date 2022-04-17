@@ -602,6 +602,12 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-plug nav-icon text-primary"></i><p>KWH Sales</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('kwhSales.sales-distribution') }}"
+                   class="nav-link {{ Request::is('kwhSales.sales-distribution*') ? 'active' : '' }}">                   
+                   <i class="fas fa-file nav-icon text-primary"></i><p>Sales Distribution</p>
+                </a>
+            </li>
         </ul>
     </li>
 @endcanany
@@ -816,3 +822,5 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
+
+

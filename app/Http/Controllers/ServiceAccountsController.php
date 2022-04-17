@@ -191,7 +191,7 @@ class ServiceAccountsController extends AppBaseController
             ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
             ->where('Billing_Bills.AccountNumber', $id)
-            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->pluck('Cashier_PaidBills.ObjectSourceId'))
+            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('AccountNumber', $id)->pluck('ObjectSourceId'))
             ->select('Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.AccountCount',
@@ -212,7 +212,7 @@ class ServiceAccountsController extends AppBaseController
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
             ->where('Billing_Bills.AccountNumber', $id)
             ->whereNull('Billing_Bills.MergedToCollectible')
-            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->pluck('Cashier_PaidBills.ObjectSourceId'))
+            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('AccountNumber', $id)->pluck('Cashier_PaidBills.ObjectSourceId'))
             ->select('Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.AccountCount',

@@ -487,6 +487,10 @@ Route::resource('oRAssignings', App\Http\Controllers\ORAssigningController::clas
 
 Route::post('/kwh_sales/generate-new/', [App\Http\Controllers\KwhSalesController::class, 'generateNew'])->name('kwhSales.generate-new');
 Route::post('/kwh_sales/save-sales-report', [App\Http\Controllers\KwhSalesController::class, 'saveSalesReport'])->name('kwhSales.save-sales-report');
+Route::get('/kwh_sales/view-sales/{id}', [App\Http\Controllers\KwhSalesController::class, 'viewSales'])->name('kwhSales.view-sales');
+Route::get('/kwh_sales/print-report/{id}', [App\Http\Controllers\KwhSalesController::class, 'printReport'])->name('kwhSales.print-report');
+Route::get('/kwh_sales/sales-distribution', [App\Http\Controllers\KwhSalesController::class, 'salesDistribution'])->name('kwhSales.sales-distribution');
+Route::get('/kwh_sales/sales-distribution-view/{period}', [App\Http\Controllers\KwhSalesController::class, 'salesDistributionView'])->name('kwhSales.sales-distribution-view');
 Route::resource('kwhSales', App\Http\Controllers\KwhSalesController::class);
 
 
@@ -521,3 +525,6 @@ Route::resource('bAPAReadingSchedules', App\Http\Controllers\BAPAReadingSchedule
 
 
 Route::resource('bAPAPayments', App\Http\Controllers\BAPAPaymentsController::class);
+
+
+Route::resource('distributionSystemLosses', App\Http\Controllers\DistributionSystemLossController::class);
