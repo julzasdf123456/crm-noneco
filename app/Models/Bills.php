@@ -510,6 +510,7 @@ class Bills extends Model
     public static function computeRegularBill($account, $billId, $kwh, $prev, $pres, $period, $readDate, $additionalCharges, $deductions, $is2307) {
         $rate = Rates::where('ConsumerType', $account->AccountType)
             ->where('ServicePeriod', $period)
+            ->where('AreaCode', $account->Town)
             ->first();
 
         $meter = DB::table('Billing_Meters')

@@ -36,7 +36,12 @@
                 {{-- AREA --}}
                 <div class="form-group col-lg-2">
                     <label for="route">Route</label>
-                    <input type="text" id="route" class="form-control">
+                    {{-- <input type="text" id="route" class="form-control"> --}}
+                    <select id="route" class="form-control">
+                        @foreach ($towns as $item)
+                            <option value="{{ $item->id }}">{{ $item->Town }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 {{-- BUTTONS --}}

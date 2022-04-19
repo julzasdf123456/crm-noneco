@@ -86,6 +86,7 @@ class TicketsController extends AppBaseController
                     'Billing_Meters.Brand',
                     'Billing_ServiceAccounts.Latitude',
                     'Billing_ServiceAccounts.Longitude')
+                ->orderByDesc('Billing_Meters.created_at')
                 ->first();
             
             if ($accountMeterInfo != null) {
@@ -1572,8 +1573,9 @@ class TicketsController extends AppBaseController
         $disconnectionList = DB::table('Billing_Bills')
             ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
             ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('Cashier_PaidBills.ServicePeriod', $period)->pluck('Cashier_PaidBills.ObjectSourceId'))
+            ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM CRM_Tickets WHERE ServicePeriod='" . $period . "' AND Ticket='" . Tickets::getDisconnectionDelinquencyId() . "')")
             ->where('Billing_Bills.ServicePeriod', $period)
-            ->where('Billing_ServiceAccounts.AreaCode', $route)
+            ->where('Billing_ServiceAccounts.Town', $route)
             ->whereRaw('DATEDIFF(dd, Billing_Bills.BillingDate, GETDATE()) > ?', [DisconnectionHistory::noOfDaysTillDisconnection()])
             ->where('Billing_ServiceAccounts.AccountStatus', 'ACTIVE')
             ->select('Billing_Bills.id as BillId',
@@ -1630,8 +1632,9 @@ class TicketsController extends AppBaseController
         $disconnectionList = DB::table('Billing_Bills')
             ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
             ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('Cashier_PaidBills.ServicePeriod', $period)->pluck('Cashier_PaidBills.ObjectSourceId'))
+            ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM CRM_Tickets WHERE ServicePeriod='" . $period . "' AND Ticket='" . Tickets::getDisconnectionDelinquencyId() . "')")
             ->where('Billing_Bills.ServicePeriod', $period)
-            ->where('Billing_ServiceAccounts.AreaCode', $route)
+            ->where('Billing_ServiceAccounts.Town', $route)
             ->whereRaw('DATEDIFF(dd, Billing_Bills.BillingDate, GETDATE()) > ?', [DisconnectionHistory::noOfDaysTillDisconnection()])
             ->where('Billing_ServiceAccounts.AccountStatus', 'ACTIVE')
             ->select('Billing_Bills.id as BillId',

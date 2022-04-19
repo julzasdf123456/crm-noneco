@@ -135,7 +135,7 @@
                                 <h3>{{ $tickets->ConsumerName }}</h3>
                                 <div class="row">
                                     <span class="col-lg-4 text-muted"><i class="fas fa-location-arrow ico-tab"></i>{{ Tickets::getAddress($tickets) }}</span><br>
-                                    <span class="col-lg-4 text-muted text-center" title="Account Number"><i class="fas fa-user-circle ico-tab"></i>{{ $tickets->AccountNumber }}</span><br>
+                                    <span class="col-lg-4 text-muted text-center" title="Account Number"><i class="fas fa-user-circle ico-tab"></i><a href="{{ route('serviceAccounts.show', [$tickets->AccountNumber]) }}">{{ $tickets->AccountNumber }}</a></span><br>
                                     <span class="col-lg-4 text-muted text-right" title="Contact Number"><i class="fas fa-phone-alt ico-tab"></i>{{ $tickets->ContactNumber }}</span><br>
                                 </div>
                                     

@@ -217,7 +217,7 @@ class Rates extends Model
 
     public static function floatRate($rate) {
         if ($rate != null) {
-            return floatval($rate);
+            return round(floatval($rate), 4);
         } else {
             return 0;
         }

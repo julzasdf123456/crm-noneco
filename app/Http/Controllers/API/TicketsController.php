@@ -8,7 +8,12 @@ use App\Models\Tickets;
 use App\Models\TicketLogs;
 use App\Models\IDGenerator;
 use App\Models\ServiceConnectionCrew;
+use App\Models\ServiceAccounts;
+use App\Models\DisconnectionHistory;
 use Illuminate\Support\Facades\DB;
+use App\Models\BillingMeters;
+use App\Models\Bills;
+use App\Models\ChangeMeterLogs;
 use Validator;
 
 class TicketsController extends Controller {
@@ -79,6 +84,7 @@ class TicketsController extends Controller {
             $tickets->NewMeterBrand = $request['NewMeterBrand'];
             $tickets->NewMeterNo = $request['NewMeterNo'];
             $tickets->NewMeterReading = $request['NewMeterReading'];
+            $tickets->PercentError = $request['PercentError'];
             $tickets->save();
 
             // CREATE LOG
@@ -89,6 +95,143 @@ class TicketsController extends Controller {
             $ticketLog->LogDetails = $tickets->Notes;
             $ticketLog->UserId = $request['UserId'];
             $ticketLog->save();
+
+            // FILTER TICKETS
+            if ($tickets->Ticket == Tickets::getDisconnectionDelinquencyId()) {
+                /*
+                 * -----------------------
+                 * FOR DISCONNECTION
+                 * -----------------------
+                 */
+                // UPDATE ACCOUNT
+                $account = ServiceAccounts::find($tickets->AccountNumber);
+
+                if ($account != null) {
+                    $account->AccountStatus = 'DISCONNECTED';
+                    $account->DateDisconnected = date('Y-m-d', strtotime($tickets->DateTimeLinemanExecuted));
+                    $account->save();
+
+                    // CREATE DISCONNECTION HISTORY
+                    $discoHist = new DisconnectionHistory;
+                    $discoHist->id = IDGenerator::generateIDandRandString();
+                    $discoHist->AccountNumber = $account->id;
+                    $discoHist->ServicePeriod = $tickets->ServicePeriod;
+                    $discoHist->Latitude = $account->Latitude;
+                    $discoHist->Longitude = $account->Longitude;
+                    $discoHist->Status = 'DISCONNECTED';
+                    $discoHist->UserId = $request['UserId'];
+                    $discoHist->DateDisconnected = date('Y-m-d', strtotime($tickets->DateTimeLinemanExecuted));
+                    $discoHist->TimeDisconnected = date('H:i:s', strtotime($tickets->DateTimeLinemanExecuted));
+                    $discoHist->save();
+                }
+            } else if ($tickets->Ticket == Tickets::getChangeMeter()) {
+                /**
+                 * -----------------------
+                 * FOR CHANGE METERS
+                 * -----------------------
+                 */
+                // SAVE NEW METER
+                $meter = new BillingMeters;
+                $meter->id = IDGenerator::generateIDandRandString();
+                $meter->ServiceAccountId = $tickets->AccountNumber;
+                $meter->SerialNumber = $tickets->NewMeterNo;
+                $meter->Brand = $tickets->NewMeterBrand;
+                $meter->Multiplier = "1";
+                $meter->InitialReading = $tickets->NewMeterReading;
+                $meter->save();
+
+                if ($tickets->PercentError=='FOR AVERAGING') {
+                    // ------------------------------------
+                    // 1. GET LATEST BILL
+                    $latestBill = Bills::where('AccountNumber', $tickets->AccountNumber)
+                        ->orderByDesc('ServicePeriod')
+                        ->first();
+
+                    if ($latestBill != null) {
+                        // ------------------------------------
+                        // 2. AVERAGE LATEST BILLS
+                        $latestBills = Bills::where('AccountNumber', $tickets->AccountNumber)
+                        ->orderByDesc('ServicePeriod')
+                        ->limit(3)
+                        ->get();
+
+                        $averageKwh = 0;
+                        foreach($latestBills as $item) {
+                            $averageKwh += floatval($item->KwhUsed);
+                        }
+                        $averageKwh = $averageKwh/count($latestBills);
+                        
+                        // ------------------------------------
+                        // 3. COMPUTE DAYS INCURED
+                        $lastReadingDate = strtotime($latestBill->BillingDate);
+                        $now = strtotime($tickets->DateTimeLinemanExecuted);
+                        $daysIncured = $now - $lastReadingDate;
+                        $daysIncured = round($daysIncured / (60 * 60 * 24));
+
+                        // ------------------------------------
+                        // 4. GET DAILY AVERAGE
+                        $averageDaily = ($averageKwh/30) * $daysIncured;
+
+                        // ------------------------------------
+                        // 5. CREATE CHANGE METER LOGS
+                        $changeMeterLogs = new ChangeMeterLogs;
+                        $changeMeterLogs->id = IDGenerator::generateIDandRandString();
+                        $changeMeterLogs->AccountNumber = $tickets->AccountNumber;
+                        $changeMeterLogs->OldMeterSerial = $tickets->CurrentMeterNo;
+                        $changeMeterLogs->NewMeterSerial = $tickets->NewMeterNo;
+                        $changeMeterLogs->PullOutReading = $tickets->NewMeterReading;   
+                        $changeMeterLogs->AdditionalKwhForNextBilling = round($averageDaily, 2);
+                        $changeMeterLogs->ServicePeriod = date('Y-m-01', strtotime($latestBill->ServicePeriod . ' +1 month')); 
+                        $changeMeterLogs->save(); 
+                    } else {
+                        $svPeriod = date('Y-m-01');
+
+                        $changeMeterLogs = new ChangeMeterLogs;
+                        $changeMeterLogs->id = IDGenerator::generateIDandRandString();
+                        $changeMeterLogs->AccountNumber = $tickets->AccountNumber;
+                        $changeMeterLogs->OldMeterSerial = $tickets->CurrentMeterNo;
+                        $changeMeterLogs->NewMeterSerial = $tickets->NewMeterNo;
+                        $changeMeterLogs->PullOutReading = $tickets->NewMeterReading;   
+                        $changeMeterLogs->AdditionalKwhForNextBilling = $tickets->NewMeterReading;
+                        $changeMeterLogs->ServicePeriod = $svPeriod; 
+                        $changeMeterLogs->save(); 
+                    }                    
+                } else {
+                    // ------------------------------------
+                    // 1. GET LATEST BILL
+                    $latestBill = Bills::where('AccountNumber', $tickets->AccountNumber)
+                        ->orderByDesc('ServicePeriod')
+                        ->first();
+
+                    if ($latestBill != null) {
+                        // ------------------------------------
+                        // 2. Get KWH Difference
+                        $dif = floatval($tickets->NewMeterReading) - floatval($latestBill->KwhUsed);
+
+                        $changeMeterLogs = new ChangeMeterLogs;
+                        $changeMeterLogs->id = IDGenerator::generateIDandRandString();
+                        $changeMeterLogs->AccountNumber = $tickets->AccountNumber;
+                        $changeMeterLogs->OldMeterSerial = $tickets->CurrentMeterNo;
+                        $changeMeterLogs->NewMeterSerial = $tickets->NewMeterNo;
+                        $changeMeterLogs->PullOutReading = $tickets->NewMeterReading;   
+                        $changeMeterLogs->AdditionalKwhForNextBilling = round($dif, 2);
+                        $changeMeterLogs->ServicePeriod = date('Y-m-01', strtotime($latestBill->ServicePeriod . ' +1 month')); 
+                        $changeMeterLogs->save(); 
+                    } else {
+                        $svPeriod = date('Y-m-01');
+
+                        $changeMeterLogs = new ChangeMeterLogs;
+                        $changeMeterLogs->id = IDGenerator::generateIDandRandString();
+                        $changeMeterLogs->AccountNumber = $tickets->AccountNumber;
+                        $changeMeterLogs->OldMeterSerial = $tickets->CurrentMeterNo;
+                        $changeMeterLogs->NewMeterSerial = $tickets->NewMeterNo;
+                        $changeMeterLogs->PullOutReading = $tickets->NewMeterReading;   
+                        $changeMeterLogs->AdditionalKwhForNextBilling = $tickets->NewMeterReading;
+                        $changeMeterLogs->ServicePeriod = $svPeriod; 
+                        $changeMeterLogs->save(); 
+                    }
+                }
+            }
         }
 
         return response()->json($tickets, $this->successStatus);

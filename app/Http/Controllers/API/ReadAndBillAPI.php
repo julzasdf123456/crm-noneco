@@ -101,6 +101,7 @@ class ReadAndBillAPI extends Controller {
                 DB::raw("(SELECT TOP 1 CAST(ReadingTimestamp AS DATE) FROM Billing_Readings WHERE ServicePeriod='" . $prevMonth . "' AND AccountNumber=Billing_ServiceAccounts.id) AS ReadingTimestamp"),
                 DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE AccountNumber=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterSerial"),
                 DB::raw("(SELECT TOP 1 Balance FROM Billing_PrePaymentBalance WHERE AccountNumber=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS Deposit"),
+                DB::raw("(SELECT TOP 1 AdditionalKwhForNextBilling FROM Billing_ChangeMeterLogs WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $request['ServicePeriod'] . "') AS ChangeMeterAdditionalKwh"),
                 DB::raw("(SELECT SUM(CAST(NetAmount AS DECIMAL(10, 2))) FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND MergedToCollectible IS NULL AND id NOT IN (SELECT ObjectSourceId FROM Cashier_PaidBills WHERE AccountNumber=Billing_Bills.id)) AS ArrearsTotal"),
                 DB::raw("'" . date('Y-m-d', strtotime($request['ServicePeriod'])) . "' AS ServicePeriod"))
             ->get();
@@ -137,7 +138,7 @@ class ReadAndBillAPI extends Controller {
         
         if ($readings != null) {
             // update
-            $reading = Readings::update($request->all(), $readings->id);
+            // $reading = Readings::update($request->all(), $readings->id);
         } else {
             //create
             $reading = Readings::create($input);
@@ -218,7 +219,7 @@ class ReadAndBillAPI extends Controller {
                 }
             }
             
-            $bill = Bills::update($request->all(), $bills->id);
+            // $bill = Bills::update($request->all(), $bills->id);
         } else {
             //create
             if ($prepaymentBalance != null) {
@@ -407,5 +408,15 @@ class ReadAndBillAPI extends Controller {
         } else {
             return response()->json([], 404);
         }       
+    }
+
+    public function updateBapaSchedule(Request $request) {
+        $id = $request['id'];
+
+        $bapaSched = BAPAReadingSchedules::find($id);
+        $bapaSched->Status = 'Downloaded';
+        $bapaSched->save();
+
+        return response()->json($bapaSched, 200);
     }
 }

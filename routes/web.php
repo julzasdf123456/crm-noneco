@@ -531,3 +531,6 @@ Route::resource('distributionSystemLosses', App\Http\Controllers\DistributionSys
 
 
 Route::resource('rateItems', App\Http\Controllers\RateItemsController::class);
+
+
+Route::resource('changeMeterLogs', App\Http\Controllers\ChangeMeterLogsController::class);

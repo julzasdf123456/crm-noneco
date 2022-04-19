@@ -17,46 +17,13 @@ class DisconnectionAPI extends Controller {
     public $successStatus = 200;
 
     public function getDisconnectionList(Request $request) {
-        // $disconnectionList = DB::table('Billing_Bills')
-        //     ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
-        //     ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('Cashier_PaidBills.ServicePeriod', $request['ServicePeriod'])->pluck('Cashier_PaidBills.ObjectSourceId'))
-        //     ->where('Billing_Bills.ServicePeriod', $request['ServicePeriod'])
-        //     ->where('Billing_ServiceAccounts.AreaCode', $request['Area'])
-        //     ->whereRaw('DATEDIFF(dd, Billing_Bills.BillingDate, GETDATE()) > ?', [DisconnectionHistory::noOfDaysTillDisconnection()])
-        //     ->where('Billing_ServiceAccounts.AccountStatus', 'ACTIVE')
-        //     ->select('Billing_Bills.id as BillId',
-        //         'Billing_ServiceAccounts.id AS AccountNumber',
-        //         'Billing_ServiceAccounts.ServiceAccountName',
-        //         'Billing_ServiceAccounts.AccountStatus',
-        //         'Billing_ServiceAccounts.Town',
-        //         'Billing_ServiceAccounts.Barangay',
-        //         'Billing_ServiceAccounts.Purok',
-        //         'Billing_ServiceAccounts.AreaCode',
-        //         'Billing_ServiceAccounts.GroupCode',
-        //         'Billing_ServiceAccounts.Latitude',
-        //         'Billing_ServiceAccounts.Longitude',
-        //         'Billing_ServiceAccounts.SequenceCode',
-        //         'Billing_Bills.KwhUsed',
-        //         'Billing_Bills.EffectiveRate',
-        //         'Billing_Bills.NetAmount',
-        //         'Billing_Bills.AdditionalCharges',
-        //         'Billing_Bills.Deductions',
-        //         'Billing_Bills.BillingDate',
-        //         'Billing_Bills.ServiceDateFrom',
-        //         'Billing_Bills.ServiceDateTo',
-        //         'Billing_Bills.DueDate',
-        //         'Billing_Bills.ConsumerType',
-        //         'Billing_Bills.MeterNumber',
-        //         'Billing_Bills.ServicePeriod',
-        //         'Billing_Bills.BillNumber')
-        //     ->get();
         $disconnectionList = DB::table('CRM_Tickets')
             ->leftJoin('Billing_ServiceAccounts', 'CRM_Tickets.AccountNumber', '=', 'Billing_ServiceAccounts.id')
             ->leftJoin('CRM_Barangays', 'CRM_Tickets.Barangay', '=', 'CRM_Barangays.id')
             ->leftJoin('CRM_Towns', 'CRM_Tickets.Town', '=', 'CRM_Towns.id')
             ->where('CRM_Tickets.Ticket', Tickets::getDisconnectionDelinquencyId())
             ->where('CRM_Tickets.Status', 'Received')
-            ->where('CRM_Tickets.Office', env('APP_LOCATION'))
+            ->where('CRM_Tickets.Office', $request['Office'])
             ->whereNotNull('CRM_Tickets.ServicePeriod')
             ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'CRM_Tickets.id as TicketId',
