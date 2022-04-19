@@ -178,24 +178,7 @@
         <ul class="navbar-nav ml-auto">
             <!-- Navbar Search -->
             <li class="nav-item">
-                <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-                    <i class="fas fa-search"></i>
-                </a>
-                <div class="navbar-search-block">
-                    <form class="form-inline">
-                        <div class="input-group input-group-sm">
-                            <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
-                            <div class="input-group-append">
-                                <button class="btn btn-navbar" type="submit">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                                <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+                <button class="btn btn-link text-primary" title="Search Consumer"  data-toggle="modal" data-target="#modal-search-main"><i class="fas fa-search ico-tab"></i></button> 
             </li>
     
             <!-- Notifications Dropdown Menu -->
@@ -271,6 +254,46 @@
         </div>
         CRM &copy; @php echo date('Y') @endphp <strong class="badge badge-danger">Developer's Preview</strong>
     </footer>
+</div>
+
+{{-- MODAL FOR SEARCHING OF CONSUMERS --}}
+<div class="modal fade" id="modal-search-main" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Search Consumer</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {{-- SEARCH --}}
+                <div class="row">                    
+                    <div class="form-group col-lg-8 offset-lg-1">
+                        <input type="text" id="search-global" placeholder="Account Number, Account Name, or Meter Number" class="form-control" autofocus="true">
+                    </div>
+                    <div class="form-group col-lg-1">
+                        <button id="search-consumer-global" class="btn btn-primary"><i class="fas fa-search-dollar"></i></button>
+                    </div>
+                </div>
+
+                {{-- RESULTS --}}
+                <p class="text-muted"><i id="count">Results</i></p>
+                <table class="table table-sm table-hover" id="res-table-global">
+                    <thead>
+                        <th>Account Number</th>
+                        <th>Account Name</th>
+                        <th>Address</th>
+                        <th>Status</th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
@@ -414,6 +437,21 @@
          **/
         window.setInterval(getNotifications(), 2000)
         
+        /**
+         * SEARCH ACCOUNTS
+         **/ 
+         $('#search-global').keyup(function() {
+            var letterCount = this.value.length;
+
+            if (letterCount > 5) {
+                performSearch(this.value)
+            }
+        })
+
+        $('#search-consumer-global').on('click', function() {
+            performSearch($('#search').val())
+        })
+        
     });
 
     function getNotifications() {
@@ -450,6 +488,37 @@
             }
 
         });
+    }
+
+    function performSearch(regex) {
+        $.ajax({
+            url : '{{ route("serviceAccounts.search-global") }}',
+            type : 'GET',
+            data : {
+                query : regex,
+            },
+            success : function(res) {
+                try {
+                    if (jQuery.isEmptyObject(res)) {
+                        $('#res-table-global tbody tr').remove()
+                    } else {
+                        $('#res-table-global tbody tr').remove()
+                        $('#res-table-global tbody').append(res)
+                    }   
+                } catch (err) {
+                    $('#res-table-global tbody tr').remove()
+                }                                     
+            },
+            error : function(error) {
+                $('#res-table-global tbody tr').remove()
+                // alert('Error fetching data')
+                console.log(error)
+            }
+        })
+    }
+
+    function goToAccount(id) {
+        window.location.href = "{{ url('/serviceAccounts') }}" + "/" + id
     }
 </script>
 

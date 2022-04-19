@@ -44,7 +44,8 @@ class ChangeMeterLogs extends Model
         'PullOutReading',
         'AdditionalKwhForNextBilling',
         'Status',
-        'ServicePeriod'
+        'ServicePeriod',
+        'NewMeterStartKwh'
     ];
 
     /**
@@ -61,6 +62,7 @@ class ChangeMeterLogs extends Model
         'AdditionalKwhForNextBilling' => 'string',
         'Status' => 'string',
         'ServicePeriod' => 'string',
+        'NewMeterStartKwh' => 'string',
     ];
 
     /**
@@ -79,6 +81,7 @@ class ChangeMeterLogs extends Model
         'created_at' => 'nullable',
         'updated_at' => 'nullable',
         'ServicePeriod' => 'nullable|string',
+        'NewMeterStartKwh' => 'nullable|string',
     ];
 
     

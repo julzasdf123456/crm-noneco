@@ -179,7 +179,8 @@ class TicketsController extends Controller {
                         $changeMeterLogs->AccountNumber = $tickets->AccountNumber;
                         $changeMeterLogs->OldMeterSerial = $tickets->CurrentMeterNo;
                         $changeMeterLogs->NewMeterSerial = $tickets->NewMeterNo;
-                        $changeMeterLogs->PullOutReading = $tickets->NewMeterReading;   
+                        $changeMeterLogs->PullOutReading = $tickets->CurrentMeterReading;  
+                        $changeMeterLogs->NewMeterStartKwh = $tickets->NewMeterReading;  
                         $changeMeterLogs->AdditionalKwhForNextBilling = round($averageDaily, 2);
                         $changeMeterLogs->ServicePeriod = date('Y-m-01', strtotime($latestBill->ServicePeriod . ' +1 month')); 
                         $changeMeterLogs->save(); 
@@ -191,7 +192,8 @@ class TicketsController extends Controller {
                         $changeMeterLogs->AccountNumber = $tickets->AccountNumber;
                         $changeMeterLogs->OldMeterSerial = $tickets->CurrentMeterNo;
                         $changeMeterLogs->NewMeterSerial = $tickets->NewMeterNo;
-                        $changeMeterLogs->PullOutReading = $tickets->NewMeterReading;   
+                        $changeMeterLogs->PullOutReading = $tickets->CurrentMeterReading;  
+                        $changeMeterLogs->NewMeterStartKwh = $tickets->NewMeterReading;   
                         $changeMeterLogs->AdditionalKwhForNextBilling = $tickets->NewMeterReading;
                         $changeMeterLogs->ServicePeriod = $svPeriod; 
                         $changeMeterLogs->save(); 
@@ -206,14 +208,15 @@ class TicketsController extends Controller {
                     if ($latestBill != null) {
                         // ------------------------------------
                         // 2. Get KWH Difference
-                        $dif = floatval($tickets->NewMeterReading) - floatval($latestBill->KwhUsed);
+                        $dif = floatval($tickets->CurrentMeterReading) - floatval($latestBill->KwhUsed);
 
                         $changeMeterLogs = new ChangeMeterLogs;
                         $changeMeterLogs->id = IDGenerator::generateIDandRandString();
                         $changeMeterLogs->AccountNumber = $tickets->AccountNumber;
                         $changeMeterLogs->OldMeterSerial = $tickets->CurrentMeterNo;
                         $changeMeterLogs->NewMeterSerial = $tickets->NewMeterNo;
-                        $changeMeterLogs->PullOutReading = $tickets->NewMeterReading;   
+                        $changeMeterLogs->PullOutReading = $tickets->CurrentMeterReading;  
+                        $changeMeterLogs->NewMeterStartKwh = $tickets->NewMeterReading;   
                         $changeMeterLogs->AdditionalKwhForNextBilling = round($dif, 2);
                         $changeMeterLogs->ServicePeriod = date('Y-m-01', strtotime($latestBill->ServicePeriod . ' +1 month')); 
                         $changeMeterLogs->save(); 
@@ -225,7 +228,8 @@ class TicketsController extends Controller {
                         $changeMeterLogs->AccountNumber = $tickets->AccountNumber;
                         $changeMeterLogs->OldMeterSerial = $tickets->CurrentMeterNo;
                         $changeMeterLogs->NewMeterSerial = $tickets->NewMeterNo;
-                        $changeMeterLogs->PullOutReading = $tickets->NewMeterReading;   
+                        $changeMeterLogs->PullOutReading = $tickets->CurrentMeterReading;  
+                        $changeMeterLogs->NewMeterStartKwh = $tickets->NewMeterReading;  
                         $changeMeterLogs->AdditionalKwhForNextBilling = $tickets->NewMeterReading;
                         $changeMeterLogs->ServicePeriod = $svPeriod; 
                         $changeMeterLogs->save(); 

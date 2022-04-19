@@ -725,5 +725,17 @@ class PaidBillsController extends AppBaseController
 
         return response()->json($bapaPayments, 200);
     }
+
+    public function billsCollection() {
+        // $paidBills = $this->paidBillsRepository->all();
+        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+            ->orderByDesc('created_at')
+            ->first();
+
+        return view('paid_bills.index', [
+            // 'paidBills' => $paidBills,
+            'orAssignedLast' => $orAssignedLast,
+        ]);
+    }
 }
 

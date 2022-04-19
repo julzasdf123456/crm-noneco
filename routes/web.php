@@ -198,6 +198,7 @@ Route::get('/service_accounts/account-grouper-organizer/{townCode}/{groupCode}',
 Route::get('/bills/bapa-view-readings/{period}/{bapaName}', [App\Http\Controllers\ServiceAccountsController::class,  'bapaViewReadings'])->name('bills.bapa-view-readings');
 Route::get('/service_accounts/re-sequence-accounts', [App\Http\Controllers\ServiceAccountsController::class,  'reSequenceAccounts'])->name('serviceAccounts.re-sequence-accounts');
 Route::get('/service_accounts/update-gps-coordinates', [App\Http\Controllers\ServiceAccountsController::class,  'updateGPSCoordinates'])->name('serviceAccounts.update-gps-coordinates');
+Route::get('/service_accounts/search-global', [App\Http\Controllers\ServiceAccountsController::class,  'searchGlobal'])->name('serviceAccounts.search-global');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 
@@ -454,6 +455,7 @@ Route::get('/paid_bills/search-bapa', [App\Http\Controllers\PaidBillsController:
 Route::get('/paid_bills/bapa-payment-console/{bapaName}', [App\Http\Controllers\PaidBillsController::class, 'bapaPaymentConsole'])->name('paidBills.bapa-payment-console');
 Route::get('/paid_bills/get-bills-from-bapa', [App\Http\Controllers\PaidBillsController::class, 'getBillsFromBapa'])->name('paidBills.get-bills-from-bapa');
 Route::get('/paid_bills/save-bapa-payments', [App\Http\Controllers\PaidBillsController::class, 'saveBapaPayments'])->name('paidBills.save-bapa-payments');
+Route::get('/paid_bills/bills-collection', [App\Http\Controllers\PaidBillsController::class, 'billsCollection'])->name('paidBills.bills-collection');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);
 
 

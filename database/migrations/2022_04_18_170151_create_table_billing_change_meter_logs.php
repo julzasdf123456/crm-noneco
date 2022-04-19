@@ -22,6 +22,7 @@ class CreateTableBillingChangeMeterLogs extends Migration
             $table->string('PullOutReading')->nullable();
             $table->string('AdditionalKwhForNextBilling')->nullable();
             $table->string('Status')->nullable();
+            $table->string('NewMeterStartKwh')->nullable();
             $table->date('ServicePeriod')->nullable();
             $table->timestamps();
         });

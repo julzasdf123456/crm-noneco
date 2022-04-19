@@ -422,7 +422,7 @@ use Illuminate\Support\Facades\Auth;
         <a href="#" class="nav-link">
             <i class="fas fa-file-invoice-dollar nav-icon text-primary"></i>
             <p>
-                Service Accounts
+                Billing Inquiry
                 <i class="fas fa-angle-left right"></i>
             </p>
         </a>
@@ -652,8 +652,8 @@ use Illuminate\Support\Facades\Auth;
         </a>
         <ul class="nav nav-treeview">
             <li class="nav-item">
-                <a href="{{ route('paidBills.index') }}"
-                class="nav-link {{ Request::is('paidBills.index*') ? 'active' : '' }}">
+                <a href="{{ route('paidBills.bills-collection') }}"
+                class="nav-link {{ Request::is('paidBills.bills-collection*') ? 'active' : '' }}">
                 <i class="fas fa-file-invoice-dollar nav-icon text-info"></i><p>Bills Payment</p>
                 </a>
             </li>
