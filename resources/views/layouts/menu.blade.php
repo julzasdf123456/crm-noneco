@@ -652,8 +652,8 @@ use Illuminate\Support\Facades\Auth;
         </a>
         <ul class="nav nav-treeview">
             <li class="nav-item">
-                <a href="{{ route('paidBills.bills-collection') }}"
-                class="nav-link {{ Request::is('paidBills.bills-collection*') ? 'active' : '' }}">
+                <a href="{{ route('paidBills.index') }}"
+                class="nav-link {{ Request::is('paidBills.index*') ? 'active' : '' }}">
                 <i class="fas fa-file-invoice-dollar nav-icon text-info"></i><p>Bills Payment</p>
                 </a>
             </li>
@@ -745,6 +745,12 @@ use Illuminate\Support\Facades\Auth;
         <a href="{{ route('accountPayables.index') }}"
            class="nav-link {{ Request::is('accountPayables*') ? 'active' : '' }}">
            <i class="fas fa-circle nav-icon text-info"></i><p>Account Payables</p>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="{{ route('accountGLCodes.index') }}"
+           class="nav-link {{ Request::is('accountGLCodes*') ? 'active' : '' }}">
+           <i class="fas fa-circle nav-icon text-info"></i><p>GL Codes</p>
         </a>
     </li>
 @endcanany

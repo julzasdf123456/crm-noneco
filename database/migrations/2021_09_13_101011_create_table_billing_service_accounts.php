@@ -80,6 +80,8 @@ class CreateTableBillingServiceAccounts extends Migration
             $table->string('Notes', 500)->nullable();
             $table->string('Migrated')->nullable();
 
+            $table->string('DistributionAccountCode')->nullable();
+
             $table->string('UserId', 50)->nullable();
         });
     }

@@ -97,7 +97,8 @@ class ServiceAccounts extends Model
         'NetMetered',
         'Notes',
         'Migrated',
-        'MemberConsumerId'
+        'MemberConsumerId',
+        'DistributionAccountCode'
     ];
 
     /**
@@ -153,7 +154,8 @@ class ServiceAccounts extends Model
         'NetMetered' => 'string',
         'Notes' => 'string',
         'Migrated' => 'string',
-        'MemberConsumerId' => 'string'
+        'MemberConsumerId' => 'string',
+        'DistributionAccountCode' => 'string'
     ];
 
     /**
@@ -211,7 +213,8 @@ class ServiceAccounts extends Model
         'NetMetered' => 'nullable|string',
         'Notes' => 'nullable|string',
         'Migrated' => 'nullable|string',
-        'MemberConsumerId' => 'nullable|string'
+        'MemberConsumerId' => 'nullable|string',
+        'DistributionAccountCode' => 'nullable|string'
     ];
 
     public static function getAddress($serviceAccount) {

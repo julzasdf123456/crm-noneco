@@ -18,6 +18,7 @@ use App\Models\Notifiers;
 use App\Models\ORCancellations;
 use App\Models\Towns;
 use App\Models\BAPAPayments;
+use App\Models\DCRSummaryTransactions;
 use Flash;
 use Response;
 
@@ -41,13 +42,11 @@ class PaidBillsController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $paidBills = $this->paidBillsRepository->all();
         $orAssignedLast = ORAssigning::where('UserId', Auth::id())
             ->orderByDesc('created_at')
             ->first();
 
         return view('paid_bills.index', [
-            'paidBills' => $paidBills,
             'orAssignedLast' => $orAssignedLast,
         ]);
     }
@@ -222,7 +221,7 @@ class PaidBillsController extends AppBaseController
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
             ->where('Billing_Bills.AccountNumber', $request['AccountNumber'])
             ->whereNull('Billing_Bills.MergedToCollectible')
-            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->whereNull('Status')->pluck('Cashier_PaidBills.ObjectSourceId'))
+            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('AccountNumber', $request['AccountNumber'])->whereNull('Status')->pluck('Cashier_PaidBills.ObjectSourceId'))
             ->select('Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.AccountCount',
@@ -241,6 +240,11 @@ class PaidBillsController extends AppBaseController
 
         if (count($unpaidBills) > 0) {
             foreach($unpaidBills as $item) {
+                $ewt2 = round((floatval($item->DistributionSystemCharge) + floatval($item->SupplyRetailCustomerCharge) + floatval($item->MeteringRetailCustomerCharge)
+                        + floatval($item->LifelineRate) + floatval($item->InterClassCrossSubsidyCharge)) * .02, 2);
+
+                $evat5 = round((floatval($item->DistributionSystemCharge) + floatval($item->SupplyRetailCustomerCharge) + floatval($item->MeteringRetailCustomerCharge)
+                        + floatval($item->LifelineRate) + floatval($item->InterClassCrossSubsidyCharge)) * .05, 2);
                 if (date('Y-m-d', strtotime($item->DueDate)) < date('Y-m-d')) {
                     // ARREARS
 
@@ -250,9 +254,10 @@ class PaidBillsController extends AppBaseController
                             <tr onclick=addToPayables("' . $item->id . '")>
                                 <td>' . $item->BillNumber . '</td>
                                 <td>' . date('F Y', strtotime($item->ServicePeriod)) . '</td>
+                                <td>' . date('F d, Y', strtotime($item->DueDate)) . '</td>
                                 <th class="text-danger">₱ ' . number_format($item->NetAmount, 2) . ' + ' . Bills::getFinalPenalty($item) . '</th>
                                 <td class="text-right">
-                                    <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" surcharge="' . Bills::getFinalPenalty($item) . '" amount="' . $item->NetAmount . '" class="btn btn-link text-muted" onclick=addToPayables("' . $item->id . '")><i class="fas fa-check-circle"></i></button>
+                                    <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" surcharge="' . Bills::getFinalPenalty($item) . '" amount="' . $item->NetAmount . '" ewt="' . $ewt2 . '" evat="' . $evat5 . '" class="btn btn-link text-muted" onclick=addToPayables("' . $item->id . '")><i class="fas fa-check-circle"></i></button>
                                 </td>
                             </tr>
                         '; 
@@ -261,9 +266,10 @@ class PaidBillsController extends AppBaseController
                             <tr>
                                 <td>' . $item->BillNumber . '</td>
                                 <td>' . date('F Y', strtotime($item->ServicePeriod)) . '</td>
+                                <td>' . date('F d, Y', strtotime($item->DueDate)) . '</td>
                                 <th class="text-danger">₱ ' . number_format($item->NetAmount, 2) . ' + ' . Bills::getFinalPenalty($item) . '</th>
                                 <td class="text-right">
-                                    <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" surcharge="' . Bills::getFinalPenalty($item) . '" amount="' . $item->NetAmount . '" class="btn btn-link text-muted"><i class="fas fa-exclamation-circle"></i></button>
+                                    <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" surcharge="' . Bills::getFinalPenalty($item) . '" amount="' . $item->NetAmount . '" ewt="' . $ewt2 . '" evat="' . $evat5 . '" class="btn btn-link text-muted"><i class="fas fa-exclamation-circle"></i></button>
                                 </td>
                             </tr>
                         ';
@@ -272,9 +278,10 @@ class PaidBillsController extends AppBaseController
                             <tr>
                                 <td>' . $item->BillNumber . '</td>
                                 <td>' . date('F Y', strtotime($item->ServicePeriod)) . '</td>
+                                <td>' . date('F d, Y', strtotime($item->DueDate)) . '</td>
                                 <th class="text-danger">₱ ' . number_format($item->NetAmount, 2) . ' + ' . Bills::getFinalPenalty($item) . '</th>
                                 <td class="text-right">
-                                    <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" surcharge="' . Bills::getFinalPenalty($item) . '" amount="' . $item->NetAmount . '" onclick=requestUnlock("' . $item->id . '") class="btn btn-link text-muted"><i id="lock-' . $item->id . '" class="fas fa-lock"></i></button>
+                                    <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" surcharge="' . Bills::getFinalPenalty($item) . '" amount="' . $item->NetAmount . '" ewt="' . $ewt2 . '" evat="' . $evat5 . '" onclick=requestUnlock("' . $item->id . '") class="btn btn-link text-muted"><i id="lock-' . $item->id . '" class="fas fa-lock"></i></button>
                                 </td>
                             </tr>
                         ';
@@ -284,9 +291,10 @@ class PaidBillsController extends AppBaseController
                         <tr onclick=addToPayables("' . $item->id . '")>
                             <td>' . $item->BillNumber . '</td>
                             <td>' . date('F Y', strtotime($item->ServicePeriod)) . '</td>
+                            <td>' . date('F d, Y', strtotime($item->DueDate)) . '</td>
                             <th>₱ ' . number_format($item->NetAmount, 2) . '</th>
                             <td class="text-right">
-                                <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" surcharge="' . Bills::getFinalPenalty($item) . '" amount="' . $item->NetAmount . '" class="btn btn-link text-muted" onclick=addToPayables("' . $item->id . '")><i class="fas fa-check-circle"></i></button>
+                                <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" amount="' . $item->NetAmount . '" ewt="' . $ewt2 . '" evat="' . $evat5 . '" class="btn btn-link text-muted" onclick=addToPayables("' . $item->id . '")><i class="fas fa-check-circle"></i></button>
                             </td>
                         </tr>
                     '; 
@@ -325,6 +333,8 @@ class PaidBillsController extends AppBaseController
             $bill = Bills::find($billsId[$i]);
 
             if ($bill != null) {
+                $account = ServiceAccounts::find($bill->AccountNumber);
+
                 $paidBill = new PaidBills;
                 $paidBill->id = IDGenerator::generateIDandRandString();
                 $paidBill->BillNumber = $bill->BillNumber;
@@ -341,15 +351,182 @@ class PaidBillsController extends AppBaseController
                     $paidBill->Surcharge = "0";
                 }
                
+                // COMPUTE EWT 2%
+                $ewt = 0;
+                $evat = 0;
+                if ($request['Ewt'] == 'true') {
+                    $ewt = round((floatval($bill->DistributionSystemCharge) + floatval($bill->SupplyRetailCustomerCharge) + floatval($bill->MeteringRetailCustomerCharge)
+                        + floatval($bill->LifelineRate) + floatval($bill->InterClassCrossSubsidyCharge)) * .02, 2);
+                }
+
+                // COMPUTE VAT 5%
+                if ($request['VAT'] == 'true') {
+                    $evat = round((floatval($bill->DistributionSystemCharge) + floatval($bill->SupplyRetailCustomerCharge) + floatval($bill->MeteringRetailCustomerCharge)
+                        + floatval($bill->LifelineRate) + floatval($bill->InterClassCrossSubsidyCharge)) * .05, 2);
+                }
+
                 $paidBill->AdditionalCharges = $bill->AdditionalCharges;
                 $paidBill->Deductions = $bill->Deductions;
-                $paidBill->NetAmount = round(floatval($bill->NetAmount) + floatval($paidBill->Surcharge), 2);
+                $paidBill->NetAmount = round((floatval($bill->NetAmount) + floatval($paidBill->Surcharge) + $evat) - $ewt, 2);
+                $paidBill->Form2307TwoPercent = $ewt;
+                $paidBill->Form2307FivePercent = $evat;
                 $paidBill->Source = 'MONTHLY BILL';
                 $paidBill->ObjectSourceId = $bill->id;
                 $paidBill->ORNumber = $request['ORNumber'];
                 $paidBill->ORDate = date('Y-m-d');
                 $paidBill->UserId = Auth::id();
                 $paidBill->save();
+
+                // SAVE DAILY COLLECTION SUMMARY
+                if ($account != null) {
+                    
+                    if ($account->ForDistribution == 'Yes') {
+                        if ($account->DistributionAccountCode != null) {
+                            // GET AR CONSUMERS
+                            $dcrSum = new DCRSummaryTransactions;
+                            $dcrSum->id = IDGenerator::generateIDandRandString();
+                            $dcrSum->GLCode = $account->DistributionAccountCode;
+                            $dcrSum->Amount = $bill->NetAmount;
+                            $dcrSum->Day = date('Y-m-d');
+                            $dcrSum->Time = date('H:i:s');
+                            $dcrSum->Teller = Auth::id();
+                            $dcrSum->ORNumber = $request['ORNumber'];
+                            $dcrSum->save();
+                        }                        
+                    } else {
+                        // GET AR CONSUMERS
+                        $dcrSum = new DCRSummaryTransactions;
+                        $dcrSum->id = IDGenerator::generateIDandRandString();
+                        $dcrSum->GLCode = DCRSummaryTransactions::getARConsumers($account->Town);
+                        $dcrSum->Amount = $bill->NetAmount;
+                        $dcrSum->Day = date('Y-m-d');
+                        $dcrSum->Time = date('H:i:s');
+                        $dcrSum->Teller = Auth::id();
+                        $dcrSum->ORNumber = $request['ORNumber'];
+                        $dcrSum->save();
+
+                        // GET RPT 
+                        $dcrSum = new DCRSummaryTransactions;
+                        $dcrSum->id = IDGenerator::generateIDandRandString();
+                        $dcrSum->GLCode = DCRSummaryTransactions::getARConsumersRPT($account->Town);
+                        $dcrSum->Amount = $bill->RealPropertyTax;
+                        $dcrSum->Day = date('Y-m-d');
+                        $dcrSum->Time = date('H:i:s');
+                        $dcrSum->Teller = Auth::id();
+                        $dcrSum->ORNumber = $request['ORNumber'];
+                        $dcrSum->save();
+                    }
+                }
+
+                // GET UC-NPC Stranded Debt
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-87';
+                $dcrSum->Amount = $bill->NPCStrandedDebt;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET FIT ALL
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-88';
+                $dcrSum->Amount = $bill->FeedInTariffAllowance;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET UCME REDCI
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-89';
+                $dcrSum->Amount = $bill->MissionaryElectrificationREDCI;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET GENCO
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-94';
+                $dcrSum->Amount = $bill->GenerationVAT;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET TRANSCO
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-95';
+                $dcrSum->Amount = $bill->TransmissionVAT;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET SYSLOSS VAT
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-96';
+                $dcrSum->Amount = $bill->SystemLossVAT;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET DIST/OTHERS VAT
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-97';
+                $dcrSum->Amount = $bill->DistributionVAT;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET UCME
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-98';
+                $dcrSum->Amount = $bill->MissionaryElectrificationCharge;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET EWT 2%
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-160-00';
+                $dcrSum->Amount = $paidBill->Form2307TwoPercent;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET EVAT 5%
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-170-00';
+                $dcrSum->Amount = $paidBill->Form2307FivePercent;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
             }            
         }  
         
@@ -632,9 +809,9 @@ class PaidBillsController extends AppBaseController
                 'Billing_ServiceAccounts.AccountStatus',
                 'Billing_Readings.KwhUsed',
                 'Billing_Readings.ServicePeriod',
-                DB::raw("(SELECT BillNumber FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod) AS BillNumber"),
-                DB::raw("(SELECT NetAmount FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod) AS NetAmount"),
-                DB::raw("(SELECT ORNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod AND Status IS NULL) AS ORNumber"),)
+                DB::raw("(SELECT TOP 1 BillNumber FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod) AS BillNumber"),
+                DB::raw("(SELECT TOP 1 NetAmount FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod) AS NetAmount"),
+                DB::raw("(SELECT TOP 1 ORNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod AND Status IS NULL) AS ORNumber"),)
             ->orderBy('Billing_ServiceAccounts.AccountStatus')
             ->get();
 
@@ -651,6 +828,8 @@ class PaidBillsController extends AppBaseController
             $bill = Bills::where('AccountNumber', $accounts[$i])
                 ->where('ServicePeriod', $period)
                 ->first();
+
+            $account = ServiceAccounts::find($bill->AccountNumber);
 
             if ($bill != null) {
                 $paidBill = new PaidBills;
@@ -690,6 +869,157 @@ class PaidBillsController extends AppBaseController
                 $paidBill->ORDate = date('Y-m-d');
                 $paidBill->UserId = Auth::id();
                 $paidBill->save();
+
+                // SAVE DAILY COLLECTION SUMMARY
+                if ($account != null) {
+                    
+                    if ($account->ForDistribution == 'Yes') {
+                        if ($account->DistributionAccountCode != null) {
+                            // GET AR CONSUMERS
+                            $dcrSum = new DCRSummaryTransactions;
+                            $dcrSum->id = IDGenerator::generateIDandRandString();
+                            $dcrSum->GLCode = $account->DistributionAccountCode;
+                            $dcrSum->Amount = $bill->NetAmount;
+                            $dcrSum->Day = date('Y-m-d');
+                            $dcrSum->Time = date('H:i:s');
+                            $dcrSum->Teller = Auth::id();
+                            $dcrSum->ORNumber = $request['ORNumber'];
+                            $dcrSum->save();
+                        }                        
+                    } else {
+                        // GET AR CONSUMERS
+                        $dcrSum = new DCRSummaryTransactions;
+                        $dcrSum->id = IDGenerator::generateIDandRandString();
+                        $dcrSum->GLCode = DCRSummaryTransactions::getARConsumers($account->Town);
+                        $dcrSum->Amount = $bill->NetAmount;
+                        $dcrSum->Day = date('Y-m-d');
+                        $dcrSum->Time = date('H:i:s');
+                        $dcrSum->Teller = Auth::id();
+                        $dcrSum->ORNumber = $request['ORNumber'];
+                        $dcrSum->save();
+
+                        // GET RPT 
+                        $dcrSum = new DCRSummaryTransactions;
+                        $dcrSum->id = IDGenerator::generateIDandRandString();
+                        $dcrSum->GLCode = DCRSummaryTransactions::getARConsumersRPT($account->Town);
+                        $dcrSum->Amount = $bill->RealPropertyTax;
+                        $dcrSum->Day = date('Y-m-d');
+                        $dcrSum->Time = date('H:i:s');
+                        $dcrSum->Teller = Auth::id();
+                        $dcrSum->ORNumber = $request['ORNumber'];
+                        $dcrSum->save();
+                    }
+                }
+
+                // GET UC-NPC Stranded Debt
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-87';
+                $dcrSum->Amount = $bill->NPCStrandedDebt;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET FIT ALL
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-88';
+                $dcrSum->Amount = $bill->FeedInTariffAllowance;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET UCME REDCI
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-89';
+                $dcrSum->Amount = $bill->MissionaryElectrificationREDCI;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET GENCO
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-94';
+                $dcrSum->Amount = $bill->GenerationVAT;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET TRANSCO
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-95';
+                $dcrSum->Amount = $bill->TransmissionVAT;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET SYSLOSS VAT
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-96';
+                $dcrSum->Amount = $bill->SystemLossVAT;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET DIST/OTHERS VAT
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-97';
+                $dcrSum->Amount = $bill->DistributionVAT;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // GET UCME
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-98';
+                $dcrSum->Amount = $bill->MissionaryElectrificationCharge;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+
+                // // GET EWT 2%
+                // $dcrSum = new DCRSummaryTransactions;
+                // $dcrSum->id = IDGenerator::generateIDandRandString();
+                // $dcrSum->GLCode = '140-160-00';
+                // $dcrSum->Amount = $paidBill->Form2307TwoPercent;
+                // $dcrSum->Day = date('Y-m-d');
+                // $dcrSum->Time = date('H:i:s');
+                // $dcrSum->Teller = Auth::id();
+                // $dcrSum->ORNumber = $request['ORNumber'];
+                // $dcrSum->save();
+
+                // // GET EVAT 5%
+                // $dcrSum = new DCRSummaryTransactions;
+                // $dcrSum->id = IDGenerator::generateIDandRandString();
+                // $dcrSum->GLCode = '140-170-00';
+                // $dcrSum->Amount = $paidBill->Form2307FivePercent;
+                // $dcrSum->Day = date('Y-m-d');
+                // $dcrSum->Time = date('H:i:s');
+                // $dcrSum->Teller = Auth::id();
+                // $dcrSum->ORNumber = $request['ORNumber'];
+                // $dcrSum->save();
             }
         }
 

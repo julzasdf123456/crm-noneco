@@ -37,6 +37,7 @@
                             <thead>
                                 <th>Bill No.</th>
                                 <th>Billing Month</th>
+                                <th>Due Date</th>
                                 <th>Amount Due</th>
                                 <th width="50px"></th>
                             </thead>
@@ -79,6 +80,30 @@
                                     <td>Surcharges</td>
                                     <td class="text-right">
                                         <h4 class="text-right" id="surcharges"></h4>
+                                    </td>
+                                </tr>
+                                <tr>                        
+                                    <td>
+                                        <div class="input-group">
+                                            <input type="hidden" value="" name="Vat2">
+                                            <input type="checkbox" value="" name="Vat2" id="Vat2" class="custom-checkbox">
+                                            <label for="Vat2">Witholding (2%)</label>
+                                        </div>
+                                    </td>
+                                    <td class="text-right">
+                                        <h4 class="text-right" id="vat2">-</h4>
+                                    </td>
+                                </tr>
+                                <tr>                        
+                                    <td>
+                                        <div class="input-group">
+                                            <input type="hidden" value="" name="Vat5">
+                                            <input type="checkbox" value="" name="Vat5" id="Vat5" class="custom-checkbox">
+                                            <label for="Vat5">Creditable VAT (5%)</label>
+                                        </div>
+                                    </td>
+                                    <td class="text-right">
+                                        <h4 class="text-right" id="vat5">-</h4>
                                     </td>
                                 </tr>
                                 <tr style="border-top: 1px solid #dcdcdc">
@@ -203,6 +228,10 @@
         var svcPeriod = ''
         var kwhUsed = ''
         var billId = ''
+        var vat2 = 0
+        var vat5 = 0
+        var vat2Checked = false
+        var vat5Checked = false
 
         var selectedPayments = []
 
@@ -296,6 +325,27 @@
             $('#modal-search').on('shown.bs.modal', function () {
                 $('#search').focus();
             })
+
+            // DISCOUNT 3% CHANGE
+            $('#Vat2').change(function() {
+                if($('#Vat2').prop('checked')) {
+                    vat2Checked = true                           
+                } else {
+                    vat2Checked = false                    
+                }
+                computePayables()
+                updatePaymentDisplays()
+            })
+
+            $('#Vat5').change(function() {
+                if($('#Vat5').prop('checked')) {
+                    vat5Checked = true                            
+                } else {
+                    vat5Checked = false                  
+                }
+                computePayables()
+                updatePaymentDisplays()
+            })
         })
 
         function addToPayables(id) {
@@ -317,12 +367,7 @@
 
             // VALIDATE FORM
             computePayables(selectedPayments)
-            $('#amount-due').text('P ' + Number(totalAmount.toFixed(2)).toLocaleString())
-            $('#total-amount').text('P ' + Number(totalAmount.toFixed(2)).toLocaleString())
-            $('#additional-charges').text('P ' + Number(additionals.toFixed(2)).toLocaleString())
-            $('#deductions').text('P ' + Number(deductions.toFixed(2)).toLocaleString())
-            $('#surcharges').text('P ' + Number(surcharge.toFixed(2)).toLocaleString())
-            $('#amountPaid').focus()
+            updatePaymentDisplays()
 
             // VALIDATE BUTTONS
             change = (parseFloat($('#amountPaid').val()) - totalAmount).toFixed(2).toLocaleString()
@@ -340,12 +385,36 @@
             } 
         }
 
+        function updatePaymentDisplays() {
+            $('#amount-due').text('P ' + Number(totalAmount.toFixed(2)).toLocaleString())
+            $('#total-amount').text('P ' + Number(totalAmount.toFixed(2)).toLocaleString())
+            $('#additional-charges').text('P ' + Number(additionals.toFixed(2)).toLocaleString())
+            $('#deductions').text('P ' + Number(deductions.toFixed(2)).toLocaleString())
+            $('#surcharges').text('P ' + Number(surcharge.toFixed(2)).toLocaleString())
+            $('#amountPaid').focus()
+
+            if(vat2Checked == true) {
+                $('#vat2').text(vat2)
+            } else {
+                $('#vat2').text('-')
+            }
+
+            // COMPUTE 5%
+            if(vat5Checked == true) {
+                $('#vat5').text(vat5)        
+            } else {
+                $('#vat5').text('-')
+            }
+        }
+
         function computePayables() {
             var len = selectedPayments.length
             totalAmount = 0.0
             deductions = 0
             additionals = 0
             surcharge = 0
+            vat2 = 0
+            vat5 = 0
 
             for(var i=0; i<len; i++) {
                 var additionalCharges = (parseFloat($('#' + selectedPayments[i]).attr('additionalCharges')) ? parseFloat($('#' + selectedPayments[i]).attr('additionalCharges')) : 0)
@@ -359,7 +428,23 @@
 
                 var amount = (parseFloat($('#' + selectedPayments[i]).attr('amount')) ? parseFloat($('#' + selectedPayments[i]).attr('amount')) : 0)
                 totalAmount += (amount + surcharges)
+
+                var ewt = (parseFloat($('#' + selectedPayments[i]).attr('ewt')) ? parseFloat($('#' + selectedPayments[i]).attr('ewt')) : 0)
+                vat2 += ewt
+
+                var evat = (parseFloat($('#' + selectedPayments[i]).attr('evat')) ? parseFloat($('#' + selectedPayments[i]).attr('evat')) : 0)
+                vat5 += evat
             }
+
+            // COMPUTE 2%
+            if(vat2Checked == true) {
+                totalAmount = totalAmount - vat2              
+            } 
+
+            // COMPUTE 5%
+            if(vat5Checked == true) {
+                totalAmount = totalAmount + vat5                 
+            } 
         }
 
         function requestUnlock(id) {
@@ -443,6 +528,14 @@
             $('#deductions').text('-')
             $('#total-amount').text('-')
             $('#surcharges').text('-')
+
+            totalAmount = 0.0
+            deductions = 0
+            additionals = 0
+            surcharge = 0
+            vat2 = 0
+            vat5 = 0
+            selectedPayments = []
 
             // FETCH ACCOUNT DETAILS
             $.ajax({
@@ -599,6 +692,8 @@
                     BillId : billId,
                     ORNumber : $('#orNumber').val(),
                     BillsId : selectedPayments,
+                    Ewt : vat2Checked,
+                    VAT : vat5Checked
                 }, 
                 success : function(res) {
                     window.location.href = "{{ url('/paid_bills/print-bill-payment') }}" + "/" + res['ORNumber']

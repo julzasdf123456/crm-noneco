@@ -262,4 +262,15 @@ class KwhSalesController extends AppBaseController
             'sales' => $sales,
         ]);
     }
+
+    public function consolidatedPerTown($period, Request $request) {
+        $town = $request['Town'];
+        $towns = Towns::orderBy('id')->get();
+
+        return view('/kwh_sales/attach_consolidated_per_town', [
+            'town' => $town,
+            'period' => $period,
+            'towns' => $towns,
+        ]);
+    }
 }

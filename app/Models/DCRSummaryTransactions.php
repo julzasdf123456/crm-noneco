@@ -1,0 +1,142 @@
+<?php
+
+namespace App\Models;
+
+use Eloquent as Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+/**
+ * Class DCRSummaryTransactions
+ * @package App\Models
+ * @version April 25, 2022, 9:33 am PST
+ *
+ * @property string $GLCode
+ * @property string $NEACode
+ * @property string $Description
+ * @property string $Amount
+ * @property string $Day
+ * @property time $Time
+ * @property string $Teller
+ * @property string $DCRNumber
+ * @property string $Status
+ */
+class DCRSummaryTransactions extends Model
+{
+    // use SoftDeletes;
+
+    use HasFactory;
+
+    public $table = 'Cashier_DCRSummaryTransactions';
+    
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = 'updated_at';
+
+
+    protected $dates = ['deleted_at'];
+
+    protected $primaryKey = 'id';
+
+    public $incrementing = false;
+
+    public $fillable = [
+        'id',
+        'GLCode',
+        'NEACode',
+        'Description',
+        'Amount',
+        'Day',
+        'Time',
+        'Teller',
+        'DCRNumber',
+        'Status',
+        'ORNumber'
+    ];
+
+    /**
+     * The attributes that should be casted to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'id' => 'string',
+        'GLCode' => 'string',
+        'NEACode' => 'string',
+        'Description' => 'string',
+        'Amount' => 'string',
+        'Day' => 'date',
+        'Teller' => 'string',
+        'DCRNumber' => 'string',
+        'Status' => 'string',
+        'ORNumber' => 'string'
+    ];
+
+    /**
+     * Validation rules
+     *
+     * @var array
+     */
+    public static $rules = [
+        'id' => 'string',
+        'GLCode' => 'nullable|string|max:255',
+        'NEACode' => 'nullable|string|max:255',
+        'Description' => 'nullable|string|max:255',
+        'Amount' => 'nullable|string|max:255',
+        'Day' => 'nullable',
+        'Time' => 'nullable',
+        'Teller' => 'nullable|string|max:255',
+        'DCRNumber' => 'nullable|string|max:255',
+        'Status' => 'nullable|string|max:255',
+        'created_at' => 'nullable',
+        'updated_at' => 'nullable',
+        'ORNumber' => 'nullable|string'
+    ];
+
+    public static function getARConsumers($town) {
+        if ($town == "01") {
+            return '140-142-50'; // Cadiz
+        } elseif($town == "02") {
+            return '140-142-20'; // EB Magalona
+        } elseif($town == "03") {
+            return '140-142-40'; // Manapla
+        } elseif($town == "04") {
+            return '140-142-30'; // Victorias
+        } elseif($town == "05") {
+            return '140-142-80'; // San Carlos
+        } elseif($town == "06") {
+            return '140-142-60'; // Sagay
+        } elseif($town == "07") {
+            return '140-142-70'; // Escalante
+        } elseif($town == "08") {
+            return '140-142-81'; // Calatrava
+        } elseif($town == "09") {
+            return '140-142-71'; // Toboso
+        } else {
+            return '0'; // Null
+        }
+    }
+
+    public static function getARConsumersRPT($town) {
+        if ($town == "01") {
+            return '140-143-05'; // Cadiz
+        } elseif($town == "02") {
+            return '140-143-02'; // EB Magalona
+        } elseif($town == "03") {
+            return '140-143-04'; // Manapla
+        } elseif($town == "04") {
+            return '140-143-03'; // Victorias
+        } elseif($town == "05") {
+            return '140-143-08'; // San Carlos
+        } elseif($town == "06") {
+            return '140-143-06'; // Sagay
+        } elseif($town == "07") {
+            return '140-143-07'; // Escalante
+        } elseif($town == "08") {
+            return '140-143-18'; // Calatrava
+        } elseif($town == "09") {
+            return '140-143-17'; // Toboso
+        } else {
+            return '0'; // Null
+        }
+    }
+}

@@ -493,6 +493,7 @@ Route::get('/kwh_sales/view-sales/{id}', [App\Http\Controllers\KwhSalesControlle
 Route::get('/kwh_sales/print-report/{id}', [App\Http\Controllers\KwhSalesController::class, 'printReport'])->name('kwhSales.print-report');
 Route::get('/kwh_sales/sales-distribution', [App\Http\Controllers\KwhSalesController::class, 'salesDistribution'])->name('kwhSales.sales-distribution');
 Route::get('/kwh_sales/sales-distribution-view/{period}', [App\Http\Controllers\KwhSalesController::class, 'salesDistributionView'])->name('kwhSales.sales-distribution-view');
+Route::get('/kwh_sales/consolidated-per-town/{period}', [App\Http\Controllers\KwhSalesController::class, 'consolidatedPerTown'])->name('kwhSales.consolidated-per-town');
 Route::resource('kwhSales', App\Http\Controllers\KwhSalesController::class);
 
 
@@ -536,3 +537,9 @@ Route::resource('rateItems', App\Http\Controllers\RateItemsController::class);
 
 
 Route::resource('changeMeterLogs', App\Http\Controllers\ChangeMeterLogsController::class);
+
+
+Route::resource('accountGLCodes', App\Http\Controllers\AccountGLCodesController::class);
+
+
+Route::resource('dCRSummaryTransactions', App\Http\Controllers\DCRSummaryTransactionsController::class);

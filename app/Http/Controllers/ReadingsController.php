@@ -192,9 +192,7 @@ class ReadingsController extends AppBaseController
             ->where('Billing_Readings.ServicePeriod', $request['ServicePeriod'])
             ->where('Billing_ServiceAccounts.GroupCode', $request['Day'])
             ->where('Billing_ServiceAccounts.Town', $request['Town'])
-            ->select('Billing_Readings.AccountNumber',
-                'Billing_Readings.ReadingTimestamp',
-                'Billing_Readings.KwhUsed',
+            ->select('Billing_Readings.*',
                 'Billing_ServiceAccounts.ServiceAccountName',
                 'Billing_ServiceAccounts.SequenceCode')
             ->orderBy('Billing_Readings.ReadingTimestamp')

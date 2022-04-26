@@ -1,7 +1,7 @@
 @php    
     use Illuminate\Support\Facades\DB;
 @endphp
-
+<a href="{{ route('kwhSales.consolidated-per-town', [$period]) }}" class="btn btn-warning btn-sm"><i class="fas fa-share ico-tab"></i>Go to Consolidated Per Town</a>
 <table class="table table-sm table-borderless">
     <thead>
         <th>Rate</th>

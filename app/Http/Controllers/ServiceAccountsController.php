@@ -503,13 +503,19 @@ class ServiceAccountsController extends AppBaseController
         $barangays = Barangays::where('TownId', $serviceAccount->Town)->pluck('Barangay', 'id');
         $accountTypes = ServiceConnectionAccountTypes::all();
         $meterReaders = MeterReaders::all();
+        $bapa = DB::table('Billing_ServiceAccounts')
+            ->select('OrganizationParentAccount')
+            ->groupBy('OrganizationParentAccount')
+            ->orderBy('OrganizationParentAccount')
+            ->get();
 
         return view('/service_accounts/update_step_one', [
             'serviceAccount' => $serviceAccount,
             'towns' => $towns,
             'barangays' => $barangays,
             'accountTypes' => $accountTypes,
-            'meterReaders' => $meterReaders
+            'meterReaders' => $meterReaders,
+            'bapa' => $bapa,
         ]);
     }
 

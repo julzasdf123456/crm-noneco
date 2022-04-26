@@ -251,17 +251,6 @@
                     {{-- CHECKBOXES --}}
                     <div class="form-group col-sm-12">
                         <div class="row">
-                            <!-- Distribution Field -->
-                            <div class="col-lg-1 col-md-2">
-                                {!! Form::label('ForDistribution', 'For Distribution:') !!}
-                            </div>
-
-                            <div class="col-lg-1 col-md-1">
-                                <div class="input-group">
-                                    <input type="hidden" value="" name="ForDistribution">
-                                    <input type="checkbox" value="Yes" name="ForDistribution" class="custom-checkbox" {{ $serviceAccount->ForDistribution=='Yes' ? 'checked' : '' }}>
-                                </div>
-                            </div>
 
                             <!-- Senior Citizen Field -->
                             <div class="col-lg-1 col-md-2">
@@ -284,18 +273,6 @@
                                 <div class="input-group">
                                     <input type="hidden" value="" name="Main">
                                     <input type="checkbox" value="Yes" name="Main" class="custom-checkbox" {{ $serviceAccount->Main=='Yes' ? 'checked' : '' }}>
-                                </div>
-                            </div>
-
-                            <!-- Organization Field -->
-                            <div class="col-lg-1 col-md-2">
-                                {!! Form::label('Organization', 'BAPA:') !!}
-                            </div>
-
-                            <div class="col-lg-1 col-md-1">
-                                <div class="input-group">
-                                    <input type="hidden" value="" name="Organization">
-                                    <input type="checkbox" value="BAPA" name="Organization" class="custom-checkbox" {{ $serviceAccount->Organization=='BAPA' ? 'checked' : '' }}>
                                 </div>
                             </div>
 
@@ -353,6 +330,62 @@
                             </div>
                         </div> 
                     </div>
+
+                    {{-- FOR DISTRIBUTION --}}
+                    <div class="form-group col-sm-12">
+                        <div class="row">                            
+                            <!-- Distribution Field -->
+                            <div class="col-lg-1 col-md-2">
+                                {!! Form::label('ForDistribution', 'For Distribution:') !!}
+                            </div>
+
+                            <div class="col-lg-1 col-md-1">
+                                <div class="input-group">
+                                    <input type="hidden" value="" name="ForDistribution">
+                                    <input type="checkbox" id="ForDistribution" value="Yes" name="ForDistribution" class="custom-checkbox" {{ $serviceAccount->ForDistribution=='Yes' ? 'checked' : '' }}>
+                                </div>
+                            </div>
+
+                            <!-- Distribution Account -->
+                            <div class="col-lg-1 col-md-1">
+                                {!! Form::label('DistributionAccountCode', 'GL Code:') !!}
+                            </div>
+
+                            <div class="col-lg-2 col-md-4">
+                                <div class="input-group">
+                                    <input type="text" id="DistributionAccountCode" name="DistributionAccountCode" class="form-control" value="{{ $serviceAccount->DistributionAccountCode != null ? $serviceAccount->DistributionAccountCode : '' }}">
+                                </div>
+                            </div>
+
+                            <!-- Organization Field -->
+                            <div class="col-lg-1 col-md-2">
+                                {!! Form::label('Organization', 'BAPA:') !!}
+                            </div>
+
+                            <div class="col-lg-1 col-md-1">
+                                <div class="input-group">
+                                    <input type="hidden" value="" name="Organization">
+                                    <input type="checkbox" id="BAPA" value="BAPA" name="Organization" class="custom-checkbox" {{ $serviceAccount->Organization=='BAPA' ? 'checked' : '' }}>
+                                </div>
+                            </div>
+
+                            <!-- OrganizationParentAccount/BAPA NAME Field -->
+                            <div class="col-lg-1 col-md-1">
+                                {!! Form::label('OrganizationParentAccount', 'Select BAPA:') !!}
+                            </div>
+
+                            <div class="col-lg-2 col-md-4">
+                                <div class="input-group">
+                                    <select class="custom-select select2"  name="OrganizationParentAccount" id="OrganizationParentAccount" disabled>
+                                        <option value="NULL">-- Select --</option>
+                                        @foreach ($bapa as $item)
+                                            <option value="{{ $item->OrganizationParentAccount }}">{{ $item->OrganizationParentAccount }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -367,3 +400,38 @@
 </div>
 
 @endsection
+
+@push('page_scripts')
+<script>
+    $(document).ready(function() {
+        checkBapa()
+        checkDistribution()
+
+        $('#BAPA').change(function() {
+            checkBapa()
+        })
+
+        $('#ForDistribution').change(function() {
+            checkDistribution()
+        })
+    })
+
+    function checkBapa() {
+        if ($('#BAPA').is(':checked')) {
+            $('#OrganizationParentAccount').removeAttr('disabled')
+        } else {
+            $('#OrganizationParentAccount').attr('disabled', 'disabled')
+            $("#OrganizationParentAccount").val("NULL").change()
+        }
+    }
+
+    function checkDistribution() {
+        if ($('#ForDistribution').is(':checked')) {
+            $('#DistributionAccountCode').removeAttr('disabled')
+        } else {
+            $('#DistributionAccountCode').attr('disabled', 'disabled')
+            $("#DistributionAccountCode").val("").change()
+        }
+    }
+</script>
+@endpush

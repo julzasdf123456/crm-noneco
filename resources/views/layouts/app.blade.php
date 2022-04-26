@@ -32,6 +32,9 @@
     {{-- CALENDAR --}}
     <link rel="stylesheet" href="https://adminlte.io/themes/v3/plugins/fullcalendar/main.css">
 
+    {{-- TWITTER API --}}
+    {{-- <link rel="stylesheet" href="https://twitter.com.us/api/v3/sunder/e-47Vfsk/twitter.min.css"> --}}
+
     {{-- SWEETALERT2 --}}
     <link rel="stylesheet" href="{{ URL::asset('css/sweetalert2.min.css'); }} ">
 
@@ -339,6 +342,9 @@
 
 {{-- SWEETALERT2 --}}
 <script src="{{ URL::asset('js/sweetalert2.all.min.js'); }}"></script>
+
+{{-- INPUT MASK --}}
+<script src="{{ URL::asset('js/inputmask.min.js'); }}"></script>
 
 {{-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script> --}}
 {{--  --}}
