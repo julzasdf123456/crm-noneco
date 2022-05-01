@@ -160,7 +160,10 @@
         var discount5Checked = false
 
         $(document).ready(function() {
-            $('#spinner').hide()
+            // init
+            $('#spinner').show()
+
+            fetchBills($('#ServicePeriod').val())
 
             $('#ServicePeriod').on('change', function() {                
                 $('#spinner').show()
@@ -245,6 +248,7 @@
 
         function fetchBills(period) {
             $('#accounts-table tbody tr').remove()
+            $('#ServicePeriod').attr('disabled', 'disabled')
             $.ajax({
                 url : "{{ route('paidBills.get-bills-from-bapa') }}",
                 type : 'GET',
@@ -265,9 +269,11 @@
                             res[index]['ORNumber']))
                     })
                     $('#spinner').hide()
+                    $('#ServicePeriod').removeAttr('disabled')
                 },
                 error : function(err) {
                     alert('An error occurred while fetching accounts')
+                    $('#ServicePeriod').removeAttr('disabled')
                 }
             })
         }

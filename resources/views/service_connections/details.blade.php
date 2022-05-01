@@ -63,7 +63,12 @@
                                         </div>
                                         <span class="text">
                                             {{ $item->Checklist }}
-                                            (<a href="{{ route('serviceConnectionChecklists.download-file', [$serviceConnections->id, $item->Checklist, $checkListRecord->Notes]) }}" target="_blank">{{ $checkListRecord->Notes }}</a>)
+                                            @if ($checkListRecord->Notes != null)
+                                                (<a href="{{ route('serviceConnectionChecklists.download-file', [$serviceConnections->id, $item->Checklist, $checkListRecord->Notes]) }}" target="_blank">{{ $checkListRecord->Notes }}</a>)
+                                            @else
+                                                
+                                            @endif
+                                            
                                         </span>
                                     </li>
                                 @endif

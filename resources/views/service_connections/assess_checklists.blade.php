@@ -17,7 +17,7 @@
         </div>
     </section>
     {{-- UPLOAD REQUIREMENTS --}}
-    <div class="row">
+    {{-- <div class="row">
         <div class="col-lg-10 offset-lg-1 col-md-12 col-sm-12">
             <div class="card">
                 <div class="card-header">
@@ -79,10 +79,10 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     {{-- CHECKLIST ONLY --}}
-    {{-- <div class="row">
+    <div class="row">
         <div class="col-lg-6 offset-lg-3 col-md-8 offset-md-2 col-sm-12">
             <div class="content px-3">
 
@@ -101,8 +101,14 @@
                                 <p class="text-center">No cheklist found. Go to Settings and add Checklists.</p>
                             @else
                                 @foreach ($checklist as $item)
+                                    @php
+                                        // FETCH CHECKLIST RECORD IF THERE'S ALREADY AN EXISTING RECORD
+                                        $checkListRecord = ServiceConnectionChecklists::where('ServiceConnectionId', $serviceConnections->id)
+                                            ->where('ChecklistId', $item->id)
+                                            ->first();
+                                    @endphp
                                     <div class='form-check'>
-                                        <input type="checkbox" class='form-check-input' value='{{ $item->id }}' name="ChecklistId[]">
+                                        <input type="checkbox" class='form-check-input' value='{{ $item->id }}' name="ChecklistId[]" {{ $checkListRecord != null ? 'checked' : '' }}>
                                 
                                         {{ Form::label('item', $item->Checklist, ['class' => 'form-check-label']) }}
                                     </div>   
@@ -121,7 +127,7 @@
                 </div>
             </div>
         </div>
-    </div> --}}
+    </div>
     
 @endsection
 
