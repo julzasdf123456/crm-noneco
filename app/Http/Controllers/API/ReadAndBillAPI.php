@@ -139,7 +139,7 @@ class ReadAndBillAPI extends Controller {
         
         if ($readings != null) {
             // update
-            // $reading = Readings::update($request->all(), $readings->id);
+            $reading = Readings::update($request->all(), $readings->id);
         } else {
             //create
             $reading = Readings::create($input);

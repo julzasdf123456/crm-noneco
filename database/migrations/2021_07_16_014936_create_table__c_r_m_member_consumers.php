@@ -38,6 +38,7 @@ class CreateTableCRMMemberConsumers extends Migration
             $table->string('ApplicationStatus')->nullable();
             $table->string('Notes', 2000)->nullable();
             $table->string('Trashed', 5)->nullable();
+            $table->string('OrganizationRepresentative', 500)->nullable();
             $table->timestamps();
         });
     }

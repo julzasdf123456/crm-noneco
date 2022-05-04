@@ -121,30 +121,47 @@ use App\Models\IDGenerator;
 </div>
 
 <!-- Organizationname Field -->
-<div class="form-group col-sm-12" id="OrgranizationNameModule">
-    <div class="row">
-        <div class="col-lg-3 col-md-5">
-            {!! Form::label('OrganizationName', 'Entity Name') !!}
-        </div>
+<div id="OrgranizationNameModule" class="col-sm-12">
+    <div class="form-group col-sm-12">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('OrganizationName', 'Entity Name') !!}
+            </div>
 
-        <div class="col-lg-9 col-md-7">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-university"></i></span>
+            <div class="col-lg-9 col-md-7">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-university"></i></span>
+                    </div>
+                    {!! Form::text('OrganizationName', null, ['class' => 'form-control','maxlength' => 1000,'maxlength' => 1000, 'placeholder' => 'Entity Name']) !!}
                 </div>
-                {!! Form::text('OrganizationName', null, ['class' => 'form-control','maxlength' => 1000,'maxlength' => 1000, 'placeholder' => 'Entity Name']) !!}
             </div>
         </div>
     </div>
     
-    
+    <div class="form-group col-sm-12">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('OrganizationRepresentative', 'Representative') !!}
+            </div>
+
+            <div class="col-lg-9 col-md-7">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    </div>
+                    {!! Form::text('OrganizationRepresentative', null, ['class' => 'form-control','maxlength' => 1000,'maxlength' => 1000, 'placeholder' => 'Representative']) !!}
+                </div>
+            </div>
+        </div>
+    </div>    
 </div>
 
 <!-- Birthdate Field -->
 <div class="form-group col-sm-12">
     <div class="row">
         <div class="col-lg-3 col-md-5">
-            {!! Form::label('Birthdate', 'Birtdate') !!}
+            {!! Form::label('Birthdate', 'Birthdate') !!}
         </div>
 
         <div class="col-lg-9 col-md-7">
@@ -340,3 +357,34 @@ use App\Models\IDGenerator;
 <input type="hidden" name="ApplicationStatus" value="Pending">
 
 <p id="Def_Brgy" style="display: none;">{{ $memberConsumers==null ? '' : $memberConsumers->Barangay }}</p>
+
+@push('page_scripts')
+    <script>
+        $(document).ready(function() {
+            /**
+            * MEMBERSHIP RELATED SCRIPTS
+            */
+
+            /**
+             * Initialize Juridical fields
+             */
+            if ($('#MembershipType option:selected').text() == 'Juridical') {
+                $('#OrgranizationNameModule').show();
+                $('#NonJuridicals').hide();
+            } else {
+                $('#OrgranizationNameModule').hide();
+                $('#NonJuridicals').show();
+            }
+
+            $('#MembershipType').on('change', function() {
+                if ($('#MembershipType option:selected').text() == 'Juridical') {
+                    $('#OrgranizationNameModule').show();
+                    $('#NonJuridicals').hide();
+                } else {
+                    $('#OrgranizationNameModule').hide();
+                    $('#NonJuridicals').show();
+                }
+            });
+        })
+    </script>
+@endpush

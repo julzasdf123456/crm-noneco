@@ -388,7 +388,7 @@
 
         function adjustBill(kwh, additionalCharges, deductions, is2307) {
             $.ajax({
-                    url : '/bills/fetch-bill-adjustment-data',
+                    url : '{{ route("bills.fetch-bill-adjustment-data") }}',
                     type : 'GET',
                     data : {
                         BillId : "{{ $bill->id }}",

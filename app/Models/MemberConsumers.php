@@ -5,6 +5,7 @@ namespace App\Models;
 use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\MemberConsumerSpouse;
 
 /**
  * Class MemberConsumers
@@ -76,7 +77,8 @@ class MemberConsumers extends Model
         'Citizenship',
         'ApplicationStatus',
         'Notes',
-        'Trashed'
+        'Trashed',
+        'OrganizationRepresentative'
     ];
 
     /**
@@ -107,7 +109,8 @@ class MemberConsumers extends Model
         'Citizenship' => 'string',
         'ApplicationStatus' => 'string',
         'Notes' => 'string',
-        'Trashed' => 'string'
+        'Trashed' => 'string',
+        'OrganizationRepresentative' => 'string'
     ];
 
     /**
@@ -140,7 +143,8 @@ class MemberConsumers extends Model
         'Notes' => 'nullable|string|max:2000',
         'Trashed' => 'nullable|string|max:5',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'OrganizationRepresentative' => 'nullable|string'
     ];
 
     public static function serializeMemberName($memberconsumer) {
@@ -166,6 +170,20 @@ class MemberConsumers extends Model
             return $memberconsumer->Sitio . ', ' . $memberconsumer->Barangay . ', ' . $memberconsumer->Town;
         } elseif($memberconsumer->Barangay == null) {
             return $memberconsumer->Sitio;
+        }
+    }
+
+    public static function serializeSpouse($memberconsumer) {
+        if ($memberconsumer->MembershipType == '1626404083011') { // GET ID OF THE DESIRED JURIDICAL TYPE
+            return $memberconsumer->OrganizationRepresentative;
+        } else {
+            $spouse = MemberConsumerSpouse::where('MemberConsumerId', $memberconsumer->Id)->first();
+            if ($spouse != null) {
+                return $spouse->FirstName . ' ' . $spouse->LastName . ' ' . $spouse->Suffix;
+            } else {
+                return "-";
+            }
+            
         }
     }
 }

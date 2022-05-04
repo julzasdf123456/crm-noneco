@@ -58,6 +58,7 @@ Route::resource('permissions', App\Http\Controllers\PermissionController::class)
 Route::get('/member_consumers/assess_checklists/{id}', [MemberConsumersController::class, 'assessChecklists'])->name('memberConsumers.assess-checklists');
 Route::get('/member_consumers/fetchmemberconsumer', [MemberConsumersController::class, 'fetchmemberconsumer'])->name('memberConsumers.fetch-member-consumers');
 Route::get('/member_consumers/capture-image/{id}', [MemberConsumersController::class, 'captureImage'])->name('memberConsumers.capture-image');
+Route::get('/member_consumers/print-membership-application/{id}', [MemberConsumersController::class, 'printMembershipApplication'])->name('memberConsumers.print-membership-application');
 Route::resource('memberConsumers', MemberConsumersController::class);
 
 
@@ -374,7 +375,7 @@ Route::get('/bills/average-bill/{readingId}', [App\Http\Controllers\BillsControl
 Route::get('/bills/rebill-reading-adjustment/{readingId}', [App\Http\Controllers\BillsController::class, 'rebillReadingAdjustment'])->name('bills.rebill-reading-adjustment');
 Route::post('/bills/rebill/{readingId}', [App\Http\Controllers\BillsController::class, 'rebill'])->name('bills.rebill');
 Route::get('/bills/adjust-bill/{billId}', [App\Http\Controllers\BillsController::class, 'adjustBill'])->name('bills.adjust-bill');
-Route::get('/bills/fetch-bill-adjustment-data', [App\Http\Controllers\BillsController::class, 'fetchBillAdjustmentData'])->name('bills.etch-bill-adjustment-data');
+Route::get('/bills/fetch-bill-adjustment-data', [App\Http\Controllers\BillsController::class, 'fetchBillAdjustmentData'])->name('bills.fetch-bill-adjustment-data');
 Route::get('/bills/all-bills', [App\Http\Controllers\BillsController::class,  'allBills'])->name('bills.all-bills');
 Route::get('/bills/bill-arrears-unlocking', [App\Http\Controllers\BillsController::class,  'billArrearsUnlocking'])->name('bills.bill-arrears-unlocking');
 Route::get('/bills/unlock-bill-arrear/{id}', [App\Http\Controllers\BillsController::class,  'unlockBillArrear'])->name('bills.unlock-bill-arrear');

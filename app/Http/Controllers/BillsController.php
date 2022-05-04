@@ -938,7 +938,8 @@ class BillsController extends AppBaseController
             ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
             ->where('Billing_ServiceAccounts.MemberConsumerId', $memberConsumerId)
             ->where('Billing_Bills.ServicePeriod', $period)
-            ->whereNotIn('Billing_Bills.AccountNumber', DB::table('Cashier_PaidBills')->where('ServicePeriod', $period)->whereNull('Status')->pluck('AccountNumber'))
+            ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "' AND Status IS NULL)")
+            // ->whereNotIn('Billing_Bills.AccountNumber', DB::table('Cashier_PaidBills')->where('ServicePeriod', $period)->whereNull('Status')->pluck('AccountNumber'))
             ->select('Billing_ServiceAccounts.MemberConsumerId',
                 'Billing_ServiceAccounts.OldAccountNo',
                 'Billing_Bills.*',

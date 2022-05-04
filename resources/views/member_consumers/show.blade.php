@@ -72,6 +72,8 @@ use App\Models\MemberConsumers;
                         @elseif ($memberConsumers->CivilStatus=='Married' && !empty($memberConsumerSpouse))
                             <a href="{{ route('memberConsumerSpouses.edit', [$memberConsumerSpouse->id]) }}" class="btn btn-link text-info" title="Edit spouse"><i class="fas fa-user-edit"></i></a>
                         @endif
+
+                        <a href="{{ route('memberConsumers.print-membership-application', [$memberConsumers->ConsumerId]) }}" class="btn btn-link" title="Print Application Form"><i class="fas fa-print"></i></a>
                     </div>
                 </div>
             </div>

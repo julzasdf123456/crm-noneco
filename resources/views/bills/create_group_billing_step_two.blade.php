@@ -98,7 +98,7 @@
 
         function performSearch(regex) {
             $.ajax({
-                url : '/bills/search-account',
+                url : '{{ route("bills.search-account") }}',
                 type : 'GET',
                 data : {
                     query : regex,
@@ -125,7 +125,7 @@
 
         function addToGroup(id) {
             $.ajax({
-                url : '/bills/add-to-group',
+                url : '{{ route("bills.add-to-group") }}',
                 type : "GET",
                 data : {
                     id : id,
@@ -143,7 +143,7 @@
         function deleteFromGroup(id) {
             if (confirm('Are you sure you want to remove this account from this group?')) {
                 $.ajax({
-                    url : '/bills/remove-from-group',
+                    url : '{{ route("bills.remove-from-group") }}',
                     type : "GET",
                     data : {
                         id : id,

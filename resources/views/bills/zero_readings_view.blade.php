@@ -239,7 +239,7 @@
         $(document).ready(function() {
             $('#adjustBtn').on('click', function() {
                 $.ajax({
-                    url : '/pendingBillAdjustments/',
+                    url : '{{ route("pendingBillAdjustments.store") }}',
                     type : 'POST',
                     data : {
                         _token : "{{ csrf_token() }}",

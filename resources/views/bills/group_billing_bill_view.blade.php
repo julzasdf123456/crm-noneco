@@ -64,8 +64,8 @@
                                 <td>{{ number_format($item->PreviousKwh, 2)  }}</td>
                                 <td class="text-right">{{ number_format($item->KwhUsed, 2) }}</td>                                
                                 <td class="text-right">{{ number_format((floatval($item->NetAmount) - (floatval($item->Evat2Percent) + floatval($item->Evat5Percent))), 2) }}</td>
-                                <td class="text-right">{{ number_format($item->Evat2Percent, 2) }}</td>
-                                <td class="text-right">{{ number_format($item->Evat5Percent, 2) }}</td>
+                                <td class="text-right">{{ $item->Evat2Percent != null ? number_format($item->Evat2Percent, 2) : 0 }}</td>
+                                <td class="text-right">{{ $item->Evat5Percent != null ? number_format($item->Evat5Percent, 2) : 0 }}</td>
                                 <td class="text-right">{{ number_format(Bills::assessDueBillAndGetSurcharge($item), 2) }}</td>
                                 <td class="text-right">{{ number_format(floatval($item->NetAmount) + floatval(Bills::assessDueBillAndGetSurcharge($item)), 2) }}</td>
                             </tr>
@@ -181,7 +181,7 @@
             if ($('#Evat2Percent').is(':checked')) {
                 // ADD 2% DISCOUNT
                 $.ajax({
-                    url : '/bills/add-two-percent',
+                    url : '{{ route("bills.add-two-percent") }}',
                     type : 'GET',
                     data : {
                         MemberConsumerId : "{{ $memberConsumer->ConsumerId }}",
@@ -197,7 +197,7 @@
             } else {
                 // REMOVE 2% DISCOUNT
                 $.ajax({
-                    url : '/bills/remove-two-percent',
+                    url : '{{ route("bills.remove-two-percent") }}',
                     type : 'GET',
                     data : {
                         MemberConsumerId : "{{ $memberConsumer->ConsumerId }}",
@@ -217,7 +217,7 @@
             if ($('#Evat5Percent').is(':checked')) {
                 // ADD 5% DISCOUNT
                 $.ajax({
-                    url : '/bills/add-five-percent',
+                    url : '{{ route("bills.add-five-percent") }}',
                     type : 'GET',
                     data : {
                         MemberConsumerId : "{{ $memberConsumer->ConsumerId }}",
@@ -233,7 +233,7 @@
             } else {
                 // REMOVE 5% DISCOUNT
                 $.ajax({
-                    url : '/bills/remove-five-percent',
+                    url : '{{ route("bills.remove-five-percent") }}',
                     type : 'GET',
                     data : {
                         MemberConsumerId : "{{ $memberConsumer->ConsumerId }}",

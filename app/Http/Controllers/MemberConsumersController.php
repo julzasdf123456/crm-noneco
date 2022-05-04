@@ -13,6 +13,9 @@ use App\Models\Barangays;
 use App\Models\Towns;
 use App\Models\MemberConsumers;
 use App\Models\MemberConsumerChecklistsRep;
+use App\Models\TransactionDetails;
+use App\Models\TransactionIndex;
+use App\Models\ServiceConnections;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Flash;
@@ -339,6 +342,7 @@ class MemberConsumersController extends AppBaseController
                                                 <p class="text-muted" style="margin-bottom: 0;">' . $row->Barangay . ', ' . $row->Town  . '</p>
                                                 <a href="' . route('memberConsumers.show', [$row->ConsumerId]) . '" class="text-primary" style="margin-top: 5px; padding: 8px;" title="View"><i class="fas fa-eye"></i></a>
                                                 <a href="' . route('memberConsumers.edit', [$row->ConsumerId]) . '" class="text-warning" style="margin-top: 5px; padding: 8px;" title="Edit"><i class="fas fa-pen"></i></a>
+                                                <a href="' . route('memberConsumers.print-membership-application', [$row->ConsumerId]) . '" class="text-primary" style="margin-top: 5px; padding: 8px;" title="Print Membership Application Form"><i class="fas fa-print"></i></a>
                                             </div>     
                                         </div> 
 
@@ -395,5 +399,59 @@ class MemberConsumersController extends AppBaseController
             return abort(403, "You're not authorized to update a membership application.");
         }
         
+    }
+
+    public function printMembershipApplication($id) {
+        $memberConsumers = DB::table('CRM_MemberConsumers')
+                            ->leftJoin('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
+                            ->leftJoin('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
+                            ->leftJoin('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
+                            ->select('CRM_MemberConsumers.Id as Id',
+                                    'CRM_MemberConsumers.MembershipType as MembershipType', 
+                                    'CRM_MemberConsumers.FirstName as FirstName', 
+                                    'CRM_MemberConsumers.MiddleName as MiddleName', 
+                                    'CRM_MemberConsumers.LastName as LastName', 
+                                    'CRM_MemberConsumers.OrganizationName as OrganizationName', 
+                                    'CRM_MemberConsumers.Suffix as Suffix', 
+                                    'CRM_MemberConsumers.Birthdate as Birthdate', 
+                                    'CRM_MemberConsumers.Barangay as Barangay', 
+                                    'CRM_MemberConsumers.ApplicationStatus as ApplicationStatus',
+                                    'CRM_MemberConsumers.DateApplied as DateApplied', 
+                                    'CRM_MemberConsumers.CivilStatus as CivilStatus', 
+                                    'CRM_MemberConsumers.DateApproved as DateApproved', 
+                                    'CRM_MemberConsumers.ContactNumbers as ContactNumbers', 
+                                    'CRM_MemberConsumers.OrganizationRepresentative', 
+                                    'CRM_MemberConsumers.EmailAddress as EmailAddress',  
+                                    'CRM_MemberConsumers.Notes as Notes', 
+                                    'CRM_MemberConsumers.Gender as Gender', 
+                                    'CRM_MemberConsumers.Sitio as Sitio', 
+                                    'CRM_MemberConsumerTypes.*',
+                                    'CRM_Towns.Town as Town',
+                                    'CRM_Barangays.Barangay as Barangay')
+                            ->where('CRM_MemberConsumers.Id', $id)
+                            ->first();
+
+        
+        if ($memberConsumers != null) {
+            $serviceConnection = ServiceConnections::where('MemberConsumerId', $id)->first();
+
+            if ($serviceConnection != null) {
+                $transaction = DB::table('Cashier_TransactionIndex')
+                    ->select('ORNumber',
+                        'ORDate',
+                        DB::raw("(SELECT Amount FROM Cashier_TransactionDetails WHERE Particular='Membership Fee' AND TransactionIndexId=Cashier_TransactionIndex.id) AS Amount"))
+                    ->where('ServiceConnectionId', $serviceConnection->id)
+                    ->first();
+            } else {
+                $transaction = null;
+            }
+            return view('/member_consumers/print_membership_application', [
+                'memberConsumers' => $memberConsumers,
+                'transaction' => $transaction,
+                'serviceConnection' => $serviceConnection,
+            ]);
+        } else {
+            return abort(404, 'Member-Consumer not found');
+        }
     }
 }

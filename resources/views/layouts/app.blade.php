@@ -378,30 +378,6 @@
         $('.select2').select2({
             theme: 'bootstrap4'
         })
-        /**
-         * MEMBERSHIP RELATED SCRIPTS
-         */
-
-         /**
-          * Initialize Juridical fields
-          */
-        if ($('#MembershipType option:selected').text() == 'Juridical') {
-            $('#OrgranizationNameModule').show();
-            $('#NonJuridicals').hide();
-        } else {
-            $('#OrgranizationNameModule').hide();
-            $('#NonJuridicals').show();
-        }
-
-        $('#MembershipType').on('change', function() {
-            if ($('#MembershipType option:selected').text() == 'Juridical') {
-                $('#OrgranizationNameModule').show();
-                $('#NonJuridicals').hide();
-            } else {
-                $('#OrgranizationNameModule').hide();
-                $('#NonJuridicals').show();
-            }
-        });
 
         /**
          * TOWN CHANGE
