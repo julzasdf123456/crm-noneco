@@ -102,7 +102,7 @@ use App\Models\IDGenerator;
         </div> 
     </div>
 
-    {{-- <!-- Accounttype Field -->
+    <!-- Accounttype Field -->
     <div class="form-group col-sm-12">
         <div class="row">
             <div class="col-lg-3 col-md-5">
@@ -115,10 +115,10 @@ use App\Models\IDGenerator;
                         <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
                     </div>
 
-                    <div class="radio-group-horizontal">
+                    <div class="radio-group">
                         @if ($accountTypes != null)
                             @foreach ($accountTypes as $item)
-                            <div class="form-check">
+                            <div class="form-check" style="margin-left: 30px;">
                                 <input class="form-check-input" type="radio" name="AccountType" value="{{ $item->id }}">
                                 <label class="form-check-label">{{ $item->AccountType }}</label>
                             </div>
@@ -128,7 +128,7 @@ use App\Models\IDGenerator;
                 </div>
             </div>
         </div>  
-    </div> --}}
+    </div>
 
     <!-- Accountapplicationtype Field -->
     <div class="form-group col-sm-12">
@@ -185,7 +185,66 @@ use App\Models\IDGenerator;
             </div>
         </div>  
     </div>
+
+    <!-- TypeOfOccupancy Field -->
+    <div class="form-group col-sm-12">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('TypeOfOccupancy', 'Type of Occupancy: ') !!}
+            </div>
+
+            <div class="col-lg-9 col-md-7">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
+                    </div>
+                    <div class="radio-group-horizontal">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="TypeOfOccupancy" value="Owns House/Lot" checked>
+                            <label class="form-check-label">Owns House/Lot</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="TypeOfOccupancy" value="Owns House">
+                            <label class="form-check-label">Owns House</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="TypeOfOccupancy" value="Leasing/Renting">
+                            <label class="form-check-label">Leasing/Renting</label>
+                        </div>
+                    </div>   
+                </div>
+            </div>
+        </div>  
+    </div>
 @else 
+    <!-- Accounttype Field -->
+    <div class="form-group col-sm-12">
+        <div class="row">
+            <div class="col-lg-3 col-md-5">
+                {!! Form::label('AccountType', 'Classification of Service') !!}
+            </div>
+
+            <div class="col-lg-9 col-md-7">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
+                    </div>
+
+                    <div class="radio-group">
+                        @if ($accountTypes != null)
+                            @foreach ($accountTypes as $item)
+                            <div class="form-check" style="margin-left: 30px;">
+                                <input class="form-check-input" type="radio" name="AccountType" value="{{ $item->id }}">
+                                <label class="form-check-label">{{ $item->AccountType }}</label>
+                            </div>
+                            @endforeach
+                        @endif
+                    </div> 
+                </div>
+            </div>
+        </div>  
+    </div>
+
     <input type="hidden" name="id" id="Membership_Id" value="{{ $serviceConnections->id }}">
 @endif
 
@@ -341,6 +400,24 @@ use App\Models\IDGenerator;
                     <span class="input-group-text"><i class="fas fa-envelope-open"></i></span>
                 </div>
                 {!! Form::text('EmailAddress', $cond=='new' ? $memberConsumer->EmailAddress : $serviceConnections->EmailAddress, ['class' => 'form-control','maxlength' => 300,'maxlength' => 300, 'placeholder' => 'Email Address']) !!}
+            </div>
+        </div>
+    </div> 
+</div>
+
+<!-- Residence Number Field -->
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('ResidenceNumber', 'Residence Number') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-house"></i></span>
+                </div>
+                {!! Form::text('ResidenceNumber', null, ['class' => 'form-control','maxlength' => 300,'maxlength' => 300, 'placeholder' => 'Residence Number']) !!}
             </div>
         </div>
     </div> 

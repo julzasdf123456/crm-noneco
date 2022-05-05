@@ -40,7 +40,8 @@ class ServiceConnectionPayParticulars extends Model
         'DefaultAmount',
         'Description',
         'VatPercentage',
-        'Notes'
+        'Notes',
+        'AccountNumber'
     ];
 
     /**
@@ -54,7 +55,8 @@ class ServiceConnectionPayParticulars extends Model
         'DefaultAmount' => 'string',
         'Description' => 'string',
         'VatPercentage' => 'string',
-        'Notes' => 'string'
+        'Notes' => 'string',
+        'AccountNumber' => 'string'
     ];
 
     /**
@@ -70,7 +72,8 @@ class ServiceConnectionPayParticulars extends Model
         'VatPercentage' => 'nullable|string|max:50',
         'Notes' => 'nullable|string|max:1000',
         'created_at' => 'nullable',
-        'updated_at' => 'nullable'
+        'updated_at' => 'nullable',
+        'AccountNumber' => 'nullable|string'
     ];
 
     

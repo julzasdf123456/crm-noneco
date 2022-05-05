@@ -23,6 +23,7 @@ use App\Models\ORAssigning;
 use App\Models\Bills;
 use App\Models\Tickets;
 use App\Models\TicketLogs;
+use App\Models\DCRSummaryTransactions;
 use Flash;
 use Response;
 
@@ -234,7 +235,8 @@ class TransactionIndexController extends AppBaseController
                     'CRM_ServiceConnectionParticularPaymentsTransactions.Amount',
                     'CRM_ServiceConnectionParticularPaymentsTransactions.Vat',
                     'CRM_ServiceConnectionParticularPaymentsTransactions.Total',
-                    'CRM_ServiceConnectionPaymentParticulars.Particular')
+                    'CRM_ServiceConnectionPaymentParticulars.Particular',
+                    'CRM_ServiceConnectionPaymentParticulars.AccountNumber')
             ->where('CRM_ServiceConnectionParticularPaymentsTransactions.ServiceConnectionId', $request['svcId'])
             ->get();
 
@@ -282,7 +284,21 @@ class TransactionIndexController extends AppBaseController
             $transactionDetails->Amount = $item->Amount;
             $transactionDetails->VAT = $item->Vat;
             $transactionDetails->Total = $item->Total;
+            $transactionDetails->AccountCode = $item->AccountNumber;
             $transactionDetails->save();
+
+            // SAVE DCR TRANSACTIONS
+            if ($item->AccountNumber != null) {
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = $item->AccountNumber;
+                $dcrSum->Amount = $item->Total;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+            }            
         }
 
         // SAVE TRANSACTION DETAILS FOR POWER LOAD
@@ -612,7 +628,7 @@ class TransactionIndexController extends AppBaseController
         if (count($results) > 0) {
             foreach($results as $item) {
                 $output .= '
-                        <tr>
+                        <tr onclick=fetchAccountDetails("' . $item->id . '")>
                             <td>' . $item->id . '</td>
                             <td>' . $item->ServiceAccountName . '</td>
                             <td>' . ServiceAccounts::getAddress($item) . '</td>
@@ -698,7 +714,7 @@ class TransactionIndexController extends AppBaseController
         if (count($results) > 0) {
             foreach($results as $item) {
                 $output .= '
-                        <tr>
+                        <tr onclick=fetchAccountDetails("' . $item->id . '")>
                             <td>' . $item->id . '</td>
                             <td>' . $item->ServiceAccountName . '</td>
                             <td>' . ServiceAccounts::getAddress($item) . '</td>
@@ -722,7 +738,7 @@ class TransactionIndexController extends AppBaseController
             ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
             ->where('Billing_Bills.AccountNumber', $request['AccountNumber'])
-            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->pluck('Cashier_PaidBills.ObjectSourceId'))
+            ->whereRaw("Billing_Bills.id NOT IN (SELECT ObjectSourceId FROM Cashier_PaidBills WHERE AccountNumber='" . $request['AccountNumber'] . "')")
             ->select('Billing_Bills.*')
             ->orderByDesc('Billing_Bills.ServicePeriod')
             ->get();
@@ -781,6 +797,19 @@ class TransactionIndexController extends AppBaseController
         $transactionDetails->Total = round(floatval($request['Total']), 2);
         $transactionDetails->AccountCode = $reconnectionPayable->AccountCode;
         $transactionDetails->save();
+
+        // SAVE DCR TRANSACTIONS
+        if ($reconnectionPayable->AccountCode != null) {
+            $dcrSum = new DCRSummaryTransactions;
+            $dcrSum->id = IDGenerator::generateIDandRandString();
+            $dcrSum->GLCode = $reconnectionPayable->AccountCode;
+            $dcrSum->Amount = $transactionDetails->Total;
+            $dcrSum->Day = date('Y-m-d');
+            $dcrSum->Time = date('H:i:s');
+            $dcrSum->Teller = Auth::id();
+            $dcrSum->ORNumber = $request['ORNumber'];
+            $dcrSum->save();
+        }  
 
         // CREATE RECONNECTION TICKET
         $ticket = new Tickets;

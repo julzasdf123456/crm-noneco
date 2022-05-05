@@ -88,6 +88,14 @@ use Illuminate\Support\Facades\Auth;
                                 <i class="fas fa-pen"></i>
                             </a>
 
+                            <a href="{{ route('serviceConnections.print-service-connection-application', [$serviceConnections->id]) }}" title="Print Service Connection Application" style="margin-left: 20px;">
+                                <i class="fas fa-print"></i>
+                            </a>
+
+                            <a href="{{ route('serviceConnections.print-service-connection-contract', [$serviceConnections->id]) }}" class="text-danger" title="Print Service Connection Contract" style="margin-left: 20px;">
+                                <i class="fas fa-print"></i>
+                            </a>
+
                             <a href="{{ route('serviceConnections.move-to-trash', [$serviceConnections->id]) }}" class="text-danger float-right" title="Move to trash">
                                 <i class="fas fa-trash"></i>
                             </a>                            

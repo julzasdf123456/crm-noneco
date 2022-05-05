@@ -80,6 +80,8 @@ class ServiceConnections extends Model
         'TemporaryDurationInMonths',
         'LongSpan',
         'Office',
+        'TypeOfOccupancy',
+        'ResidenceNumber'
     ];
 
     /**
@@ -119,6 +121,8 @@ class ServiceConnections extends Model
         'TemporaryDurationInMonths' => 'string',
         'LongSpan' => 'string',
         'Office' => 'string',
+        'TypeOfOccupancy' => 'string',
+        'ResidenceNumber' => 'string'
     ];
 
     /**
@@ -160,6 +164,8 @@ class ServiceConnections extends Model
         'TemporaryDurationInMonths' => 'nullable|string',
         'LongSpan' => 'nullable|string',
         'Office' => 'nullable|string',
+        'TypeOfOccupancy' => 'nullable|string',
+        'ResidenceNumber' => 'nullable|string'
     ];
 
     public static function getAccountCount($consumerId) {

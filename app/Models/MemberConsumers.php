@@ -6,6 +6,7 @@ use Eloquent as Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\MemberConsumerSpouse;
+use DateTime;
 
 /**
  * Class MemberConsumers
@@ -78,7 +79,8 @@ class MemberConsumers extends Model
         'ApplicationStatus',
         'Notes',
         'Trashed',
-        'OrganizationRepresentative'
+        'OrganizationRepresentative',
+        'ResidenceNumber'
     ];
 
     /**
@@ -110,7 +112,8 @@ class MemberConsumers extends Model
         'ApplicationStatus' => 'string',
         'Notes' => 'string',
         'Trashed' => 'string',
-        'OrganizationRepresentative' => 'string'
+        'OrganizationRepresentative' => 'string',
+        'ResidenceNumber' => 'string'
     ];
 
     /**
@@ -144,11 +147,12 @@ class MemberConsumers extends Model
         'Trashed' => 'nullable|string|max:5',
         'created_at' => 'nullable',
         'updated_at' => 'nullable',
-        'OrganizationRepresentative' => 'nullable|string'
+        'OrganizationRepresentative' => 'nullable|string',
+        'ResidenceNumber' => 'nullable|string'
     ];
 
     public static function serializeMemberName($memberconsumer) {
-        if ($memberconsumer->MembershipType == '1626404083011') { // GET ID OF THE DESIRED JURIDICAL TYPE
+        if ($memberconsumer->MembershipType == MemberConsumers::getJuridicalId()) { // GET ID OF THE DESIRED JURIDICAL TYPE
             return $memberconsumer->OrganizationName;
         } else {
             return $memberconsumer->FirstName . ' ' . $memberconsumer->LastName . ' ' . $memberconsumer->Suffix;
@@ -156,7 +160,7 @@ class MemberConsumers extends Model
     }
 
     public static function serializeMemberNameFormal($memberconsumer) {
-        if ($memberconsumer->MembershipType == '1626404083011') { // GET ID OF THE DESIRED JURIDICAL TYPE
+        if ($memberconsumer->MembershipType == MemberConsumers::getJuridicalId()) { // GET ID OF THE DESIRED JURIDICAL TYPE
             return $memberconsumer->OrganizationName;
         } else {
             return $memberconsumer->LastName . ', ' . $memberconsumer->FirstName . ' ' . $memberconsumer->Suffix;
@@ -174,7 +178,7 @@ class MemberConsumers extends Model
     }
 
     public static function serializeSpouse($memberconsumer) {
-        if ($memberconsumer->MembershipType == '1626404083011') { // GET ID OF THE DESIRED JURIDICAL TYPE
+        if ($memberconsumer->MembershipType == MemberConsumers::getJuridicalId()) { // GET ID OF THE DESIRED JURIDICAL TYPE
             return $memberconsumer->OrganizationRepresentative;
         } else {
             $spouse = MemberConsumerSpouse::where('MemberConsumerId', $memberconsumer->Id)->first();
@@ -182,8 +186,19 @@ class MemberConsumers extends Model
                 return $spouse->FirstName . ' ' . $spouse->LastName . ' ' . $spouse->Suffix;
             } else {
                 return "-";
-            }
-            
+            }            
         }
+    }
+
+    public static function getJuridicalId() {
+        return '1626404083011';
+    }
+
+    public static function getAge($birthdate) {
+        $now = new DateTime();
+        $birthdate = $birthdate != null ? new DateTime($birthdate) : new DateTime();
+        $age = $birthdate->diff($now);
+
+        return $age->y;
     }
 }

@@ -16,8 +16,14 @@
     {!! Form::number('VatPercentage', null, ['class' => 'form-control', 'step' => 'any']) !!}
 </div>
 
+<!-- AccountNumber Field -->
+<div class="form-group col-sm-3">
+    {!! Form::label('AccountNumber', 'AccountNumber:') !!}
+    {!! Form::text('AccountNumber', null, ['class' => 'form-control','maxlength' => 800,'maxlength' => 800]) !!}
+</div>
+
 <!-- Description Field -->
-<div class="form-group col-sm-6">
+<div class="form-group col-sm-3">
     {!! Form::label('Description', 'Description:') !!}
     {!! Form::text('Description', null, ['class' => 'form-control','maxlength' => 800,'maxlength' => 800]) !!}
 </div>

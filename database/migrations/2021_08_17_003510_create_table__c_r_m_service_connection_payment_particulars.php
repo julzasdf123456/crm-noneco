@@ -21,6 +21,7 @@ class CreateTableCRMServiceConnectionPaymentParticulars extends Migration
             $table->string('DefaultAmount', 500)->nullable();
             $table->string('VatPercentage', 50)->nullable();
             $table->string('Notes', 1000)->nullable();
+            $table->string('AccountNumber')->nullable();
             $table->timestamps();
         });
     }

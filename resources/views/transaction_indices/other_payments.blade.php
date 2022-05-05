@@ -422,7 +422,6 @@
 
             $('#amountPaid').val('')
             $('#change').val('')
-            $('#ornumber').val('')
 
             $.ajax({
                 url : '/cache_other_payments/fetch-cached',
@@ -455,7 +454,7 @@
         }
 
         function focusOrNumber() {
-            $('#ornumber').focus()
+            $('#amountPaid').focus()
         }
 
         function clearAll() {
@@ -466,7 +465,6 @@
             $('#totalAmount').val("")
             $('#amountPaid').val('')
             $('#change').val('')
-            $('#ornumber').val('')
         }
     </script>
 @endpush

@@ -120,7 +120,7 @@ p {
         </div>
 
         <div class="col-sm-3 offset-sm-8">
-            <p class="text-center"><strong>{{ $memberConsumers->MembershipType == '1626404083011' ? MemberConsumers::serializeSpouse($memberConsumers) : MemberConsumers::serializeMemberNameFormal($memberConsumers) }}</strong></p>
+            <p class="text-center"><strong>{{ $memberConsumers->MembershipType == MemberConsumers::getJuridicalId() ? MemberConsumers::serializeSpouse($memberConsumers) : MemberConsumers::serializeMemberNameFormal($memberConsumers) }}</strong></p>
             <div class="divider"></div>
             <p class="text-center">Applicant's Name Over Signature</p>
             <br>

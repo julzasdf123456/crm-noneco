@@ -7,6 +7,8 @@ use App\Http\Requests\UpdateDCRSummaryTransactionsRequest;
 use App\Repositories\DCRSummaryTransactionsRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Flash;
 use Response;
 
@@ -30,10 +32,35 @@ class DCRSummaryTransactionsController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $dCRSummaryTransactions = $this->dCRSummaryTransactionsRepository->all();
+        
+        if ($request['Day'] != null) {
+            $data = DB::table('Cashier_DCRSummaryTransactions')
+                ->where('Day', $request['Day'])
+                ->where('Teller', $request['Teller'])
+                ->select('GLCode',
+                    DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
+                    DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
+                )
+                ->groupBy('GLCode')
+                ->orderBy('GLCode')
+                ->get();
+        } else {
+            $data = DB::table('Cashier_DCRSummaryTransactions')
+                ->where('Day', date('Y-m-d'))
+                ->where('Teller', $request['Teller'])
+                ->select('GLCode',
+                    DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
+                    DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
+                )
+                ->groupBy('GLCode')
+                ->orderBy('GLCode')
+                ->get();
+        }
 
-        return view('d_c_r_summary_transactions.index')
-            ->with('dCRSummaryTransactions', $dCRSummaryTransactions);
+        return view('d_c_r_summary_transactions.index', [
+            'data' => $data,
+            'day' => $request['Day'] != null ? $request['Day'] : date('Y-m-d'),
+        ]);
     }
 
     /**

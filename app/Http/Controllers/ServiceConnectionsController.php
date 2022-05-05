@@ -8,6 +8,7 @@ use App\Repositories\ServiceConnectionsRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
 use App\Models\MemberConsumers;
+use App\Models\MemberConsumerSpouse;
 use App\Models\Towns;
 use App\Models\ServiceConnectionAccountTypes;
 use App\Models\ServiceConnections;
@@ -29,6 +30,8 @@ use App\Models\SpanningData;
 use App\Models\PoleIndex;
 use App\Models\PreDefinedMaterials;
 use App\Models\PreDefinedMaterialsMatrix;
+use App\Models\TransactionDetails;
+use App\Models\TransactionIndex;
 use App\Exports\ServiceConnectionApplicationsReportExport;
 use App\Exports\ServiceConnectionEnergizationReportExport;
 use Illuminate\Support\Facades\DB;
@@ -2165,5 +2168,187 @@ class ServiceConnectionsController extends AppBaseController
             ->get();
     
         return response()->json($serviceConnections, 200);
+    }
+
+    public function printServiceConnectionApplication($id) {
+        $serviceConnection = DB::table('CRM_ServiceConnections')
+            ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->join('CRM_ServiceConnectionCrew', 'CRM_ServiceConnections.StationCrewAssigned', '=', 'CRM_ServiceConnectionCrew.id')
+            ->select('CRM_ServiceConnections.id as id',
+                        'CRM_ServiceConnections.AccountCount as AccountCount', 
+                        'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                        'CRM_ServiceConnections.DateOfApplication as DateOfApplication', 
+                        'CRM_ServiceConnections.ContactNumber as ContactNumber', 
+                        'CRM_ServiceConnections.EmailAddress as EmailAddress',  
+                        'CRM_ServiceConnections.AccountApplicationType as AccountApplicationType', 
+                        'CRM_ServiceConnections.AccountOrganization as AccountOrganization', 
+                        'CRM_ServiceConnections.AccountApplicationType as AccountApplicationType', 
+                        'CRM_ServiceConnections.ConnectionApplicationType as ConnectionApplicationType',
+                        'CRM_ServiceConnections.MemberConsumerId as MemberConsumerId',
+                        'CRM_ServiceConnections.Status as Status',  
+                        'CRM_ServiceConnections.Notes as Notes', 
+                        'CRM_ServiceConnections.TypeOfOccupancy',
+                        'CRM_ServiceConnections.ResidenceNumber',
+                        'CRM_ServiceConnections.Office', 
+                        'CRM_ServiceConnections.ORNumber as ORNumber', 
+                        'CRM_ServiceConnections.Sitio as Sitio', 
+                        'CRM_ServiceConnections.LoadCategory as LoadCategory', 
+                        'CRM_ServiceConnections.DateTimeOfEnergization as DateTimeOfEnergization', 
+                        'CRM_ServiceConnections.DateTimeLinemenArrived as DateTimeLinemenArrived', 
+                        'CRM_Towns.Town as Town',
+                        'CRM_Barangays.Barangay as Barangay',
+                        'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
+                        'CRM_ServiceConnectionCrew.StationName as StationName',
+                        'CRM_ServiceConnectionCrew.CrewLeader as CrewLeader',
+                        'CRM_ServiceConnectionCrew.Members as Members')
+        ->where('CRM_ServiceConnections.id', $id)
+        ->where(function ($query) {
+            $query->where('CRM_ServiceConnections.Trash', 'No')
+                ->orWhereNull('CRM_ServiceConnections.Trash');
+        })
+        ->first(); 
+
+        if ($serviceConnection != null) {
+            $memberConsumer = DB::table('CRM_MemberConsumers')
+            ->leftJoin('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
+            ->leftJoin('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
+            ->select('CRM_MemberConsumers.Id as Id',
+                    'CRM_MemberConsumers.MembershipType as MembershipType', 
+                    'CRM_MemberConsumers.FirstName as FirstName', 
+                    'CRM_MemberConsumers.MiddleName as MiddleName', 
+                    'CRM_MemberConsumers.LastName as LastName', 
+                    'CRM_MemberConsumers.OrganizationName as OrganizationName', 
+                    'CRM_MemberConsumers.Suffix as Suffix', 
+                    'CRM_MemberConsumers.Birthdate as Birthdate', 
+                    'CRM_MemberConsumers.Barangay as Barangay', 
+                    'CRM_MemberConsumers.ApplicationStatus as ApplicationStatus',
+                    'CRM_MemberConsumers.DateApplied as DateApplied', 
+                    'CRM_MemberConsumers.CivilStatus as CivilStatus', 
+                    'CRM_MemberConsumers.DateApproved as DateApproved', 
+                    'CRM_MemberConsumers.ContactNumbers as ContactNumbers', 
+                    'CRM_MemberConsumers.OrganizationRepresentative', 
+                    'CRM_MemberConsumers.EmailAddress as EmailAddress',  
+                    'CRM_MemberConsumers.Notes as Notes', 
+                    'CRM_MemberConsumers.Gender as Gender', 
+                    'CRM_MemberConsumers.Sitio as Sitio', 
+                    'CRM_MemberConsumerTypes.*',
+                    'CRM_Towns.Town as Town',
+                    'CRM_Barangays.Barangay as Barangay')
+            ->where('CRM_MemberConsumers.Id', $serviceConnection->MemberConsumerId)
+            ->first();
+
+            $transactionIndex = TransactionIndex::where('ServiceConnectionId', $id)->first();
+
+            if ($transactionIndex != null) {
+                $transactionDetails = TransactionDetails::where('TransactionIndexId', $transactionIndex->id)->get();
+            } else {
+                $transactionDetails = null;
+            }
+
+            if ($memberConsumer != null) {
+                $spouse = MemberConsumerSpouse::where('MemberConsumerId', $serviceConnection->MemberConsumerId)->first();
+            } else {
+                $spouse = null;
+            }
+
+            return view('/service_connections/print_service_connection_application', [
+                'serviceConnection' => $serviceConnection,
+                'memberConsumer' => $memberConsumer,
+                'spouse' => $spouse,
+                'transactionIndex' => $transactionIndex,
+                'transactionDetails' => $transactionDetails,
+            ]);
+        } else {
+            return abort(404, 'Service connection application not found!');
+        }
+    }  
+    
+    public function printServiceConnectionContract($id) { 
+        $serviceConnection = DB::table('CRM_ServiceConnections')
+            ->leftJoin('CRM_Barangays', 'CRM_ServiceConnections.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('CRM_Towns', 'CRM_ServiceConnections.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_ServiceConnectionAccountTypes', 'CRM_ServiceConnections.AccountType', '=', 'CRM_ServiceConnectionAccountTypes.id')
+            ->join('CRM_ServiceConnectionCrew', 'CRM_ServiceConnections.StationCrewAssigned', '=', 'CRM_ServiceConnectionCrew.id')
+            ->select('CRM_ServiceConnections.id as id',
+                        'CRM_ServiceConnections.AccountCount as AccountCount', 
+                        'CRM_ServiceConnections.ServiceAccountName as ServiceAccountName',
+                        'CRM_ServiceConnections.DateOfApplication as DateOfApplication', 
+                        'CRM_ServiceConnections.ContactNumber as ContactNumber', 
+                        'CRM_ServiceConnections.EmailAddress as EmailAddress',  
+                        'CRM_ServiceConnections.AccountApplicationType as AccountApplicationType', 
+                        'CRM_ServiceConnections.AccountOrganization as AccountOrganization', 
+                        'CRM_ServiceConnections.AccountApplicationType as AccountApplicationType', 
+                        'CRM_ServiceConnections.ConnectionApplicationType as ConnectionApplicationType',
+                        'CRM_ServiceConnections.MemberConsumerId as MemberConsumerId',
+                        'CRM_ServiceConnections.Status as Status',  
+                        'CRM_ServiceConnections.Notes as Notes', 
+                        'CRM_ServiceConnections.TypeOfOccupancy',
+                        'CRM_ServiceConnections.ResidenceNumber',
+                        'CRM_ServiceConnections.Office', 
+                        'CRM_ServiceConnections.ORNumber as ORNumber', 
+                        'CRM_ServiceConnections.Sitio as Sitio', 
+                        'CRM_ServiceConnections.LoadCategory as LoadCategory', 
+                        'CRM_ServiceConnections.DateTimeOfEnergization as DateTimeOfEnergization', 
+                        'CRM_ServiceConnections.DateTimeLinemenArrived as DateTimeLinemenArrived', 
+                        'CRM_Towns.Town as Town',
+                        'CRM_Barangays.Barangay as Barangay',
+                        'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
+                        'CRM_ServiceConnectionCrew.StationName as StationName',
+                        'CRM_ServiceConnectionCrew.CrewLeader as CrewLeader',
+                        'CRM_ServiceConnectionCrew.Members as Members')
+        ->where('CRM_ServiceConnections.id', $id)
+        ->where(function ($query) {
+            $query->where('CRM_ServiceConnections.Trash', 'No')
+                ->orWhereNull('CRM_ServiceConnections.Trash');
+        })
+        ->first(); 
+
+        if ($serviceConnection != null) {
+            $memberConsumer = DB::table('CRM_MemberConsumers')
+            ->leftJoin('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
+            ->leftJoin('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
+            ->select('CRM_MemberConsumers.Id as Id',
+                    'CRM_MemberConsumers.MembershipType as MembershipType', 
+                    'CRM_MemberConsumers.FirstName as FirstName', 
+                    'CRM_MemberConsumers.MiddleName as MiddleName', 
+                    'CRM_MemberConsumers.LastName as LastName', 
+                    'CRM_MemberConsumers.OrganizationName as OrganizationName', 
+                    'CRM_MemberConsumers.Suffix as Suffix', 
+                    'CRM_MemberConsumers.Birthdate as Birthdate', 
+                    'CRM_MemberConsumers.Barangay as Barangay', 
+                    'CRM_MemberConsumers.ApplicationStatus as ApplicationStatus',
+                    'CRM_MemberConsumers.DateApplied as DateApplied', 
+                    'CRM_MemberConsumers.CivilStatus as CivilStatus', 
+                    'CRM_MemberConsumers.DateApproved as DateApproved', 
+                    'CRM_MemberConsumers.ContactNumbers as ContactNumbers', 
+                    'CRM_MemberConsumers.OrganizationRepresentative', 
+                    'CRM_MemberConsumers.EmailAddress as EmailAddress',  
+                    'CRM_MemberConsumers.Notes as Notes', 
+                    'CRM_MemberConsumers.Gender as Gender', 
+                    'CRM_MemberConsumers.Sitio as Sitio', 
+                    'CRM_MemberConsumerTypes.*',
+                    'CRM_Towns.Town as Town',
+                    'CRM_Barangays.Barangay as Barangay')
+            ->where('CRM_MemberConsumers.Id', $serviceConnection->MemberConsumerId)
+            ->first();
+
+            if ($memberConsumer != null) {
+                $spouse = MemberConsumerSpouse::where('MemberConsumerId', $serviceConnection->MemberConsumerId)->first();
+            } else {
+                $spouse = null;
+            }
+
+            return view('/service_connections/print_service_connection_contract', [
+                'serviceConnection' => $serviceConnection,
+                'memberConsumer' => $memberConsumer,
+                'spouse' => $spouse,
+            ]);
+        } else {
+            return abort(404, 'Service connection application not found!');
+        }
     }
 }

@@ -3,9 +3,9 @@
         <thead>
         <tr>
             <th>Particular</th>
-        <th>DefaultAmount</th>
-        <th>Vatpercentage</th>
-        <th>Notes</th>
+            <th>Default Amount</th>
+            <th>VAT Percentage</th>
+            <th>Account Number</th>
             <th colspan="3">Action</th>
         </tr>
         </thead>
@@ -15,7 +15,7 @@
                 <td>{{ $serviceConnectionPayParticulars->Particular }}</td>
             <td>{{ $serviceConnectionPayParticulars->DefaultAmount }}</td>
             <td>{{ $serviceConnectionPayParticulars->VatPercentage }}</td>
-            <td>{{ $serviceConnectionPayParticulars->Notes }}</td>
+            <td>{{ $serviceConnectionPayParticulars->AccountNumber }}</td>
                 <td width="120">
                     {!! Form::open(['route' => ['serviceConnectionPayParticulars.destroy', $serviceConnectionPayParticulars->id], 'method' => 'delete']) !!}
                     <div class='btn-group'>

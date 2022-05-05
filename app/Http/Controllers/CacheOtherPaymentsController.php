@@ -13,6 +13,7 @@ use App\Models\TransactionDetails;
 use App\Models\TransactionIndex;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\DCRSummaryTransactions;
 use Flash;
 use Response;
 
@@ -191,6 +192,19 @@ class CacheOtherPaymentsController extends AppBaseController
             $transactionDetails->Total = $item->Total;
             $transactionDetails->AccountCode = $item->AccountCode;
             $transactionDetails->save();
+
+            // SAVE DCR TRANSACTIONS
+            if ($item->AccountCode != null) {
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = $item->AccountCode;
+                $dcrSum->Amount = $transactionDetails->Total;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->save();
+        }
         }
 
         $transactionIndex = new TransactionIndex;

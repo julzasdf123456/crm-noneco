@@ -729,6 +729,23 @@ use Illuminate\Support\Facades\Auth;
             </li>
         </ul>
     </li>
+    <li class="nav-item has-treeview">
+        <a href="#" class="nav-link">
+            <i class="fas fa-file nav-icon text-info"></i>
+            <p>
+                DCR
+                <i class="fas fa-angle-left right"></i>
+            </p>
+        </a>
+        <ul class="nav nav-treeview">
+            <li class="nav-item">
+                <a href="{{ route('dCRSummaryTransactions.index') }}"
+                class="nav-link {{ Request::is('dCRSummaryTransactions.index*') ? 'active' : '' }}">
+                <i class="fas fa-file-alt nav-icon text-info"></i><p>DCR Summary</p>
+                </a>
+            </li>
+        </ul>
+    </li>
     <li class="nav-header">                
         Others
     </li>
