@@ -50,7 +50,9 @@ class DCRSummaryTransactions extends Model
         'Teller',
         'DCRNumber',
         'Status',
-        'ORNumber'
+        'ORNumber',
+        'ReportDestination',
+        'Office',
     ];
 
     /**
@@ -68,7 +70,9 @@ class DCRSummaryTransactions extends Model
         'Teller' => 'string',
         'DCRNumber' => 'string',
         'Status' => 'string',
-        'ORNumber' => 'string'
+        'ORNumber' => 'string',
+        'ReportDestination' => 'string',
+        'Office' => 'string'
     ];
 
     /**
@@ -89,8 +93,33 @@ class DCRSummaryTransactions extends Model
         'Status' => 'nullable|string|max:255',
         'created_at' => 'nullable',
         'updated_at' => 'nullable',
-        'ORNumber' => 'nullable|string'
+        'ORNumber' => 'nullable|string',
+        'ReportDestination' => 'nullable|string',
+        'Office' => 'nullable|string',
     ];
+
+    public static function getARConsumersAmount($bill) {
+        $amount = 0.0;
+
+        $amount = floatval($bill->GenerationSystemCharge) +
+                floatval($bill->TransmissionDeliveryChargeKW) +
+                floatval($bill->TransmissionDeliveryChargeKWH) + 
+                floatval($bill->SystemLossCharge) +
+                floatval($bill->DistributionDemandCharge) + 
+                floatval($bill->DistributionSystemCharge) + 
+                floatval($bill->SupplyRetailCustomerCharge) + 
+                floatval($bill->SupplySystemCharge) +
+                floatval($bill->MeteringRetailCustomerCharge) + 
+                floatval($bill->MeteringSystemCharge) + 
+                floatval($bill->OtherGenerationRateAdjustment) +
+                floatval($bill->OtherTransmissionCostAdjustmentKW) +
+                floatval($bill->OtherTransmissionCostAdjustmentKWH) +
+                floatval($bill->OtherSystemLossCostAdjustment) +
+                floatval($bill->OtherLifelineRateCostAdjustment) +
+                floatval($bill->SeniorCitizenDiscountAndSubsidyAdjustment);
+
+        return round($amount, 4);
+    }
 
     public static function getARConsumers($town) {
         if ($town == "01") {
@@ -138,5 +167,39 @@ class DCRSummaryTransactions extends Model
         } else {
             return '0'; // Null
         }
+    }
+
+    public static function getGLCodePerAccountType($type) {
+        if ($type == 'COMMERCIAL' || $type == 'COMMERCIAL HIGH VOLTAGE') {
+            return '311-442-00';
+        } elseif ($type == 'PUBLIC BUILDING' || $type == 'PUBLIC BUILDING HIGH VOLTAGE') {
+            return '311-445-00';
+        } elseif ($type == 'INDUSTRIAL' || $type == 'INDUSTRIAL HIGH VOLTAGE') {
+            return '311-443-00';
+        } elseif ($type == 'STREET LIGHTS') {
+            return '311-444-00';
+        } elseif ($type == 'IRRIGATION/WATER SYSTEMS') {
+            return '311-446-00';
+        } elseif ($type == 'BAPA') {
+            return '311-448-00';
+        }
+    }
+
+    public static function getSalesGenTransSysLossVatAmount($bill) {
+        $amount = 0.0;
+
+        $amount = floatval($bill->GenerationVAT) +
+                floatval($bill->TransmissionVAT) +
+                floatval($bill->SystemLossVAT);
+
+        return round($amount, 4);
+    }
+
+    public static function getSalesDistOthersVatAmount($bill) {
+        $amount = 0.0;
+
+        $amount = floatval($bill->DistributionVAT);
+
+        return round($amount, 4);
     }
 }

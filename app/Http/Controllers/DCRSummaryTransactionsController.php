@@ -37,6 +37,7 @@ class DCRSummaryTransactionsController extends AppBaseController
             $data = DB::table('Cashier_DCRSummaryTransactions')
                 ->where('Day', $request['Day'])
                 ->where('Teller', $request['Teller'])
+                ->where('ReportDestination', 'COLLECTION')
                 ->select('GLCode',
                     DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
                     DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
@@ -48,6 +49,7 @@ class DCRSummaryTransactionsController extends AppBaseController
             $data = DB::table('Cashier_DCRSummaryTransactions')
                 ->where('Day', date('Y-m-d'))
                 ->where('Teller', $request['Teller'])
+                ->where('ReportDestination', 'COLLECTION')
                 ->select('GLCode',
                     DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
                     DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")

@@ -377,20 +377,25 @@ class PaidBillsController extends AppBaseController
                 $paidBill->UserId = Auth::id();
                 $paidBill->save();
 
-                // SAVE DAILY COLLECTION SUMMARY
+                /**
+                 * SAVE DCR AND SALES REPORT
+                 */
                 if ($account != null) {
                     
                     if ($account->ForDistribution == 'Yes') {
+                        // IF ACCOUNT IS MARKED AS FOR DISTRIBUTION
                         if ($account->DistributionAccountCode != null) {
                             // GET AR CONSUMERS
                             $dcrSum = new DCRSummaryTransactions;
                             $dcrSum->id = IDGenerator::generateIDandRandString();
                             $dcrSum->GLCode = $account->DistributionAccountCode;
-                            $dcrSum->Amount = $bill->NetAmount;
+                            $dcrSum->Amount = DCRSummaryTransactions::getARConsumersAmount($bill);
                             $dcrSum->Day = date('Y-m-d');
                             $dcrSum->Time = date('H:i:s');
                             $dcrSum->Teller = Auth::id();
                             $dcrSum->ORNumber = $request['ORNumber'];
+                            $dcrSum->ReportDestination = 'BOTH';
+                            $dcrSum->Office = env('APP_LOCATION');
                             $dcrSum->save();
                         }                        
                     } else {
@@ -398,14 +403,16 @@ class PaidBillsController extends AppBaseController
                         $dcrSum = new DCRSummaryTransactions;
                         $dcrSum->id = IDGenerator::generateIDandRandString();
                         $dcrSum->GLCode = DCRSummaryTransactions::getARConsumers($account->Town);
-                        $dcrSum->Amount = $bill->NetAmount;
+                        $dcrSum->Amount = DCRSummaryTransactions::getARConsumersAmount($bill);
                         $dcrSum->Day = date('Y-m-d');
                         $dcrSum->Time = date('H:i:s');
                         $dcrSum->Teller = Auth::id();
                         $dcrSum->ORNumber = $request['ORNumber'];
+                        $dcrSum->ReportDestination = 'COLLECTION';
+                        $dcrSum->Office = env('APP_LOCATION');
                         $dcrSum->save();
 
-                        // GET RPT 
+                        // GET RPT FOR DCR
                         $dcrSum = new DCRSummaryTransactions;
                         $dcrSum->id = IDGenerator::generateIDandRandString();
                         $dcrSum->GLCode = DCRSummaryTransactions::getARConsumersRPT($account->Town);
@@ -414,11 +421,71 @@ class PaidBillsController extends AppBaseController
                         $dcrSum->Time = date('H:i:s');
                         $dcrSum->Teller = Auth::id();
                         $dcrSum->ORNumber = $request['ORNumber'];
+                        $dcrSum->ReportDestination = 'COLLECTION';
+                        $dcrSum->Office = env('APP_LOCATION');
                         $dcrSum->save();
+
+                        // GET RPT  FOR SALES
+                        $dcrSum = new DCRSummaryTransactions;
+                        $dcrSum->id = IDGenerator::generateIDandRandString();
+                        $dcrSum->GLCode = '140-143-30';
+                        $dcrSum->Amount = $bill->RealPropertyTax;
+                        $dcrSum->Day = date('Y-m-d');
+                        $dcrSum->Time = date('H:i:s');
+                        $dcrSum->Teller = Auth::id();
+                        $dcrSum->ORNumber = $request['ORNumber'];
+                        $dcrSum->ReportDestination = 'SALES';
+                        $dcrSum->Office = env('APP_LOCATION');
+                        $dcrSum->save();
+
+                        // GET SALES AR BY CONSUMER TYPE 
+                        if ($account->OrganizationParentAccount != null) {
+                            // GET BAPA
+                            $dcrSum = new DCRSummaryTransactions;
+                            $dcrSum->id = IDGenerator::generateIDandRandString();
+                            $dcrSum->GLCode = '311-448-00';
+                            $dcrSum->Amount = DCRSummaryTransactions::getARConsumersAmount($bill);
+                            $dcrSum->Day = date('Y-m-d');
+                            $dcrSum->Time = date('H:i:s');
+                            $dcrSum->Teller = Auth::id();
+                            $dcrSum->ORNumber = $request['ORNumber'];
+                            $dcrSum->ReportDestination = 'SALES';
+                            $dcrSum->Office = env('APP_LOCATION');
+                            $dcrSum->save();
+                        } else {
+                            // GET NOT BAPA
+                            if ($account->AccountType == 'RURAL RESIDENTIAL' || $account->AccountType == 'RESIDENTIAL') {
+                                // GET RESIDENTIALS
+                                $dcrSum = new DCRSummaryTransactions;
+                                $dcrSum->id = IDGenerator::generateIDandRandString();
+                                $dcrSum->GLCode = DCRSummaryTransactions::getARConsumers($account->Town);;
+                                $dcrSum->Amount = DCRSummaryTransactions::getARConsumersAmount($bill);
+                                $dcrSum->Day = date('Y-m-d');
+                                $dcrSum->Time = date('H:i:s');
+                                $dcrSum->Teller = Auth::id();
+                                $dcrSum->ORNumber = $request['ORNumber'];
+                                $dcrSum->ReportDestination = 'SALES';
+                                $dcrSum->Office = env('APP_LOCATION');
+                                $dcrSum->save();
+                            } else {
+                                // GET NOT RESIDENTIALS
+                                $dcrSum = new DCRSummaryTransactions;
+                                $dcrSum->id = IDGenerator::generateIDandRandString();
+                                $dcrSum->GLCode = DCRSummaryTransactions::getGLCodePerAccountType($account->AccountType);;
+                                $dcrSum->Amount = DCRSummaryTransactions::getARConsumersAmount($bill);
+                                $dcrSum->Day = date('Y-m-d');
+                                $dcrSum->Time = date('H:i:s');
+                                $dcrSum->Teller = Auth::id();
+                                $dcrSum->ORNumber = $request['ORNumber'];
+                                $dcrSum->ReportDestination = 'SALES';
+                                $dcrSum->Office = env('APP_LOCATION');
+                                $dcrSum->save();
+                            }
+                        }
                     }
                 }
 
-                // GET UC-NPC Stranded Debt
+                // GET UC-NPC Stranded Debt COLLECTION
                 $dcrSum = new DCRSummaryTransactions;
                 $dcrSum->id = IDGenerator::generateIDandRandString();
                 $dcrSum->GLCode = '140-142-87';
@@ -427,9 +494,50 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
-                // GET FIT ALL
+                // GET UC-NPC Stranded Debt Sales
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '230-232-65';
+                $dcrSum->Amount = $bill->NPCStrandedDebt;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET STRANDED CONTRACT COST COLLECTION
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-92';
+                $dcrSum->Amount = $bill->StrandedContractCosts;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET STRANDED CONTRACT COST SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '230-232-62';
+                $dcrSum->Amount = $bill->StrandedContractCosts;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET FIT ALL COLLECTION
                 $dcrSum = new DCRSummaryTransactions;
                 $dcrSum->id = IDGenerator::generateIDandRandString();
                 $dcrSum->GLCode = '140-142-88';
@@ -438,9 +546,24 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
-                // GET UCME REDCI
+                // GET FIT ALL SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '230-232-64';
+                $dcrSum->Amount = $bill->FeedInTariffAllowance;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET UCME REDCI COLLECTION
                 $dcrSum = new DCRSummaryTransactions;
                 $dcrSum->id = IDGenerator::generateIDandRandString();
                 $dcrSum->GLCode = '140-142-89';
@@ -449,6 +572,21 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET UCME REDCI SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '230-232-63';
+                $dcrSum->Amount = $bill->MissionaryElectrificationREDCI;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
                 // GET GENCO
@@ -460,6 +598,8 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
                 // GET TRANSCO
@@ -471,6 +611,8 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
                 // GET SYSLOSS VAT
@@ -482,6 +624,8 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
                 // GET DIST/OTHERS VAT
@@ -493,9 +637,37 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
-                // GET UCME
+                // GET GENVAT, TRANSVAT, SYSLOSSVAT SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '170-184-40';
+                $dcrSum->Amount = DCRSummaryTransactions::getSalesGenTransSysLossVatAmount($bill);
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET DIST AND OTHERS SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '250-255-00';
+                $dcrSum->Amount = DCRSummaryTransactions::getSalesDistOthersVatAmount($bill);
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET UCME COLLECTION
                 $dcrSum = new DCRSummaryTransactions;
                 $dcrSum->id = IDGenerator::generateIDandRandString();
                 $dcrSum->GLCode = '140-142-98';
@@ -504,6 +676,21 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET UCME SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '230-232-60';
+                $dcrSum->Amount = $bill->MissionaryElectrificationCharge;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
                 // GET EWT 2%
@@ -515,6 +702,8 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
                 // GET EVAT 5%
@@ -526,6 +715,60 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET ENVIRONMENT CHARGE COLLECTION
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-99';
+                $dcrSum->Amount = $bill->EnvironmentalCharge;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET ENVIRONMENT CHARGE SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '230-232-90';
+                $dcrSum->Amount = $bill->EnvironmentalCharge;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET RFSC COLLECTION
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-93';
+                $dcrSum->Amount = $bill->RFSC;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET RFSC SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '211-211-10';
+                $dcrSum->Amount = $bill->RFSC;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
             }            
         }  
@@ -870,20 +1113,25 @@ class PaidBillsController extends AppBaseController
                 $paidBill->UserId = Auth::id();
                 $paidBill->save();
 
-                // SAVE DAILY COLLECTION SUMMARY
+                /**
+                 * SAVE DCR AND SALES REPORT
+                 */
                 if ($account != null) {
                     
                     if ($account->ForDistribution == 'Yes') {
+                        // IF ACCOUNT IS MARKED AS FOR DISTRIBUTION
                         if ($account->DistributionAccountCode != null) {
                             // GET AR CONSUMERS
                             $dcrSum = new DCRSummaryTransactions;
                             $dcrSum->id = IDGenerator::generateIDandRandString();
                             $dcrSum->GLCode = $account->DistributionAccountCode;
-                            $dcrSum->Amount = $bill->NetAmount;
+                            $dcrSum->Amount = DCRSummaryTransactions::getARConsumersAmount($bill);
                             $dcrSum->Day = date('Y-m-d');
                             $dcrSum->Time = date('H:i:s');
                             $dcrSum->Teller = Auth::id();
                             $dcrSum->ORNumber = $request['ORNumber'];
+                            $dcrSum->ReportDestination = 'BOTH';
+                            $dcrSum->Office = env('APP_LOCATION');
                             $dcrSum->save();
                         }                        
                     } else {
@@ -891,14 +1139,16 @@ class PaidBillsController extends AppBaseController
                         $dcrSum = new DCRSummaryTransactions;
                         $dcrSum->id = IDGenerator::generateIDandRandString();
                         $dcrSum->GLCode = DCRSummaryTransactions::getARConsumers($account->Town);
-                        $dcrSum->Amount = $bill->NetAmount;
+                        $dcrSum->Amount = DCRSummaryTransactions::getARConsumersAmount($bill);
                         $dcrSum->Day = date('Y-m-d');
                         $dcrSum->Time = date('H:i:s');
                         $dcrSum->Teller = Auth::id();
                         $dcrSum->ORNumber = $request['ORNumber'];
+                        $dcrSum->ReportDestination = 'COLLECTION';
+                        $dcrSum->Office = env('APP_LOCATION');
                         $dcrSum->save();
 
-                        // GET RPT 
+                        // GET RPT FOR DCR
                         $dcrSum = new DCRSummaryTransactions;
                         $dcrSum->id = IDGenerator::generateIDandRandString();
                         $dcrSum->GLCode = DCRSummaryTransactions::getARConsumersRPT($account->Town);
@@ -907,11 +1157,71 @@ class PaidBillsController extends AppBaseController
                         $dcrSum->Time = date('H:i:s');
                         $dcrSum->Teller = Auth::id();
                         $dcrSum->ORNumber = $request['ORNumber'];
+                        $dcrSum->ReportDestination = 'COLLECTION';
+                        $dcrSum->Office = env('APP_LOCATION');
                         $dcrSum->save();
+
+                        // GET RPT  FOR SALES
+                        $dcrSum = new DCRSummaryTransactions;
+                        $dcrSum->id = IDGenerator::generateIDandRandString();
+                        $dcrSum->GLCode = '140-143-30';
+                        $dcrSum->Amount = $bill->RealPropertyTax;
+                        $dcrSum->Day = date('Y-m-d');
+                        $dcrSum->Time = date('H:i:s');
+                        $dcrSum->Teller = Auth::id();
+                        $dcrSum->ORNumber = $request['ORNumber'];
+                        $dcrSum->ReportDestination = 'SALES';
+                        $dcrSum->Office = env('APP_LOCATION');
+                        $dcrSum->save();
+
+                        // GET SALES AR BY CONSUMER TYPE 
+                        if ($account->OrganizationParentAccount != null) {
+                            // GET BAPA
+                            $dcrSum = new DCRSummaryTransactions;
+                            $dcrSum->id = IDGenerator::generateIDandRandString();
+                            $dcrSum->GLCode = '311-448-00';
+                            $dcrSum->Amount = DCRSummaryTransactions::getARConsumersAmount($bill);
+                            $dcrSum->Day = date('Y-m-d');
+                            $dcrSum->Time = date('H:i:s');
+                            $dcrSum->Teller = Auth::id();
+                            $dcrSum->ORNumber = $request['ORNumber'];
+                            $dcrSum->ReportDestination = 'SALES';
+                            $dcrSum->Office = env('APP_LOCATION');
+                            $dcrSum->save();
+                        } else {
+                            // GET NOT BAPA
+                            if ($account->AccountType == 'RURAL RESIDENTIAL' || $account->AccountType == 'RESIDENTIAL') {
+                                // GET RESIDENTIALS
+                                $dcrSum = new DCRSummaryTransactions;
+                                $dcrSum->id = IDGenerator::generateIDandRandString();
+                                $dcrSum->GLCode = DCRSummaryTransactions::getARConsumers($account->Town);;
+                                $dcrSum->Amount = DCRSummaryTransactions::getARConsumersAmount($bill);
+                                $dcrSum->Day = date('Y-m-d');
+                                $dcrSum->Time = date('H:i:s');
+                                $dcrSum->Teller = Auth::id();
+                                $dcrSum->ORNumber = $request['ORNumber'];
+                                $dcrSum->ReportDestination = 'SALES';
+                                $dcrSum->Office = env('APP_LOCATION');
+                                $dcrSum->save();
+                            } else {
+                                // GET NOT RESIDENTIALS
+                                $dcrSum = new DCRSummaryTransactions;
+                                $dcrSum->id = IDGenerator::generateIDandRandString();
+                                $dcrSum->GLCode = DCRSummaryTransactions::getGLCodePerAccountType($account->AccountType);;
+                                $dcrSum->Amount = DCRSummaryTransactions::getARConsumersAmount($bill);
+                                $dcrSum->Day = date('Y-m-d');
+                                $dcrSum->Time = date('H:i:s');
+                                $dcrSum->Teller = Auth::id();
+                                $dcrSum->ORNumber = $request['ORNumber'];
+                                $dcrSum->ReportDestination = 'SALES';
+                                $dcrSum->Office = env('APP_LOCATION');
+                                $dcrSum->save();
+                            }
+                        }
                     }
                 }
 
-                // GET UC-NPC Stranded Debt
+                // GET UC-NPC Stranded Debt COLLECTION
                 $dcrSum = new DCRSummaryTransactions;
                 $dcrSum->id = IDGenerator::generateIDandRandString();
                 $dcrSum->GLCode = '140-142-87';
@@ -920,9 +1230,50 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
-                // GET FIT ALL
+                // GET UC-NPC Stranded Debt Sales
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '230-232-65';
+                $dcrSum->Amount = $bill->NPCStrandedDebt;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET STRANDED CONTRACT COST COLLECTION
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-92';
+                $dcrSum->Amount = $bill->StrandedContractCosts;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET STRANDED CONTRACT COST SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '230-232-62';
+                $dcrSum->Amount = $bill->StrandedContractCosts;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET FIT ALL COLLECTION
                 $dcrSum = new DCRSummaryTransactions;
                 $dcrSum->id = IDGenerator::generateIDandRandString();
                 $dcrSum->GLCode = '140-142-88';
@@ -931,9 +1282,24 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
-                // GET UCME REDCI
+                // GET FIT ALL SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '230-232-64';
+                $dcrSum->Amount = $bill->FeedInTariffAllowance;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET UCME REDCI COLLECTION
                 $dcrSum = new DCRSummaryTransactions;
                 $dcrSum->id = IDGenerator::generateIDandRandString();
                 $dcrSum->GLCode = '140-142-89';
@@ -942,6 +1308,21 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET UCME REDCI SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '230-232-63';
+                $dcrSum->Amount = $bill->MissionaryElectrificationREDCI;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
                 // GET GENCO
@@ -953,6 +1334,8 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
                 // GET TRANSCO
@@ -964,6 +1347,8 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
                 // GET SYSLOSS VAT
@@ -975,6 +1360,8 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
                 // GET DIST/OTHERS VAT
@@ -986,9 +1373,37 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
-                // GET UCME
+                // GET GENVAT, TRANSVAT, SYSLOSSVAT SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '170-184-40';
+                $dcrSum->Amount = DCRSummaryTransactions::getSalesGenTransSysLossVatAmount($bill);
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET DIST AND OTHERS SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '250-255-00';
+                $dcrSum->Amount = DCRSummaryTransactions::getSalesDistOthersVatAmount($bill);
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET UCME COLLECTION
                 $dcrSum = new DCRSummaryTransactions;
                 $dcrSum->id = IDGenerator::generateIDandRandString();
                 $dcrSum->GLCode = '140-142-98';
@@ -997,6 +1412,73 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET UCME SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '230-232-60';
+                $dcrSum->Amount = $bill->MissionaryElectrificationCharge;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET ENVIRONMENT CHARGE COLLECTION
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-99';
+                $dcrSum->Amount = $bill->EnvironmentalCharge;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET ENVIRONMENT CHARGE SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '230-232-90';
+                $dcrSum->Amount = $bill->EnvironmentalCharge;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET RFSC COLLECTION
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '140-142-93';
+                $dcrSum->Amount = $bill->RFSC;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
+
+                // GET RFSC SALES
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '211-211-10';
+                $dcrSum->Amount = $bill->RFSC;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'SALES';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
 
                 // // GET EWT 2%
@@ -1008,6 +1490,8 @@ class PaidBillsController extends AppBaseController
                 // $dcrSum->Time = date('H:i:s');
                 // $dcrSum->Teller = Auth::id();
                 // $dcrSum->ORNumber = $request['ORNumber'];
+                // $dcrSum->ReportDestination = 'COLLECTION';
+                // $dcrSum->Office = env('APP_LOCATION');
                 // $dcrSum->save();
 
                 // // GET EVAT 5%
@@ -1019,6 +1503,8 @@ class PaidBillsController extends AppBaseController
                 // $dcrSum->Time = date('H:i:s');
                 // $dcrSum->Teller = Auth::id();
                 // $dcrSum->ORNumber = $request['ORNumber'];
+                // $dcrSum->ReportDestination = 'COLLECTION';
+                // $dcrSum->Office = env('APP_LOCATION');
                 // $dcrSum->save();
             }
         }
