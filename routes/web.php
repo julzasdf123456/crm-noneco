@@ -546,3 +546,4 @@ Route::resource('accountGLCodes', App\Http\Controllers\AccountGLCodesController:
 
 
 Route::resource('dCRSummaryTransactions', App\Http\Controllers\DCRSummaryTransactionsController::class);
+Route::get('/d_c_r_summary_transactions/sales-dcr-monitor', [App\Http\Controllers\DCRSummaryTransactionsController::class, 'salesDcrMonitor'])->name('dCRSummaryTransactions.sales-dcr-monitor');

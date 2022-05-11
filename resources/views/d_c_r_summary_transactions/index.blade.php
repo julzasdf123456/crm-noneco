@@ -45,7 +45,7 @@
                     @endpush
                 </div>
                 <div class="card-footer">
-                    {!! Form::submit('Proceed', ['class' => 'btn btn-primary']) !!}
+                    {!! Form::submit('Go', ['class' => 'btn btn-primary']) !!}
                 </div>
                 {!! Form::close() !!}
             </div>

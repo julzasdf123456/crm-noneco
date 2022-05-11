@@ -28,6 +28,7 @@ class CreateTableCashierDcrSummarTransactions extends Migration
             $table->string('ORNumber')->nullable();
             $table->string('ReportDestination')->nullable(); // SALES, COLLECTION, BOTH
             $table->string('Office')->nullable();
+            $table->string('AccountNumber')->nullable();
             $table->timestamps();
         });
     }

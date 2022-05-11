@@ -9,6 +9,7 @@ use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
 use Flash;
 use Response;
 
@@ -31,8 +32,7 @@ class DCRSummaryTransactionsController extends AppBaseController
      * @return Response
      */
     public function index(Request $request)
-    {
-        
+    {        
         if ($request['Day'] != null) {
             $data = DB::table('Cashier_DCRSummaryTransactions')
                 ->where('Day', $request['Day'])
@@ -182,5 +182,135 @@ class DCRSummaryTransactionsController extends AppBaseController
         Flash::success('D C R Summary Transactions deleted successfully.');
 
         return redirect(route('dCRSummaryTransactions.index'));
+    }
+
+    public function salesDcrMonitor(Request $request) {        
+        $tellers = User::permission('teller create')->get();
+        $offices = DB::table('Cashier_DCRSummaryTransactions')
+            ->select('Office')
+            ->groupBy('Office')
+            ->orderBy('Office')
+            ->get();
+
+        if ($request['From'] != null || $request['To'] != null) {
+            if ($request['Teller'] == 'All') {
+                if ($request['Office'] == 'All') {
+                    $collection = DB::table('Cashier_DCRSummaryTransactions')
+                            ->whereBetween('Day', [$request['From'], $request['To']])
+                            // ->where('Teller', $request['Teller'])
+                            ->where('ReportDestination', 'COLLECTION')
+                            ->select('GLCode',
+                                DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
+                                DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
+                            )
+                            ->groupBy('GLCode')
+                            ->orderBy('GLCode')
+                            ->get();
+
+                        $sales = DB::table('Cashier_DCRSummaryTransactions')
+                            ->whereBetween('Day', [$request['From'], $request['To']])
+                            // ->where('Teller', $request['Teller'])
+                            ->where('ReportDestination', 'SALES')
+                            ->select('GLCode',
+                                DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
+                                DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
+                            )
+                            ->groupBy('GLCode')
+                            ->orderBy('GLCode')
+                            ->get();
+                } else {
+                    $collection = DB::table('Cashier_DCRSummaryTransactions')
+                        ->whereBetween('Day', [$request['From'], $request['To']])
+                        // ->where('Teller', $request['Teller'])
+                        ->where('ReportDestination', 'COLLECTION')
+                        ->where('Office', $request['Office'])
+                        ->select('GLCode',
+                            DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
+                            DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
+                        )
+                        ->groupBy('GLCode')
+                        ->orderBy('GLCode')
+                        ->get();
+
+                    $sales = DB::table('Cashier_DCRSummaryTransactions')
+                        ->whereBetween('Day', [$request['From'], $request['To']])
+                        // ->where('Teller', $request['Teller'])
+                        ->where('ReportDestination', 'SALES')
+                        ->where('Office', $request['Office'])
+                        ->select('GLCode',
+                            DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
+                            DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
+                        )
+                        ->groupBy('GLCode')
+                        ->orderBy('GLCode')
+                        ->get();
+                }                
+            } else {
+                if ($request['Office'] == 'All') {
+                    $collection = DB::table('Cashier_DCRSummaryTransactions')
+                        ->whereBetween('Day', [$request['From'], $request['To']])
+                        ->where('Teller', $request['Teller'])
+                        ->where('ReportDestination', 'COLLECTION')
+                        ->select('GLCode',
+                            DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
+                            DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
+                        )
+                        ->groupBy('GLCode')
+                        ->orderBy('GLCode')
+                        ->get();
+
+                    $sales = DB::table('Cashier_DCRSummaryTransactions')
+                        ->whereBetween('Day', [$request['From'], $request['To']])
+                        ->where('Teller', $request['Teller'])
+                        ->where('ReportDestination', 'SALES')
+                        ->select('GLCode',
+                            DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
+                            DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
+                        )
+                        ->groupBy('GLCode')
+                        ->orderBy('GLCode')
+                        ->get();
+                } else {
+                    $collection = DB::table('Cashier_DCRSummaryTransactions')
+                        ->whereBetween('Day', [$request['From'], $request['To']])
+                        ->where('Teller', $request['Teller'])
+                        ->where('ReportDestination', 'COLLECTION')
+                        ->where('Office', $request['Office'])
+                        ->select('GLCode',
+                            DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
+                            DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
+                        )
+                        ->groupBy('GLCode')
+                        ->orderBy('GLCode')
+                        ->get();
+
+                    $sales = DB::table('Cashier_DCRSummaryTransactions')
+                        ->whereBetween('Day', [$request['From'], $request['To']])
+                        ->where('Teller', $request['Teller'])
+                        ->where('ReportDestination', 'SALES')
+                        ->where('Office', $request['Office'])
+                        ->select('GLCode',
+                            DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
+                            DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
+                        )
+                        ->groupBy('GLCode')
+                        ->orderBy('GLCode')
+                        ->get();
+                }                
+            }            
+        } else {
+            $collection = [];
+        }
+
+        return view('/d_c_r_summary_transactions/sales_dcr_monitor', [
+            'collection' => $collection,
+            'sales' => $sales,
+            'tellers' => $tellers,
+            'tellerSelect' => $request['Teller'],
+            'from' => $request['From'] != null ? $request['From'] : date('Y-m-d'),
+            'to' => $request['To'] != null ? $request['To'] : date('Y-m-d', strtotime('+1 day')),
+            'offices' => $offices,
+            'officeSelect' => $request['Office'],
+        ]);
     }
 }

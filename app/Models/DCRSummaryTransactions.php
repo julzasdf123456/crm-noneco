@@ -53,6 +53,7 @@ class DCRSummaryTransactions extends Model
         'ORNumber',
         'ReportDestination',
         'Office',
+        'AccountNumber'
     ];
 
     /**
@@ -72,7 +73,8 @@ class DCRSummaryTransactions extends Model
         'Status' => 'string',
         'ORNumber' => 'string',
         'ReportDestination' => 'string',
-        'Office' => 'string'
+        'Office' => 'string',
+        'AccountNumber' => 'string'
     ];
 
     /**
@@ -96,6 +98,7 @@ class DCRSummaryTransactions extends Model
         'ORNumber' => 'nullable|string',
         'ReportDestination' => 'nullable|string',
         'Office' => 'nullable|string',
+        'AccountNumber' => 'nullable|string'
     ];
 
     public static function getARConsumersAmount($bill) {
@@ -164,6 +167,30 @@ class DCRSummaryTransactions extends Model
             return '140-143-18'; // Calatrava
         } elseif($town == "09") {
             return '140-143-17'; // Toboso
+        } else {
+            return '0'; // Null
+        }
+    }
+
+    public static function getARConsumersTermedPayments($town) {
+        if ($town == "01") {
+            return '140-142-67'; // Cadiz
+        } elseif($town == "02") {
+            return '140-142-64'; // EB Magalona
+        } elseif($town == "03") {
+            return '140-142-66'; // Manapla
+        } elseif($town == "04") {
+            return '140-142-65'; // Victorias
+        } elseif($town == "05") {
+            return '140-142-75'; // San Carlos
+        } elseif($town == "06") {
+            return '140-142-77'; // Sagay
+        } elseif($town == "07") {
+            return '140-142-68'; // Escalante
+        } elseif($town == "08") {
+            return '140-142-76'; // Calatrava
+        } elseif($town == "09") {
+            return '140-142-69'; // Toboso
         } else {
             return '0'; // Null
         }

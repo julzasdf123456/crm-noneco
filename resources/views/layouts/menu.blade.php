@@ -733,7 +733,7 @@ use Illuminate\Support\Facades\Auth;
         <a href="#" class="nav-link">
             <i class="fas fa-file nav-icon text-info"></i>
             <p>
-                DCR
+                DCR and Sales
                 <i class="fas fa-angle-left right"></i>
             </p>
         </a>
@@ -742,6 +742,12 @@ use Illuminate\Support\Facades\Auth;
                 <a href="{{ route('dCRSummaryTransactions.index') }}"
                 class="nav-link {{ Request::is('dCRSummaryTransactions.index*') ? 'active' : '' }}">
                 <i class="fas fa-file-alt nav-icon text-info"></i><p>DCR Summary</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('dCRSummaryTransactions.sales-dcr-monitor') }}"
+                class="nav-link {{ Request::is('dCRSummaryTransactions.sales-dcr-monitor*') ? 'active' : '' }}">
+                <i class="fas fa-chart-area nav-icon text-info"></i><p>Sales Monitor</p>
                 </a>
             </li>
         </ul>

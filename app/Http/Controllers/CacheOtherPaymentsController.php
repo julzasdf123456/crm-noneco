@@ -203,6 +203,8 @@ class CacheOtherPaymentsController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
         }
         }

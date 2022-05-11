@@ -34,6 +34,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="card-tools">
+                            <a href="{{ route('bills.adjust-bill', [$bills->id]) }}" class="btn btn-link" title="Adjust Reading"><i class="fas fa-pen"></i></a>
                             <a href="{{ route('bills.print-single-bill-new-format', [$bills->id]) }}" class="btn btn-link" title="Print New Formatted Bill"><i class="fas fa-print"></i></a>
                             <a href="{{ route('bills.print-single-bill-old', [$bills->id]) }}" class="btn btn-link text-warning" title="Print Pre-Formatted Bill (Old)"><i class="fas fa-print"></i></a>
                         </div>
@@ -379,7 +380,7 @@
                                     <div class="col-lg-12">
                                         <table class="table table-borderless table-sm">
                                             <tr>
-                                                <td>Additional Charges</td>
+                                                <td>Additional Charges - Termed Payments</td>
                                                 <td class="text-right">+ {{ number_format($bills->AdditionalCharges, 2) }}</td>
                                             </tr>
                                             <tr>

@@ -58,7 +58,7 @@
                     </div>
 
                     <div class="form-group col-lg-3">
-                        <label for="AdditionalCharges">Additional Charges</label>
+                        <label for="AdditionalCharges">Termed Payment Attached</label>
                         <input type="number" step="any" name="AdditionalCharges" id="AdditionalCharges" value="{{ $bill->AdditionalCharges }}" class="form-control text-right">
                     </div>
 

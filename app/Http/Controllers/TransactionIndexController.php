@@ -297,6 +297,8 @@ class TransactionIndexController extends AppBaseController
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
                 $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
             }            
         }
@@ -550,6 +552,20 @@ class TransactionIndexController extends AppBaseController
                 // $transactionDetails->VAT = $item->Vat; // TO BE ADDED LATER
                 $transactionDetails->Total = round(floatval($ledgers->Amount), 2);
                 $transactionDetails->save();
+
+                // SAVE TO DCR SUMMARY
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = DCRSummaryTransactions::getARConsumersTermedPayments($account->Town);
+                $dcrSum->Amount = $ledgers->Amount;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $account->id;
+                $dcrSum->save();
 
                 // UPDATE LEDGER STATUS
                 $ledgers->IsPaid = 'Yes';
@@ -808,6 +824,8 @@ class TransactionIndexController extends AppBaseController
             $dcrSum->Time = date('H:i:s');
             $dcrSum->Teller = Auth::id();
             $dcrSum->ORNumber = $request['ORNumber'];
+            $dcrSum->ReportDestination = 'COLLECTION';
+            $dcrSum->Office = env('APP_LOCATION');
             $dcrSum->save();
         }  
 

@@ -19,6 +19,7 @@ use App\Models\ORCancellations;
 use App\Models\Towns;
 use App\Models\BAPAPayments;
 use App\Models\DCRSummaryTransactions;
+use App\Models\ArrearsLedgerDistribution;
 use Flash;
 use Response;
 
@@ -380,8 +381,7 @@ class PaidBillsController extends AppBaseController
                 /**
                  * SAVE DCR AND SALES REPORT
                  */
-                if ($account != null) {
-                    
+                if ($account != null) {                    
                     if ($account->ForDistribution == 'Yes') {
                         // IF ACCOUNT IS MARKED AS FOR DISTRIBUTION
                         if ($account->DistributionAccountCode != null) {
@@ -396,6 +396,7 @@ class PaidBillsController extends AppBaseController
                             $dcrSum->ORNumber = $request['ORNumber'];
                             $dcrSum->ReportDestination = 'BOTH';
                             $dcrSum->Office = env('APP_LOCATION');
+                            $dcrSum->AccountNumber = $bill->AccountNumber;
                             $dcrSum->save();
                         }                        
                     } else {
@@ -410,6 +411,7 @@ class PaidBillsController extends AppBaseController
                         $dcrSum->ORNumber = $request['ORNumber'];
                         $dcrSum->ReportDestination = 'COLLECTION';
                         $dcrSum->Office = env('APP_LOCATION');
+                        $dcrSum->AccountNumber = $bill->AccountNumber;
                         $dcrSum->save();
 
                         // GET RPT FOR DCR
@@ -423,6 +425,7 @@ class PaidBillsController extends AppBaseController
                         $dcrSum->ORNumber = $request['ORNumber'];
                         $dcrSum->ReportDestination = 'COLLECTION';
                         $dcrSum->Office = env('APP_LOCATION');
+                        $dcrSum->AccountNumber = $bill->AccountNumber;
                         $dcrSum->save();
 
                         // GET RPT  FOR SALES
@@ -436,6 +439,7 @@ class PaidBillsController extends AppBaseController
                         $dcrSum->ORNumber = $request['ORNumber'];
                         $dcrSum->ReportDestination = 'SALES';
                         $dcrSum->Office = env('APP_LOCATION');
+                        $dcrSum->AccountNumber = $bill->AccountNumber;
                         $dcrSum->save();
 
                         // GET SALES AR BY CONSUMER TYPE 
@@ -451,6 +455,7 @@ class PaidBillsController extends AppBaseController
                             $dcrSum->ORNumber = $request['ORNumber'];
                             $dcrSum->ReportDestination = 'SALES';
                             $dcrSum->Office = env('APP_LOCATION');
+                            $dcrSum->AccountNumber = $bill->AccountNumber;
                             $dcrSum->save();
                         } else {
                             // GET NOT BAPA
@@ -466,6 +471,7 @@ class PaidBillsController extends AppBaseController
                                 $dcrSum->ORNumber = $request['ORNumber'];
                                 $dcrSum->ReportDestination = 'SALES';
                                 $dcrSum->Office = env('APP_LOCATION');
+                                $dcrSum->AccountNumber = $bill->AccountNumber;
                                 $dcrSum->save();
                             } else {
                                 // GET NOT RESIDENTIALS
@@ -479,8 +485,36 @@ class PaidBillsController extends AppBaseController
                                 $dcrSum->ORNumber = $request['ORNumber'];
                                 $dcrSum->ReportDestination = 'SALES';
                                 $dcrSum->Office = env('APP_LOCATION');
+                                $dcrSum->AccountNumber = $bill->AccountNumber;
                                 $dcrSum->save();
                             }
+                        }
+                    }
+
+                    // GET TERMED PAYMENT BUNDLES
+                    if ($bill->AdditionalCharges != null) {
+                        // GET TERMED PAYMENT
+                        $termedPayment = ArrearsLedgerDistribution::where('AccountNumber', $account->id)
+                            ->where('ServicePeriod', $bill->ServicePeriod)
+                            ->whereNull('IsPaid')
+                            ->first();
+
+                        if ($termedPayment != null) {
+                            $dcrSum = new DCRSummaryTransactions;
+                            $dcrSum->id = IDGenerator::generateIDandRandString();
+                            $dcrSum->GLCode = DCRSummaryTransactions::getARConsumersTermedPayments($account->Town);
+                            $dcrSum->Amount = $termedPayment->Amount;
+                            $dcrSum->Day = date('Y-m-d');
+                            $dcrSum->Time = date('H:i:s');
+                            $dcrSum->Teller = Auth::id();
+                            $dcrSum->ORNumber = $request['ORNumber'];
+                            $dcrSum->ReportDestination = 'COLLECTION';
+                            $dcrSum->Office = env('APP_LOCATION');
+                            $dcrSum->AccountNumber = $bill->AccountNumber;
+                            $dcrSum->save();
+
+                            $termedPayment->IsPaid = 'Yes';
+                            $termedPayment->save();
                         }
                     }
                 }
@@ -496,6 +530,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET UC-NPC Stranded Debt Sales
@@ -509,6 +544,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET STRANDED CONTRACT COST COLLECTION
@@ -522,6 +558,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET STRANDED CONTRACT COST SALES
@@ -535,6 +572,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET FIT ALL COLLECTION
@@ -548,6 +586,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET FIT ALL SALES
@@ -561,6 +600,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET UCME REDCI COLLECTION
@@ -574,6 +614,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET UCME REDCI SALES
@@ -587,6 +628,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET GENCO
@@ -600,6 +642,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET TRANSCO
@@ -613,6 +656,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET SYSLOSS VAT
@@ -626,6 +670,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET DIST/OTHERS VAT
@@ -639,6 +684,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET GENVAT, TRANSVAT, SYSLOSSVAT SALES
@@ -652,6 +698,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET DIST AND OTHERS SALES
@@ -665,6 +712,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET UCME COLLECTION
@@ -678,6 +726,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET UCME SALES
@@ -691,6 +740,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET EWT 2%
@@ -704,6 +754,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET EVAT 5%
@@ -717,6 +768,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET ENVIRONMENT CHARGE COLLECTION
@@ -730,6 +782,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET ENVIRONMENT CHARGE SALES
@@ -743,6 +796,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET RFSC COLLECTION
@@ -756,6 +810,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET RFSC SALES
@@ -769,6 +824,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
             }            
         }  
@@ -1116,8 +1172,7 @@ class PaidBillsController extends AppBaseController
                 /**
                  * SAVE DCR AND SALES REPORT
                  */
-                if ($account != null) {
-                    
+                if ($account != null) {                    
                     if ($account->ForDistribution == 'Yes') {
                         // IF ACCOUNT IS MARKED AS FOR DISTRIBUTION
                         if ($account->DistributionAccountCode != null) {
@@ -1132,6 +1187,7 @@ class PaidBillsController extends AppBaseController
                             $dcrSum->ORNumber = $request['ORNumber'];
                             $dcrSum->ReportDestination = 'BOTH';
                             $dcrSum->Office = env('APP_LOCATION');
+                            $dcrSum->AccountNumber = $bill->AccountNumber;
                             $dcrSum->save();
                         }                        
                     } else {
@@ -1146,6 +1202,7 @@ class PaidBillsController extends AppBaseController
                         $dcrSum->ORNumber = $request['ORNumber'];
                         $dcrSum->ReportDestination = 'COLLECTION';
                         $dcrSum->Office = env('APP_LOCATION');
+                        $dcrSum->AccountNumber = $bill->AccountNumber;
                         $dcrSum->save();
 
                         // GET RPT FOR DCR
@@ -1159,6 +1216,7 @@ class PaidBillsController extends AppBaseController
                         $dcrSum->ORNumber = $request['ORNumber'];
                         $dcrSum->ReportDestination = 'COLLECTION';
                         $dcrSum->Office = env('APP_LOCATION');
+                        $dcrSum->AccountNumber = $bill->AccountNumber;
                         $dcrSum->save();
 
                         // GET RPT  FOR SALES
@@ -1172,6 +1230,7 @@ class PaidBillsController extends AppBaseController
                         $dcrSum->ORNumber = $request['ORNumber'];
                         $dcrSum->ReportDestination = 'SALES';
                         $dcrSum->Office = env('APP_LOCATION');
+                        $dcrSum->AccountNumber = $bill->AccountNumber;
                         $dcrSum->save();
 
                         // GET SALES AR BY CONSUMER TYPE 
@@ -1187,6 +1246,7 @@ class PaidBillsController extends AppBaseController
                             $dcrSum->ORNumber = $request['ORNumber'];
                             $dcrSum->ReportDestination = 'SALES';
                             $dcrSum->Office = env('APP_LOCATION');
+                            $dcrSum->AccountNumber = $bill->AccountNumber;
                             $dcrSum->save();
                         } else {
                             // GET NOT BAPA
@@ -1202,6 +1262,7 @@ class PaidBillsController extends AppBaseController
                                 $dcrSum->ORNumber = $request['ORNumber'];
                                 $dcrSum->ReportDestination = 'SALES';
                                 $dcrSum->Office = env('APP_LOCATION');
+                                $dcrSum->AccountNumber = $bill->AccountNumber;
                                 $dcrSum->save();
                             } else {
                                 // GET NOT RESIDENTIALS
@@ -1215,8 +1276,36 @@ class PaidBillsController extends AppBaseController
                                 $dcrSum->ORNumber = $request['ORNumber'];
                                 $dcrSum->ReportDestination = 'SALES';
                                 $dcrSum->Office = env('APP_LOCATION');
+                                $dcrSum->AccountNumber = $bill->AccountNumber;
                                 $dcrSum->save();
                             }
+                        }
+                    }
+
+                    // GET TERMED PAYMENT BUNDLES
+                    if ($bill->AdditionalCharges != null) {
+                        // GET TERMED PAYMENT
+                        $termedPayment = ArrearsLedgerDistribution::where('AccountNumber', $account->id)
+                            ->where('ServicePeriod', $bill->ServicePeriod)
+                            ->whereNull('IsPaid')
+                            ->first();
+
+                        if ($termedPayment != null) {
+                            $dcrSum = new DCRSummaryTransactions;
+                            $dcrSum->id = IDGenerator::generateIDandRandString();
+                            $dcrSum->GLCode = DCRSummaryTransactions::getARConsumersTermedPayments($account->Town);
+                            $dcrSum->Amount = $termedPayment->Amount;
+                            $dcrSum->Day = date('Y-m-d');
+                            $dcrSum->Time = date('H:i:s');
+                            $dcrSum->Teller = Auth::id();
+                            $dcrSum->ORNumber = $request['ORNumber'];
+                            $dcrSum->ReportDestination = 'COLLECTION';
+                            $dcrSum->Office = env('APP_LOCATION');
+                            $dcrSum->AccountNumber = $bill->AccountNumber;
+                            $dcrSum->save();
+
+                            $termedPayment->IsPaid = 'Yes';
+                            $termedPayment->save();
                         }
                     }
                 }
@@ -1232,6 +1321,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET UC-NPC Stranded Debt Sales
@@ -1245,6 +1335,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET STRANDED CONTRACT COST COLLECTION
@@ -1258,6 +1349,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET STRANDED CONTRACT COST SALES
@@ -1271,6 +1363,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET FIT ALL COLLECTION
@@ -1284,6 +1377,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET FIT ALL SALES
@@ -1297,6 +1391,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET UCME REDCI COLLECTION
@@ -1310,6 +1405,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET UCME REDCI SALES
@@ -1323,6 +1419,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET GENCO
@@ -1336,6 +1433,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET TRANSCO
@@ -1349,6 +1447,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET SYSLOSS VAT
@@ -1362,6 +1461,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET DIST/OTHERS VAT
@@ -1375,6 +1475,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET GENVAT, TRANSVAT, SYSLOSSVAT SALES
@@ -1388,6 +1489,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET DIST AND OTHERS SALES
@@ -1401,6 +1503,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET UCME COLLECTION
@@ -1414,6 +1517,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET UCME SALES
@@ -1427,7 +1531,36 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
+
+                // GET EWT 2%
+                // $dcrSum = new DCRSummaryTransactions;
+                // $dcrSum->id = IDGenerator::generateIDandRandString();
+                // $dcrSum->GLCode = '140-160-00';
+                // $dcrSum->Amount = $paidBill->Form2307TwoPercent;
+                // $dcrSum->Day = date('Y-m-d');
+                // $dcrSum->Time = date('H:i:s');
+                // $dcrSum->Teller = Auth::id();
+                // $dcrSum->ORNumber = $request['ORNumber'];
+                // $dcrSum->ReportDestination = 'COLLECTION';
+                // $dcrSum->Office = env('APP_LOCATION');
+                // $dcrSum->AccountNumber = $bill->AccountNumber;
+                // $dcrSum->save();
+
+                // GET EVAT 5%
+                // $dcrSum = new DCRSummaryTransactions;
+                // $dcrSum->id = IDGenerator::generateIDandRandString();
+                // $dcrSum->GLCode = '140-170-00';
+                // $dcrSum->Amount = $paidBill->Form2307FivePercent;
+                // $dcrSum->Day = date('Y-m-d');
+                // $dcrSum->Time = date('H:i:s');
+                // $dcrSum->Teller = Auth::id();
+                // $dcrSum->ORNumber = $request['ORNumber'];
+                // $dcrSum->ReportDestination = 'COLLECTION';
+                // $dcrSum->Office = env('APP_LOCATION');
+                // $dcrSum->AccountNumber = $bill->AccountNumber;
+                // $dcrSum->save();
 
                 // GET ENVIRONMENT CHARGE COLLECTION
                 $dcrSum = new DCRSummaryTransactions;
@@ -1440,6 +1573,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET ENVIRONMENT CHARGE SALES
@@ -1453,6 +1587,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET RFSC COLLECTION
@@ -1466,6 +1601,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
 
                 // GET RFSC SALES
@@ -1479,33 +1615,8 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->ORNumber = $request['ORNumber'];
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->AccountNumber = $bill->AccountNumber;
                 $dcrSum->save();
-
-                // // GET EWT 2%
-                // $dcrSum = new DCRSummaryTransactions;
-                // $dcrSum->id = IDGenerator::generateIDandRandString();
-                // $dcrSum->GLCode = '140-160-00';
-                // $dcrSum->Amount = $paidBill->Form2307TwoPercent;
-                // $dcrSum->Day = date('Y-m-d');
-                // $dcrSum->Time = date('H:i:s');
-                // $dcrSum->Teller = Auth::id();
-                // $dcrSum->ORNumber = $request['ORNumber'];
-                // $dcrSum->ReportDestination = 'COLLECTION';
-                // $dcrSum->Office = env('APP_LOCATION');
-                // $dcrSum->save();
-
-                // // GET EVAT 5%
-                // $dcrSum = new DCRSummaryTransactions;
-                // $dcrSum->id = IDGenerator::generateIDandRandString();
-                // $dcrSum->GLCode = '140-170-00';
-                // $dcrSum->Amount = $paidBill->Form2307FivePercent;
-                // $dcrSum->Day = date('Y-m-d');
-                // $dcrSum->Time = date('H:i:s');
-                // $dcrSum->Teller = Auth::id();
-                // $dcrSum->ORNumber = $request['ORNumber'];
-                // $dcrSum->ReportDestination = 'COLLECTION';
-                // $dcrSum->Office = env('APP_LOCATION');
-                // $dcrSum->save();
             }
         }
 
