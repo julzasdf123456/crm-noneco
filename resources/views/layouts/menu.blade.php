@@ -433,6 +433,13 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-user-circle nav-icon text-primary"></i><p>Active Accounts</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('serviceAccounts.termed-payment-accounts') }}"
+                   class="nav-link {{ Request::is('serviceAccounts.termed-payment-accounts') ? 'active' : '' }}"
+                   title="Accounts with Termed Payments">                   
+                   <i class="fas fa-list nav-icon text-primary"></i><p>Termed Accounts</p>
+                </a>
+            </li>
             <li class="nav-header">                
                 Others 
             </li>
@@ -818,6 +825,13 @@ use Illuminate\Support\Facades\Auth;
                 <i class="fas fa-circle nav-icon"></i><p>Rate Items</p>
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a href="{{ route('banks.index') }}"
+                   class="nav-link {{ Request::is('banks*') ? 'active' : '' }}">
+                   <i class="fas fa-circle nav-icon"></i><p>Banks</p>
+                </a>
+            </li>
         </ul>
     </li>
 @endcanany
@@ -858,5 +872,6 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
+
 
 

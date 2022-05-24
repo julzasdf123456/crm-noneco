@@ -122,6 +122,7 @@ Route::post('/service_connections/download-energization-report', [ServiceConnect
 Route::get('/service_connections/fetch-application-count-via-status', [ServiceConnectionsController::class, 'fetchApplicationCountViaStatus'])->name('serviceConnections.fetch-application-count-via-status');
 Route::get('/service_connections/print-service-connection-application/{id}', [ServiceConnectionsController::class, 'printServiceConnectionApplication'])->name('serviceConnections.print-service-connection-application');
 Route::get('/service_connections/print-service-connection-contract/{id}', [ServiceConnectionsController::class, 'printServiceConnectionContract'])->name('serviceConnections.print-service-connection-contract');
+Route::get('/service_connections/relocation-search', [ServiceConnectionsController::class, 'relocationSearch'])->name('serviceConnections.relocation-search');
 Route::resource('serviceConnections', App\Http\Controllers\ServiceConnectionsController::class);
 
 
@@ -202,6 +203,8 @@ Route::get('/bills/bapa-view-readings/{period}/{bapaName}', [App\Http\Controller
 Route::get('/service_accounts/re-sequence-accounts', [App\Http\Controllers\ServiceAccountsController::class,  'reSequenceAccounts'])->name('serviceAccounts.re-sequence-accounts');
 Route::get('/service_accounts/update-gps-coordinates', [App\Http\Controllers\ServiceAccountsController::class,  'updateGPSCoordinates'])->name('serviceAccounts.update-gps-coordinates');
 Route::get('/service_accounts/search-global', [App\Http\Controllers\ServiceAccountsController::class,  'searchGlobal'])->name('serviceAccounts.search-global');
+Route::get('/service_accounts/termed-payment-accounts', [App\Http\Controllers\ServiceAccountsController::class,  'termedPaymentAccounts'])->name('serviceAccounts.termed-payment-accounts');
+Route::get('/service_accounts/disconnect-manual', [App\Http\Controllers\ServiceAccountsController::class,  'disconnectManual'])->name('serviceAccounts.disconnect-manual');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 
@@ -547,3 +550,6 @@ Route::resource('accountGLCodes', App\Http\Controllers\AccountGLCodesController:
 
 Route::resource('dCRSummaryTransactions', App\Http\Controllers\DCRSummaryTransactionsController::class);
 Route::get('/d_c_r_summary_transactions/sales-dcr-monitor', [App\Http\Controllers\DCRSummaryTransactionsController::class, 'salesDcrMonitor'])->name('dCRSummaryTransactions.sales-dcr-monitor');
+
+
+Route::resource('banks', App\Http\Controllers\BanksController::class);

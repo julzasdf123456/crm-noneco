@@ -37,7 +37,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="towns">Service Period</label>
+                            <label for="towns">Area</label>
                             <select id="towns" class="form-control">
                                 <option value="All">All</option>
                                 @foreach ($towns as $item)

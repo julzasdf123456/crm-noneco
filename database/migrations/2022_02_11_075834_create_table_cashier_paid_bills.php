@@ -41,6 +41,9 @@ class CreateTableCashierPaidBills extends Migration
             $table->string('ApprovedBy')->nullable(); // userid
             $table->string('AuditedBy')->nullable(); // userid
             $table->string('Notes', 1000)->nullable(); // userid
+            $table->string('CheckNo')->nullable();
+            $table->string('Bank')->nullable();
+            $table->date('CheckExpiration')->nullable();
             $table->timestamps();
         });
     }

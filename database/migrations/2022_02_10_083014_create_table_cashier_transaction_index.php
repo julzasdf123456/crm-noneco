@@ -36,6 +36,11 @@ class CreateTableCashierTransactionIndex extends Migration
             $table->string('ApprovedBy')->nullable();
             $table->string('AuditedBy')->nullable();
             $table->string('CancellationNotes')->nullable();
+            $table->string('PayeeName')->nullable();
+            $table->string('CheckNo')->nullable();
+            $table->string('Bank')->nullable();
+            $table->date('CheckExpiration')->nullable();
+            $table->string('AccountNumber')->nullable();
             $table->timestamps();
         });
     }

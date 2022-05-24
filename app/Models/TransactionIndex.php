@@ -65,7 +65,12 @@ class TransactionIndex extends Model
         'FiledBy',
         'ApprovedBy',
         'AuditedBy',
-        'CancellationNotes'
+        'CancellationNotes',
+        'PayeeName',
+        'CheckNo',
+        'Bank',
+        'CheckExpiration',
+        'AccountNumber'
     ];
 
     /**
@@ -94,7 +99,12 @@ class TransactionIndex extends Model
         'FiledBy' => 'string',
         'ApprovedBy' => 'string',
         'AuditedBy' => 'string',
-        'CancellationNotes' => 'string'
+        'CancellationNotes' => 'string',
+        'PayeeName' => 'string',
+        'CheckNo' => 'string',
+        'Bank' => 'string',
+        'CheckExpiration' => 'string',
+        'AccountNumber' => 'string'
     ];
 
     /**
@@ -125,7 +135,12 @@ class TransactionIndex extends Model
         'FiledBy' => 'nullable|string',
         'ApprovedBy' => 'nullable|string',
         'AuditedBy' => 'nullable|string',
-        'CancellationNotes' => 'nullable|string'
+        'CancellationNotes' => 'nullable|string',
+        'PayeeName' => 'nullable|string',
+        'CheckNo' => 'nullable|string',
+        'Bank' => 'nullable|string',
+        'CheckExpiration' => 'nullable|string',
+        'AccountNumber' => 'nullable|string'
     ];
 
     public static function getReconnectionFeeId() {

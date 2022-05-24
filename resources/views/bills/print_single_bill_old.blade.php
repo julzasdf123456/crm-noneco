@@ -3,35 +3,22 @@
 use App\Models\ServiceAccounts;
 use App\Models\MemberConsumers;
 use App\Models\Bills;
+use App\Models\ServiceConnectionAccountTypes;
 @endphp
 
 <style>
 @media print {
     @page {
-        /* size: landscape !important; */
+        /* size: 8.5in 6.5in; */
+        font-size: .8em !important;
+    }
+
+    html, body {
+        font-size: .8em !important;
     }
 
     header {
         display: none;
-    }
-
-    .divider {
-        width: 100%;
-        margin: 10px auto;
-        height: 1px;
-        background-color: #dedede;
-    }
-
-    .left-indent {
-        margin-left: 30px;
-    }
-
-    .text-right {
-        text-align: right;
-    }
-
-    .text-center {
-        text-align: center;
     }
 
     .print-area {        
@@ -42,10 +29,6 @@ use App\Models\Bills;
         page-break-after: auto;
     }
 }  
-
-html {
-    margin: 10px !important;
-}
 
 .left-indent {
     margin-left: 50px;
@@ -65,13 +48,86 @@ html {
     height: 1px;
     background-color: #dedede;
 } 
+
+#print-area, td {
+    font-size: .8em !important;
+}
+
+span, p {
+    font-size: 1.3em !important;
+}
+
 </style>
 
 <link rel="stylesheet" href="{{ URL::asset('adminlte.min.css') }}">
 
 <div id="print-area" class="content">
     <div class="row">
-        <div class="col-lg-12">
+        <div class="col-sm-6">
+            <table class="table table-sm table-borderless" style="margin-top: 124px; margin-left: 70px;">
+                <tr>
+                    <td style="padding-left: 50px">{{ date('F d, Y', strtotime($bills->ServicePeriod)) }}</td>
+                    <td style="padding-left: 50px">{{ date('F d, Y', strtotime($bills->BillingDate)) }}</td>
+                </tr>
+            </table>
+
+            @php
+                $acctType = ServiceConnectionAccountTypes::where('AccountType', $bills->ConsumerType)->first();
+            @endphp
+            
+            <table class="table table-sm table-borderless" style="margin-top: 8px; margin-left: 2px;">
+                <tr>
+                    <td style="padding-left: 30px" width="25%">{{ $account->OldAccountNo }}</td>
+                    <td style="padding-left: 30px" width="25%">{{ $bills->MeterNumber }}</td>
+                    <td width="10%">{{ $acctType != null ? $acctType->Alias : '-' }}</td>
+                    <td width="20%">{{ $bills->Multiplier }}</td>
+                    <td width="20%">{{ $bills->DueDate }}</td>
+                </tr>                
+            </table>
+
+            <table class="table table-sm table-borderless" style="margin-top: -16px; margin-left: 2px;">
+                <tr>
+                    <td style="padding-left: 70px">{{ $account->ServiceAccountName }}</td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 70px">{{ ServiceAccounts::getAddress($account) }}</td>
+                </tr>
+            </table>
+
+            <div style="margin-left: 65%; margin-top: 53px;">
+                <table class="table table-sm table-borderless">
+                    <tr>
+                        <td>{{ $rate->GenerationSystemCharge }}</td>
+                        <td>{{ $bills->GenerationSystemCharge }}</td>
+                    </tr>
+                    <tr style="opacity: 0;">
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr style="opacity: 0;">
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr style="opacity: 0;">
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr style="opacity: 0;">
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>{{ $rate->TransmissionDeliveryChargeKW }}</td>
+                        <td>{{ $bills->TransmissionDeliveryChargeKW }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ $rate->TransmissionDeliveryChargeKW }}</td>
+                        <td>{{ $bills->TransmissionDeliveryChargeKW }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        {{-- <div class="col-lg-12">
             
             <table class="table table-borderless table-sm">
                 <tr>
@@ -127,13 +183,13 @@ html {
             <div class="divider"></div>
 
                        
-        </div>
+        </div> --}}
     </div>
 </div>
-<script type="text/javascript">
+{{-- <script type="text/javascript">
 window.print();
 
 window.setTimeout(function(){
     window.history.go(-1)
 }, 800);
-</script>
+</script> --}}

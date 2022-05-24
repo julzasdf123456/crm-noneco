@@ -346,6 +346,14 @@ class PaidBillsController extends AppBaseController
                 $paidBill->OfficeTransacted = env('APP_LOCATION');
                 $paidBill->PostingDate = date('Y-m-d');
                 $paidBill->PostingTime = date('H:i:s');
+
+                $paidBill->PaymentUsed = $request['PaymentUsed'];
+                // CHECK IF PAYMENT IS CASH, CHECK, OR CARD
+                if ($request['PaymentUsed'] == 'Check') {
+                    $paidBill->CheckNo = $request['CheckNo'];
+                    $paidBill->Bank = $request['Bank'];
+                }
+
                 if (date('Y-m-d', strtotime($bill->DueDate)) < date('Y-m-d')) {
                     $paidBill->Surcharge = Bills::getFinalPenalty($bill);
                 } else {
@@ -1141,6 +1149,13 @@ class PaidBillsController extends AppBaseController
                 $paidBill->OfficeTransacted = env('APP_LOCATION');
                 $paidBill->PostingDate = date('Y-m-d');
                 $paidBill->PostingTime = date('H:i:s');
+                
+                $paidBill->PaymentUsed = $request['PaymentUsed'];
+                // CHECK IF PAYMENT IS CASH, CHECK, OR CARD
+                if ($request['PaymentUsed'] == 'Check') {
+                    $paidBill->CheckNo = $request['CheckNo'];
+                    $paidBill->Bank = $request['Bank'];
+                }
                 if (date('Y-m-d', strtotime($bill->DueDate)) < date('Y-m-d')) {
                     $paidBill->Surcharge = Bills::getFinalPenalty($bill);
                 } else {

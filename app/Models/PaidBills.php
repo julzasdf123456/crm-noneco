@@ -76,7 +76,11 @@ class PaidBills extends Model
         'FiledBy',
         'ApprovedBy',
         'AuditedBy',
-        'Notes'
+        'Notes',
+        'CheckNo',
+        'Bank',
+        'CheckExpiration',
+        'PaymentUsed'
     ];
 
     /**
@@ -109,7 +113,11 @@ class PaidBills extends Model
         'FiledBy' => 'string',
         'ApprovedBy' => 'string',
         'AuditedBy' => 'string',
-        'Notes' => 'string'
+        'Notes' => 'string',
+        'CheckNo' => 'string',
+        'Bank' => 'string',
+        'CheckExpiration' => 'string',
+        'PaymentUsed' => 'string',
     ];
 
     /**
@@ -145,7 +153,11 @@ class PaidBills extends Model
         'FiledBy' => 'nullable|string',
         'ApprovedBy' => 'nullable|string',
         'AuditedBy' => 'nullable|string',
-        'Notes' => 'nullable|string'
+        'Notes' => 'nullable|string',
+        'CheckNo' => 'nullable|string',
+        'Bank' => 'nullable|string',
+        'CheckExpiration' => 'nullable|string',
+        'PaymentUsed' => 'nullable|string',
     ];
 
     public static function roundDecimal($val, $precision) {

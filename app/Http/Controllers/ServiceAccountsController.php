@@ -9,6 +9,7 @@ use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
 use App\Models\ServiceConnections;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use App\Models\Towns;
@@ -1017,5 +1018,41 @@ class ServiceAccountsController extends AppBaseController
         } else {
             return response()->json([], 200);
         }        
+    }
+
+    public function termedPaymentAccounts() {
+        $termedAccounts = DB::table('Billing_ArrearsLedgerDistribution')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_ArrearsLedgerDistribution.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->whereNull('Billing_ArrearsLedgerDistribution.IsPaid')
+            ->select('Billing_ArrearsLedgerDistribution.AccountNumber', 'Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.OldAccountNo')
+            ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+            ->groupBy('Billing_ArrearsLedgerDistribution.AccountNumber', 'Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.OldAccountNo')
+            ->get();
+
+        return view('/service_accounts/termed_payment_accounts', [
+            'termedAccounts' => $termedAccounts,
+        ]);
+    }
+
+    public function disconnectManual(Request $request) {
+        $account = ServiceAccounts::find($request['id']);
+
+        if ($account != null) {
+            $account->AccountStatus = 'DISCONNECTED';
+            $account->save();
+
+            $disconnectionHistory = new DisconnectionHistory;
+            $disconnectionHistory->id = IDGenerator::generateIDandRandString();
+            $disconnectionHistory->AccountNumber = $account->id;
+            $disconnectionHistory->ServicePeriod = date('Y-m-01');
+            $disconnectionHistory->Status = 'DISCONNECTED';
+            $disconnectionHistory->UserId = Auth::id();
+            $disconnectionHistory->Notes = $request['Notes'];
+            $disconnectionHistory->DateDisconnected = $request['DateDisconnected'];
+            $disconnectionHistory->TimeDisconnected = $request['TimeDisconnected'];
+            $disconnectionHistory->save();
+        }
+
+        return response()->json('ok', 200);
     }
 }

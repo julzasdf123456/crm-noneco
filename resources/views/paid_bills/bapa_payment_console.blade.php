@@ -140,13 +140,15 @@
             </div>
             <div class="card-footer">
                 <button id="cashBtn" class="btn btn-lg btn-primary float-right" disabled><i class="fas fa-dollar-sign"></i> Cash</button>
-                <button id="checkBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled><i class="fas fa-money-check-alt"></i> Check</button>
+                <button id="checkBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled data-toggle="modal" data-target="#modal-check-payment"><i class="fas fa-money-check-alt"></i> Check</button>
                 <button id="cardBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled><i class="fas fa-credit-card"></i> Debit/Credit Card</button>
             </div>
         </div>
     </div>
 </div>
 @endsection
+
+@include('paid_bills.check_modal')
 
 @push('page_scripts')
     <script>
@@ -200,11 +202,16 @@
             $('#cashBtn').on('click', function() {
                 if (parseFloat(change)) {
                     if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(accountsAdded)) {  
-                        transact()                     
+                        transact('Cash')                     
                     } else {
 
                     }
                 }
+            })
+
+            // TRANSACT CHECK
+            $('#save-check-transaction').on('click', function() {
+                transact('Check')
             })
 
             // OR NO ON KEY PRESSED
@@ -457,19 +464,23 @@
         $(document).keydown(function(event){
             var keycode = (event.keyCode ? event.keyCode : event.which);  
             if(keycode == '13'){
-                if (parseFloat(change)) {
-                    if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(accountsAdded)) {  
-                        transact()                     
+                if ($('#modal-check-payment').hasClass('show')) {
+                    // ENTER KEY IS DISABLED IF SHOW CHECK MODAL IS SHOWN
+                } else {
+                    if (parseFloat(change)) {
+                        if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(accountsAdded)) {  
+                            transact('Cash')                     
+                        } else {
+
+                        }
                     } else {
 
                     }
-                } else {
-
-                }
+                }                
             } 
         });
 
-        function transact() {
+        function transact(paymentUsed) {
             $.ajax({
                 url : "{{ route('paidBills.save-bapa-payments') }}",
                 type : 'GET',
@@ -483,7 +494,10 @@
                     TotalAmountPaid : amountDue,
                     ORNumber : $('#orNumber').val(),
                     BAPAName : "{{ urlencode($bapaName) }}",
-                    SubTotal : totalAmount
+                    SubTotal : totalAmount,
+                    PaymentUsed : paymentUsed,
+                    CheckNo : $('#checkNo').val(),
+                    Bank : $('#bank').val()
                 },
                 success : function(res) {
                     alert('PRINT OR BAPA')

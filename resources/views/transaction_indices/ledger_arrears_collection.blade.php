@@ -76,7 +76,7 @@
                     </div>
                     <div class="card-footer">
                         <button id="cashBtn" class="btn btn-lg btn-primary float-right" disabled><i class="fas fa-dollar-sign"></i> Cash</button>
-                        <button id="checkBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled><i class="fas fa-money-check-alt"></i> Check</button>
+                        <button id="checkBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled data-toggle="modal" data-target="#modal-check-payment"><i class="fas fa-money-check-alt"></i> Check</button>
                         <button id="cardBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled><i class="fas fa-credit-card"></i> Debit/Credit Card</button>
                     </div>
                 </div>
@@ -84,6 +84,8 @@
         </div>
     </div>
 @endsection
+
+@include('paid_bills.check_modal')
 
 @push('page_scripts')
     <script>
@@ -156,7 +158,11 @@
             if (selectedPayments.length > 0 && !jQuery.isEmptyObject($('#ornumber').val())) {
                 var keycode = (event.keyCode ? event.keyCode : event.which);
                 if(keycode == '13'){
-                    transact()
+                    if ($('#modal-check-payment').hasClass('show')) {
+                        // ENTER KEY IS DISABLED IF SHOW CHECK MODAL IS SHOWN
+                    } else {
+                        transact('Cash')
+                    }                    
                 } 
             } else {
 
@@ -176,14 +182,19 @@
             // CASH BUTTON EVENT
             $('#cashBtn').on('click', function() {
                 if (selectedPayments.length > 0 && !jQuery.isEmptyObject($('#ornumber').val())) {
-                    transact()
+                    transact('Cash')
                 } else {
 
                 }  
             })
+
+            // TRANSACT CHECK
+            $('#save-check-transaction').on('click', function() {
+                transact('Check')
+            })
         })
 
-        function transact() {
+        function transact(paymentUsed) {
             $.ajax({
                 url : '/transaction_indices/save-ledger-arrear-transaction',
                 type : 'GET',
@@ -191,8 +202,10 @@
                     LedgerIds : selectedPayments,
                     TotalPayment : totalPayable,
                     ORNumber : $('#ornumber').val(),
-                    PaymentUsed : 'Cash',
-                    AccountNumber : "{{ $account != null ? $account->id : '-' }}"
+                    PaymentUsed : paymentUsed,
+                    AccountNumber : "{{ $account != null ? $account->id : '-' }}",
+                    CheckNo : $('#checkNo').val(),
+                    Bank : $('#bank').val()
                 },
                 success : function(res) {
                     window.location.href = "{{ url('/transaction_indices/print-or-termed-ledger-arrears') }}" + "/" + res['id'];

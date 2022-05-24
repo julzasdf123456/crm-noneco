@@ -12,6 +12,10 @@
             <thead></thead>
             <tbody>
                 <tr>
+                    <td class="text-muted">Status</td>
+                    <td><strong>{{ $serviceAccounts->AccountStatus }}</td>
+                </tr>
+                <tr>
                     <td class="text-muted">Account Number</td>
                     <td><strong>{{ $serviceAccounts->id }}</strong> (Old Acct: {{ $serviceAccounts->OldAccountNo }})</td>
                 </tr>
@@ -89,11 +93,14 @@
             
         </table>
 
-        <div class="content px-3">
-            <div class="divider"></div>
+        {{-- <div class="content px-3"> --}}
+            {{-- <div class="divider"></div> --}}
             {{-- <span class="text-muted"><i>Tools</i></span><br> --}}
-            <a href="{{ route('serviceAccounts.update-step-one', [$serviceAccounts->id]) }}" class="btn btn-tool text-success" title="Update Consumer Info"><i class="fas fa-pen"></i></a>
-            <a href="" class="btn btn-tool text-danger" title="Disconnect this account"><i class="fas fa-unlink"></i></a>
-        </div>
+            
+            {{-- <a href="" class="btn btn-tool text-danger" title="Disconnect this account"><i class="fas fa-unlink"></i></a> --}}
+        {{-- </div> --}}
     </div>
+    {{-- <div class="card-footer">
+
+    </div> --}}
 </div>

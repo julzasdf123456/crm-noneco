@@ -221,7 +221,9 @@ class CacheOtherPaymentsController extends AppBaseController
         $transactionIndex->ObjectId = $request['AccountNumber'];
         $transactionIndex->Source = 'Other Payments';
         $transactionIndex->PaymentUsed = $request['PaymentUsed'];
+        $transactionIndex->PayeeName = $request['PaymentTitle'];
         $transactionIndex->UserId = Auth::id();
+        $transactionIndex->AccountNumber = $request['AccountNumber'];
         $transactionIndex->save();
 
         CacheOtherPayments::where('AccountNumber', $request['AccountNumber'])->delete();

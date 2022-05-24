@@ -4,14 +4,19 @@
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
-                <div class="col-sm-6">
+                <div class="col-sm-5">
                     <h4>Service Account Management Console</h4>
                 </div>
-                <div class="col-sm-6">
-                    <a class="btn btn-default float-right"
-                       href="{{ route('serviceAccounts.index') }}">
-                        Back
-                    </a>
+                <div class="col-sm-7">
+                    <button class="btn btn-xs btn-danger float-right" style="margin-right: 5px;" title="Tag this account as Pulled-out"><i class="fas fa-times ico-tab-mini"></i> Pull-out</button>
+                    <button class="btn btn-xs btn-danger float-right" style="margin-right: 5px;" title="Apprehend This Account"><i class="fas fa-exclamation-circle ico-tab-mini"></i> Apprehend</button>
+                    @if ($serviceAccounts->AccountStatus == 'DISCONNECTED')
+                        
+                    @elseif ($serviceAccounts->AccountStatus == 'ACTIVE')
+                    <button class="btn btn-xs btn-danger float-right" style="margin-right: 5px;" title="Disconnect This Account" data-toggle="modal" data-target="#modal-disconnect"><i class="fas fa-unlink ico-tab-mini"></i> Disconnect</button>
+                    @endif
+                    
+                    <a href="{{ route('serviceAccounts.update-step-one', [$serviceAccounts->id]) }}" class="btn btn-xs btn-warning float-right" style="margin-right: 30px;" title="Update Consumer Info"><i class="fas fa-pen ico-tab-mini"></i> Update</a>
                 </div>
             </div>
         </div>
@@ -79,3 +84,81 @@
         
     </div>
 @endsection
+
+{{-- DISCONNECT --}}
+<div class="modal fade" id="modal-disconnect" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Disconnect This Account</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="DisconnectionDate">Disconnection Date</label>
+                    <input type="text" name="DisconnectionDate" id="DisconnectionDate" value="" class="form-control">
+
+                    <label for="DisconnectionTime">Disconnection Time</label>
+                    <input type="text" name="DisconnectionTime" id="DisconnectionTime" value="" class="form-control">
+
+                    <textarea type="text" name="Notes" id="Notes" value="" placeholder="Notes/Remarks" class="form-control" style="margin-top: 8px;" rows="3"></textarea>
+                </div>
+
+                @push('page_scripts')
+                    <script type="text/javascript">
+                        $('#DisconnectionDate').datetimepicker({
+                            format: 'YYYY-MM-DD',
+                            useCurrent: false,
+                            sideBySide: true
+                        })
+
+                        $('#DisconnectionTime').datetimepicker({
+                            format: 'hh:mm:ss',
+                            useCurrent: false,
+                            sideBySide: true
+                        })
+                    </script>
+                @endpush
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="disconnect-proceed">Proceed</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('page_scripts')
+    <script>
+        $(document).ready(function() {
+            $('#disconnect-proceed').on('click', function() {
+                disconnect()
+            })
+        })
+
+        function disconnect() {
+            $.ajax({
+                url : "{{ route('serviceAccounts.disconnect-manual') }}",
+                type : 'GET',
+                data : {
+                    id : "{{ $serviceAccounts->id }}",
+                    Notes : $('#Notes').val(),
+                    DateDisconnected : $('#DisconnectionDate').val(),
+                    TimeDisconnected : $('#DisconnectionTime').val(),
+                },
+                success : function(res) {
+                    location.reload()
+                },
+                error : function (err) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'An error occurred while disconnecting this account!',
+                    })
+                }
+            })
+        }
+    </script>
+@endpush

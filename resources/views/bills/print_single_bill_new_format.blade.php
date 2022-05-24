@@ -71,15 +71,12 @@ html {
 
 <div id="print-area" class="content">
     <div class="row">
-        <div class="col-lg-12">
+        <div class="col-sm-12">
             <p class="text-center"><strong>{{ env('APP_COMPANY') }}</strong></p>
             <p class="text-center">{{ env('APP_ADDRESS') }}</p>
 
-            <br>
 
             <h4 class="text-center">STATEMENT OF ACCOUNT</h4>
-
-            <br>
 
             <table class="table table-borderless table-sm">
                 <tr>
@@ -135,7 +132,7 @@ html {
             <div class="divider"></div>
 
             <div class="row">
-                <div class="col-lg-6 col-md-6">
+                <div class="col-sm-6 col-md-6">
                     <table class="table-borderless table-sm table-hover">
                         <thead>
                             <th>CHARGES</th>
@@ -276,7 +273,7 @@ html {
                     </table>
                 </div>
 
-                <div class="col-lg-6 col-md-6">
+                <div class="col-sm-6 col-md-6">
                     <table class="table-borderless table-hover table-sm">
                         <thead>
                             <th>CHARGES</th>
@@ -407,7 +404,7 @@ html {
 
                 <div class="divider"></div>
 
-                <div class="col-lg-12">
+                <div class="col-sm-12">
                     <table class="table table-borderless table-sm">
                         <tr>
                             <td>Additional Charges</td>

@@ -267,6 +267,13 @@ class TransactionIndexController extends AppBaseController
         $transactionIndex->Source = $request['LoadCategory'] == 'above 5kVa' ? "Service Connection Application w Power Load" : "Service Connection Application";
         $transactionIndex->PaymentUsed = $request['PaymentUsed'];
         $transactionIndex->UserId = Auth::id();
+        $transactionIndex->PayeeName = $totalTransactions->ServiceAccountName;
+
+        if ($request['PaymentUsed'] == 'Check') {
+            $transactionIndex->CheckNo = $request['CheckNo'];
+            $transactionIndex->Bank = $request['Bank'];
+        }
+
         $transactionIndex->save();
 
         $saTransaction = ServiceConnectionTotalPayments::where('ServiceConnectionId', $request['svcId'])->first();
@@ -321,6 +328,19 @@ class TransactionIndexController extends AppBaseController
                 $powerLoadPayables->ORNumber = $request['ORNumber'];
                 $powerLoadPayables->ORDate = date('Y-m-d');
                 $powerLoadPayables->save();
+
+                // SAVE GL CODE
+                $dcrSum = new DCRSummaryTransactions;
+                $dcrSum->id = IDGenerator::generateIDandRandString();
+                $dcrSum->GLCode = '250-251-00';
+                $dcrSum->Amount = $transactionDetails->Total;
+                $dcrSum->Day = date('Y-m-d');
+                $dcrSum->Time = date('H:i:s');
+                $dcrSum->Teller = Auth::id();
+                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ReportDestination = 'COLLECTION';
+                $dcrSum->Office = env('APP_LOCATION');
+                $dcrSum->save();
             }            
         }
 
@@ -457,6 +477,14 @@ class TransactionIndexController extends AppBaseController
         $transactionIndex->ObjectId = $request['AccountNumber']; // ACCOUNT NUMBER
         $transactionIndex->PaymentUsed = $request['PaymentUsed'];
         $transactionIndex->UserId = Auth::id();
+        $transactionIndex->PayeeName = $account->ServiceAccountName;
+        $transactionIndex->AccountNumber = $account->OldAccountNo;
+
+        if ($request['PaymentUsed'] == 'Check') {
+            $transactionIndex->CheckNo = $request['CheckNo'];
+            $transactionIndex->Bank = $request['Bank'];
+        }
+
         $transactionIndex->save();
 
         // SAVE TRANSACTION DETAILS
@@ -536,6 +564,14 @@ class TransactionIndexController extends AppBaseController
         $transactionIndex->ObjectId = $request['AccountNumber']; // ACCOUNT NUMBER
         $transactionIndex->PaymentUsed = $request['PaymentUsed'];
         $transactionIndex->UserId = Auth::id();
+        $transactionIndex->PayeeName = $account->ServiceAccountName;
+        $transactionIndex->AccountNumber = $account->OldAccountNo;
+
+        if ($request['PaymentUsed'] == 'Check') {
+            $transactionIndex->CheckNo = $request['CheckNo'];
+            $transactionIndex->Bank = $request['Bank'];
+        }
+
         $transactionIndex->save();
 
         for ($i=0; $i<$len; $i++) {
@@ -551,6 +587,7 @@ class TransactionIndexController extends AppBaseController
                 $transactionDetails->Amount = round(floatval($ledgers->Amount), 2);
                 // $transactionDetails->VAT = $item->Vat; // TO BE ADDED LATER
                 $transactionDetails->Total = round(floatval($ledgers->Amount), 2);
+                $transactionDetails->AccountCode = DCRSummaryTransactions::getARConsumersTermedPayments($account->Town);
                 $transactionDetails->save();
 
                 // SAVE TO DCR SUMMARY

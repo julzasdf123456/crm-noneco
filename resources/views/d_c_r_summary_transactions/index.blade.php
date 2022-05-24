@@ -54,31 +54,51 @@
         {{-- RESULTS --}}
         <div class="col-lg-9">
             <div class="card">
-                <div class="card-header border-0">
-                    <span class="card-title">Daily Collection Summary</span>
+                <div class="card-header p-2">
+                    <ul class="nav nav-pills">
+                        <li class="nav-item"><a class="nav-link active" href="#dcr-summary" data-toggle="tab">
+                            <i class="fas fa-list"></i>
+                            DCR Summary</a></li>
+
+                        <li class="nav-item"><a class="nav-link" href="#power-bills" data-toggle="tab">
+                            <i class="fas fa-user"></i>
+                            Power Bills Payments</a></li>
+
+                        <li class="nav-item"><a class="nav-link" href="#non-power-bills" data-toggle="tab">
+                            <i class="fas fa-circle"></i>
+                            Non-Power Bills Payments</a></li>
+
+                        <li class="nav-item"><a class="nav-link" href="#check-payments" data-toggle="tab">
+                            <i class="fas fa-circle"></i>
+                            Check Payments</a></li>
+
+                        <li class="nav-item"><a class="nav-link" href="#cancelled-ors" data-toggle="tab">
+                            <i class="fas fa-circle"></i>
+                            Cancelled ORs</a></li>
+                    </ul>
                 </div>
-                <div class="card-body table-responsive px-0">
-                    <table class="table table-hover table-sm table-borderless">
-                        <thead>
-                            <th>GL Code</th>
-                            <th>Description</th>
-                            <th class="text-right">Amount</th>
-                        </thead>
-                        <tbody>
-                            @foreach ($data as $item)
-                                @if (intval($item->Amount) == 0)
-                                    
-                                @else
-                                    <tr>
-                                        <td>{{ $item->GLCode }}</td>
-                                        <td>{{ $item->Description }}</td>
-                                        <td class="text-right">{{ number_format($item->Amount, 2) }}</td>
-                                    </tr>
-                                @endif
-                                
-                            @endforeach
-                        </tbody>
-                    </table>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="dcr-summary">
+                            @include('d_c_r_summary_transactions.dcr_summary')
+                        </div>
+
+                        <div class="tab-pane" id="power-bills">
+                            @include('d_c_r_summary_transactions.power_bills')
+                        </div>
+
+                        <div class="tab-pane" id="non-power-bills">
+                            @include('d_c_r_summary_transactions.non_power_bills')
+                        </div>
+
+                        <div class="tab-pane" id="check-payments">
+                            @include('d_c_r_summary_transactions.check_payments')
+                        </div>
+
+                        <div class="tab-pane" id="cancelled-ors">
+                            @include('d_c_r_summary_transactions.cancelled_ors')
+                        </div>
+                    </div>                    
                 </div>
             </div>
         </div>

@@ -59,9 +59,86 @@ class DCRSummaryTransactionsController extends AppBaseController
                 ->get();
         }
 
+        $powerBills = DB::table('Cashier_PaidBills')
+            ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Cashier_PaidBills.PostingDate', $request['Day'] != null ? $request['Day'] : date('Y-m-d'))
+            ->where('Cashier_PaidBills.Teller', $request['Teller'])
+            ->whereNull('Cashier_PaidBills.Status')
+            ->select('Cashier_PaidBills.*', 'Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.OldAccountNo')
+            ->get();
+
+        $nonPowerBills = DB::table('Cashier_TransactionDetails')
+            ->leftJoin('Cashier_TransactionIndex', 'Cashier_TransactionDetails.TransactionIndexId', '=', 'Cashier_TransactionIndex.id')
+            ->where('Cashier_TransactionIndex.ORDate', $request['Day'] != null ? $request['Day'] : date('Y-m-d'))
+            ->where('Cashier_TransactionIndex.UserId', $request['Teller'])
+            ->whereNull('Cashier_TransactionIndex.Status')
+            ->select('Cashier_TransactionIndex.ORNumber',
+                'Cashier_TransactionIndex.Total',
+                'Cashier_TransactionIndex.AccountNumber',
+                'Cashier_TransactionIndex.PayeeName',
+                'Cashier_TransactionDetails.AccountCode',
+                'Cashier_TransactionIndex.CheckNo',
+                'Cashier_TransactionIndex.Bank',
+                'Cashier_TransactionIndex.PayeeName')
+            ->orderBy('Cashier_TransactionDetails.TransactionIndexId')
+            ->get();
+
+        $powerBillsCheck = DB::table('Cashier_PaidBills')
+            ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Cashier_PaidBills.PostingDate', $request['Day'] != null ? $request['Day'] : date('Y-m-d'))
+            ->where('Cashier_PaidBills.Teller', $request['Teller'])
+            ->where('Cashier_PaidBills.PaymentUsed', 'Check')
+            ->whereNull('Cashier_PaidBills.Status')
+            ->select('Cashier_PaidBills.*', 'Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.OldAccountNo')
+            ->get();
+
+        $nonPowerBillsCheck = DB::table('Cashier_TransactionDetails')
+            ->leftJoin('Cashier_TransactionIndex', 'Cashier_TransactionDetails.TransactionIndexId', '=', 'Cashier_TransactionIndex.id')
+            ->where('Cashier_TransactionIndex.ORDate', $request['Day'] != null ? $request['Day'] : date('Y-m-d'))
+            ->where('Cashier_TransactionIndex.UserId', $request['Teller'])
+            ->where('Cashier_TransactionIndex.PaymentUsed', 'Check')
+            ->whereNull('Cashier_TransactionIndex.Status')
+            ->select('Cashier_TransactionIndex.ORNumber',
+                'Cashier_TransactionIndex.Total',
+                'Cashier_TransactionIndex.AccountNumber',
+                'Cashier_TransactionIndex.PayeeName',
+                'Cashier_TransactionDetails.AccountCode',
+                'Cashier_TransactionIndex.CheckNo',
+                'Cashier_TransactionIndex.Bank',
+                'Cashier_TransactionIndex.PayeeName')
+            ->orderBy('Cashier_TransactionDetails.TransactionIndexId')
+            ->get();
+
+        $powerBillsCancelled = DB::table('Cashier_PaidBills')
+            ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Cashier_PaidBills.PostingDate', $request['Day'] != null ? $request['Day'] : date('Y-m-d'))
+            ->where('Cashier_PaidBills.Teller', $request['Teller'])
+            ->where('Cashier_PaidBills.Status', 'CANCELLED')
+            ->select('Cashier_PaidBills.*', 'Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.OldAccountNo')
+            ->get();
+
+        $nonPowerBillsCancelled = DB::table('Cashier_TransactionIndex')
+            ->where('Cashier_TransactionIndex.ORDate', $request['Day'] != null ? $request['Day'] : date('Y-m-d'))
+            ->where('Cashier_TransactionIndex.UserId', $request['Teller'])
+            ->where('Cashier_TransactionIndex.Status', 'CANCELLED')
+            ->select('Cashier_TransactionIndex.ORNumber',
+                'Cashier_TransactionIndex.Total',
+                'Cashier_TransactionIndex.AccountNumber',
+                'Cashier_TransactionIndex.PayeeName',
+                'Cashier_TransactionIndex.CheckNo',
+                'Cashier_TransactionIndex.Bank',
+                'Cashier_TransactionIndex.PayeeName')
+            ->get();
+
         return view('d_c_r_summary_transactions.index', [
             'data' => $data,
             'day' => $request['Day'] != null ? $request['Day'] : date('Y-m-d'),
+            'powerBills' => $powerBills,
+            'nonPowerBills' => $nonPowerBills,
+            'powerBillsCheck' => $powerBillsCheck,
+            'nonPowerBillsCheck' => $nonPowerBillsCheck,
+            'powerBillsCancelled' => $powerBillsCancelled,
+            'nonPowerBillsCancelled' => $nonPowerBillsCancelled,
         ]);
     }
 
@@ -300,6 +377,7 @@ class DCRSummaryTransactionsController extends AppBaseController
             }            
         } else {
             $collection = [];
+            $sales = [];
         }
 
         return view('/d_c_r_summary_transactions/sales_dcr_monitor', [
