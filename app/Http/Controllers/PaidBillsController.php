@@ -20,6 +20,7 @@ use App\Models\Towns;
 use App\Models\BAPAPayments;
 use App\Models\DCRSummaryTransactions;
 use App\Models\ArrearsLedgerDistribution;
+use App\Models\BAPAAdjustmentDetails;
 use Flash;
 use Response;
 
@@ -1103,6 +1104,7 @@ class PaidBillsController extends AppBaseController
         ]);
     }
 
+    // RE-DIRECTED TO BAPA ADJUSTMENTS
     public function getBillsFromBapa(Request $request) {
         $bapaName = $request['BAPAName'];
         $period = $request['Period'];
@@ -1127,20 +1129,61 @@ class PaidBillsController extends AppBaseController
         return response()->json($accounts, 200);
     }
 
+    // THE NEW BAPA BILLS QUERY
+    public function getAdjustedBapaBills(Request $request) {
+        $bapaName = $request['BAPAName'];
+        $period = $request['Period'];
+
+        $accounts = DB::table('Cashier_BAPAAdjustmentDetails')
+            ->leftJoin('Billing_Bills', 'Cashier_BAPAAdjustmentDetails.BillId', '=', 'Billing_Bills.id')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_ServiceAccounts.id', '=', 'Billing_Bills.AccountNumber')
+            ->where("Cashier_BAPAAdjustmentDetails.ServicePeriod", $period)
+            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+            ->select('Billing_ServiceAccounts.id AS AccountNumber',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_Bills.KwhUsed',
+                'Billing_Bills.ServicePeriod',
+                'Billing_Bills.id',
+                'Billing_Bills.BillNumber',
+                'Billing_Bills.NetAmount',
+                'Cashier_BAPAAdjustmentDetails.DiscountPercentage',
+                'Cashier_BAPAAdjustmentDetails.DiscountAmount',
+                DB::raw("(SELECT TOP 1 ORNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Bills.ServicePeriod AND Status IS NULL) AS ORNumber"),)
+            ->orderBy('Billing_ServiceAccounts.AccountStatus')
+            ->get();
+
+        return response()->json($accounts, 200);
+    }
+
     public function saveBapaPayments(Request $request) {
         $accounts = $request['AccountNumbers'];
         $len = count($accounts);
         $period = $request['Period'];
 
+        $orStart = intval($request['ORNumber']) + 1;
+
         // SAVE EACH TRANSACTION
         for($i=0; $i<$len; $i++) {
-            $bill = Bills::where('AccountNumber', $accounts[$i])
-                ->where('ServicePeriod', $period)
-                ->first();
+            $bill = Bills::find($accounts[$i]);
+            $billAdjustment = BAPAAdjustmentDetails::where('BillId', $bill->id)->first();
 
             $account = ServiceAccounts::find($bill->AccountNumber);
 
             if ($bill != null) {
+                // SAVE OR FIRST
+                $saveORNew = new ORAssigning;
+                $saveORNew->id = IDGenerator::generateIDandRandString();
+                $saveORNew->ORNumber = $orStart;
+                $saveORNew->UserId = Auth::id();
+                $saveORNew->DateAssigned = date('Y-m-d');
+                $saveORNew->TimeAssigned = date('H:i:s');
+                $saveORNew->Office = env('APP_LOCATION');
+                $saveORNew->save();
+
+                $orStart += 1;
+
                 $paidBill = new PaidBills;
                 $paidBill->id = IDGenerator::generateIDandRandString();
                 $paidBill->BillNumber = $bill->BillNumber;
@@ -1158,30 +1201,25 @@ class PaidBillsController extends AppBaseController
                     $paidBill->CheckNo = $request['CheckNo'];
                     $paidBill->Bank = $request['Bank'];
                 }
-                if (date('Y-m-d', strtotime($bill->DueDate)) < date('Y-m-d')) {
+                if (date('Y-m-d', strtotime($bill->DueDate)) < date('Y-m-d') && ($bill->ConsumerType != 'RESIDENTIAL' || $bill->ConsumerType != 'RURAL RESIDENTIAL')) {
                     $paidBill->Surcharge = Bills::getFinalPenalty($bill);
                 } else {
                     $paidBill->Surcharge = "0";
-                }
-
-                $threePercent = 0;
-                $fivePercent = 0;
-                // COMPUTE DISCOUNTS
-                if ($request['IsDiscount3'] == 'true') {
-                    $threePercent = floatval($bill->NetAmount) * .03;
-                }
-
-                if ($request['IsDiscount5'] == 'true') {
-                    $fivePercent = floatval($bill->NetAmount) * .05;
-                }               
+                }            
 
                 $paidBill->AdditionalCharges = $bill->AdditionalCharges;
-                $paidBill->Deductions = round(floatval($bill->Deductions) + floatval($threePercent) + floatval($fivePercent), 2);
+
+                if ($billAdjustment != null) {
+                    $paidBill->Deductions = round(floatval($bill->Deductions) + floatval($billAdjustment->DiscountAmount), 2);
+                } else {
+                    $paidBill->Deductions = round(floatval($bill->Deductions), 2);
+                }
+                
                 $paidBill->NetAmount = round((floatval($bill->NetAmount) + floatval($paidBill->Surcharge)) - floatval($paidBill->Deductions), 2);
 
                 $paidBill->Source = 'MONTHLY BILL';
                 $paidBill->ObjectSourceId = $bill->id;
-                $paidBill->ORNumber = $request['ORNumber'];
+                $paidBill->ORNumber = $saveORNew->ORNumber;
                 $paidBill->ORDate = date('Y-m-d');
                 $paidBill->UserId = Auth::id();
                 $paidBill->save();
@@ -1335,7 +1373,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1349,7 +1387,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1363,7 +1401,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1377,7 +1415,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1391,7 +1429,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1405,7 +1443,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1419,7 +1457,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1433,7 +1471,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1447,7 +1485,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1461,7 +1499,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1475,7 +1513,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1489,7 +1527,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1503,7 +1541,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1517,7 +1555,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1531,7 +1569,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1545,7 +1583,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1559,7 +1597,7 @@ class PaidBillsController extends AppBaseController
                 // $dcrSum->Day = date('Y-m-d');
                 // $dcrSum->Time = date('H:i:s');
                 // $dcrSum->Teller = Auth::id();
-                // $dcrSum->ORNumber = $request['ORNumber'];
+                // $dcrSum->ORNumber = $saveORNew->ORNumber;
                 // $dcrSum->ReportDestination = 'COLLECTION';
                 // $dcrSum->Office = env('APP_LOCATION');
                 // $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1573,7 +1611,7 @@ class PaidBillsController extends AppBaseController
                 // $dcrSum->Day = date('Y-m-d');
                 // $dcrSum->Time = date('H:i:s');
                 // $dcrSum->Teller = Auth::id();
-                // $dcrSum->ORNumber = $request['ORNumber'];
+                // $dcrSum->ORNumber = $saveORNew->ORNumber;
                 // $dcrSum->ReportDestination = 'COLLECTION';
                 // $dcrSum->Office = env('APP_LOCATION');
                 // $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1587,7 +1625,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1601,7 +1639,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1615,7 +1653,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1629,7 +1667,7 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->Day = date('Y-m-d');
                 $dcrSum->Time = date('H:i:s');
                 $dcrSum->Teller = Auth::id();
-                $dcrSum->ORNumber = $request['ORNumber'];
+                $dcrSum->ORNumber = $saveORNew->ORNumber;
                 $dcrSum->ReportDestination = 'SALES';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->AccountNumber = $bill->AccountNumber;
@@ -1642,32 +1680,17 @@ class PaidBillsController extends AppBaseController
         $bapaPayments->id = IDGenerator::generateIDandRandString();
         $bapaPayments->BAPAName = urldecode($request['BAPAName']);
         $bapaPayments->ServicePeriod = $period;
-        $bapaPayments->ORNumber = $request['ORNumber'];
+        // $bapaPayments->ORNumber = $saveORNew->ORNumber;
         $bapaPayments->ORDate = date('Y-m-d');
         $bapaPayments->SubTotal = round(floatval($request['SubTotal']), 2);
-        $bapaPayments->TwoPercentDiscount = round(floatval($request['Discount3']), 2);
-        $bapaPayments->FivePercentDiscount = round(floatval($request['Discount5']), 2);
+        $bapaPayments->TwoPercentDiscount = round(floatval($request['DiscountAmount']), 2);
+        // $bapaPayments->FivePercentDiscount = round(floatval($request['Discount5']), 2);
         $bapaPayments->Total = round(floatval($request['TotalAmountPaid']), 2);
         $bapaPayments->Teller = Auth::id();
         $bapaPayments->NoOfConsumersPaid = $len;
-        $bapaPayments->save();
+        $bapaPayments->save(); 
 
-        // SAVE OR
-        $saveOR = ORAssigning::where('ORNumber', $request['ORNumber'])
-            ->where('UserId', Auth::id())
-            ->first();        
-        if ($saveOR == null) {
-            $saveOR = new ORAssigning;
-            $saveOR->id = IDGenerator::generateIDandRandString();
-            $saveOR->ORNumber = $request['ORNumber'];
-            $saveOR->UserId = Auth::id();
-            $saveOR->DateAssigned = date('Y-m-d');
-            $saveOR->TimeAssigned = date('H:i:s');
-            $saveOR->Office = env('APP_LOCATION');
-            $saveOR->save();
-        }  
-
-        return response()->json($bapaPayments, 200);
+        return response()->json($accounts, 200);
     }
 
     public function billsCollection() {

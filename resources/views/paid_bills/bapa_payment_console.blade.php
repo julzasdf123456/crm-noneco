@@ -70,7 +70,7 @@
                         <th>Billing Mo.</th>
                         <th>Bill Number</th>
                         <th>Amount Due</th>
-                        <th></th>
+                        <th>Discount</th>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -81,42 +81,36 @@
     <div class="col-lg-4">
         <div class="card">
             <div class="card-body">
-                <table class="table table-borderless">
+                <table class="table table-sm table-borderless">
+                    <tr>
+                        <td>Number of Consumers</td>
+                        <td class="text-right">
+                            <strong class="text-right" id="noOfConsumers">-</strong>
+                        </td>
+                    </tr>
                     <tr>
                         <td>Total Amount</td>
                         <td class="text-right">
-                            <h4 class="text-right" id="totalAmount">-</h4>
+                            <strong class="text-right" id="totalAmount">-</strong>
                         </td>
                     </tr>
                     <tr>                        
-                        <td>
-                            <div class="input-group">
-                                <input type="hidden" value="" name="Discount3">
-                                <input type="checkbox" value="" name="Discount3" id="Discount3" class="custom-checkbox">
-                                <label for="Discount3">Discount (3%)</label>
-                            </div>
-                        </td>
+                        <td>Discount Percentage</td>
                         <td class="text-right">
-                            <h4 class="text-right" id="discount3">-</h4>
+                            <strong class="text-right" id="discountPercentage">-</strong>
                         </td>
                     </tr>
                     <tr>                        
-                        <td>
-                            <div class="input-group">
-                                <input type="hidden" value="" name="Discount5">
-                                <input type="checkbox" value="" name="Discount5" id="Discount5" class="custom-checkbox">
-                                <label for="Discount5">Discount (5%)</label>
-                            </div>
-                        </td>
+                        <td>Discount Amount</td>
                         <td class="text-right">
-                            <h4 class="text-right" id="discount5">-</h4>
+                            <strong class="text-right" id="discountAmount">-</strong>
                         </td>
                     </tr>
                     <tr>                        
                         <td>Amount Due</td>
-                        <td class="text-right">
-                            <h4 class="text-right" id="amountDue">-</h4>
-                        </td>
+                        <th class="text-right">
+                            <strong><h3 class="text-right" id="amountDue">-</h3></strong>
+                        </th>
                     </tr>
                     <tr>
                         <td>OR Number</td>
@@ -139,7 +133,7 @@
                 </table>
             </div>
             <div class="card-footer">
-                <button id="cashBtn" class="btn btn-lg btn-primary float-right" disabled><i class="fas fa-dollar-sign"></i> Cash</button>
+                <button id="cashBtn" class="btn btn-lg btn-primary float-right" disabled><i class="fas fa-dollar-sign"></i> Transact</button>
                 <button id="checkBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled data-toggle="modal" data-target="#modal-check-payment"><i class="fas fa-money-check-alt"></i> Check</button>
                 <button id="cardBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled><i class="fas fa-credit-card"></i> Debit/Credit Card</button>
             </div>
@@ -154,12 +148,10 @@
     <script>
         var accountsAdded = []
         var totalAmount = 0
-        var discount3 = 0
-        var discount5 = 0
         var change = 0
         var amountDue = 0
-        var discount3Checked = false
-        var discount5Checked = false
+        var discountPercentage = 0
+        var discountAmount = 0
 
         $(document).ready(function() {
             // init
@@ -171,10 +163,10 @@
                 $('#spinner').show()
 
                 totalAmount = 0
-                discount3 = 0
-                discount5 = 0
                 change = 0
                 amountDue = 0
+                discountPercentage = 0
+                discountAmount = 0
                 $('#amountPaid').val('')
                 updatePaymentDisplays()
 
@@ -230,34 +222,13 @@
                     buttonEnablers(false)
                 }                
             })
-
-            // DISCOUNT 3% CHANGE
-            $('#Discount3').change(function() {
-                if($('#Discount3').prop('checked')) {
-                    discount3Checked = true                           
-                } else {
-                    discount3Checked = false                    
-                }
-                computeAmounts()
-                updatePaymentDisplays()
-            })
-
-            $('#Discount5').change(function() {
-                if($('#Discount5').prop('checked')) {
-                    discount5Checked = true                            
-                } else {
-                    discount5Checked = false                  
-                }
-                computeAmounts()
-                updatePaymentDisplays()
-            })
         })
 
         function fetchBills(period) {
             $('#accounts-table tbody tr').remove()
             $('#ServicePeriod').attr('disabled', 'disabled')
             $.ajax({
-                url : "{{ route('paidBills.get-bills-from-bapa') }}",
+                url : "{{ route('paidBills.get-adjusted-bapa-bills') }}",
                 type : 'GET',
                 data : {
                     BAPAName : "{{ $bapaName }}",
@@ -273,7 +244,10 @@
                             res[index]['ServicePeriod'],
                             res[index]['BillNumber'],
                             res[index]['NetAmount'],
-                            res[index]['ORNumber']))
+                            res[index]['ORNumber'],
+                            res[index]['DiscountPercentage'],
+                            res[index]['DiscountAmount'],
+                            res[index]['OldAccountNo']))
                     })
                     $('#spinner').hide()
                     $('#ServicePeriod').removeAttr('disabled')
@@ -285,34 +259,47 @@
             })
         }
 
-        function addToRow(acctNo, acctName, status, kwhused, billmo, billno, amtdue, or) {
+        function addToRow(acctNo, acctName, status, kwhused, billmo, billno, amtdue, or, discountPercentage, discountAmount, oldAcctNo) {
             if (billno != null) {
                 if (or != null) { // PAID AREA
                     return '<tr title="OR Number: ' + or + '" class="bg-teal disabled">' +
-                                '<td><i class="ico-tab fas fa-check text-success"></i>' + acctNo + '</td>' +
+                                '<td><i class="ico-tab fas fa-check text-success"></i>' + oldAcctNo + '</td>' +
                                 '<td>' + acctName + '</td>' +
                                 '<td>' + status + '</td>' +
                                 '<td class="text-right">' + Number(parseFloat(kwhused).toFixed(2)).toLocaleString() + '</td>' +
                                 '<td>' + billmo + '</td>' +
                                 '<td class="text-right">' + (billno != null ? billno : '') + '</td>' +
                                 '<td class="text-right">' + (parseFloat(amtdue) ? Number(parseFloat(amtdue).toFixed(2)).toLocaleString() : '') + '</td>' +
-                                '<td></td>' +
+                                '<td class="text-right"></td>' +
                             '</tr>';
                 } else { // PAYABLE AREA
-                    return '<tr onclick=addToPayables("' + acctNo + '")>' +
-                                '<td><i class="ico-tab fas fa-exclamation text-primary"></i>' + acctNo + '</td>' +
-                                '<td>' + acctName + '</td>' +
-                                '<td>' + status + '</td>' +
-                                '<td class="text-right">' + Number(parseFloat(kwhused).toFixed(2)).toLocaleString() + '</td>' +
-                                '<td>' + billmo + '</td>' +
-                                '<td class="text-right">' + (billno != null ? billno : '') + '</td>' +
-                                '<td class="text-right">' + (parseFloat(amtdue) ? Number(parseFloat(amtdue).toFixed(2)).toLocaleString() : '') + '</td>' +
-                                '<td><button class="btn btn-link btn-sm"><i ischecked="true" amount="' + amtdue + '" id="btn-' + acctNo + '" class="fas fa-check-circle text-success"></i></button></td>' +
-                            '</tr>';
+                    if (billmo == $('#ServicePeriod').val()) {
+                        return '<tr>' +
+                                    '<td><i class="ico-tab fas fa-exclamation text-primary"></i>' + oldAcctNo + '</td>' +
+                                    '<td>' + acctName + '</td>' +
+                                    '<td>' + status + '</td>' +
+                                    '<td class="text-right">' + Number(parseFloat(kwhused).toFixed(2)).toLocaleString() + '</td>' +
+                                    '<td>' + billmo + '</td>' +
+                                    '<td class="text-right">' + (billno != null ? billno : '') + '</td>' +
+                                    '<td class="text-right">' + (parseFloat(amtdue) ? Number(parseFloat(amtdue).toFixed(2)).toLocaleString() : '') + '</td>' +
+                                    '<td class="text-right">' + (parseFloat(discountAmount) ? Number(parseFloat(discountAmount).toFixed(2)).toLocaleString() : '') + '</td>' +
+                                '</tr>';
+                    } else { // arears
+                        return '<tr style="background-color: #ffcdd2;">' +
+                                    '<td><i class="ico-tab fas fa-exclamation text-primary"></i>' + oldAcctNo + '</td>' +
+                                    '<td>' + acctName + '</td>' +
+                                    '<td>' + status + '</td>' +
+                                    '<td class="text-right">' + Number(parseFloat(kwhused).toFixed(2)).toLocaleString() + '</td>' +
+                                    '<td>' + billmo + '</td>' +
+                                    '<td class="text-right">' + (billno != null ? billno : '') + '</td>' +
+                                    '<td class="text-right">' + (parseFloat(amtdue) ? Number(parseFloat(amtdue).toFixed(2)).toLocaleString() : '') + '</td>' +
+                                    '<td class="text-right">' + (parseFloat(discountAmount) ? Number(parseFloat(discountAmount).toFixed(2)).toLocaleString() : '') + '</td>' +
+                                '</tr>';
+                    }                    
                 }
             } else { // UNBILLED AREA
                 return '<tr class="bg-secondary disabled">' +
-                                '<td><i class="ico-tab fas fa-exclamation text-danger"></i>' + acctNo + '</td>' +
+                                '<td><i class="ico-tab fas fa-exclamation text-danger"></i>' + oldAcctNo + '</td>' +
                                 '<td>' + acctName + '</td>' +
                                 '<td>' + status + '</td>' +
                                 '<td class="text-right">' + Number(parseFloat(kwhused).toFixed(2)).toLocaleString() + '</td>' +
@@ -321,66 +308,11 @@
                                 '<td class="text-right">' + (parseFloat(amtdue) ? Number(parseFloat(amtdue).toFixed(2)).toLocaleString() : '') + '</td>' +
                                 '<td></td>' +
                             '</tr>';
-            }
-        }
-
-        function addToPayables(acctNo) {
-            if ($('#btn-' + acctNo).attr('ischecked') == 'false') {
-                $('#btn-' + acctNo).removeClass('text-muted').addClass('text-primary')
-
-                // ADD TO ARRAY
-                accountsAdded.push(acctNo)
-                // ADD PAYABLE
-                totalAmount += parseFloat($('#btn-' + acctNo).attr('amount'))
-                amountDue = totalAmount
-
-                $('#btn-' + acctNo).attr('ischecked', 'true')
-            } else {
-                $('#btn-' + acctNo).removeClass('text-primary').addClass('text-muted')
-
-                // REMOVE ITEM FROM ARRAY
-                removeItemFromArray(acctNo)
-                totalAmount -= parseFloat($('#btn-' + acctNo).attr('amount'))
-                amountDue = totalAmount
-
-                $('#btn-' + acctNo).attr('ischecked', 'false')
-            }
-
-            // VALIDATE FORM
-            discount3 = 0
-            discount5 = 0
-            computeAmounts()
-            updatePaymentDisplays()
-        }
-
-        function computeAmounts(update = false) {
-            // COMPUTE 3%
-            if(discount3Checked == true) {
-                if (discount3 == 0) {
-                    discount3 = parseFloat(totalAmount) * .03
-                    amountDue = amountDue - discount3
-                }                
-            } else {
-                amountDue = amountDue + discount3
-                discount3 = 0;
-            }
-
-            // COMPUTE 5%
-            if(discount5Checked == true) {
-                if (discount5 == 0) {
-                    discount5 = parseFloat(totalAmount) * .05
-                    amountDue = amountDue - discount5
-                }                
-            } else {
-                amountDue = amountDue + discount5
-                discount5 = 0;
             }
         }
 
         function updatePaymentDisplays() {
             $('#totalAmount').text(Number(totalAmount.toFixed(2)).toLocaleString())
-            $('#discount3').text(Number(discount3.toFixed(2)).toLocaleString())
-            $('#discount5').text(Number(discount5.toFixed(2)).toLocaleString())
             $('#amountDue').text(Number(amountDue.toFixed(2)).toLocaleString())
             $('#amountPaid').focus()
 
@@ -426,17 +358,26 @@
                         // COMPUTE TOTAL ON INITALIZE
                         if (jQuery.isEmptyObject(res[index]['ORNumber'])){
                             // ADD ACCOUNTS ON INITIALIZE
-                            accountsAdded.push(res[index]['AccountNumber'])
-                            totalAmount += parseFloat(res[index]['NetAmount'])
+                            accountsAdded.push(res[index]['id'])
+                            totalAmount += Number(parseFloat(res[index]['NetAmount']).toFixed(2))
+                            discountAmount += Number(parseFloat(res[index]['DiscountAmount']).toFixed(2))
+
+                            // GET PERCENTAGE
+                            if (index == 0) {
+                                discountPercentage = parseFloat(res[index]['DiscountPercentage']) * 100
+                            }
                         }                        
                     }
 
                     ttlAccts += 1;
 
                     // SHOW AMOUNTS
-                    amountDue = totalAmount
+                    amountDue = (totalAmount - discountAmount)
                     $('#totalAmount').text(Number(totalAmount.toFixed(2)).toLocaleString())
                     $('#amountDue').text(Number(amountDue.toFixed(2)).toLocaleString())
+                    $('#discountPercentage').text(Number(discountPercentage.toFixed(2)) + " %")
+                    $('#discountAmount').text('-' + Number(discountAmount.toFixed(2)).toLocaleString())
+                    $('#noOfConsumers').text(accountsAdded.length)
                 })
 
                 $('#total-acts').text(ttlAccts)
@@ -487,14 +428,11 @@
                 data : {
                     Period : $('#ServicePeriod').val(),
                     AccountNumbers : accountsAdded,
-                    IsDiscount3 : discount3Checked,
-                    Discount3 : discount3,
-                    IsDiscount5 : discount5Checked,
-                    Discount5 : discount5,
                     TotalAmountPaid : amountDue,
-                    ORNumber : $('#orNumber').val(),
+                    ORNumber : "{{ $orAssignedLast->ORNumber }}",
                     BAPAName : "{{ urlencode($bapaName) }}",
                     SubTotal : totalAmount,
+                    DiscountAmount : discountAmount,
                     PaymentUsed : paymentUsed,
                     CheckNo : $('#checkNo').val(),
                     Bank : $('#bank').val()
