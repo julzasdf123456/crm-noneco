@@ -1109,14 +1109,16 @@ class PaidBillsController extends AppBaseController
 
         $accounts = DB::table('Billing_Readings')
             ->leftJoin('Billing_ServiceAccounts', 'Billing_ServiceAccounts.id', '=', 'Billing_Readings.AccountNumber')
-            ->where('Billing_Readings.ServicePeriod', $period)
+            ->whereRaw("Billing_Readings.ServicePeriod <= '" . $period . "'")
             ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
             ->select('Billing_ServiceAccounts.id AS AccountNumber',
                 'Billing_ServiceAccounts.ServiceAccountName',
                 'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.OldAccountNo',
                 'Billing_Readings.KwhUsed',
                 'Billing_Readings.ServicePeriod',
-                DB::raw("(SELECT TOP 1 BillNumber FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod) AS BillNumber"),
+                'Billing_Readings.id',
+                DB::raw("(SELECT TOP 1 id FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod) AS BillId"),
                 DB::raw("(SELECT TOP 1 NetAmount FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod) AS NetAmount"),
                 DB::raw("(SELECT TOP 1 ORNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod AND Status IS NULL) AS ORNumber"),)
             ->orderBy('Billing_ServiceAccounts.AccountStatus')

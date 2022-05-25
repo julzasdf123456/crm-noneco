@@ -553,3 +553,12 @@ Route::get('/d_c_r_summary_transactions/sales-dcr-monitor', [App\Http\Controller
 
 
 Route::resource('banks', App\Http\Controllers\BanksController::class);
+
+
+Route::get('/b_a_p_a_adjustments/adjust-bapa/{bapaName}', [App\Http\Controllers\BAPAAdjustmentsController::class, 'adjustBapaPayments'])->name('bAPAAdjustments.adjust-bapa');
+Route::get('/b_a_p_a_adjustments/search-bapa', [App\Http\Controllers\BAPAAdjustmentsController::class, 'searchBapa'])->name('bAPAAdjustments.search-bapa');
+Route::get('/b_a_p_a_adjustments/save-bapa-adjustments', [App\Http\Controllers\BAPAAdjustmentsController::class, 'saveBapaAdjustments'])->name('bAPAAdjustments.save-bapa-adjustments');
+Route::resource('bAPAAdjustments', App\Http\Controllers\BAPAAdjustmentsController::class);
+
+
+Route::resource('bAPAAdjustmentDetails', App\Http\Controllers\BAPAAdjustmentDetailsController::class);
