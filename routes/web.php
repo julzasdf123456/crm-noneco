@@ -463,6 +463,8 @@ Route::get('/paid_bills/get-bills-from-bapa', [App\Http\Controllers\PaidBillsCon
 Route::get('/paid_bills/save-bapa-payments', [App\Http\Controllers\PaidBillsController::class, 'saveBapaPayments'])->name('paidBills.save-bapa-payments');
 Route::get('/paid_bills/bills-collection', [App\Http\Controllers\PaidBillsController::class, 'billsCollection'])->name('paidBills.bills-collection');
 Route::get('/paid_bills/get-adjusted-bapa-bills', [App\Http\Controllers\PaidBillsController::class, 'getAdjustedBapaBills'])->name('paidBills.get-adjusted-bapa-bills');
+Route::get('/paid_bills/add-check-payments', [App\Http\Controllers\PaidBillsController::class, 'addCheckPayments'])->name('paidBills.add-check-payments');
+Route::get('/paid_bills/delete-check-payment', [App\Http\Controllers\PaidBillsController::class, 'deleteCheckPayment'])->name('paidBills.delete-check-payment');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);
 
 
@@ -563,3 +565,6 @@ Route::resource('bAPAAdjustments', App\Http\Controllers\BAPAAdjustmentsControlle
 
 
 Route::resource('bAPAAdjustmentDetails', App\Http\Controllers\BAPAAdjustmentDetailsController::class);
+
+
+Route::resource('paidBillsDetails', App\Http\Controllers\PaidBillsDetailsController::class);

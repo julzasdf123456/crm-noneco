@@ -10,12 +10,25 @@
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h4>Bills Payment Console</h4>
+                <div class="col-sm-5">
+                    <h4>Bills Payment</h4>
                 </div>
-                <div class="col-sm-6">
+                <div class="col-sm-5">
+                    <div class="form-row align-items-center float-right">
+                        <div class="col-auto">
+                            <input id="area-search" type="text" maxlength="2" class="form-control" style="width: 60px;">
+                        </div>
+                        <div class="col-auto">
+                            <input id="route-search" type="text" maxlength="5" class="form-control" style="width: 90px;">
+                        </div>
+                        <div class="col-auto">
+                            <input id="sequence-search" type="text" maxlength="3" class="form-control" style="width: 70px;">
+                        </div>
+                    </div>    
+                </div>
+                <div class="col-sm-2">
                     {{-- <button class="btn btn-warning float-right" title="Search initial OR Number"  data-toggle="modal" data-target="#modal-set" style="margin-left: 20px;"><i class="fas fa-tools ico-tab"></i>Set Start OR</button> --}}
-                    <button class="btn btn-success float-right" title="Search Consumer"  data-toggle="modal" data-target="#modal-search"><i class="fas fa-search-dollar ico-tab"></i>Search <strong>(F2)</strong></button>                   
+                    <button class="btn btn-success btn-sm float-right" title="Search Consumer"  data-toggle="modal" data-target="#modal-search"><i class="fas fa-search-dollar ico-tab"></i>Advanced Search <strong>(F2)</strong></button>                   
                 </div>
             </div>
         </div>
@@ -25,6 +38,7 @@
         <div class="row">
             {{-- QUEUE --}}
             <div class="col-lg-8 col-md-6">
+                {{-- DETAILS CARD --}}
                 <div class="card" style="height: 60vh;">
                     <div class="card-header border-0">
                         <span class="card-title">
@@ -52,34 +66,31 @@
             {{-- PAYMENT SECTION --}}
             <div class="col-lg-4 col-md-6">
                 <div class="card">
-                    <div class="card-header border-0">
-                        
-                    </div>
                     <div class="card-body">
                         <div class="row">
                             <table class="table table-borderless table-sm">
                                 <tr>
                                     <td>Amount Due</td>
                                     <td class="text-right">
-                                        <h4 class="text-right" id="amount-due"></h4>
+                                        <strong class="text-right" id="amount-due"></strong>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>Deductions/Subsidies</td>
                                     <td class="text-right">
-                                        <h4 class="text-right" id="deductions"></h4>
+                                        <strong class="text-right" id="deductions"></strong>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>Additional Charges</td>
                                     <td class="text-right">
-                                        <h4 class="text-right" id="additional-charges"></h4>
+                                        <strong class="text-right" id="additional-charges"></strong>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>Surcharges</td>
                                     <td class="text-right">
-                                        <h4 class="text-right" id="surcharges"></h4>
+                                        <strong class="text-right" id="surcharges"></strong>
                                     </td>
                                 </tr>
                                 <tr>                        
@@ -91,7 +102,7 @@
                                         </div>
                                     </td>
                                     <td class="text-right">
-                                        <h4 class="text-right" id="vat2">-</h4>
+                                        <strong class="text-right" id="vat2">-</strong>
                                     </td>
                                 </tr>
                                 <tr>                        
@@ -103,39 +114,60 @@
                                         </div>
                                     </td>
                                     <td class="text-right">
-                                        <h4 class="text-right" id="vat5">-</h4>
+                                        <strong class="text-right" id="vat5">-</strong>
                                     </td>
                                 </tr>
                                 <tr style="border-top: 1px solid #dcdcdc">
                                     <th>Total Amount Due</th>
                                     <th class="text-right">
-                                        <h1 class="text-right" id="total-amount"></h1>
+                                        <h3 class="text-right text-danger" id="total-amount"></h3>
                                     </th>
                                 </tr>                                    
                                 <tr>
                                     <td>OR Number</td>
                                     <td class="text-right">
-                                        <input type="number" class="form-control text-right" style="font-size: 1.5em;" id="orNumber" value="{{ ORAssigning::getORIncrement(1, $orAssignedLast) }}">
+                                        <input type="number" class="form-control text-right" style="font-size: 1.2em;" id="orNumber" value="{{ ORAssigning::getORIncrement(1, $orAssignedLast) }}">
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Amount Paid</td>
+                                    <td>Cash Payment</td>
                                     <td class="text-right">
-                                        <input type="number" class="form-control text-right" style="font-size: 1.5em;" id="amountPaid" step="any">
+                                        <input type="number" class="form-control text-right" style="font-size: 1.2em;" id="cashAmount" step="any">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Check Payments</td>
+                                    <td class="text-right">
+                                        <button id="addCheckBtn" class="btn btn-xs btn-primary float-right ico-tab-mini" data-toggle="modal" data-target="#modal-check-payment"><i class="fas fa-plus ico-tab-mini"></i>Add Check</button>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            {{-- CHECK PAYMENTS --}}
+                            <table class="table table-borderless table-sm" id="check-table">
+
+                            </table>
+
+                            {{-- TOTAL --}}
+                            <table class="table table-borderless table-sm">                                
+                                <tr style="border-top: 1px solid #dcdcdc">
+                                    <td>Total Amount Paid</td>
+                                    <td class="text-right">
+                                        <input type="number" class="form-control text-right" style="font-size: 1.2em;" id="amountPaid" step="any" readonly="true">
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>Change</td>
                                     <td class="text-right">
-                                        <input type="text" class="form-control text-right" style="font-size: 1.5em;" id="change" readonly="true">
+                                        <input type="text" class="form-control text-right" style="font-size: 1.2em;" id="change" readonly="true">
                                     </td>
                                 </tr>
                             </table>
                         </div>
                     </div>
                     <div class="card-footer">
-                        <button id="cashBtn" class="btn btn-lg btn-primary float-right" disabled><i class="fas fa-dollar-sign"></i> Cash</button>
-                        <button id="checkBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled data-toggle="modal" data-target="#modal-check-payment"><i class="fas fa-money-check-alt"></i> Check</button>
+                        <button id="cashBtn" class="btn btn-lg btn-primary float-right" disabled><i class="fas fa-dollar-sign"></i> Transact</button>
+                        {{-- <button id="checkBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled data-toggle="modal" data-target="#modal-check-payment"><i class="fas fa-money-check-alt"></i> Check</button> --}}
                         <button id="cardBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled><i class="fas fa-credit-card"></i> Debit/Credit Card</button>
                     </div>
                 </div>
@@ -234,10 +266,41 @@
         var vat5 = 0
         var vat2Checked = false
         var vat5Checked = false
+        var checkAmountTotal = 0.0
 
         var selectedPayments = []
+        var checkIds = []
 
         $(document).ready(function() {
+            // basic search
+            $('#area-search').focus()
+            $('#area-search').keyup(function() {
+                var charCount = this.value.length
+                if (charCount == 2) {
+                    $('#route-search').focus()
+                }
+            })
+
+            $('#route-search').keyup(function() {
+                var charCount = this.value.length
+                if (charCount == 5) {
+                    $('#sequence-search').focus()
+                } else if (charCount == 0) {
+                    $('#area-search').focus()
+                }
+            })
+
+
+            $('#sequence-search').keyup(function() {
+                var charCount = this.value.length
+                if (charCount == 3) {
+                    // SEARCH CONSUMER
+
+                } else if (charCount == 0) {
+                    $('#route-search').focus()
+                }
+            })
+
             $('#search').keyup(function() {
                 var letterCount = this.value.length;
 
@@ -268,6 +331,27 @@
                     $('#change').val('')
                     buttonEnablers(false)
                 }                
+            })
+
+            // AMOUNT PAID ON CHANGE
+            $('#amountPaid').on('change', function() {
+                change = (parseFloat(this.value) - totalAmount).toFixed(2).toLocaleString()
+
+                if (parseFloat(change)) {
+                    $('#change').val(change)
+                    if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(selectedPayments)) {
+                        buttonEnablers(true)                        
+                    } else {
+                        buttonEnablers(false)
+                    }
+                } else {
+                    $('#change').val('')
+                    buttonEnablers(false)
+                }                
+            })
+
+            $('#cashAmount').keyup(function() {
+                computePayments()
             })
 
             // CASH BUTTON EVENT
@@ -351,7 +435,7 @@
 
             // TRANSACT CHECK
             $('#save-check-transaction').on('click', function() {
-                transact('Check')
+                addCheck()           
             })
         })
 
@@ -363,6 +447,7 @@
                 selectedPayments.push(id)
 
                 $('#' + id).attr('ischecked', 'true')
+                billId = id
             } else {
                 $('#' + id).removeClass('text-primary').addClass('text-muted')
 
@@ -370,6 +455,7 @@
                 removeItemFromArray(id)
 
                 $('#' + id).attr('ischecked', 'false')
+                billId = ''
             }
 
             // VALIDATE FORM
@@ -398,7 +484,7 @@
             $('#additional-charges').text('P ' + Number(additionals.toFixed(2)).toLocaleString())
             $('#deductions').text('P ' + Number(deductions.toFixed(2)).toLocaleString())
             $('#surcharges').text('P ' + Number(surcharge.toFixed(2)).toLocaleString())
-            $('#amountPaid').focus()
+            $('#cashAmount').focus()
 
             if(vat2Checked == true) {
                 $('#vat2').text(vat2)
@@ -454,6 +540,12 @@
             } 
         }
 
+        function computePayments() {
+            var cashAmnt = parseFloat($('#cashAmount').val()) ? parseFloat($('#cashAmount').val()) : 0
+            var totalX = cashAmnt + checkAmountTotal
+            $('#amountPaid').val(totalX.toFixed(2)).change()
+        }
+
         function requestUnlock(id) {
             $.ajax({
                 url : '/paid_bills/request-bills-payment-unlock',
@@ -476,6 +568,13 @@
             var index = selectedPayments.indexOf(id)
             if (index > -1) {
                 selectedPayments.splice(index, 1)
+            }
+        }
+
+        function removeCheckFromArray(id) {
+            var index = checkIds.indexOf(id)
+            if (index > -1) {
+                checkIds.splice(index, 1)
             }
         }
 
@@ -543,6 +642,8 @@
             vat2 = 0
             vat5 = 0
             selectedPayments = []
+            checkIds = []
+            checkAmountTotal = 0.0
 
             // FETCH ACCOUNT DETAILS
             $.ajax({
@@ -557,6 +658,7 @@
 
                     } else {
                         $('#account-name').text(res['ServiceAccountName'])
+                        acctNo = id
                     }
                     $('#modal-search').modal('hide')
                 },
@@ -586,82 +688,83 @@
                     console.log(err)
                     alert('Error fetching account details. Contact support for more.')
                 }
+
             })            
         }
 
         function fetchPayable(id) {
-            buttonEnablers(false)
-            $('#amountPaid').val('')
-            $('#change').val('')
-            $.ajax({
-                url : '/paid_bills/fetch-payable',
-                type : 'GET',
-                data : {
-                    BillId : id
-                },
-                success : function(res) {
-                    if (jQuery.isEmptyObject(res)) {
-                        $('#bill-no').text('-')
-                        $('#service-from').text('-')
-                        $('#service-to').text('-')
-                        $('#due-date').text('-')
-                        $('#kwh-used').text('-')
-                        $('#rate').text('-')
-                        $('#amount-due').text('-')
-                        $('#additional-charges').text('-')
-                        $('#deductions').text('-')
-                        $('#total-amount').text('-')
-                        $('#surcharges').text('-')
-                    } else {
-                        $('#amountPaid').focus()
-                        // INVOICE
-                        $('#bill-no').text(res['BillNumber'])
-                        $('#service-from').text(moment(res['ServiceDateFrom']).format('LL'))
-                        $('#service-to').text(moment(res['ServiceDateTo']).format('LL'))
-                        $('#due-date').text(moment(res['DueDate']).format('LL'))
-                        $('#kwh-used').text(res['KwhUsed'])
-                        $('#rate').text((parseFloat(res['EffectiveRate']).toFixed(4)).toLocaleString())
+            // buttonEnablers(false)
+            // $('#amountPaid').val('')
+            // $('#change').val('')
+            // $.ajax({
+            //     url : '/paid_bills/fetch-payable',
+            //     type : 'GET',
+            //     data : {
+            //         BillId : id
+            //     },
+            //     success : function(res) {
+            //         if (jQuery.isEmptyObject(res)) {
+            //             $('#bill-no').text('-')
+            //             $('#service-from').text('-')
+            //             $('#service-to').text('-')
+            //             $('#due-date').text('-')
+            //             $('#kwh-used').text('-')
+            //             $('#rate').text('-')
+            //             $('#amount-due').text('-')
+            //             $('#additional-charges').text('-')
+            //             $('#deductions').text('-')
+            //             $('#total-amount').text('-')
+            //             $('#surcharges').text('-')
+            //         } else {
+            //             $('#cashAmount').focus()  
+            //             // INVOICE
+            //             $('#bill-no').text(res['BillNumber'])
+            //             $('#service-from').text(moment(res['ServiceDateFrom']).format('LL'))
+            //             $('#service-to').text(moment(res['ServiceDateTo']).format('LL'))
+            //             $('#due-date').text(moment(res['DueDate']).format('LL'))
+            //             $('#kwh-used').text(res['KwhUsed'])
+            //             $('#rate').text((parseFloat(res['EffectiveRate']).toFixed(4)).toLocaleString())
 
-                        // GLOBAL VARIABLES
-                        billNumber = res['BillNumber']
-                        acctNo = res['AccountNumber']
-                        svcPeriod = res['ServicePeriod']
-                        kwhUsed = res['KwhUsed']
-                        billId = id
+            //             // GLOBAL VARIABLES
+            //             billNumber = res['BillNumber']
+            //             acctNo = res['AccountNumber']
+            //             svcPeriod = res['ServicePeriod']
+            //             kwhUsed = res['KwhUsed']
+            //             billId = id
 
-                        // PAYABLES
-                        deductions = parseFloat(res['Deductions'] != null ? res['Deductions'] : 0)
-                        additionals = parseFloat(res['AdditionalCharges'] != null ? res['AdditionalCharges'] : 0)
-                        dbAmount = parseFloat(res['NetAmount'] != null ? res['NetAmount'] : 0)
-                        netAmount = dbAmount - additionals + deductions
-                        surcharge = 0
+            //             // PAYABLES
+            //             deductions = parseFloat(res['Deductions'] != null ? res['Deductions'] : 0)
+            //             additionals = parseFloat(res['AdditionalCharges'] != null ? res['AdditionalCharges'] : 0)
+            //             dbAmount = parseFloat(res['NetAmount'] != null ? res['NetAmount'] : 0)
+            //             netAmount = dbAmount - additionals + deductions
+            //             surcharge = 0
 
-                        var today = moment()
-                        var dueDate = moment(res['DueDate'])
-                        var dueDateDiff = today.diff(dueDate, 'days') 
+            //             var today = moment()
+            //             var dueDate = moment(res['DueDate'])
+            //             var dueDateDiff = today.diff(dueDate, 'days') 
                         
-                        if (dueDateDiff > 0) {
-                            // ADD DUE DATE
-                            surcharge = (dbAmount * .3)
-                            $('#surcharges').text('+ ₱ ' + surcharge.toFixed(2).toLocaleString())
-                        } else {
-                            $('#surcharges').text('+ ₱ 0')
-                            surcharge = 0
-                        }
+            //             if (dueDateDiff > 0) {
+            //                 // ADD DUE DATE
+            //                 surcharge = (dbAmount * .3)
+            //                 $('#surcharges').text('+ ₱ ' + surcharge.toFixed(2).toLocaleString())
+            //             } else {
+            //                 $('#surcharges').text('+ ₱ 0')
+            //                 surcharge = 0
+            //             }
 
-                        totalAmount = dbAmount + surcharge
+            //             totalAmount = dbAmount + surcharge
 
-                        $('#amount-due').text('₱ ' + netAmount.toFixed(2).toLocaleString())
-                        $('#additional-charges').text('+ ₱ ' + additionals.toFixed(2).toLocaleString())
-                        $('#deductions').text('- ₱ ' + deductions.toFixed(2).toLocaleString())
-                        $('#total-amount').text('₱ ' + totalAmount.toFixed(2).toLocaleString())
-                    }
-                },
-                error : function(err) {
-                    console.log(err)
-                    alert('An error occurred while fetching the bill\n' + err)
-                }
-            })
+            //             $('#amount-due').text('₱ ' + netAmount.toFixed(2).toLocaleString())
+            //             $('#additional-charges').text('+ ₱ ' + additionals.toFixed(2).toLocaleString())
+            //             $('#deductions').text('- ₱ ' + deductions.toFixed(2).toLocaleString())
+            //             $('#total-amount').text('₱ ' + totalAmount.toFixed(2).toLocaleString())
+            //         }
+            //     },
+            //     error : function(err) {
+            //         console.log(err)
+            //         alert('An error occurred while fetching the bill\n' + err)
+            //     }
+            // })
         }
 
         // DETECT ENTER
@@ -688,6 +791,16 @@
         });
 
         function transact(paymentUsed) {
+            if (jQuery.isEmptyObject($('#cashAmount').val())) {
+                paymentUsed = 'Check'
+            } else {
+                if (checkIds.length > 0) {
+                    paymentUsed = 'Cash and Check'
+                } else {
+                    paymentUsed = 'Cash'
+                }
+            }
+
             $.ajax({
                 url : '{{ route("paidBills.save-paid-bill-and-print") }}',
                 type : 'GET',
@@ -707,7 +820,9 @@
                     VAT : vat5Checked,
                     PaymentUsed : paymentUsed,
                     CheckNo : $('#checkNo').val(),
-                    Bank : $('#bank').val()
+                    Bank : $('#bank').val(),
+                    CheckIds : checkIds,
+                    CashAmount : $('#cashAmount').val(),
                 }, 
                 success : function(res) {
                     window.location.href = "{{ url('/paid_bills/print-bill-payment') }}" + "/" + res['ORNumber']
@@ -717,6 +832,97 @@
                     console.log(err)
                 }
             })
+        }
+
+        function addCheck() {
+            if (jQuery.isEmptyObject(billId)) {
+                Swal.fire({
+                    title: 'Error',
+                    text: "Select consumer's bill first!",
+                    icon: 'error',
+                })
+            } else {
+                if (jQuery.isEmptyObject($('#checkAmount').val()) || jQuery.isEmptyObject($('#checkNo').val())) {
+                    Swal.fire({
+                        title: 'Oops...',
+                        text: 'Provide the Check Number and Amount first!',
+                        icon: 'error',
+                    })
+                } else {
+                    $.ajax({
+                        url : "{{ route('paidBills.add-check-payments') }}",
+                        type : 'GET',
+                        data : {
+                            AccountNumber : acctNo,
+                            ServicePeriod : svcPeriod,
+                            BillId : billId,
+                            ORNumber : $('#orNumber').val(),
+                            Amount : $('#checkAmount').val(),
+                            CheckNo : $('#checkNo').val(),
+                            Bank : $('#bank').val(),
+                            CheckExpiration : null,
+                        },
+                        success : function(res) {
+                            checkIds.push(res['id'])
+                            $('#check-table').append(addCheckToTable(res['id'], res['Bank'], res['Amount'], res['CheckNo']))
+                            $('#modal-check-payment').modal('hide')
+
+                            clearModalFields()
+
+                            // compute payments
+                            checkAmountTotal = checkAmountTotal + parseFloat(res['Amount'])
+                            computePayments()
+                        },
+                        error : function(err) {
+                            $('#modal-check-payment').modal('hide')
+                            Swal.fire({
+                                title: 'Oops...',
+                                text: 'An error occurred while adding the check. Contact support immediately!',
+                                icon: 'error',
+                            })
+                        }
+                    })
+                }                
+            }            
+        }
+
+        function addCheckToTable(id, bank, amount, checkNo) {
+            return "<tr id='" + id + "' title='Check Number: " + checkNo + "' style='background-color: #e3f2fd'>" +
+                        "<td>" + bank + "</td>" +
+                        "<td class='text-right'><strong>P " + Number(parseFloat(amount).toFixed(2)).toLocaleString() + "<strong></td>" +
+                        "<td class='text-right'><button onclick=deleteCheck('" + id + "') class='btn btn-xs text-danger'><i class='fas fa-trash'></i></button></td>" +
+                    "</tr>"
+        }
+
+        function deleteCheck(id) {
+            $.ajax({
+                url : "{{ route('paidBills.delete-check-payment') }}",
+                type : 'GET',
+                data : {
+                    id : id,
+                },
+                success : function(res) {
+                    removeCheckFromArray(id)
+                    $('#' + id).remove()
+
+                    // deduct check
+                    checkAmountTotal = checkAmountTotal - parseFloat(res['Amount'])
+                    computePayments()
+                },
+                error : function(err) {
+                    Swal.fire({
+                        title: 'Oops...',
+                        text: 'An error occurred while adding the check. Contact support immediately!',
+                        icon: 'error',
+                    })
+                }
+            })
+        }
+
+        function clearModalFields() {
+            // clear fields
+            $('#checkAmount').val('')
+            $('#checkNo').val('')
         }
     </script>
 @endpush

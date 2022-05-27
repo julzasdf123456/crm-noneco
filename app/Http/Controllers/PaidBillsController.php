@@ -13,6 +13,7 @@ use App\Models\ServiceAccounts;
 use App\Models\Bills;
 use App\Models\IDGenerator;
 use App\Models\PaidBills;
+use App\Models\PaidBillsDetails;
 use App\Models\ORAssigning;
 use App\Models\Notifiers;
 use App\Models\ORCancellations;
@@ -350,10 +351,10 @@ class PaidBillsController extends AppBaseController
 
                 $paidBill->PaymentUsed = $request['PaymentUsed'];
                 // CHECK IF PAYMENT IS CASH, CHECK, OR CARD
-                if ($request['PaymentUsed'] == 'Check') {
-                    $paidBill->CheckNo = $request['CheckNo'];
-                    $paidBill->Bank = $request['Bank'];
-                }
+                // if ($request['PaymentUsed'] == 'Check') {
+                //     $paidBill->CheckNo = $request['CheckNo'];
+                //     $paidBill->Bank = $request['Bank'];
+                // }
 
                 if (date('Y-m-d', strtotime($bill->DueDate)) < date('Y-m-d')) {
                     $paidBill->Surcharge = Bills::getFinalPenalty($bill);
@@ -837,6 +838,26 @@ class PaidBillsController extends AppBaseController
                 $dcrSum->save();
             }            
         }  
+
+        // SAVE PAIDBILL DETAILS
+        if ($request['PaymentUsed'] == 'Cash' | $request['PaymentUsed'] == 'Cash and Check') {
+            $paidBillDetails = new PaidBillsDetails;
+            $paidBillDetails->id = IDGenerator::generateIDandRandString();
+            $paidBillDetails->AccountNumber = $request['AccountNumber'];
+            $paidBillDetails->ORNumber = $request['ORNumber'];
+            $paidBillDetails->Amount = $request['CashAmount'];
+            $paidBillDetails->PaymentUsed = 'Cash';
+            $paidBillDetails->UserId = Auth::id();
+            $paidBillDetails->save();
+        }
+
+        // DELETE CHECK ITEMS FROM PaidBillDetails that are not on the CheckIds
+        $checkIds = $request['CheckIds'];
+        PaidBillsDetails::where('ORNumber', $request['ORNumber'])
+            ->where('PaymentUsed', 'Check')
+            ->where('AccountNumber', $request['AccountNumber'])
+            ->whereNotIn('id', $checkIds)
+            ->delete();
         
         // SAVE OR
         $saveOR = ORAssigning::where('ORNumber', $request['ORNumber'])
@@ -1703,6 +1724,36 @@ class PaidBillsController extends AppBaseController
             // 'paidBills' => $paidBills,
             'orAssignedLast' => $orAssignedLast,
         ]);
+    }
+
+    public function addCheckPayments(Request $request) {
+        $paidBillDetails = new PaidBillsDetails;
+        $paidBillDetails->id = IDGenerator::generateIDandRandString();
+        $paidBillDetails->AccountNumber = $request['AccountNumber'];
+        $paidBillDetails->ServicePeriod = $request['ServicePeriod'];
+        $paidBillDetails->BillId = $request['Billid'];
+        $paidBillDetails->ORNumber = $request['ORNumber'];
+        $paidBillDetails->Amount = $request['Amount'];
+        $paidBillDetails->PaymentUsed = 'Check';
+        $paidBillDetails->CheckNo = $request['CheckNo'];
+        $paidBillDetails->Bank = $request['Bank'];
+        $paidBillDetails->CheckExpiration = $request['CheckExpiration'];
+        $paidBillDetails->UserId = Auth::id();
+        $paidBillDetails->save();
+
+        return response()->json($paidBillDetails, 200);
+    }
+
+    public function deleteCheckPayment(Request $request) {
+        $paidBillDetails = PaidBillsDetails::find($request['id']);
+
+        $paidBillDetails->delete();
+
+        return response()->json($paidBillDetails, 200);
+    }
+
+    public function fetchOldAccountNumber(Request $request) {
+        
     }
 }
 

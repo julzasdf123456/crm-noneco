@@ -22,6 +22,10 @@
                     </div>
 
                     <div class="form-group col-lg-12">
+                        <input type="number" step="any" id="checkAmount" placeholder="Check Amount" class="form-control">
+                    </div>
+
+                    <div class="form-group col-lg-12">
                         <select name="bank" id="bank" class="form-control">
                             @foreach ($banks as $item)
                                 <option value="{{ $item->BankAbbrev }}">{{ $item->BankFullName }} ({{ $item->BankAbbrev }})</option>
@@ -31,7 +35,7 @@
                 </div>                
             </div>
             <div class="modal-footer">
-                <button id="save-check-transaction" class="btn btn-primary"><i class="fas fa-check ico-tab-mini"></i> Pay Check</button>
+                <button id="save-check-transaction" class="btn btn-primary"><i class="fas fa-check ico-tab-mini"></i> Add Check</button>
             </div>
         </div>
     </div>
