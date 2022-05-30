@@ -9,7 +9,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h4>Other Payments</h4>
+                    <span><h4>Other Payments</h4> {{ $transactionId }}</span>
                 </div>
                 <div class="col-sm-6">
                     <button class="btn btn-success float-right" title="Search Consumer"  data-toggle="modal" data-target="#modal-search"><i class="fas fa-search-dollar ico-tab"></i>Search</button>
@@ -28,10 +28,6 @@
                             <div class="col-lg-11">
                                 <h4 class="card-title" id="account-name">Account Name</h4><br>
                                 <address class="text-muted" id="account-no">Account No</address>
-                            </div>
-
-                            <div class="col-lg-1">
-                                <button class="btn btn-tool float-right" style="margin: 8px;" id="clear-btn"><i class="fas fa-redo"></i></button>
                             </div>
 
                             <div class="divider"></div>
@@ -92,7 +88,7 @@
                 <div class="card">
                     <div class="card-body">
                         {{-- FORM --}}
-                        <table class="table table-borderless">
+                        <table class="table table-borderless table-sm">
                             <tr>
                                 <td>Total</td>
                                 <td class="text-right">
@@ -106,9 +102,31 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td>Amount Paid</td>
+                                <td>Cash Payment</td>
                                 <td class="text-right">
-                                    <input type="number" class="form-control text-right" style="font-size: 1.5em;" id="amountPaid" step="any">
+                                    <input type="number" class="form-control text-right" style="font-size: 1.5em;" id="cashAmount" step="any">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Check Payments</td>
+                                <td class="text-right">
+                                    <button id="addCheckBtn" class="btn btn-xs btn-primary float-right ico-tab-mini" data-toggle="modal" data-target="#modal-check-payment"><i class="fas fa-plus ico-tab-mini"></i>Add Check</button>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table class="table table-borderless table-sm" id="check-table">
+
+                        </table>
+
+                        <div class="divider"></div>
+
+                        {{-- FORM TABLE --}}
+                        <table class="table table-borderless table-sm">                            
+                            <tr>
+                                <td>Total Amount Paid</td>
+                                <td class="text-right">
+                                    <input type="number" class="form-control text-right" style="font-size: 1.5em;" id="amountPaid" step="any" readonly>
                                 </td>
                             </tr>
                             <tr>
@@ -120,8 +138,8 @@
                         </table>
                     </div>
                     <div class="card-footer">
-                        <button id="cashBtn" class="btn btn-lg btn-primary float-right" disabled><i class="fas fa-dollar-sign"></i> Cash</button>
-                        <button id="checkBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled><i class="fas fa-money-check-alt"></i> Check</button>
+                        <button id="cashBtn" class="btn btn-lg btn-primary float-right" disabled><i class="fas fa-dollar-sign"></i> Transact</button>
+                        {{-- <button id="checkBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled><i class="fas fa-money-check-alt"></i> Check</button> --}}
                         <button id="cardBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled><i class="fas fa-credit-card"></i> Debit/Credit Card</button>
                     </div>
                 </div>
@@ -129,6 +147,8 @@
         </div>
     </div>
 @endsection
+
+@include('paid_bills.check_modal')
 
 {{-- MODAL FOR SEARCHING OF CONSUMERS --}}
 <div class="modal fade" id="modal-search" aria-hidden="true" style="display: none;">
@@ -178,7 +198,11 @@
 @push('page_scripts')
     <script>
         var accountNo = ""
-        var total = 0.0;
+        var total = 0.0
+        var checkIds = []
+        var checkAmountTotal = 0
+        var change = 0
+
         $(document).ready(function() {
             payableDisablers(true)
             setFormAmount()
@@ -222,7 +246,6 @@
             })
 
             // ASSESS VALUE ON TYPE
-            var change = 0;
             $('#amountPaid').keyup(function() {
                 change = parseFloat(this.value) - parseFloat(total)
 
@@ -243,6 +266,32 @@
                     $('#checkBtn').attr('disabled', 'true')
                     $('#cardBtn').attr('disabled', 'true')
                 }                
+            })
+
+            $('#amountPaid').on('change', function() {
+                change = parseFloat(this.value) - parseFloat(total)
+
+                if (parseFloat(change)) {
+                    if (change > -1 && !jQuery.isEmptyObject($('#ornumber').val())) {
+                        $('#cashBtn').removeAttr('disabled')
+                        $('#checkBtn').removeAttr('disabled')
+                        $('#cardBtn').removeAttr('disabled')                        
+                    } else {
+                        $('#cashBtn').attr('disabled', 'true')
+                        $('#checkBtn').attr('disabled', 'true')
+                        $('#cardBtn').attr('disabled', 'true')
+                    }
+                    $('#change').val(Number(change.toFixed(2)).toLocaleString())
+                } else {
+                    $('#change').val('')
+                    $('#cashBtn').attr('disabled', 'true')
+                    $('#checkBtn').attr('disabled', 'true')
+                    $('#cardBtn').attr('disabled', 'true')
+                }                
+            })
+
+            $('#cashAmount').keyup(function() {
+                computePayments()
             })
 
             $('#ornumber').keyup(function() { 
@@ -271,7 +320,7 @@
                     if (change > -1 && !jQuery.isEmptyObject($('#ornumber').val())) {
                         var keycode = (event.keyCode ? event.keyCode : event.which);
                         if(keycode == '13'){
-                            saveOtherPayments('Cash')
+                            saveOtherPayments()
                         }                      
                     } else {
 
@@ -285,7 +334,7 @@
             $('#cashBtn').on('click', function() {
                 if (parseFloat(change)) {
                     if (change > -1 && !jQuery.isEmptyObject($('#ornumber').val())) {
-                        saveOtherPayments('Cash')                    
+                        saveOtherPayments()                    
                     } else {
 
                     }
@@ -298,12 +347,28 @@
             $('#clear-btn').on('click', function() {
                 clearAll()
             })
+
+            // TRANSACT CHECK
+            $('#save-check-transaction').on('click', function() {
+                addCheckPayment()           
+            })
         })
 
         /**
          * SAVE TRANSACTION AND CLEAR CACHE
          */
-        function saveOtherPayments(type) {
+        function saveOtherPayments() {
+            var paymentUsed = ''
+            if (jQuery.isEmptyObject($('#cashAmount').val())) {
+                paymentUsed = 'Check'
+            } else {
+                if (checkIds.length > 0) {
+                    paymentUsed = 'Cash and Check'
+                } else {
+                    paymentUsed = 'Cash'
+                }
+            }
+
             $.ajax({
                 url : '/cache_other_payments/save-other-payments',
                 type : 'GET',
@@ -311,7 +376,11 @@
                     AccountNumber : accountNo,
                     PaymentTitle : $('#for').val(),
                     ORNumber : $('#ornumber').val(),
-                    PaymentUsed : type,
+                    PaymentUsed : paymentUsed,
+                    TransactionId : '{{ $transactionId }}',
+                    CheckAmount : checkAmountTotal,
+                    CheckIds : checkIds,
+                    CashAmount : $('#cashAmount').val(),
                 },
                 success : function(res) {
                     if (jQuery.isEmptyObject(res)) {
@@ -321,7 +390,11 @@
                     }
                 },
                 error : function(err) {
-
+                    Swal.fire({
+                        title: 'Oops...',
+                        text: 'An error occurred while performing the transaction. Contact support immediately!',
+                        icon: 'error',
+                    })
                 }
             })
         }
@@ -419,6 +492,9 @@
 
         function fetchCachedData(accountNo) {
             total = 0.0;
+            change = 0
+            checkAmountTotal = 0
+            checkIds = []
 
             $('#amountPaid').val('')
             $('#change').val('')
@@ -442,7 +518,7 @@
 
                         $('#total-amnt-text').text(Number(total.toFixed(2)).toLocaleString())
                         $('#totalAmount').val(total.toFixed(2))
-                        focusOrNumber()
+                        $('#cashAmount').focus()
                     }
                 },
                 error : function(error) {
@@ -465,6 +541,91 @@
             $('#totalAmount').val("")
             $('#amountPaid').val('')
             $('#change').val('')
+        }
+
+        function computePayments() {
+            var cashAmnt = parseFloat($('#cashAmount').val()) ? parseFloat($('#cashAmount').val()) : 0
+            var totalX = cashAmnt + checkAmountTotal
+            $('#amountPaid').val(totalX.toFixed(2)).change()
+        }
+
+        function clearModalFields() {
+            // clear fields
+            $('#checkAmount').val('')
+            $('#checkNo').val('')
+        }
+
+        function removeCheckFromArray(id) {
+            var index = checkIds.indexOf(id)
+            if (index > -1) {
+                checkIds.splice(index, 1)
+            }
+        }
+
+        function addCheckPayment() {
+            $.ajax({
+                url : "{{ route('transactionIndices.add-check-payment') }}",
+                type : 'GET',
+                data : {
+                    TransactionIndexId : '{{ $transactionId }}',
+                    Amount : $('#checkAmount').val(),
+                    CheckNo : $('#checkNo').val(),
+                    Bank : $('#bank').val(),
+                    CheckNo : $('#checkNo').val(),
+                    ORNumber : $('#ornumber').val(),
+                    CheckExpiration : null,
+                },
+                success : function(res) {
+                    checkIds.push(res['id'])
+                    $('#check-table').append(addCheckToTable(res['id'], res['Bank'], res['Amount'], res['CheckNo']))
+                    $('#modal-check-payment').modal('hide')
+
+                    checkAmountTotal = checkAmountTotal + parseFloat(res['Amount'])
+                    clearModalFields()
+
+                    computePayments()
+                },
+                error : function(err) {
+                    Swal.fire({
+                        title: 'Oops...',
+                        text: 'An error occurred while adding the check. Contact support immediately!',
+                        icon: 'error',
+                    })
+                }
+            })
+        }
+
+        function addCheckToTable(id, bank, amount, checkNo) {
+            return "<tr id='" + id + "' title='Check Number: " + checkNo + "' style='background-color: #e3f2fd'>" +
+                        "<td>" + bank + "</td>" +
+                        "<td class='text-right'><strong>P " + Number(parseFloat(amount).toFixed(2)).toLocaleString() + "<strong></td>" +
+                        "<td class='text-right'><button onclick=deleteCheck('" + id + "') class='btn btn-xs text-danger'><i class='fas fa-trash'></i></button></td>" +
+                    "</tr>"
+        }
+
+        function deleteCheck(id) {
+            $.ajax({
+                url : "{{ route('transactionIndices.delete-check-payment') }}",
+                type : 'GET',
+                data : {
+                    id : id,
+                },
+                success : function(res) {
+                    removeCheckFromArray(id)
+                    $('#' + id).remove()
+
+                    // deduct check
+                    checkAmountTotal = checkAmountTotal - parseFloat(res['Amount'])
+                    computePayments()
+                },
+                error : function(err) {
+                    Swal.fire({
+                        title: 'Oops...',
+                        text: 'An error occurred while adding the check. Contact support immediately!',
+                        icon: 'error',
+                    })
+                }
+            })
         }
     </script>
 @endpush

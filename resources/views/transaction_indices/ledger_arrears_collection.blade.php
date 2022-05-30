@@ -76,7 +76,7 @@
                     </div>
                     <div class="card-footer">
                         <button id="cashBtn" class="btn btn-lg btn-primary float-right" disabled><i class="fas fa-dollar-sign"></i> Cash</button>
-                        <button id="checkBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled data-toggle="modal" data-target="#modal-check-payment"><i class="fas fa-money-check-alt"></i> Check</button>
+                        {{-- <button id="checkBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled data-toggle="modal" data-target="#modal-check-payment"><i class="fas fa-money-check-alt"></i> Check</button> --}}
                         <button id="cardBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled><i class="fas fa-credit-card"></i> Debit/Credit Card</button>
                     </div>
                 </div>
@@ -144,12 +144,12 @@
                 // enable
                 $('#cashBtn').removeAttr('disabled')   
                 $('#checkBtn').removeAttr('disabled')  
-                $('#cardBtn').removeAttr('disabled')               
+                // $('#cardBtn').removeAttr('disabled')               
             } else {
                 // disable
                 $('#cashBtn').attr('disabled', 'true')
                 $('#checkBtn').attr('disabled', 'true')
-                $('#cardBtn').attr('disabled', 'true')
+                // $('#cardBtn').attr('disabled', 'true')
             }   
         }
 

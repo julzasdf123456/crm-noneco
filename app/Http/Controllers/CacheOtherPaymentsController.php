@@ -14,6 +14,8 @@ use App\Models\TransactionIndex;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\DCRSummaryTransactions;
+use App\Models\TransacionPaymentDetails;
+use App\Models\ORAssigning;
 use Flash;
 use Response;
 
@@ -172,11 +174,29 @@ class CacheOtherPaymentsController extends AppBaseController
         $cacheOtherPayments = CacheOtherPayments::where('AccountNumber', $request['AccountNumber'])->get();
 
         // SAVE TRANSACTION
+        // $id = $request['TransactionId'];
         $id = IDGenerator::generateID();
 
         $subTotal = 0.0;
         $vat = 0.0;
         $total = 0.0;
+
+        $transactionIndex = new TransactionIndex;
+        $transactionIndex->id = $id;
+        $transactionIndex->TransactionNumber = env('APP_LOCATION') . '-' . $id;
+        $transactionIndex->PaymentTitle = $request['PaymentTitle'];
+        $transactionIndex->ORNumber = $request['ORNumber'];
+        $transactionIndex->ORDate = date('Y-m-d');
+        $transactionIndex->SubTotal = round($subTotal, 2);
+        $transactionIndex->VAT = round($vat, 2);
+        $transactionIndex->Total = round($total, 2);
+        $transactionIndex->ObjectId = $request['AccountNumber'];
+        $transactionIndex->Source = 'Other Payments';
+        $transactionIndex->PaymentUsed = $request['PaymentUsed'];
+        $transactionIndex->PayeeName = $request['PaymentTitle'];
+        $transactionIndex->UserId = Auth::id();
+        $transactionIndex->AccountNumber = $request['AccountNumber'];
+        $transactionIndex->save();
 
         foreach($cacheOtherPayments as $item) {
             $subTotal += floatval($item->Amount);
@@ -206,27 +226,39 @@ class CacheOtherPaymentsController extends AppBaseController
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
-        }
+            }
         }
 
-        $transactionIndex = new TransactionIndex;
-        $transactionIndex->id = $id;
-        $transactionIndex->TransactionNumber = env('APP_LOCATION') . '-' . $id;
-        $transactionIndex->PaymentTitle = $request['PaymentTitle'];
-        $transactionIndex->ORNumber = $request['ORNumber'];
-        $transactionIndex->ORDate = date('Y-m-d');
-        $transactionIndex->SubTotal = round($subTotal, 2);
-        $transactionIndex->VAT = round($vat, 2);
-        $transactionIndex->Total = round($total, 2);
-        $transactionIndex->ObjectId = $request['AccountNumber'];
-        $transactionIndex->Source = 'Other Payments';
-        $transactionIndex->PaymentUsed = $request['PaymentUsed'];
-        $transactionIndex->PayeeName = $request['PaymentTitle'];
-        $transactionIndex->UserId = Auth::id();
-        $transactionIndex->AccountNumber = $request['AccountNumber'];
-        $transactionIndex->save();
+        // SAVE TRANSACTION PAYMENT DETAILS LOGS
+        if ($request['PaymentUsed'] == 'Cash' | $request['PaymentUsed'] == 'Cash and Check') {
+            if ($request['CashAmount'] != null) {
+                $transactionPaymentDetails = new TransacionPaymentDetails;
+                $transactionPaymentDetails->id = IDGenerator::generateIDandRandString();
+                $transactionPaymentDetails->TransactionIndexId = $id;
+                $transactionPaymentDetails->Amount = $request['CashAmount'];
+                $transactionPaymentDetails->PaymentUsed = 'Cash';
+                $transactionPaymentDetails->ORNumber = $request['ORNumber'];
+                $transactionPaymentDetails->save();
+            }            
+        }
 
+        // CLEAR CACHE PAYMENTS
         CacheOtherPayments::where('AccountNumber', $request['AccountNumber'])->delete();
+
+        // SAVE OR
+        $saveOR = ORAssigning::where('ORNumber', $transactionIndex->ORNumber)
+            ->where('UserId', Auth::id())
+            ->first();        
+        if ($saveOR == null) {
+            $saveOR = new ORAssigning;
+            $saveOR->id = IDGenerator::generateIDandRandString();
+            $saveOR->ORNumber = $transactionIndex->ORNumber;
+            $saveOR->UserId = Auth::id();
+            $saveOR->DateAssigned = $transactionIndex->ORDate;
+            $saveOR->TimeAssigned = date('H:i:s');
+            $saveOR->Office = env('APP_LOCATION');
+            $saveOR->save();
+        }  
 
         return response()->json($transactionIndex, 200);
     }

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\ServiceConnectionTotalPayments;
 use App\Models\ServiceConnections;
 use App\Models\TransactionDetails;
+use App\Models\TransacionPaymentDetails;
 use App\Models\TransactionIndex;
 use App\Models\ArrearsLedgerDistribution;
 use App\Models\Collectibles;
@@ -269,11 +270,6 @@ class TransactionIndexController extends AppBaseController
         $transactionIndex->UserId = Auth::id();
         $transactionIndex->PayeeName = $totalTransactions->ServiceAccountName;
 
-        if ($request['PaymentUsed'] == 'Check') {
-            $transactionIndex->CheckNo = $request['CheckNo'];
-            $transactionIndex->Bank = $request['Bank'];
-        }
-
         $transactionIndex->save();
 
         $saTransaction = ServiceConnectionTotalPayments::where('ServiceConnectionId', $request['svcId'])->first();
@@ -341,6 +337,19 @@ class TransactionIndexController extends AppBaseController
                 $dcrSum->ReportDestination = 'COLLECTION';
                 $dcrSum->Office = env('APP_LOCATION');
                 $dcrSum->save();
+            }            
+        }
+
+        // SAVE TRANSACTION PAYMENT DETAILS LOGS
+        if ($request['PaymentUsed'] == 'Cash' | $request['PaymentUsed'] == 'Cash and Check') {
+            if ($request['CashAmount'] != null) {
+                $transactionPaymentDetails = new TransacionPaymentDetails;
+                $transactionPaymentDetails->id = IDGenerator::generateIDandRandString();
+                $transactionPaymentDetails->TransactionIndexId = $id;
+                $transactionPaymentDetails->Amount = $request['CashAmount'];
+                $transactionPaymentDetails->PaymentUsed = 'Cash';
+                $transactionPaymentDetails->ORNumber = $request['ORNumber'];
+                $transactionPaymentDetails->save();
             }            
         }
 
@@ -428,7 +437,7 @@ class TransactionIndexController extends AppBaseController
                     ';
                 } else {
                     $output .= '
-                        <tr>
+                        <tr onclick=fetchDetails("' . $item->AccountNumber . '")>
                             <td>' . $item->AccountNumber . '</td>
                             <td>' . $item->ServiceAccountName . '</td>
                             <td>' . number_format($item->Balance, 2) . '</td>
@@ -480,11 +489,6 @@ class TransactionIndexController extends AppBaseController
         $transactionIndex->PayeeName = $account->ServiceAccountName;
         $transactionIndex->AccountNumber = $account->OldAccountNo;
 
-        if ($request['PaymentUsed'] == 'Check') {
-            $transactionIndex->CheckNo = $request['CheckNo'];
-            $transactionIndex->Bank = $request['Bank'];
-        }
-
         $transactionIndex->save();
 
         // SAVE TRANSACTION DETAILS
@@ -503,6 +507,19 @@ class TransactionIndexController extends AppBaseController
         if ($collectibles != null) {
             $collectibles->Balance = floatval($request['RemainingBalance']);
             $collectibles->save();
+        }
+
+        // SAVE TRANSACTION PAYMENT DETAILS LOGS
+        if ($request['PaymentUsed'] == 'Cash' | $request['PaymentUsed'] == 'Cash and Check') {
+            if ($request['CashAmount'] != null) {
+                $transactionPaymentDetails = new TransacionPaymentDetails;
+                $transactionPaymentDetails->id = IDGenerator::generateIDandRandString();
+                $transactionPaymentDetails->TransactionIndexId = $id;
+                $transactionPaymentDetails->Amount = $request['CashAmount'];
+                $transactionPaymentDetails->PaymentUsed = 'Cash';
+                $transactionPaymentDetails->ORNumber = $request['ORNumber'];
+                $transactionPaymentDetails->save();
+            }            
         }
 
         // SAVE OR
@@ -649,9 +666,12 @@ class TransactionIndexController extends AppBaseController
         $orAssignedLast = ORAssigning::where('UserId', Auth::id())
             ->orderByDesc('created_at')
             ->first();
+        $transactionId = IDGenerator::generateID();
+
         return view('/transaction_indices/other_payments', [
             'payables' => $payables,
             'orAssignedLast' => $orAssignedLast,
+            'transactionId' => $transactionId,
         ]);
     }
 
@@ -767,13 +787,13 @@ class TransactionIndexController extends AppBaseController
         if (count($results) > 0) {
             foreach($results as $item) {
                 $output .= '
-                        <tr onclick=fetchAccountDetails("' . $item->id . '")>
+                        <tr onclick=fetchDetails("' . $item->id . '")>
                             <td>' . $item->id . '</td>
                             <td>' . $item->ServiceAccountName . '</td>
                             <td>' . ServiceAccounts::getAddress($item) . '</td>
                             <td>' . $item->AccountStatus . '</td>
                             <td>
-                                <button class="btn btn-link text-primary" onclick=fetchAccountDetails("' . $item->id . '")><i class="fas fa-forward"></i></button>
+                                <button class="btn btn-link text-primary" onclick=fetchDetails("' . $item->id . '")><i class="fas fa-forward"></i></button>
                             </td>
                         </tr>
                     '; 
@@ -892,5 +912,28 @@ class TransactionIndexController extends AppBaseController
         $ticketLog->save();
 
         return response()->json($transactionIndex, 200);
+    }
+
+    public function addCheckPayment(Request $request) {
+        $transactionPaymentDetails = new TransacionPaymentDetails;
+        $transactionPaymentDetails->id = IDGenerator::generateIDandRandString();
+        $transactionPaymentDetails->TransactionIndexId = $request['TransactionIndexId'];
+        $transactionPaymentDetails->Amount = $request['Amount'];
+        $transactionPaymentDetails->PaymentUsed = 'Check';
+        $transactionPaymentDetails->CheckNo = $request['CheckNo'];
+        $transactionPaymentDetails->Bank = $request['Bank'];
+        $transactionPaymentDetails->ORNumber = $request['ORNumber'];
+        $transactionPaymentDetails->CheckExpiration = $request['CheckExpiration'];
+        $transactionPaymentDetails->save();
+
+        return response()->json($transactionPaymentDetails, 200);
+    }
+
+    public function deleteCheckPayment(Request $request) {
+        $transactionPaymentDetails = TransacionPaymentDetails::find($request['id']);
+
+        $transactionPaymentDetails->delete();
+
+        return response()->json($transactionPaymentDetails, 200);
     }
 }

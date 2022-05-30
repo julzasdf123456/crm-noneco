@@ -148,6 +148,7 @@ class ServiceConnectionsController extends AppBaseController
                         'CRM_ServiceConnections.Status as Status',  
                         'CRM_ServiceConnections.Notes as Notes', 
                         'CRM_ServiceConnections.Office', 
+                        'CRM_ServiceConnections.LongSpan', 
                         'CRM_ServiceConnections.ORNumber as ORNumber', 
                         'CRM_ServiceConnections.Sitio as Sitio', 
                         'CRM_ServiceConnections.LoadCategory as LoadCategory', 

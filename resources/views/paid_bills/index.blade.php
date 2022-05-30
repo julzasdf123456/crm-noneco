@@ -15,7 +15,7 @@
                 </div>
                 <div class="col-sm-5">
                     <div class="form-row align-items-center float-right">
-                        <div class="col-auto">
+                        {{-- <div class="col-auto">
                             <input id="area-search" type="text" maxlength="2" class="form-control" style="width: 60px;">
                         </div>
                         <div class="col-auto">
@@ -23,6 +23,9 @@
                         </div>
                         <div class="col-auto">
                             <input id="sequence-search" type="text" maxlength="3" class="form-control" style="width: 70px;">
+                        </div> --}}
+                        <div class="col-auto">
+                            <input class="form-control" id="old-account-no" data-inputmask="'alias': 'phonebe'" maxlength="12">
                         </div>
                     </div>    
                 </div>
@@ -201,6 +204,7 @@
                 <p class="text-muted"><i id="count">Results</i></p>
                 <table class="table table-sm table-hover" id="res-table">
                     <thead>
+                        <th>Account ID</th>
                         <th>Account Number</th>
                         <th>Account Name</th>
                         <th>Address</th>
@@ -272,34 +276,57 @@
         var checkIds = []
 
         $(document).ready(function() {
+            //basic search
+            $('#old-account-no').focus()
+
+            $("#old-account-no").inputmask({
+                mask: '99-99999-999',
+                placeholder: '',
+                showMaskOnHover: false,
+                showMaskOnFocus: false,
+                onBeforePaste: function (pastedValue, opts) {
+                    var processedValue = pastedValue;
+
+                    //do something with it
+
+                    return processedValue;
+                }
+            });
+
+            $("#old-account-no").keyup(function() {
+                if (this.value.length == 12) {
+                    searchOldAccountNumber()
+                }
+            })
+
             // basic search
-            $('#area-search').focus()
-            $('#area-search').keyup(function() {
-                var charCount = this.value.length
-                if (charCount == 2) {
-                    $('#route-search').focus()
-                }
-            })
+            // $('#area-search').focus()
+            // $('#area-search').keyup(function(e) {
+            //     var charCount = this.value.length
+            //     if (charCount == 2) {
+            //         $('#route-search').focus()
+            //     }
+            // })
 
-            $('#route-search').keyup(function() {
-                var charCount = this.value.length
-                if (charCount == 5) {
-                    $('#sequence-search').focus()
-                } else if (charCount == 0) {
-                    $('#area-search').focus()
-                }
-            })
+            // $('#route-search').keyup(function() {
+            //     var charCount = this.value.length
+            //     if (charCount == 5) {
+            //         $('#sequence-search').focus()
+            //     } else if (charCount == 0) {
+            //         $('#area-search').focus()
+            //     }
+            // })
 
 
-            $('#sequence-search').keyup(function() {
-                var charCount = this.value.length
-                if (charCount == 3) {
-                    // SEARCH CONSUMER
-
-                } else if (charCount == 0) {
-                    $('#route-search').focus()
-                }
-            })
+            // $('#sequence-search').keyup(function() {
+            //     var charCount = this.value.length
+            //     if (charCount == 3) {
+            //         // SEARCH CONSUMER
+            //         searchOldAccountNumber()
+            //     } else if (charCount == 0) {
+            //         $('#route-search').focus()
+            //     }
+            // })
 
             $('#search').keyup(function() {
                 var letterCount = this.value.length;
@@ -410,6 +437,7 @@
 
             $('#modal-search').on('shown.bs.modal', function () {
                 $('#search').focus();
+                $('#search').val($('#old-account-no').val()).keyup()
             })
 
             // DISCOUNT 3% CHANGE
@@ -644,6 +672,9 @@
             selectedPayments = []
             checkIds = []
             checkAmountTotal = 0.0
+            acctNo = ''
+            billId = ''
+            svcPeriod = ''
 
             // FETCH ACCOUNT DETAILS
             $.ajax({
@@ -657,7 +688,7 @@
                     if (jQuery.isEmptyObject(res)) {
 
                     } else {
-                        $('#account-name').text(res['ServiceAccountName'])
+                        $('#account-name').html('<i class="fas fa-check-circle text-success ico-tab"></i>' + res['ServiceAccountName'])
                         acctNo = id
                     }
                     $('#modal-search').modal('hide')
@@ -923,6 +954,68 @@
             // clear fields
             $('#checkAmount').val('')
             $('#checkNo').val('')
+        }
+
+        function searchOldAccountNumber() {
+            // CLEAR DETAILS
+            $('#bill-no').text('-')
+            $('#service-from').text('-')
+            $('#service-to').text('-')
+            $('#due-date').text('-')
+            $('#kwh-used').text('-')
+            $('#rate').text('-')
+            $('#amount-due').text('-')
+            $('#additional-charges').text('-')
+            $('#deductions').text('-')
+            $('#total-amount').text('-')
+            $('#surcharges').text('-')
+            $('#account-name').html('')
+            $('#account-number').text('')
+            $('#payables-table tbody tr').remove()
+            $('#cashAmount').val('')
+            $('#amountPaid').val('')
+            $('#change').val('')
+            $('#check-table tr').remove()
+            
+            totalAmount = 0.0
+            deductions = 0
+            additionals = 0
+            surcharge = 0
+            vat2 = 0
+            vat5 = 0
+            selectedPayments = []
+            checkIds = []
+            checkAmountTotal = 0.0
+            acctNo = ''
+            billId = ''
+            svcPeriod = ''
+
+            var oldAcctNo = $('#old-account-no').val()
+            $.ajax({
+                url : "{{ route('paidBills.fetch-account-by-old-account-number') }}",
+                type : 'GET',
+                data : {
+                    OldAccountNo : oldAcctNo,
+                },
+                success : function(res) {
+                    fetchDetails(res['id'])
+                },
+                error : function(err) {
+                    Swal.fire({
+                        title: 'Oops...',
+                        text: 'An error occurred while adding the check. Contact support immediately!',
+                        icon: 'error',
+                    })
+                },
+                statusCode : {
+                    404: function() {
+                        Swal.fire({
+                            title: 'Account Not Found!',
+                            icon: 'error',
+                        })
+                    }
+                }
+            })
         }
     </script>
 @endpush

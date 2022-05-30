@@ -440,6 +440,8 @@ Route::get('/transaction_indices/reconnection-collection', [App\Http\Controllers
 Route::get('/transaction_indices/search-disconnected-consumers', [App\Http\Controllers\TransactionIndexController::class, 'searchDisconnectedConsumers'])->name('transactionIndices.search-disconnected-consumers');
 Route::get('/transaction_indices/get-arrears-data', [App\Http\Controllers\TransactionIndexController::class, 'getArrearsData'])->name('transactionIndices.get-arrears-data');
 Route::get('/transaction_indices/save-reconnection-transaction', [App\Http\Controllers\TransactionIndexController::class, 'saveReconnectionTransaction'])->name('transactionIndices.save-reconnection-transaction');
+Route::get('/transaction_indices/add-check-payment', [App\Http\Controllers\TransactionIndexController::class, 'addCheckPayment'])->name('transactionIndices.add-check-payment');
+Route::get('/transaction_indices/delete-check-payment', [App\Http\Controllers\TransactionIndexController::class, 'deleteCheckPayment'])->name('transactionIndices.delete-check-payment');
 Route::resource('transactionIndices', App\Http\Controllers\TransactionIndexController::class);
 
 
@@ -465,6 +467,7 @@ Route::get('/paid_bills/bills-collection', [App\Http\Controllers\PaidBillsContro
 Route::get('/paid_bills/get-adjusted-bapa-bills', [App\Http\Controllers\PaidBillsController::class, 'getAdjustedBapaBills'])->name('paidBills.get-adjusted-bapa-bills');
 Route::get('/paid_bills/add-check-payments', [App\Http\Controllers\PaidBillsController::class, 'addCheckPayments'])->name('paidBills.add-check-payments');
 Route::get('/paid_bills/delete-check-payment', [App\Http\Controllers\PaidBillsController::class, 'deleteCheckPayment'])->name('paidBills.delete-check-payment');
+Route::get('/paid_bills/fetch-account-by-old-account-number', [App\Http\Controllers\PaidBillsController::class, 'fetchAccountByOldAccountNumber'])->name('paidBills.fetch-account-by-old-account-number');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);
 
 
@@ -568,3 +571,6 @@ Route::resource('bAPAAdjustmentDetails', App\Http\Controllers\BAPAAdjustmentDeta
 
 
 Route::resource('paidBillsDetails', App\Http\Controllers\PaidBillsDetailsController::class);
+
+
+Route::resource('transacionPaymentDetails', App\Http\Controllers\TransacionPaymentDetailsController::class);

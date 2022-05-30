@@ -8,10 +8,26 @@
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
-                <div class="col-sm-6">
+                <div class="col-sm-5">
                     <h4>Reconnection Payments</h4>
                 </div>
-                <div class="col-sm-6">
+                <div class="col-sm-5">
+                    <div class="form-row align-items-center float-right">
+                        {{-- <div class="col-auto">
+                            <input id="area-search" type="text" maxlength="2" class="form-control" style="width: 60px;">
+                        </div>
+                        <div class="col-auto">
+                            <input id="route-search" type="text" maxlength="5" class="form-control" style="width: 90px;">
+                        </div>
+                        <div class="col-auto">
+                            <input id="sequence-search" type="text" maxlength="3" class="form-control" style="width: 70px;">
+                        </div> --}}
+                        <div class="col-auto">
+                            <input class="form-control" id="old-account-no" data-inputmask="'alias': 'phonebe'" maxlength="12">
+                        </div>
+                    </div>    
+                </div>
+                <div class="col-sm-2">
                     <button class="btn btn-success float-right" title="Search Consumer"  data-toggle="modal" data-target="#modal-search"><i class="fas fa-search-dollar ico-tab"></i>Search</button>
                 </div>
             </div>
@@ -154,6 +170,29 @@
         var accountNo = ""
         var total = 0.0;
         $(document).ready(function() {
+            //basic search
+            $('#old-account-no').focus()
+
+            $("#old-account-no").inputmask({
+                mask: '99-99999-999',
+                placeholder: '',
+                showMaskOnHover: false,
+                showMaskOnFocus: false,
+                onBeforePaste: function (pastedValue, opts) {
+                    var processedValue = pastedValue;
+
+                    //do something with it
+
+                    return processedValue;
+                }
+            });
+
+            $("#old-account-no").keyup(function() {
+                if (this.value.length == 12) {
+                    searchOldAccountNumber()
+                }
+            })
+
             total = parseFloat($('#totalAmount').val())
             payableDisablers(true)
             setFormAmount()
@@ -289,12 +328,11 @@
                 error : function(error) {
                     $('#res-table tbody tr').remove()
                     alert('Error fetching data')
-                    console.log(error)
                 }
             })
         }
 
-        function fetchAccountDetails(id) {
+        function fetchDetails(id) {
             $('#modal-search').modal('hide')
             // payableDisablers(false)
             $.ajax({
@@ -304,13 +342,32 @@
                     id : id,
                 },
                 success : function(res) {
-                    accountNo = res['id']
-                    $('#account-name').text(res['ServiceAccountName'])
-                    $('#account-no').text(accountNo)
-                    getArrears(accountNo)
+                    if (res['AccountStatus'] == 'DISCONNECTED') {
+                        accountNo = res['id']
+                        $('#account-name').html('<i class="fas fa-check-circle text-success ico-tab"></i>' + res['ServiceAccountName'])
+                        $('#account-no').text(accountNo)
+                        getArrears(accountNo)
+                    } else {
+                        accountNo = ""
+                        total = 0.0;
+
+                        $('#account-name').text('...')
+                        $('#account-no').text('...')
+
+                        Swal.fire({
+                            title: 'Invalid Entry!',
+                            text: 'Account name ' + res['ServiceAccountName'] + ' is ' + res['AccountStatus'] + ', it should be marked DISCONNECTED to be able to pay the reconnection fee.',
+                            icon: 'error',
+                        })
+                    }
+                    
                 },
                 error : function(err) {
-                    alert('An error occurred while fetching your request. \n' + err)
+                    Swal.fire({
+                            title: 'Oops...',
+                            text: 'An error occurred while fetching the entry',
+                            icon: 'error',
+                        })
                 }
             })
         }
@@ -359,6 +416,38 @@
             $('#amountPaid').val('')
             $('#change').val('')
             $('#ornumber').val('')
+        }
+
+        function searchOldAccountNumber() {            
+            accountNo = ""
+            total = 0.0;
+
+            var oldAcctNo = $('#old-account-no').val()
+            $.ajax({
+                url : "{{ route('paidBills.fetch-account-by-old-account-number') }}",
+                type : 'GET',
+                data : {
+                    OldAccountNo : oldAcctNo,
+                },
+                success : function(res) {
+                    fetchDetails(res['id'])
+                },
+                error : function(err) {
+                    Swal.fire({
+                        title: 'Oops...',
+                        text: 'An error occurred while adding the check. Contact support immediately!',
+                        icon: 'error',
+                    })
+                },
+                statusCode : {
+                    404: function() {
+                        Swal.fire({
+                            title: 'Account Not Found!',
+                            icon: 'error',
+                        })
+                    }
+                }
+            })
         }
     </script>
 @endpush

@@ -201,6 +201,7 @@ class PaidBillsController extends AppBaseController
                 $output .= '
                         <tr onclick=fetchDetails("' . $item->id . '")>
                             <td>' . $item->id . '</td>
+                            <td>' . $item->OldAccountNo . '</td>
                             <td>' . $item->ServiceAccountName . '</td>
                             <td>' . ServiceAccounts::getAddress($item) . '</td>
                             <td>' . $item->AccountStatus . '</td>
@@ -855,7 +856,7 @@ class PaidBillsController extends AppBaseController
         $checkIds = $request['CheckIds'];
         PaidBillsDetails::where('ORNumber', $request['ORNumber'])
             ->where('PaymentUsed', 'Check')
-            ->where('AccountNumber', $request['AccountNumber'])
+            // ->where('AccountNumber', $request['AccountNumber'])
             ->whereNotIn('id', $checkIds)
             ->delete();
         
@@ -1752,8 +1753,14 @@ class PaidBillsController extends AppBaseController
         return response()->json($paidBillDetails, 200);
     }
 
-    public function fetchOldAccountNumber(Request $request) {
-        
+    public function fetchAccountByOldAccountNumber(Request $request) {
+        $account = ServiceAccounts::where('OldAccountNo', $request['OldAccountNo'])->first();
+
+        if ($account != null) {
+            return response()->json($account, 200);
+        } else {
+            return response()->json('Account not found', 404);
+        }
     }
 }
 
