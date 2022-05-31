@@ -73,7 +73,7 @@ Route::post('receive-readings', [ReadAndBillAPI::class, 'receiveReadings']);
 Route::post('receive-bills', [ReadAndBillAPI::class, 'receiveBills']);
 Route::post('save-reading-images', [ReadAndBillAPI::class, 'saveReadingImages']);
 Route::get('get-bapa-list', [ReadAndBillAPI::class, 'getBapaList']);
-Route::get('get-bapa-account-list', [ReadAndBillAPI::class, 'getBapaAccountList']);
+Route::get('get-bapa-account-list', [ReadAndBillAPI::class, 'getBapaAccountList'])->name('readAndBillApi.get-bapa-account-list');
 Route::get('get-available-bapa-schedule', [ReadAndBillAPI::class, 'getAvailableBapaSchedule']);
 Route::get('update-bapa-schedule', [ReadAndBillAPI::class, 'updateBapaSchedule']);
 Route::get('download-hv-accounts', [ReadAndBillAPI::class, 'downloadHvAccounts']);

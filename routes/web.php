@@ -406,6 +406,10 @@ Route::get('/bills/print-single-bill-old/{billId}', [App\Http\Controllers\BillsC
 Route::get('/bills/bulk-print-bill', [App\Http\Controllers\BillsController::class,  'bulkPrintBill'])->name('bills.bulk-print-bill');
 Route::get('/bills/get-routes-from-town', [App\Http\Controllers\BillsController::class,  'getRoutesFromTown'])->name('bills.get-routes-from-town');
 Route::get('/bills/print-bulk-bill-new-format/{period}/{town}/{route}', [App\Http\Controllers\BillsController::class,  'printBulkBillNewFormat'])->name('bills.print-bulk-bill-new-format');
+Route::get('/bills/bapa-manual-billing', [App\Http\Controllers\BillsController::class,  'bapaManualBilling'])->name('bills.bapa-manual-billing');
+Route::get('/bills/search-bapa-for-billing', [App\Http\Controllers\BillsController::class,  'searchBapaForBilling'])->name('bills.search-bapa-for-billing');
+Route::get('/bills/bapa-manual-billing-console/{bapaName}', [App\Http\Controllers\BillsController::class,  'bapaManualBillingConsole'])->name('bills.bapa-manual-billing-console');
+Route::get('/bills/get-bill-computation', [App\Http\Controllers\BillsController::class,  'getBillComputation'])->name('bills.get-bill-computation');
 Route::resource('bills', App\Http\Controllers\BillsController::class);
 
 

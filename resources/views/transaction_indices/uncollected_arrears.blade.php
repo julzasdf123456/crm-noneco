@@ -103,8 +103,8 @@
                                         </table>
                                     </div>
                                     <div class="card-footer">
-                                        <button id="cashBtn" class="btn btn-lg btn-primary float-right" disabled><i class="fas fa-dollar-sign"></i> Cash</button>
-                                        <button id="checkBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled><i class="fas fa-money-check-alt"></i> Check</button>
+                                        <button id="cashBtn" class="btn btn-lg btn-primary float-right" disabled><i class="fas fa-dollar-sign"></i> Transact</button>
+                                        {{-- <button id="checkBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled><i class="fas fa-money-check-alt"></i> Check</button> --}}
                                         <button id="cardBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled><i class="fas fa-credit-card"></i> Debit/Credit Card</button>
                                     </div>
                                 </div>
@@ -182,14 +182,14 @@
 
                 if (parseFloat(remainingBalance) | remainingBalance == 0) {
                     if (remainingBalance < 0) {
-                        buttonEnablers(true)
-                    } else {
                         buttonEnablers(false)
+                    } else {
+                        buttonEnablers(true)
                     }
                     $('#remaining-balance').val(remainingBalance.toFixed(2))
                 } else {
                     $('#remaining-balance').val('')
-                    buttonEnablers(true)
+                    buttonEnablers(false)
                 }                
             })
 

@@ -475,6 +475,12 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-calendar nav-icon text-primary"></i><p>BAPA Reading Sched</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('bills.bapa-manual-billing') }}"
+                   class="nav-link {{ Request::is('bills.bapa-manual-billing*') ? 'active' : '' }}">                   
+                   <i class="fas fa-circle nav-icon text-primary"></i><p>Manual Billing</p>
+                </a>
+            </li>
         </ul>
     </li>
 @endcanany

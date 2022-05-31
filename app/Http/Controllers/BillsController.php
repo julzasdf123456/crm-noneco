@@ -1238,4 +1238,81 @@ class BillsController extends AppBaseController
             'bills' => $bills
         ]);
     }
+
+    public function bapaManualBilling() {
+        $towns = Towns::all();
+        return view('/bills/bapa_manual_billing', [
+            'towns' => $towns,
+        ]);
+    }
+
+    public function searchBapaForBilling(Request $request) {
+        $param = $request['BAPA'];
+        $town = $request['Town'];
+
+        if ($town == 'All') {
+            $bapas = DB::table('Billing_ServiceAccounts AS sa')
+            ->where('sa.OrganizationParentAccount', 'LIKE', '%' . $param . '%')
+            ->select('sa.OrganizationParentAccount', 
+                'sa.Town',
+                DB::raw("COUNT(sa.id) AS NoOfAccounts"),
+                DB::raw("(SELECT SUBSTRING((SELECT ',' + AreaCode AS 'data()' FROM Billing_ServiceAccounts WHERE OrganizationParentAccount=sa.OrganizationParentAccount GROUP BY AreaCode FOR XML PATH('')), 2 , 9999)) As Result"))
+            ->groupBy('sa.OrganizationParentAccount', 
+                'sa.Town')
+            ->orderBy('sa.OrganizationParentAccount')
+            ->get();
+        } else {
+            $bapas = DB::table('Billing_ServiceAccounts AS sa')
+            ->where('sa.OrganizationParentAccount', 'LIKE', '%' . $param . '%')
+            ->where('sa.Town', $town)
+            ->select('sa.OrganizationParentAccount', 
+                'sa.Town',
+                DB::raw("COUNT(sa.id) AS NoOfAccounts"),
+                DB::raw("(SELECT SUBSTRING((SELECT ',' + AreaCode AS 'data()' FROM Billing_ServiceAccounts WHERE OrganizationParentAccount=sa.OrganizationParentAccount GROUP BY AreaCode FOR XML PATH('')), 2 , 9999)) As Result"))
+            ->groupBy('sa.OrganizationParentAccount', 
+                'sa.Town')
+            ->orderBy('sa.OrganizationParentAccount')
+            ->get();
+        }
+
+        $output = "";
+        foreach($bapas as $item) {
+            if (strlen($item->OrganizationParentAccount) > 1) {
+                $output .= '<tr>
+                                <td><a href="' . route('bills.bapa-manual-billing-console', [urlencode($item->OrganizationParentAccount)]) . '">' . $item->OrganizationParentAccount . '</a></td>
+                                <td>' . $item->Town . '</td>
+                                <td>' . number_format($item->NoOfAccounts) . '</td>
+                                <td>' . $item->Result . '</td>
+                            </tr>';
+            }
+            
+        }
+
+        return response()->json($output, 200);
+    }
+
+    public function bapaManualBillingConsole($bapaName) {
+        return view('/bills/bapa_manual_billing_console', [
+            'bapaName' => $bapaName,
+        ]);
+    }
+
+    public function getBillComputation(Request $request) {
+        $account = ServiceAccounts::find($request['id']);
+
+        $bill = Bills::computeRegularBillAndDontSave(
+            $account, 
+            null, 
+            $request['KwhUsed'], 
+            $request['PreviousKwh'], 
+            $request['PresentKwh'], 
+            $request['ServicePeriod'],
+            date('Y-m-d'),
+            0,
+            0,
+            false
+        );
+
+        return response()->json($bill, 200);
+    }
 }
