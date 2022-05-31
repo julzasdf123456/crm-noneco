@@ -188,7 +188,7 @@ class RatesController extends AppBaseController
             $districts = [
                 new RateUploadHelper('02', 'E.B. MAGALONA', 63),
                 new RateUploadHelper('04', 'VICTORIAS', 118),
-                new RateUploadHelper('05', 'MANAPLA', 173),
+                new RateUploadHelper('03', 'MANAPLA', 173),
                 new RateUploadHelper('01', 'CADIZ', 228),
                 new RateUploadHelper('06', 'SAGAY', 283),
                 new RateUploadHelper('07', 'ESCALANTE', 338),

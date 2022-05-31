@@ -1315,4 +1315,85 @@ class BillsController extends AppBaseController
 
         return response()->json($bill, 200);
     }
+
+    public function billManually(Request $request) {
+        $account = ServiceAccounts::find($request['id']);
+
+        if ($account->AccountStatus == 'ACTIVE') {
+            $bill = Bills::computeRegularBill(
+                $account, 
+                null, 
+                $request['KwhUsed'], 
+                $request['PreviousKwh'], 
+                $request['PresentKwh'], 
+                $request['ServicePeriod'],
+                date('Y-m-d'),
+                0,
+                0,
+                false
+            );
+        } else {
+            $bill = null;
+        }    
+
+        // save reading
+        $reading = new Readings;
+        $reading->id = IDGenerator::generateIDandRandString();
+        $reading->AccountNumber = $account->id;
+        $reading->ServicePeriod = $request['ServicePeriod'];
+        $reading->ReadingTimestamp = date('Y-m-d H:i:s');
+        $reading->KwhUsed = $request['PresentKwh'];
+        $reading->Notes = $request['Remarks'];
+        $reading->MeterReader = Auth::id();
+        $reading->save();
+
+        if ($bill != null) {
+            $response = [];
+
+            array_push($response, [
+                'ServiceAccountName' => $account->ServiceAccountName,
+                'id' => $account->id,
+                'OldAccountNo' => $account->OldAccountNo,
+                'PreviousKwh' => $bill->PreviousKwh,
+                'PresentKwh' => $bill->PresentKwh,
+                'KwhUsed' => $bill->KwhUsed,
+                'NetAmount' => $bill->NetAmount,
+                'BillId' => $bill->id,
+                'ReadingId' => $reading->id,
+            ]);
+
+            return response()->json($response, 200);
+        } else {
+            $response = [];
+
+            array_push($response, [
+                'ServiceAccountName' => $account->ServiceAccountName,
+                'id' => $account->id,
+                'OldAccountNo' => $account->OldAccountNo,
+                'PreviousKwh' => $request['PreviousKwh'],
+                'PresentKwh' => $request['PresentKwh'],
+                'KwhUsed' => $request['KwhUsed'],
+                'NetAmount' => null,
+                'BillId' => null,
+                'ReadingId' => $reading->id,
+            ]);
+
+            return response()->json($response, 200);
+        }
+        
+    }
+
+    public function fetchBilledConsumersFromReading(Request $request) {
+        $bills = DB::table('Billing_Readings')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $request['BAPAName'])
+            ->where('Billing_Readings.ServicePeriod', $request['ServicePeriod'])
+            ->select('Billing_Readings.*',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    DB::raw("(SELECT TOP 1 NetAmount FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $request['ServicePeriod'] . "') as NetAmount"),
+                    DB::raw("(SELECT TOP 1 id FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $request['ServicePeriod'] . "') as BillId"))
+            ->get();
+
+        return response()->json($bills, 200);
+    }
 }

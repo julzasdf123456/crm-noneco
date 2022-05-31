@@ -410,6 +410,8 @@ Route::get('/bills/bapa-manual-billing', [App\Http\Controllers\BillsController::
 Route::get('/bills/search-bapa-for-billing', [App\Http\Controllers\BillsController::class,  'searchBapaForBilling'])->name('bills.search-bapa-for-billing');
 Route::get('/bills/bapa-manual-billing-console/{bapaName}', [App\Http\Controllers\BillsController::class,  'bapaManualBillingConsole'])->name('bills.bapa-manual-billing-console');
 Route::get('/bills/get-bill-computation', [App\Http\Controllers\BillsController::class,  'getBillComputation'])->name('bills.get-bill-computation');
+Route::get('/bills/bill-manually', [App\Http\Controllers\BillsController::class,  'billManually'])->name('bills.bill-manually');
+Route::get('/bills/fetch-billed-consumers-from-reading', [App\Http\Controllers\BillsController::class,  'fetchBilledConsumersFromReading'])->name('bills.fetch-billed-consumers-from-reading');
 Route::resource('bills', App\Http\Controllers\BillsController::class);
 
 

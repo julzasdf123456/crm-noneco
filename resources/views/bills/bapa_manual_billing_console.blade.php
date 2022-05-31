@@ -41,7 +41,7 @@
     <div class="col-lg-3">
         <div class="card" style="height: 80vh">
             <div class="card-header border-0">
-                <span class="card-title"><i class="fas fa-exclamation-circle text-danger ico-tab"></i>Accounts to be Billed</span>
+                <span class="card-title" id="toBill"><i class="fas fa-exclamation-circle text-danger ico-tab"></i>Accounts to be Billed</span>
             </div>
             <div class="card-body table-responsive px-0">
                 <table class="table table-sm table-hover" id="previous-table">
@@ -119,6 +119,22 @@
                         <p><i>Bill Preview</i></p>
                         <table class="table table-sm">
                             <tr>
+                                <td>Bill Number</td>
+                                <th id="billNo"></th>
+                            </tr>
+                            <tr>
+                                <td>Service From</td>
+                                <th id="svcFrom"></th>
+                            </tr>
+                            <tr>
+                                <td>Service To</td>
+                                <th id="svcTo"></th>
+                            </tr>
+                            <tr>
+                                <td>Due Date</td>
+                                <th id="dueDate"></th>
+                            </tr>
+                            <tr>
                                 <td>Amount Due</td>
                                 <th id="amnt-due"></th>
                             </tr>
@@ -133,10 +149,19 @@
     <div class="col-lg-3">
         <div class="card" style="height: 80vh">
             <div class="card-header border-0">
-                <span class="card-title"><i class="fas fa-check-circle text-success ico-tab"></i>Accounts Already Billed</span>
+                <span class="card-title" id="billed"><i class="fas fa-check-circle text-success ico-tab"></i>Accounts Already Billed</span>
             </div>
             <div class="card-body table-responsive px-0">
+                <table class="table table-sm table-hover" id="billed-table">
+                    <thead>
+                        <th>Acct. Name</th>
+                        <th>Kwh Used</th>
+                        <th>Amnt. Due</th>
+                    </thead>
+                    <tbody>
 
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -149,15 +174,23 @@
         var activeObject = {}
         var activeObjectIndex = 0
         var period = ''
+        var toBill = 0
+        var billed = 0
 
         $(document).ready(function() {
             $('#setBtn').on('click', function() {
                 fetchReadables()
+                $('#setBtn').attr('disabled', true)
+                $('#Period').attr('disabled', true)
             })
 
             $('#presReading').keyup(function() {
                 $('#kwhUsed').val(getKwhUsed())
                 previewBill()
+            })
+
+            $('#readAndBillBtn').on('click', function() {
+                readAndBill()
             })
         })
 
@@ -165,10 +198,14 @@
             readingList = {}
             activeObject = {}
             activeObjectIndex = 0
+            toBill = 0
+            billed = 0
 
             period = $('#Period').val()
 
             $('#previous-table tbody tr').remove()
+            fetchBilledConsumers()
+
             $.ajax({
                 url : "{{ route('api.readAndBillApi.get-bapa-account-list') }}",
                 type : 'GET',
@@ -183,8 +220,12 @@
                         readingList = res
                         
                         $.each(res, function(index, element) {
-                            $('#previous-table tbody').append(addRowToPrevTable(res[index]['id'], res[index]['ServiceAccountName'], res[index]['KwhUsed']))
+                            $('#previous-table tbody').append(addRowToPrevTable(res[index]['id'], res[index]['ServiceAccountName'], res[index]['KwhUsed'], res[index]['AccountStatus']))
                         })
+
+                        toBill = readingList.length
+
+                        $('#toBill').html('<i class="fas fa-exclamation-circle text-danger ico-tab"></i> Accounts to be Billed (' + toBill + ')')
 
                         activeObject = readingList[activeObjectIndex]
                         addActiveObjectToQueue(activeObject)
@@ -200,11 +241,18 @@
             })
         }
 
-        function addRowToPrevTable(accountNo, accountName, kwhUsed) {
-            return '<tr id="' + accountNo + '" onclick=selectConsumer("' + accountNo + '")>' +
-                        '<td>' + accountName + '</td>' +
-                        '<td>' + kwhUsed + '</td>' +
-                    '</tr>'
+        function addRowToPrevTable(accountNo, accountName, kwhUsed, status) {
+            if (status == 'ACTIVE') {
+                return '<tr id="' + accountNo + '" onclick=selectConsumer("' + accountNo + '")>' +
+                            '<td>' + accountName + '</td>' +
+                            '<td>' + kwhUsed + '</td>' +
+                        '</tr>'
+            } else {
+                return '<tr class="text-danger" id="' + accountNo + '" onclick=selectConsumer("' + accountNo + '")>' +
+                            '<th>' + accountName + '</th>' +
+                            '<th>' + kwhUsed + '</th>' +
+                        '</tr>'
+            }            
         }
 
         function addActiveObjectToQueue(activeObject) {
@@ -315,11 +363,74 @@
                             icon: 'error',
                         })
                 } else {
-                    // REMOVE FROM PREVIOUS QUEUE
-                    $('#' + activeObject['id']).remove()
+                    $.ajax({
+                        url : "{{ route('bills.bill-manually') }}",
+                        type : 'GET',
+                        data : {
+                            id : activeObject['id'],
+                            KwhUsed : $('#kwhUsed').val(),
+                            PreviousKwh : $('#prevReading').val(),
+                            PresentKwh : $('#presReading').val(),
+                            Remarks : $('#remarks').val(),
+                            ServicePeriod : period
+                        },
+                        success : function(res) {
+                            // REMOVE FROM PREVIOUS QUEUE
+                            $('#' + activeObject['id']).remove()
 
-                    // ADD TO CURRENT EDIT
-                    moveCursor('forward')
+                            // ADD TO BILLED TABLE
+                            $('#billed-table tbody').append(addRowToBilledTable(res[0]['id'], res[0]['ServiceAccountName'], res[0]['KwhUsed'], res[0]['NetAmount'], res[0]['BillId'], res[0]['ReadingId']))
+
+                            toBill--
+                            billed++
+
+                            // UPDATE LABELS
+                            $('#billed').html('<i class="fas fa-check-circle text-success ico-tab"></i> Accounts Already Billed (' + billed + ')')
+                            $('#toBill').html('<i class="fas fa-exclamation-circle text-danger ico-tab"></i> Accounts to be Billed (' + toBill + ')')
+
+                            if (toBill < 1) { // FINISHED BILLING
+                                $('#setBtn').attr('disabled', false)
+                                $('#Period').attr('disabled', false)
+                                readingList = {}
+                                activeObject = {}
+                                activeObjectIndex = 0
+                                toBill = 0
+                                billed = 0
+                                $('#presReading').val('')
+                                $('#kwhUsed').val('')
+                                $('#acctNo').text('')
+                                $('#acctId').text('')
+                                $('#acctName').text('')
+                                $('#acctType').text('')
+                                $('#prevReading').val('')                            
+
+                                Swal.fire({
+                                    title: 'Billing Complete',
+                                    icon: 'success',
+                                })
+                            } else { // STILL BILLING
+                                // ADD TO CURRENT EDIT
+                                moveCursor('forward') 
+                            }
+                                                      
+                        },
+                        error : function(err) {
+                            Swal.fire({
+                                title: 'Error Generating Bill',
+                                text: 'An error occurred while billing. Contact support immediately!',
+                                icon: 'error',
+                            })
+                        },
+                        statusCode :  {
+                            404 : function() {
+                                Swal.fire({
+                                    title: 'Bill Not Generated',
+                                    text: 'An error occurred while billing. Contact support immediately!',
+                                    icon: 'error',
+                                })
+                            }
+                        }
+                    })                        
                 }
                 
             }            
@@ -339,12 +450,56 @@
                 success : function(res) {
                     if (!jQuery.isEmptyObject(res)) {
                         $('#amnt-due').text(Number(parseFloat(res['NetAmount']).toFixed(2)).toLocaleString())
+                        $('#billNo').text(res['BillNumber'])
+                        $('#svcFrom').text(res['ServiceDateFrom'])
+                        $('#svcTo').text(res['ServiceDateTo'])
+                        $('#dueDate').text(res['DueDate'])
+                    } else {
+                        console.log(res)
                     }
                 },
                 error : function(err) {
                     Swal.fire({
                         title: 'Oops...',
                         text: 'An error occurred while fetching data. Contact support immediately!',
+                        icon: 'error',
+                    })
+                }
+            })
+        }
+
+        function addRowToBilledTable(accountNo, accountName, kwhUsed, amountDue, billId, readingId) {
+            return '<tr id="' + billId + '">' +
+                        '<td>' + accountName + '</td>' +
+                        '<td>' + kwhUsed + '</td>' +
+                        '<td>' + (amountDue != null ? Number(parseFloat(amountDue).toFixed(2)).toLocaleString() : 'DISCO') + '</td>' +
+                    '</tr>'
+        }
+
+        function fetchBilledConsumers() {
+            $.ajax({
+                url : "{{ route('bills.fetch-billed-consumers-from-reading') }}",
+                type : 'GET',
+                data : {
+                    ServicePeriod : period,
+                    BAPAName : "{{ urldecode($bapaName) }}"
+                },
+                success : function(res) {
+                    $('#billed-table tbody tr').remove()
+
+                    billed = res.length
+
+                    $('#billed').html('<i class="fas fa-check-circle text-success ico-tab"></i> Accounts Already Billed (' + billed + ')')
+
+                    $.each(res, function(index, element) {
+                        // ADD TO BILLED TABLE
+                        $('#billed-table tbody').append(addRowToBilledTable(res[index]['AccountNumber'], res[index]['ServiceAccountName'], res[index]['KwhUsed'], res[index]['NetAmount'], res[index]['BillId'], res[index]['ReadingId']))
+                    })
+                },
+                error : function(err) {
+                    Swal.fire({
+                        title: 'Error Fetching Bills',
+                        text: 'An error occurred while fetching the billed consumers from this BAPA and Billing Month. Contact support immediately!',
                         icon: 'error',
                     })
                 }

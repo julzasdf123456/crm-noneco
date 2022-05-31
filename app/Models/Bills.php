@@ -346,10 +346,18 @@ class Bills extends Model
     }
 
     public static function getFinalPenalty($bill) {
-        if ($bill->ConsumerType == 'RESIDENTIAL' || $bill->ConsumerType == 'RESIDENTIAL RURAL') {
+        if ($bill->ConsumerType == 'RESIDENTIAL' || $bill->ConsumerType == 'RESIDENTIAL RURAL' || $bill->ConsumerType == 'RURAL RESIDENTIAL') {
             return 0;
         } else {
             return round(floatval($bill->NetAmount) * .05, 2);
+        }
+    }
+
+    public static function getAccountType($account) {
+        if ($account->AccountType == 'RESIDENTIAL RURAL' || $account->AccountType == 'RURAL RESIDENTIAL') {
+            return 'RESIDENTIAL';
+        } else {
+            return $account->AccountType;
         }
     }
 
@@ -511,7 +519,7 @@ class Bills extends Model
      * COMPUTES THE BILL AND SAVE
      */
     public static function computeRegularBill($account, $billId, $kwh, $prev, $pres, $period, $readDate, $additionalCharges, $deductions, $is2307) {
-        $rate = Rates::where('ConsumerType', $account->AccountType)
+        $rate = Rates::where('ConsumerType', Bills::getAccountType($account))
             ->where('ServicePeriod', $period)
             ->where('AreaCode', $account->Town)
             ->first();
@@ -541,6 +549,7 @@ class Bills extends Model
                     $bill->Deductions = $deductions;
                     $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
+                    $bill->BillingDate = date('Y-m-d');
                     $bill->DueDate = Bills::createDueDate($readDate);
                     $bill->MeterNumber = $meter != null ? $meter->SerialNumber : null;
                     $bill->ConsumerType = $account->AccountType;
@@ -630,6 +639,7 @@ class Bills extends Model
                     $bill->Deductions = $deductions;
                     $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
+                    $bill->BillingDate = date('Y-m-d');
                     $bill->DueDate = Bills::createDueDate($readDate);
                     $bill->MeterNumber = $meter != null ? $meter->SerialNumber : null;
                     $bill->ConsumerType = $account->AccountType;
@@ -712,7 +722,7 @@ class Bills extends Model
                     $bill->Multiplier = $account->Multiplier;
                     $bill->Coreloss = $account->Coreloss;
                     $bill->KwhUsed = $kwhAmountUsed;
-                    $bill->PreviousKwh = round(floatval($prev), 4);
+                    $bill->PreviousKwh = ($prev == 0 ? 0 : round(floatval($prev), 4));
                     $bill->PresentKwh = round(floatval($pres), 4);
                     $bill->EffectiveRate = $effectiveRate;
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
@@ -720,8 +730,9 @@ class Bills extends Model
                     $bill->Deductions = $deductions;
                     $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
+                    $bill->BillingDate = date('Y-m-d');
                     $bill->DueDate = Bills::createDueDate($readDate);
-                    $bill->MeterNumber = $meter != null ? $meter->SerialNumber : null;
+                    $bill->MeterNumber = ($meter != null ? $meter->SerialNumber : null);
                     $bill->ConsumerType = $account->AccountType;
                     $bill->BillType = $account->AccountType;  
                     $bill->Multiplier = $account->Multiplier;  
@@ -806,7 +817,7 @@ class Bills extends Model
      * COMPUTES THE BILL ONLY
      */
     public static function computeRegularBillAndDontSave($account, $billId, $kwh, $prev, $pres, $period, $readDate, $additionalCharges, $deductions, $is2307) {
-        $rate = Rates::where('ConsumerType', $account->AccountType)
+        $rate = Rates::where('ConsumerType', Bills::getAccountType($account))
             ->where('ServicePeriod', $period)
             ->where('AreaCode', $account->Town)
             ->first();
@@ -1007,7 +1018,7 @@ class Bills extends Model
                     $bill->Multiplier = $account->Multiplier;
                     $bill->Coreloss = $account->Coreloss;
                     $bill->KwhUsed = $kwhAmountUsed;
-                    $bill->PreviousKwh = round(floatval($prev), 4);
+                    $bill->PreviousKwh = $prev;
                     $bill->PresentKwh = round(floatval($pres), 4);
                     $bill->EffectiveRate = $effectiveRate;
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
