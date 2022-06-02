@@ -593,6 +593,12 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-unlock nav-icon text-primary"></i><p>Bill Arrears Unlocking</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('bills.bills-cancellation-approval') }}"
+                   class="nav-link {{ Request::is('bills.bills-cancellation-approval*') ? 'active' : '' }}">                   
+                   <i class="fas fa-check-circle nav-icon text-primary"></i><p>Bills Cancellation</p>
+                </a>
+            </li>
         </ul>
     </li>
 
@@ -884,4 +890,3 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
-

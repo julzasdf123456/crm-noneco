@@ -1,3 +1,7 @@
+@php
+    use App\Models\IDGenerator;
+@endphp
+
 @extends('layouts.app')
 
 @section('content')
@@ -25,8 +29,8 @@
             <div class="card-body">
                 <div class="row">
                     <div class="form-group col-lg-3">
-                        <label for="KwhUsed">Kwh Used</label>
-                        <input type="number" step="any" name="KwhUsed" id="KwhUsed" value="{{ $bill->KwhUsed }}" class="form-control text-right">
+                        <label for="AdjustmentNumber">Adjustment Number</label>
+                        <input type="text" name="AdjustmentNumber" id="AdjustmentNumber" value="{{ IDGenerator::generateID() }}" class="form-control" readonly>
                     </div>
 
                     <div class="form-group col-lg-3">
@@ -58,8 +62,23 @@
                     </div>
 
                     <div class="form-group col-lg-3">
+                        <label for="PreviousKwh">Previous Reading</label>
+                        <input type="number" step="any" name="PreviousKwh" id="PreviousKwh" value="{{ $bill->PreviousKwh }}" class="form-control text-right">
+                    </div>
+
+                    <div class="form-group col-lg-3">
+                        <label for="PresentKwh">Present Reading</label>
+                        <input type="number" step="any" name="PresentKwh" id="PresentKwh" value="{{ $bill->PresentKwh }}" class="form-control text-right">
+                    </div>
+
+                    <div class="form-group col-lg-3">
+                        <label for="KwhUsed">Kwh Used</label>
+                        <input type="number" step="any" name="KwhUsed" id="KwhUsed" value="{{ $bill->KwhUsed }}" class="form-control text-right">
+                    </div>
+
+                    <div class="form-group col-lg-3">
                         <label for="AdditionalCharges">Termed Payment Attached</label>
-                        <input type="number" step="any" name="AdditionalCharges" id="AdditionalCharges" value="{{ $bill->AdditionalCharges }}" class="form-control text-right">
+                        <input type="number" step="any" name="AdditionalCharges" id="AdditionalCharges" value="{{ $bill->AdditionalCharges }}" class="form-control text-right" readonly>
                     </div>
 
                     <div class="form-group col-lg-3">
@@ -77,7 +96,7 @@
 
                     <div class="form-group col-lg-3">
                         <label for="Form2307Amount">Form 2307 Amount</label>
-                        <input type="number" step="any" name="Form2307Amount" id="Form2307Amount" value="{{ $bill->Form2307Amount }}" class="form-control text-right">
+                        <input type="number" step="any" name="Form2307Amount" id="Form2307Amount" value="{{ $bill->Form2307Amount }}" class="form-control text-right" readonly>
                     </div>
                 </div>
 
@@ -384,7 +403,23 @@
                 }
                 adjustBill($('#KwhUsed').val(), $('#AdditionalCharges').val(), $('#Deductions').val(), is2307Checked)
             })
+
+            $('#PresentKwh').keyup(function() {
+                computeKwhUsed()
+            })
+
+            $('#PreviousKwh').keyup(function() {
+                computeKwhUsed()
+            })
         })
+
+        function computeKwhUsed() {
+            var pres = parseFloat($('#PresentKwh').val())
+            var prev = parseFloat($('#PreviousKwh').val())
+            var dif = pres - prev
+
+            $('#KwhUsed').val(dif).change()            
+        }
 
         function adjustBill(kwh, additionalCharges, deductions, is2307) {
             $.ajax({
@@ -437,7 +472,11 @@
                         $('#Form2307Amount').val(res['Form2307Amount'])
                     },
                     error : function(error) {
-                        alert('An error occurred while adjusting the bill.')
+                        Swal.fire({
+                            title : 'Oops...',
+                            text : 'An error occurred while adjusting the bill. Contact suppport immediately!',
+                            icon : 'error'
+                        })
                     }
                 })
         }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTableBills extends Migration
+class CreateTableBillsOriginal extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateTableBills extends Migration
      */
     public function up()
     {
-        Schema::create('Billing_Bills', function (Blueprint $table) {
+        Schema::create('Billing_BillsOriginal', function (Blueprint $table) {
             $table->string('id')->unsigned();
             $table->primary('id');
             /** BASIC BILL INFO */
@@ -103,7 +103,7 @@ class CreateTableBills extends Migration
             $table->string('ForCancellation')->nullable();
             $table->string('CancelRequestedBy')->nullable();
             $table->string('CancelApprovedBy')->nullable();
-            
+
             $table->timestamps();
         });
     }
@@ -115,6 +115,6 @@ class CreateTableBills extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('Billing_Bills');
+        Schema::dropIfExists('Billing_BillsOriginal');
     }
 }

@@ -412,6 +412,10 @@ Route::get('/bills/bapa-manual-billing-console/{bapaName}', [App\Http\Controller
 Route::get('/bills/get-bill-computation', [App\Http\Controllers\BillsController::class,  'getBillComputation'])->name('bills.get-bill-computation');
 Route::get('/bills/bill-manually', [App\Http\Controllers\BillsController::class,  'billManually'])->name('bills.bill-manually');
 Route::get('/bills/fetch-billed-consumers-from-reading', [App\Http\Controllers\BillsController::class,  'fetchBilledConsumersFromReading'])->name('bills.fetch-billed-consumers-from-reading');
+Route::get('/bills/request-cancel-bill', [App\Http\Controllers\BillsController::class,  'requestCancelBill'])->name('bills.request-cancel-bill');
+Route::get('/bills/bills-cancellation-approval', [App\Http\Controllers\BillsController::class,  'billsCancellationApproval'])->name('bills.bills-cancellation-approval');
+Route::get('/bills/approve-bill-cancellation-request/{id}', [App\Http\Controllers\BillsController::class,  'approveBillCancellationRequest'])->name('bills.approve-bill-cancellation-request');
+Route::get('/bills/reject-bill-cancellation-request/{id}', [App\Http\Controllers\BillsController::class,  'rejectBillCancellationRequest'])->name('bills.reject-bill-cancellation-request');
 Route::resource('bills', App\Http\Controllers\BillsController::class);
 
 
@@ -580,3 +584,6 @@ Route::resource('paidBillsDetails', App\Http\Controllers\PaidBillsDetailsControl
 
 
 Route::resource('transacionPaymentDetails', App\Http\Controllers\TransacionPaymentDetailsController::class);
+
+
+Route::resource('billsOriginals', App\Http\Controllers\BillsOriginalController::class);

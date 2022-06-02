@@ -160,7 +160,13 @@ class Bills extends Model
         'IsUnlockedForPayment',
         'UnlockedBy',
         'Evat2Percent',
-        'Evat5Percent'
+        'Evat5Percent',
+        'AdjustmentNumber',
+        'AdjustedBy',
+        'DateAdjusted',
+        'ForCancellation',
+        'CancelRequestedBy',
+        'CancelApprovedBy'
     ];
 
     /**
@@ -240,7 +246,13 @@ class Bills extends Model
         'IsUnlockedForPayment' => 'string',
         'UnlockedBy' => 'string',
         'Evat2Percent' => 'string',
-        'Evat5Percent' => 'string'
+        'Evat5Percent' => 'string',
+        'AdjustmentNumber' => 'string',
+        'AdjustedBy' => 'string',
+        'DateAdjusted' => 'string',
+        'ForCancellation' => 'string',
+        'CancelRequestedBy' => 'string',
+        'CancelApprovedBy' => 'string'
     ];
 
     /**
@@ -322,7 +334,13 @@ class Bills extends Model
         'IsUnlockedForPayment' => 'nullable|string',
         'UnlockedBy' => 'nullable|string',
         'Evat2Percent' => 'nullable|string',
-        'Evat5Percent' => 'nullable|string'
+        'Evat5Percent' => 'nullable|string',
+        'AdjustmentNumber' => 'nullable|string',
+        'AdjustedBy' => 'nullable|string',
+        'DateAdjusted' => 'nullable|string',
+        'ForCancellation' => 'nullable|string',
+        'CancelRequestedBy' => 'nullable|string',
+        'CancelApprovedBy' => 'nullable|string'
     ];
 
     public static function createDueDate($readDate) {

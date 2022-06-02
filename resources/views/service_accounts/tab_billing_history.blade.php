@@ -26,6 +26,7 @@
                         <td class="text-right">
                             @if ($item->ORDate == null)
                                 <a href="{{ route('bills.adjust-bill', [$item->id]) }}" class="btn btn-link btn-sm text-warning" title="Adjust Reading"><i class="fas fa-pen"></i></a>
+                                <button class="btn btn-link text-danger" title="Cancel this Bill" onclick="requestCancel('{{ $item->id }}')"><i class="fas fa-ban"></i></button>
                             @endif
                             <a href="{{ route('bills.print-single-bill-new-format', [$item->id]) }}" class="btn btn-link" title="Print New Formatted Bill"><i class="fas fa-print"></i></a>
                             <a href="{{ route('bills.print-single-bill-old', [$item->id]) }}" class="btn btn-link text-warning" title="Print Pre-Formatted Bill (Old)"><i class="fas fa-print"></i></a>
@@ -36,3 +37,39 @@
         </table>
     @endif
 </div>
+
+@push('page_scripts')
+    <script>
+        function requestCancel(id) {
+            (async () => {
+                const { value: text } = await Swal.fire({
+                    input: 'textarea',
+                    inputLabel: 'Remarks',
+                    inputPlaceholder: 'Type your remarks here...',
+                    inputAttributes: {
+                        'aria-label': 'Type your remarks here'
+                    },
+                    title: 'Cancel this bill?',
+                    showCancelButton: true
+                })
+
+                if (text) {
+                    $.ajax({
+                        url : '{{ route("bills.request-cancel-bill") }}',
+                        type : 'GET',
+                        data : {
+                            id : id,
+                            Remarks : text
+                        },
+                        success : function(res) {
+                            Swal.fire('Cancel Request Successful', 'Your cancellation request has been forwarded to your Billing Head and is waiting for confirmation', 'success')
+                        },
+                        error : function(err) {
+                            Swal.fire('Cancel Request Error', 'Contact support immediately', 'error')
+                        }
+                    })
+                }
+            })()
+        }
+    </script>
+@endpush

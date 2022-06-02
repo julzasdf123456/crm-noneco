@@ -14,6 +14,7 @@ use App\Models\ReadingImages;
 use App\Models\ServiceAccounts;
 use App\Models\Rates;
 use App\Models\Bills;
+use App\Models\BillsOriginal;
 use App\Models\BillingMeters;
 use App\Models\IDGenerator;
 use App\Models\Barangays;
@@ -176,6 +177,8 @@ class BillsController extends AppBaseController
     public function update($id, UpdateBillsRequest $request)
     {
         $bills = $this->billsRepository->find($id);
+        $bills->AdjustedBy = Auth::id();
+        $bills->DateAdjusted = date('Y-m-d');
 
         if (empty($bills)) {
             Flash::error('Bills not found');
@@ -183,9 +186,25 @@ class BillsController extends AppBaseController
             return redirect(route('bills.index'));
         }
 
+        // BEFORE UPDATE
+        // INSERT TO BILLS ORIGINAL
+        $billsArr = $bills->toArray();
+        $billsArr['id'] = IDGenerator::generateIDandRandString();
+        $billsOriginal = BillsOriginal::create($billsArr);
+
+        // UPDATE BILL
         $bills = $this->billsRepository->update($request->all(), $id);
 
-        Flash::success('Bills updated successfully.');
+        // UPDATE READINGS
+        $reading = Readings::where('AccountNumber', $bills->AccountNumber)
+            ->where('ServicePeriod', $bills->ServicePeriod)
+            ->first();
+        if ($reading != null) {
+            $reading->KwhUsed = $bills->PresentKwh;
+            $reading->save();
+        }
+
+        // Flash::success('Bills updated successfully.');
 
         return redirect(route('serviceAccounts.show', [$bills->AccountNumber]));
     }
@@ -574,7 +593,7 @@ class BillsController extends AppBaseController
         $additionalCharges = $request['AdditionalCharges'] != null ? floatval($request['AdditionalCharges']) : 0;
         $deductions = $request['Deductions'] != null ? floatval($request['Deductions']) : 0;
 
-        return response()->json(Bills::computeRegularBill($account, $bill->id, $request['KwhUsed'], $bill->PreviousKwh, $bill->PresentKwh, $bill->ServicePeriod, $bill->BillingDate, $additionalCharges, $deductions, $request['Is2307']), 200);
+        return response()->json(Bills::computeRegularBillAndDontSave($account, $bill->id, $request['KwhUsed'], $bill->PreviousKwh, $bill->PresentKwh, $bill->ServicePeriod, $bill->BillingDate, $additionalCharges, $deductions, $request['Is2307']), 200);
     }
 
     public function allBills(Request $request) {
@@ -1395,5 +1414,65 @@ class BillsController extends AppBaseController
             ->get();
 
         return response()->json($bills, 200);
+    }
+
+    public function requestCancelBill(Request $request) {
+        $bill = Bills::find($request['id']);
+
+        if ($bill != null) {
+            $bill->ForCancellation = 'Yes';
+            $bill->CancelRequestedBy = Auth::id();
+            $bill->CancelApprovedBy = env('APP_BILLING_ANALYST_ID');
+            $bill->Notes = $request['Remarks'];
+            $bill->save();
+        }
+
+        return response()->json($bill, 200);
+    }
+
+    public function billsCancellationApproval() {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Bills.ForCancellation', 'Yes')
+            ->where('Billing_Bills.CancelApprovedBy', env('APP_BILLING_ANALYST_ID'))
+            ->select('Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_Bills.*')
+            ->get();
+
+        return view('/bills/bills_cancellation_approval', [
+            'bills' => $bills,
+        ]);
+    }
+
+    public function approveBillCancellationRequest($id) {
+        $bill = Bills::find($id);
+
+        if ($bill != null) {
+            // INSERT TO BILLS ORIGINAL
+            $billsArr = $bill->toArray();
+            $billsArr['id'] = IDGenerator::generateIDandRandString();
+            $billsArr['ForCancellation'] = 'Cancelled';
+            $billsArr['CancelApprovedBy'] = Auth::id();
+            $billsOriginal = BillsOriginal::create($billsArr);
+
+            $bill->delete();
+        }
+
+        return redirect(route('bills.bills-cancellation-approval'));
+    }
+
+    public function rejectBillCancellationRequest($id) {
+        $bill = Bills::find($id);
+
+        if ($bill != null) {
+            $bill->ForCancellation = null;
+            $bill->CancelRequestedBy = null;
+            $bill->CancelApprovedBy = null;
+            $bill->Notes = null;
+            $bill->save();
+        }
+
+        return redirect(route('bills.bills-cancellation-approval'));
     }
 }
