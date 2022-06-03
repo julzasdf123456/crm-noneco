@@ -7,9 +7,28 @@
 
         <div class="col-lg-10 col-md-8">
             <div class="input-group">
-                {!! Form::text('OldAccountNo', $serviceAccount != null ? $serviceAccount->OldAccountNo : null, ['class' => 'form-control','maxlength' => 50,'maxlength' => 50]) !!}
+                {!! Form::text('OldAccountNo', ($serviceAccount != null ? $serviceAccount->OldAccountNo : $serviceConnection->Town), ['class' => 'form-control','maxlength' => 12, 'data-inputmask' => "'alias': 'phonebe'"]) !!}
             </div>
         </div>
+
+        @push('page_scripts')
+            <script>
+                $("#OldAccountNo").focus()
+                $("#OldAccountNo").inputmask({
+                    mask: '99-99999-999',
+                    placeholder: '',
+                    showMaskOnHover: false,
+                    showMaskOnFocus: false,
+                    onBeforePaste: function (pastedValue, opts) {
+                        var processedValue = pastedValue;
+
+                        //do something with it
+
+                        return processedValue;
+                    }
+                });
+            </script>
+        @endpush
     </div> 
 </div>
 
@@ -45,12 +64,12 @@
 
         <!-- Areacode Field -->
         <div class="col-lg-1 col-md-2">
-            {!! Form::label('AreaCode', 'Areacode:') !!}
+            {!! Form::label('AreaCode', 'Areacode/Route:') !!}
         </div>
 
         <div class="col-lg-4 col-md-2">
             <div class="input-group">
-                {!! Form::text('AreaCode', null, ['class' => 'form-control','maxlength' => 50,'maxlength' => 50]) !!}
+                {!! Form::text('AreaCode', null, ['class' => 'form-control','maxlength' => 5]) !!}
             </div>
         </div>
     </div> 
@@ -191,7 +210,7 @@
             <div class="input-group">
                 <select class="custom-select select2"  name="MeterReader">
                     @foreach ($meterReaders as $items)
-                        <option value="{{ $items->id }}">{{ $items->MeterReaderCode }}</option>
+                        <option value="{{ $items->id }}">{{ $items->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -204,7 +223,21 @@
 
         <div class="col-lg-3 col-md-2">
             <div class="input-group">
-                {!! Form::text('GroupCode', null, ['class' => 'form-control','maxlength' => 30,'maxlength' => 30]) !!}
+                <select name="GroupCode" class="form-control">
+                    <option value="01">01</option>
+                    <option value="02">02</option>
+                    <option value="03">03</option>
+                    <option value="04">04</option>
+                    <option value="05">05</option>
+                    <option value="06">06</option>
+                    <option value="07">07</option>
+                    <option value="08">08</option>
+                    <option value="09">09</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                </select>
             </div>
         </div>
 

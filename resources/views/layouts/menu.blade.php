@@ -714,6 +714,12 @@ use Illuminate\Support\Facades\Auth;
         <i class="fas fa-users nav-icon text-info"></i><p>BAPA Adjustments</p>
         </a>
     </li>
+    <li class="nav-item">
+        <a href="{{ route('transactionIndices.browse-ors') }}"
+        class="nav-link {{ Request::is('transactionIndices.browse-ors*') ? 'active' : '' }}">
+        <i class="fas fa-search nav-icon text-info"></i><p>Browse ORs</p>
+        </a>
+    </li>
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-ban nav-icon text-info"></i>

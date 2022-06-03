@@ -936,4 +936,22 @@ class TransactionIndexController extends AppBaseController
 
         return response()->json($transactionPaymentDetails, 200);
     }
+
+    public function browseORs(Request $request) {
+        $params = $request['params'];
+
+        $paidBills = DB::table('Cashier_PaidBills')
+            ->whereRaw("ORNumber LIKE '%" . $params . "%'")
+            ->select('id', 'ORNumber', 'ORDate', 'AccountNumber', 'NetAmount', DB::raw("'BILLS PAYMENT' AS PaymentType"));
+        $allPayments = DB::table('Cashier_TransactionIndex')
+            ->whereRaw("ORNumber LIKE '%" . $params . "%'")
+            ->select('id', 'ORNumber', 'ORDate', 'AccountNumber', 'Total', DB::raw("'OTHER PAYMENT' AS PaymentType"))
+            ->union($paidBills)
+            ->get();
+
+        return view('/transaction_indices/browse_ors', [
+            'params' => $params,
+            'allPayments' => $allPayments,
+        ]);
+    }
 }

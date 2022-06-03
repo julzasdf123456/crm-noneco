@@ -108,7 +108,7 @@
                 } else {
                     if (confirm('Are you sure you want to cancel this OR?')) {
                         $.ajax({
-                            url : '/paid_bills/request-cancel-or',
+                            url : '{{ route("paidBills.request-cancel-or") }}',
                             type : 'GET',
                             data : {
                                 orNo : orNumberActive,
@@ -129,7 +129,7 @@
         function performSearchOR(value) {
             $('#result-table tbody tr').remove()
             $.ajax({
-                url : '/paid_bills/search-or',
+                url : '{{ route("paidBills.search-or") }}',
                 type : 'GET',
                 data : {
                     query : value
@@ -148,7 +148,7 @@
             $('#bills-table tbody tr').remove()
             orNumberActive = orNo
             $.ajax({
-                url : '/paid_bills/fetch-or-details',
+                url : '{{ route("paidBills.fetch-or-details") }}',
                 type : 'GET',
                 data : {
                     orNo : orNo,

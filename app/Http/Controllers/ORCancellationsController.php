@@ -8,6 +8,7 @@ use App\Repositories\ORCancellationsRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
 use App\Models\PaidBills;
+use App\Models\PaidBillsDetails;
 use App\Models\ServiceAccounts;
 use App\Models\Notifiers;
 use App\Models\IDGenerator;
@@ -234,6 +235,9 @@ class ORCancellationsController extends AppBaseController
 
             // REMOVE FROM DCR 
             DCRSummaryTransactions::where('ORNumber', $orCancellationId)->delete();
+
+            // REMOVE FROM PAIDBILLDETAILS
+            PaidBillsDetails::where('ORNumber', $orCancellationId)->delete();
 
             // ADD NOTIFICATION
             $notifier = new Notifiers;

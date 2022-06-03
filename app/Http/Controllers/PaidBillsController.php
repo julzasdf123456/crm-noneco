@@ -854,11 +854,13 @@ class PaidBillsController extends AppBaseController
 
         // DELETE CHECK ITEMS FROM PaidBillDetails that are not on the CheckIds
         $checkIds = $request['CheckIds'];
-        PaidBillsDetails::where('ORNumber', $request['ORNumber'])
-            ->where('PaymentUsed', 'Check')
-            // ->where('AccountNumber', $request['AccountNumber'])
-            ->whereNotIn('id', $checkIds)
-            ->delete();
+        if ($checkIds != null) {
+            PaidBillsDetails::where('ORNumber', $request['ORNumber'])
+                ->where('PaymentUsed', 'Check')
+                // ->where('AccountNumber', $request['AccountNumber'])
+                ->whereNotIn('id', $checkIds)
+                ->delete();
+        }        
         
         // SAVE OR
         $saveOR = ORAssigning::where('ORNumber', $request['ORNumber'])

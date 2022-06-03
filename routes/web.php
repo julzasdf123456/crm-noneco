@@ -452,6 +452,7 @@ Route::get('/transaction_indices/get-arrears-data', [App\Http\Controllers\Transa
 Route::get('/transaction_indices/save-reconnection-transaction', [App\Http\Controllers\TransactionIndexController::class, 'saveReconnectionTransaction'])->name('transactionIndices.save-reconnection-transaction');
 Route::get('/transaction_indices/add-check-payment', [App\Http\Controllers\TransactionIndexController::class, 'addCheckPayment'])->name('transactionIndices.add-check-payment');
 Route::get('/transaction_indices/delete-check-payment', [App\Http\Controllers\TransactionIndexController::class, 'deleteCheckPayment'])->name('transactionIndices.delete-check-payment');
+Route::get('/transaction_indices/browse-ors', [App\Http\Controllers\TransactionIndexController::class, 'browseORs'])->name('transactionIndices.browse-ors');
 Route::resource('transactionIndices', App\Http\Controllers\TransactionIndexController::class);
 
 
