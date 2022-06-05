@@ -940,18 +940,40 @@ class TransactionIndexController extends AppBaseController
     public function browseORs(Request $request) {
         $params = $request['params'];
 
-        $paidBills = DB::table('Cashier_PaidBills')
-            ->whereRaw("ORNumber LIKE '%" . $params . "%'")
-            ->select('id', 'ORNumber', 'ORDate', 'AccountNumber', 'NetAmount', DB::raw("'BILLS PAYMENT' AS PaymentType"));
-        $allPayments = DB::table('Cashier_TransactionIndex')
-            ->whereRaw("ORNumber LIKE '%" . $params . "%'")
-            ->select('id', 'ORNumber', 'ORDate', 'AccountNumber', 'Total', DB::raw("'OTHER PAYMENT' AS PaymentType"))
-            ->union($paidBills)
-            ->get();
+        if ($params == null) {
+            $paidBills = DB::table('Cashier_PaidBills')
+                ->whereRaw("ORNumber LIKE '%" . $params . "%'")
+                ->select('id', 'ORNumber', 'ORDate', 'AccountNumber', 'NetAmount', DB::raw("'BILLS PAYMENT' AS PaymentType"))
+                ->orderByDesc('created_at')
+                ->limit(20);
+            $allPayments = DB::table('Cashier_TransactionIndex')
+                ->whereRaw("ORNumber LIKE '%" . $params . "%'")
+                ->select('id', 'ORNumber', 'ORDate', 'AccountNumber', 'Total', DB::raw("'OTHER PAYMENT' AS PaymentType"))
+                ->orderByDesc('created_at')
+                ->limit(20)
+                ->union($paidBills)
+                ->get();
+        } else {
+            $paidBills = DB::table('Cashier_PaidBills')
+                ->whereRaw("ORNumber LIKE '%" . $params . "%'")
+                ->select('id', 'ORNumber', 'ORDate', 'AccountNumber', 'NetAmount', DB::raw("'BILLS PAYMENT' AS PaymentType"));
+            $allPayments = DB::table('Cashier_TransactionIndex')
+                ->whereRaw("ORNumber LIKE '%" . $params . "%'")
+                ->select('id', 'ORNumber', 'ORDate', 'AccountNumber', 'Total', DB::raw("'OTHER PAYMENT' AS PaymentType"))
+                ->union($paidBills)
+                ->get();
+        }
 
         return view('/transaction_indices/browse_ors', [
             'params' => $params,
             'allPayments' => $allPayments,
+        ]);
+    }
+
+    public function browseORView($id, $paymentType) {
+        return view('/transaction_indices/browse_ors_view', [
+            'id' => $id,
+            'paymentType' => $paymentType,
         ]);
     }
 }

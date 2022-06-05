@@ -453,6 +453,7 @@ Route::get('/transaction_indices/save-reconnection-transaction', [App\Http\Contr
 Route::get('/transaction_indices/add-check-payment', [App\Http\Controllers\TransactionIndexController::class, 'addCheckPayment'])->name('transactionIndices.add-check-payment');
 Route::get('/transaction_indices/delete-check-payment', [App\Http\Controllers\TransactionIndexController::class, 'deleteCheckPayment'])->name('transactionIndices.delete-check-payment');
 Route::get('/transaction_indices/browse-ors', [App\Http\Controllers\TransactionIndexController::class, 'browseORs'])->name('transactionIndices.browse-ors');
+Route::get('/transaction_indices/browse-ors-view/{id}/{paymentType}', [App\Http\Controllers\TransactionIndexController::class, 'browseORView'])->name('transactionIndices.browse-ors-view');
 Route::resource('transactionIndices', App\Http\Controllers\TransactionIndexController::class);
 
 

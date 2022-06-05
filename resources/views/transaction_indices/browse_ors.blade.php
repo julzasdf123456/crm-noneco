@@ -33,11 +33,11 @@
                         <tr>
                             <td>{{ $item->ORNumber }}</td>
                             <td>{{ $item->ORDate }}</td>
-                            <td><a href="{{ route('serviceAccounts.show', [$item->AccountNumber]) }}">{{ $item->AccountNumber }}</a></td>
+                            <td><a href="{{ $item->AccountNumber != null ? (route('serviceAccounts.show', [$item->AccountNumber])) : '' }}">{{ $item->AccountNumber }}</a></td>
                             <td class="text-right">{{ $item->Total != null ? number_format($item->Total, 2) : '-' }}</td>
                             <td class="text-right">{{ $item->PaymentType }}</td>
                             <td class="text-right">
-                                <a href="" title="View this OR"><i class="fas fa-eye"></i></a>
+                                <a href="{{ route('transactionIndices.browse-ors-view', [$item->id, $item->PaymentType]) }}" title="View this OR"><i class="fas fa-eye"></i></a>
                             </td>
                         </tr>
                     @endforeach
