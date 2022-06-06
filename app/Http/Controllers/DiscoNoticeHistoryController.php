@@ -297,12 +297,21 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountType',
                     'CRM_Towns.Town',
                     'CRM_Barangays.Barangay',
                     'Billing_Bills.NetAmount',
                     'Billing_Bills.BillNumber',
                     'Billing_Bills.id',
+                    'Billing_Bills.MeterNumber',
+                    'Billing_Bills.ServicePeriod',
+                    'Billing_Bills.DueDate',
+                    'Billing_Bills.KwhUsed',
+                    'Billing_Bills.ConsumerType',
                     'Disconnection_NoticeHistory.id as NoticeId')
+                ->orderBy('Billing_ServiceAccounts.SequenceCode')
                 ->get();
         } else {
             // SELECT ALL FROM DISCO NOTICE HISTORY
@@ -316,12 +325,21 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountType',
                     'CRM_Towns.Town',
                     'CRM_Barangays.Barangay',
                     'Billing_Bills.NetAmount',
                     'Billing_Bills.BillNumber',
                     'Billing_Bills.id',
+                    'Billing_Bills.MeterNumber',
+                    'Billing_Bills.ServicePeriod',
+                    'Billing_Bills.DueDate',
+                    'Billing_Bills.KwhUsed',
+                    'Billing_Bills.ConsumerType',
                     'Disconnection_NoticeHistory.id as NoticeId')
+                ->orderBy('Billing_ServiceAccounts.SequenceCode')
                 ->get();
         }
 
