@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Users;
 use App\Models\Towns;
 use App\Models\ReadingSchedules;
+use App\Models\IDGenerator;
 use Illuminate\Support\Facades\DB;
 use Flash;
 use Response;
@@ -197,5 +198,99 @@ class ReadingSchedulesController extends AppBaseController
             ->get();
 
         return response()->json($readingSchedules, 200);
+    }
+
+    public function readingScheduleIndex() {
+        $periods = DB::table('Billing_ReadingSchedules')
+            ->where('AreaCode', env("APP_AREA_CODE"))
+            ->select('ServicePeriod',
+                DB::raw("COUNT(id) AS SchedulesCreated"))
+            ->groupBy('ServicePeriod')
+            ->orderByDesc('ServicePeriod')
+            ->get();
+        return view('/reading_schedules/reading_schedule_index', [
+            'periods' => $periods,
+        ]);
+    }
+
+    public function viewMeterReadingSchedsInPeriod($period) {
+        // $readingSchedules = $this->readingSchedulesRepository->all();
+        // $meterReaders = User::role('Meter Reader')->get();
+        $meterReaders = User::role('Meter Reader')
+            ->select('*',
+                DB::raw("SUBSTRING((SELECT ', ' + GroupCode AS 'data()' FROM Billing_ReadingSchedules WHERE ServicePeriod='" . $period . "' AND MeterReader = users.id FOR XML PATH('')), 2 , 9999) As GroupCodes"))
+            ->get();
+
+        return view('reading_schedules.index', [
+            'meterReaders' => $meterReaders,
+            'period' => $period
+        ]);
+    }
+
+    public function createReadingSchedule() {
+        return view('/reading_schedules/create_reading_schedule', [
+
+        ]);
+    }
+
+    public function storeReadingSchedules(Request $request) {
+        // GET GROUPS FROM ServiceAccounts
+        $accountGroups = DB::table('Billing_ServiceAccounts')
+            ->where('Town', $request['AreaCode'])
+            ->whereNotNull('GroupCode')
+            ->whereNotNull('MeterReader')
+            ->select('GroupCode')
+            ->groupBy('GroupCode')
+            ->orderBy('GroupCode')
+            ->get();
+
+        // CREATE SCHEDULE
+        $i = 0;
+        foreach($accountGroups as $item) {
+            if (strlen($item->GroupCode) > 0) {
+                $readingDate = date('Y-m-d', strtotime($request['ScheduledDate'] . ' +' . $i . ' day'));
+                
+                $accountMeterReaders = DB::table('Billing_ServiceAccounts')
+                    ->where('Town', $request['AreaCode'])
+                    ->where('GroupCode', $item->GroupCode)
+                    ->whereNotNull('MeterReader')
+                    ->select('MeterReader')
+                    ->groupBy('MeterReader')
+                    ->get();
+
+                foreach($accountMeterReaders as $meterReaders) {
+                    if (strlen($meterReaders->MeterReader) > 0) {
+                        $readingSchedule = ReadingSchedules::where('ServicePeriod', $request['ServicePeriod'])
+                            ->where('AreaCode', $request['AreaCode'])
+                            ->where('GroupCode', $item->GroupCode)
+                            ->where('MeterReader', $meterReaders->MeterReader)
+                            ->first();
+
+                        if ($readingSchedule != null) {
+                            $readingSchedule->AreaCode = $request['AreaCode'];
+                            $readingSchedule->GroupCode = $item->GroupCode;
+                            $readingSchedule->ServicePeriod = $request['ServicePeriod'];
+                            $readingSchedule->ScheduledDate = $readingDate;
+                            $readingSchedule->MeterReader = $meterReaders->MeterReader;
+                            $readingSchedule->Status = null;
+                            $readingSchedule->save();
+                        } else {
+                            $readingSchedule = new ReadingSchedules;
+                            $readingSchedule->id = IDGenerator::generateIDandRandString();
+                            $readingSchedule->AreaCode = $request['AreaCode'];
+                            $readingSchedule->GroupCode = $item->GroupCode;
+                            $readingSchedule->ServicePeriod = $request['ServicePeriod'];
+                            $readingSchedule->ScheduledDate = $readingDate;
+                            $readingSchedule->MeterReader = $meterReaders->MeterReader;
+                            $readingSchedule->save();
+                        }                        
+                    }                        
+                }              
+
+                $i++;
+            }            
+        }
+
+        return redirect(route('readingSchedules.reading-schedule-index'));
     }
 }

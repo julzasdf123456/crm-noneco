@@ -551,8 +551,8 @@ use Illuminate\Support\Facades\Auth;
         </a>
         <ul class="nav nav-treeview">
             <li class="nav-item">
-                <a href="{{ route('readingSchedules.index') }}"
-                   class="nav-link {{ Request::is('readingSchedules.index*') ? 'active' : '' }}">                   
+                <a href="{{ route('readingSchedules.reading-schedule-index') }}"
+                   class="nav-link {{ Request::is('readingSchedules.reading-schedule-index*') ? 'active' : '' }}">                   
                    <i class="fas fa-calendar-week nav-icon text-primary"></i><p>M. Reader Scheduler</p>
                 </a>
             </li>

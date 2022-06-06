@@ -359,6 +359,10 @@ Route::resource('damageAssessments', App\Http\Controllers\DamageAssessmentContro
 Route::get('/reading_schedules/update-schedule/{userId}', [App\Http\Controllers\ReadingSchedulesController::class, 'updateSchedule'])->name('readingSchedules.update-schedule');
 Route::get('/reading_schedules/view-schedule/{userId}', [App\Http\Controllers\ReadingSchedulesController::class, 'viewSchedule'])->name('readingSchedules.view-schedule');
 Route::get('/reading_schedules/get-latest-schedule', [App\Http\Controllers\ReadingSchedulesController::class, 'getLatestSchedule'])->name('readingSchedules.get-latest-schedule');
+Route::get('/reading_schedules/reading-schedule-index', [App\Http\Controllers\ReadingSchedulesController::class, 'readingScheduleIndex'])->name('readingSchedules.reading-schedule-index');
+Route::get('/reading_schedules/view-meter-reading-scheds-in-period/{period}', [App\Http\Controllers\ReadingSchedulesController::class, 'viewMeterReadingSchedsInPeriod'])->name('readingSchedules.view-meter-reading-scheds-in-period');
+Route::get('/reading_schedules/create-reading-schedule', [App\Http\Controllers\ReadingSchedulesController::class, 'createReadingSchedule'])->name('readingSchedules.create-reading-schedule');
+Route::post('/reading_schedules/store-reading-schedule', [App\Http\Controllers\ReadingSchedulesController::class, 'storeReadingSchedules'])->name('readingSchedules.store-reading-schedule');
 Route::resource('readingSchedules', App\Http\Controllers\ReadingSchedulesController::class);
 
 
