@@ -169,6 +169,10 @@
                                                         <td>{{ $tickets->ReportedBy }}</td>
                                                     </tr>
                                                     <tr>
+                                                        <th>Crew Assigned :</th>
+                                                        <td>{{ $tickets->StationName }}</td>
+                                                    </tr>
+                                                    <tr>
                                                         <th>OR Number :</th>
                                                         <td>{{ $tickets->ORNumber }}</td>
                                                     </tr>

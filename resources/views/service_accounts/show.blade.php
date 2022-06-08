@@ -37,7 +37,7 @@
                                 Billing History</a></li>
                             <li class="nav-item"><a class="nav-link" href="#disco-hist" data-toggle="tab">
                                 <i class="fas fa-unlink"></i>
-                                Disconnection History</a></li>
+                                Disco/Reco History</a></li>
                             <li class="nav-item"><a class="nav-link" href="#arrears" data-toggle="tab">
                                 <i class="fas fa-receipt"></i>
                                 Arrears</a></li>

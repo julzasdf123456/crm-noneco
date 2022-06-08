@@ -2,12 +2,13 @@
     use App\Models\User;
 @endphp
 
-<table class="table table-hover">
+<table class="table table-hover table-sm">
     <thead>
+        <th>Status</th>
         <th>Billing Month</th>
-        <th>Date Disconnected</th>
-        <th>Time Disconnected</th>
-        <th>Meter Reader</th>
+        <th>Disco/Reco Date</th>
+        <th>Disco/Reco Time</th>
+        <th>Disconnection Personnel</th>
     </thead>
     <tbody>
         @if ($disconnectionHistory != null)
@@ -16,7 +17,8 @@
                     $user = User::find($item->UserId);
                 @endphp
                 <tr>
-                    <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
+                    <td><i class="fas ico-tab {{ $item->Status=='RECONNECTED' ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger' }}"></i>{{ $item->Status }}</td>
+                    <td>{{ $item->ServicePeriod==null ? '-' : date('F Y', strtotime($item->ServicePeriod)) }}</td>
                     <td>{{ date('F d, Y', strtotime($item->DateDisconnected)) }}</td>
                     <td>{{ date('h:i:s A', strtotime($item->TimeDisconnected)) }}</td>
                     <td>{{ $user != null ? $user->name : 'n/a' }}</td>

@@ -235,6 +235,23 @@ class TicketsController extends Controller {
                         $changeMeterLogs->save(); 
                     }
                 }
+            } else if ($tickets->Ticket == Tickets::getReconnection() && $tickets->Status == 'Executed') {
+                $account = ServiceAccounts::find($tickets->AccountNumber);
+                if ($account != null) {
+                    $account->AccountStatus = 'ACTIVE';
+                    $account->save();
+
+                    // ADD TO DISCO/RECO HISTORY
+                    $recoHist = new DisconnectionHistory;
+                    $recoHist->id = IDGenerator::generateIDandRandString();
+                    $recoHist->AccountNumber = $account->id;
+                    // $recoHist->ServicePeriod = $ticket->ServicePeriod;
+                    $recoHist->Status = 'RECONNECTED';
+                    $recoHist->UserId = $request['UserId'];
+                    $recoHist->DateDisconnected = date('Y-m-d', strtotime($tickets->DateTimeLinemanExecuted));
+                    $recoHist->TimeDisconnected = date('H:i:s', strtotime($tickets->DateTimeLinemanExecuted));
+                    $recoHist->save();
+                }
             }
         }
 

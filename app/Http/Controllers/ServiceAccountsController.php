@@ -231,7 +231,7 @@ class ServiceAccountsController extends AppBaseController
             ->get();
 
         $disconnectionHistory = DisconnectionHistory::where('AccountNumber', $id)
-            ->orderByDesc('DateDisconnected')
+            ->orderByDesc('created_at')
             ->get();
 
         $arrearTransactionHistory = TransactionIndex::where('ObjectId', $id)

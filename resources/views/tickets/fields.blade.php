@@ -218,6 +218,24 @@
     </div> 
 </div>
 
+<!-- Crewassigned Field -->
+<div class="form-group col-sm-12">
+    <div class="row">
+        <div class="col-lg-3 col-md-5">
+            {!! Form::label('CrewAssigned', 'Crew Assigned:') !!}
+        </div>
+
+        <div class="col-lg-9 col-md-7">
+            <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-hard-hat"></i></span>
+                </div>
+                {!! Form::select('CrewAssigned', $crew, null, ['class' => 'form-control',]) !!}
+            </div>
+        </div>
+    </div>    
+</div>
+
 {{-- <div class="divider"></div>
 <br>
 

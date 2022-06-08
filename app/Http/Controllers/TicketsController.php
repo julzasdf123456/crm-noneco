@@ -686,6 +686,26 @@ class TicketsController extends AppBaseController
             $ticket->DateTimeLinemanExecuted = date('Y-m-d H:i:s', strtotime($request['DateTimeLinemanExecuted']));
             $ticket->save();
 
+            // UPDATE ACCOUNTS
+            if ($ticket->Ticket == Tickets::getReconnection() && $ticket->Status == 'Executed') {
+                $account = ServiceAccounts::find($ticket->AccountNumber);
+                if ($account != null) {
+                    $account->AccountStatus = 'ACTIVE';
+                    $account->save();
+
+                    // ADD TO DISCO/RECO HISTORY
+                    $recoHist = new DisconnectionHistory;
+                    $recoHist->id = IDGenerator::generateIDandRandString();
+                    $recoHist->AccountNumber = $account->id;
+                    $recoHist->ServicePeriod = $ticket->ServicePeriod;
+                    $recoHist->Status = 'RECONNECTED';
+                    $recoHist->UserId = Auth::id();
+                    $recoHist->DateDisconnected = date('Y-m-d', strtotime($ticket->DateTimeLinemanExecuted));
+                    $recoHist->TimeDisconnected = date('H:i:s', strtotime($ticket->DateTimeLinemanExecuted));
+                    $recoHist->save();
+                }
+            }
+
             // CREATE LOG
             $ticketLog = new TicketLogs;
             $ticketLog->id = IDGenerator::generateID();
