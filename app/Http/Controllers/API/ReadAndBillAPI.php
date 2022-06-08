@@ -51,9 +51,9 @@ class ReadAndBillAPI extends Controller {
     }
 
     public function downloadAccounts(Request $request) {
-        $accounts = ServiceAccounts::where('Town', $request['AreaCode'])
-            ->where('GroupCode', $request['GroupCode'])
-            ->get();
+        // $accounts = ServiceAccounts::where('Town', $request['AreaCode'])
+        //     ->where('GroupCode', $request['GroupCode'])
+        //     ->get();
 
         $prevMonth = date('Y-m-01', strtotime($request['ServicePeriod'] . ' -1 month'));
 

@@ -99,6 +99,13 @@
                                     <option value="Downloaded" {{ $readingSchedules->Status=='Downloaded' ? 'selected' : '' }}>Downloaded</option>
                                 </select>
                             </div>
+
+                            <div class="divider"></div>
+
+                            <div class="col-lg-12">
+                                <span class="text-muted">3rd-day Reading Rule Unlock Code</span>
+                                <p><strong>{{ explode("-", $readingSchedules->id)[0] }}</strong></p>
+                            </div>
                         </div>
                     </div>
 

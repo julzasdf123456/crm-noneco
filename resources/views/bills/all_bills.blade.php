@@ -35,7 +35,7 @@
             @foreach ($bills as $item)
                 <tr>
                     <td>{{ $item->BillNumber }}</td>
-                    <td>{{ $item->AccountNumber }}</td>
+                    <td><a href="{{ route('serviceAccounts.show', [$item->AccountNumber]) }}">{{ $item->AccountNumber }}</a></td>
                     <td>{{ $item->ServiceAccountName }} {{ $item->AccountCount != null ? '(# ' . $item->AccountCount . ')' : '' }}</td>                
                     <td>{{ $item->Barangay }}, {{ $item->Town }}</td>
                     <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>

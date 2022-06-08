@@ -18,11 +18,13 @@ use App\Models\BillsOriginal;
 use App\Models\BillingMeters;
 use App\Models\IDGenerator;
 use App\Models\Barangays;
+use App\Models\User;
 use App\Models\Towns;
 use App\Models\MemberConsumerTypes;
 use App\Models\MemberConsumers;
 use App\Models\PendingBillAdjustments;
 use App\Models\ArrearsLedgerDistribution;
+use App\Models\ChangeMeterLogs;
 use App\Repositories\ReadingsRepository;
 use Flash;
 use Response;
@@ -248,36 +250,80 @@ class BillsController extends AppBaseController
         ]);
     }
 
-    public function unbilledReadingsConsole($servicePeriod) {
-        $zeroReadings = DB::table('Billing_Readings')
-            ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
-            ->whereNotIn('Billing_Readings.AccountNumber', DB::table('Billing_Bills')->where('Billing_Bills.ServicePeriod', $servicePeriod)->pluck('Billing_Bills.AccountNumber'))
-            ->where('Billing_Readings.ServicePeriod', $servicePeriod)
-            ->where('Billing_ServiceAccounts.AccountStatus', 'ACTIVE')
-            ->whereNotIn('Billing_Readings.id', DB::table('Billing_PendingBillAdjustments')->where('ServicePeriod', $servicePeriod)->whereNull('Confirmed')->pluck('ReadingId'))
-            ->select('Billing_Readings.AccountNumber',
-                'Billing_Readings.id',
-                'Billing_ServiceAccounts.ServiceAccountName',
-                'Billing_Readings.FieldStatus')
-            ->get();
+    public function unbilledReadingsConsole($servicePeriod, Request $request) {
+        $area = $request['Area'];
+        $meterReader = $request['MeterReader'];
+        $groupCode = $request['GroupCode'];
+
+        if ($meterReader == null | $groupCode == null | $area == null) {
+            $zeroReadings = null;
+            $disconnectedReadings = null;
+            $changeMeters = null;
+        } else {
+            $zeroReadings = DB::table('Billing_Readings')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->whereRaw("Billing_Readings.AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $servicePeriod . "')")
+                // ->whereNotIn('Billing_Readings.AccountNumber', DB::table('Billing_Bills')->where('Billing_Bills.ServicePeriod', $servicePeriod)->pluck('Billing_Bills.AccountNumber'))
+                ->where('Billing_Readings.ServicePeriod', $servicePeriod)
+                ->where('Billing_ServiceAccounts.AccountStatus', 'ACTIVE')
+                ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
+                ->where('Billing_ServiceAccounts.GroupCode', $groupCode)
+                ->where('Billing_ServiceAccounts.Town', $area)
+                ->whereRaw("Billing_Readings.id NOT IN (SELECT ReadingId FROM Billing_PendingBillAdjustments WHERE Confirmed IS NULL AND ServicePeriod='" . $servicePeriod . "')")
+                // ->whereNotIn('Billing_Readings.id', DB::table('Billing_PendingBillAdjustments')->where('ServicePeriod', $servicePeriod)->whereNull('Confirmed')->pluck('ReadingId'))
+                ->select('Billing_Readings.AccountNumber',
+                    'Billing_Readings.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_Readings.FieldStatus')
+                ->get();
         
-        $disconnectedReadings = DB::table('Billing_Readings')
-            ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
-            ->whereNotIn('Billing_Readings.AccountNumber', DB::table('Billing_Bills')->where('Billing_Bills.ServicePeriod', $servicePeriod)->pluck('Billing_Bills.AccountNumber'))
-            ->where('Billing_Readings.ServicePeriod', $servicePeriod)
-            ->where('Billing_ServiceAccounts.AccountStatus', 'DISCONNECTED')
-            ->whereNotIn('Billing_Readings.id', DB::table('Billing_PendingBillAdjustments')->where('ServicePeriod', $servicePeriod)->whereNull('Confirmed')->pluck('ReadingId'))
-            ->select('Billing_Readings.AccountNumber',
-                'Billing_Readings.id',
-                'Billing_ServiceAccounts.ServiceAccountName',
-                'Billing_Readings.KwhUsed',
-                'Billing_Readings.FieldStatus')
-            ->get();
+            $disconnectedReadings = DB::table('Billing_Readings')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                // ->whereRaw("Billing_Readings.AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $servicePeriod . "')")
+                // ->whereNotIn('Billing_Readings.AccountNumber', DB::table('Billing_Bills')->where('Billing_Bills.ServicePeriod', $servicePeriod)->pluck('Billing_Bills.AccountNumber'))
+                ->where('Billing_Readings.ServicePeriod', $servicePeriod)
+                ->where('Billing_ServiceAccounts.AccountStatus', 'DISCONNECTED')
+                ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
+                ->where('Billing_ServiceAccounts.GroupCode', $groupCode)
+                ->where('Billing_ServiceAccounts.Town', $area)
+                // ->whereRaw("Billing_Readings.id NOT IN (SELECT ReadingId FROM Billing_PendingBillAdjustments WHERE Confirmed IS NULL AND ServicePeriod='" . $servicePeriod . "')")
+                // ->whereNotIn('Billing_Readings.id', DB::table('Billing_PendingBillAdjustments')->where('ServicePeriod', $servicePeriod)->whereNull('Confirmed')->pluck('ReadingId'))
+                ->select('Billing_Readings.AccountNumber',
+                    'Billing_Readings.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_Readings.KwhUsed',
+                    'Billing_Readings.FieldStatus')
+                ->get();
+
+            $changeMeters = DB::table('Billing_Readings')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->whereRaw("Billing_Readings.AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $servicePeriod . "')")
+                // ->whereNotIn('Billing_Readings.AccountNumber', DB::table('Billing_Bills')->where('Billing_Bills.ServicePeriod', $servicePeriod)->pluck('Billing_Bills.AccountNumber'))
+                ->where('Billing_Readings.ServicePeriod', $servicePeriod)
+                ->where('Billing_ServiceAccounts.AccountStatus', 'ACTIVE')
+                ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
+                ->where('Billing_ServiceAccounts.GroupCode', $groupCode)
+                ->where('Billing_ServiceAccounts.Town', $area)
+                ->whereRaw("Billing_Readings.id NOT IN (SELECT ReadingId FROM Billing_PendingBillAdjustments WHERE Confirmed IS NULL AND ServicePeriod='" . $servicePeriod . "')")
+                ->whereRaw("Billing_ServiceAccounts.id IN (SELECT AccountNumber FROM Billing_ChangeMeterLogs WHERE ServicePeriod='" . $servicePeriod . "')")
+                // ->whereNotIn('Billing_Readings.id', DB::table('Billing_PendingBillAdjustments')->where('ServicePeriod', $servicePeriod)->whereNull('Confirmed')->pluck('ReadingId'))
+                ->select('Billing_Readings.AccountNumber',
+                    'Billing_Readings.id',
+                    'Billing_Readings.KwhUsed',
+                    'Billing_Readings.ServicePeriod',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_Readings.FieldStatus')
+                ->get();
+        }        
+
+        $meterReaders = User::role('Meter Reader')->get();
         
         return view('/bills/unbilled_readings_console', [
             'servicePeriod' => $servicePeriod,
             'zeroReadings' => $zeroReadings,
             'disconnectedReadings' => $disconnectedReadings,
+            'meterReaders' => $meterReaders,
+            'changeMeters' => $changeMeters,
         ]);
     }
 
@@ -1474,5 +1520,53 @@ class BillsController extends AppBaseController
         }
 
         return redirect(route('bills.bills-cancellation-approval'));
+    }
+
+    public function changeMeterReadings($accountId, $period) {
+        $account = ServiceAccounts::find($accountId);
+        $reading = Readings::where('AccountNumber', $accountId)
+            ->where('ServicePeriod', $period)
+            ->first();
+        $changeMeterLogs = ChangeMeterLogs::where('AccountNumber', $accountId)
+            ->where('ServicePeriod', $period)
+            ->first();
+
+        $prevReadings = Readings::where('AccountNumber', $accountId)
+            ->whereNotIn('ServicePeriod', [$period])
+            ->orderByDesc('ServicePeriod')
+            ->limit(15)
+            ->get();
+
+        return view('/bills/change_meter_readings', [
+            'account' => $account,
+            'reading' => $reading,
+            'changeMeterLogs' => $changeMeterLogs,
+            'prevReadings' => $prevReadings,
+        ]);
+    }
+
+    public function billChangeMeters(Request $request) {
+        $account = ServiceAccounts::find($request['AccountNumber']);
+        $reading = Readings::where('AccountNumber', $request['AccountNumber'])
+            ->where('ServicePeriod', $request['ServicePeriod'])
+            ->first();
+        $prevReading = Readings::where('AccountNumber', $request['AccountNumber'])
+            ->where('ServicePeriod', date('Y-m-01', strtotime($request['ServicePeriod'] . ' -1 month')))
+            ->first();
+
+        $bill = Bills::computeRegularBill(
+                $account, 
+                null, 
+                $request['KwhUsed'], 
+                ($prevReading != null ? $prevReading->KwhUsed : '0'), 
+                ($reading != null ? $reading->KwhUsed : '0'), 
+                $request['ServicePeriod'],
+                ($reading != null ? date('Y-m-d', strtotime($reading->ReadingTimestamp)) : date('Y-m-d')),
+                0,
+                0,
+                false
+            );
+        
+        return redirect(route('bills.unbilled-readings-console', $request['ServicePeriod']));
     }
 }

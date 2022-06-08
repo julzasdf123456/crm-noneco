@@ -211,7 +211,10 @@ class PendingBillAdjustmentsController extends AppBaseController
                 ->first();
 
             // BILL ALL
-            Bills::computeRegularBill($account, null, $item->KwhUsed, ($prevReading!=null ? $prevReading->KwhUsed : 0), $presReading->KwhUsed, $servicePeriod, $item->ReadDate, 0, 0, 'false');
+            $bill = Bills::computeRegularBill($account, null, $item->KwhUsed, ($prevReading!=null ? $prevReading->KwhUsed : 0), $presReading->KwhUsed, $servicePeriod, $item->ReadDate, 0, 0, 'false');
+
+            $bill->Notes = 'ZERO READING ADJUSTMENT';
+            $bill->save();
 
             $item->Confirmed = 'Yes';
             $item->save();
@@ -234,8 +237,11 @@ class PendingBillAdjustmentsController extends AppBaseController
                 ->first();
 
             // BILL
-            Bills::computeRegularBill($account, null, $pendingBillAdjustments->KwhUsed, ($prevReading!=null ? $prevReading->KwhUsed : 0), $presReading->KwhUsed, $pendingBillAdjustments->ServicePeriod, $pendingBillAdjustments->ReadDate, 0, 0, 'false');
+            $bill = Bills::computeRegularBill($account, null, $pendingBillAdjustments->KwhUsed, ($prevReading!=null ? $prevReading->KwhUsed : 0), $presReading->KwhUsed, $pendingBillAdjustments->ServicePeriod, $pendingBillAdjustments->ReadDate, 0, 0, 'false');
             
+            $bill->Notes = 'ZERO READING ADJUSTMENT';
+            $bill->save();
+        
             $pendingBillAdjustments->Confirmed = 'Yes';
             $pendingBillAdjustments->save();
         } 

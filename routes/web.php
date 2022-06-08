@@ -420,6 +420,8 @@ Route::get('/bills/request-cancel-bill', [App\Http\Controllers\BillsController::
 Route::get('/bills/bills-cancellation-approval', [App\Http\Controllers\BillsController::class,  'billsCancellationApproval'])->name('bills.bills-cancellation-approval');
 Route::get('/bills/approve-bill-cancellation-request/{id}', [App\Http\Controllers\BillsController::class,  'approveBillCancellationRequest'])->name('bills.approve-bill-cancellation-request');
 Route::get('/bills/reject-bill-cancellation-request/{id}', [App\Http\Controllers\BillsController::class,  'rejectBillCancellationRequest'])->name('bills.reject-bill-cancellation-request');
+Route::get('/bills/change-meter-readings/{account}/{period}', [App\Http\Controllers\BillsController::class,  'changeMeterReadings'])->name('bills.change-meter-readings');
+Route::post('/bills/bill-change-meters', [App\Http\Controllers\BillsController::class,  'billChangeMeters'])->name('bills.bill-change-meters');
 Route::resource('bills', App\Http\Controllers\BillsController::class);
 
 
