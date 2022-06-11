@@ -8,13 +8,23 @@
                     <h4>Service Account Management Console</h4>
                 </div>
                 <div class="col-sm-7">
-                    <button class="btn btn-xs btn-danger float-right" style="margin-right: 5px;" title="Tag this account as Pulled-out"><i class="fas fa-times ico-tab-mini"></i> Pull-out</button>
-                    <button class="btn btn-xs btn-danger float-right" style="margin-right: 5px;" title="Apprehend This Account"><i class="fas fa-exclamation-circle ico-tab-mini"></i> Apprehend</button>
-                    @if ($serviceAccounts->AccountStatus == 'DISCONNECTED')
+                    
+                    @if ($serviceAccounts->AccountStatus == 'APPREHENDED')
                         
-                    @elseif ($serviceAccounts->AccountStatus == 'ACTIVE')
-                    <button class="btn btn-xs btn-danger float-right" style="margin-right: 5px;" title="Disconnect This Account" data-toggle="modal" data-target="#modal-disconnect"><i class="fas fa-unlink ico-tab-mini"></i> Disconnect</button>
-                    @endif
+                    @else
+                        @if ($serviceAccounts->AccountStatus == 'PULLOUT')
+                        
+                        @else
+                            <button class="btn btn-xs btn-danger float-right" style="margin-right: 5px;" title="Tag this account as Pulled-out" data-toggle="modal" data-target="#modal-pullout"><i class="fas fa-times ico-tab-mini"></i> Pull-out</button>
+                        @endif
+
+                        <button class="btn btn-xs btn-danger float-right" style="margin-right: 5px;" title="Apprehend This Account" data-toggle="modal" data-target="#modal-apprehend"><i class="fas fa-exclamation-circle ico-tab-mini"></i> Apprehend</button>
+                        @if ($serviceAccounts->AccountStatus == 'DISCONNECTED')
+                            
+                        @elseif ($serviceAccounts->AccountStatus == 'ACTIVE')
+                            <button class="btn btn-xs btn-danger float-right" style="margin-right: 5px;" title="Disconnect This Account" data-toggle="modal" data-target="#modal-disconnect"><i class="fas fa-unlink ico-tab-mini"></i> Disconnect</button>
+                        @endif
+                    @endif                   
                     
                     <a href="{{ route('serviceAccounts.update-step-one', [$serviceAccounts->id]) }}" class="btn btn-xs btn-warning float-right" style="margin-right: 30px;" title="Update Consumer Info"><i class="fas fa-pen ico-tab-mini"></i> Update</a>
                 </div>
@@ -130,11 +140,109 @@
     </div>
 </div>
 
+{{-- APPREHEND --}}
+<div class="modal fade" id="modal-apprehend" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Apprehend This Account</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="ApprehensionDate">Apprehension Date</label>
+                    <input type="text" name="ApprehensionDate" id="ApprehensionDate" value="" class="form-control">
+
+                    <label for="ApprehensionTime">Apprehension Time</label>
+                    <input type="text" name="ApprehensionTime" id="ApprehensionTime" value="" class="form-control">
+
+                    <textarea type="text" name="Notes" id="ApprehensionNotes" value="" placeholder="Notes/Remarks" class="form-control" style="margin-top: 8px;" rows="3"></textarea>
+                </div>
+
+                @push('page_scripts')
+                    <script type="text/javascript">
+                        $('#ApprehensionDate').datetimepicker({
+                            format: 'YYYY-MM-DD',
+                            useCurrent: false,
+                            sideBySide: true
+                        })
+
+                        $('#ApprehensionTime').datetimepicker({
+                            format: 'hh:mm:ss',
+                            useCurrent: false,
+                            sideBySide: true
+                        })
+                    </script>
+                @endpush
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="apprehend-proceed">Proceed</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- PULL OUT --}}
+<div class="modal fade" id="modal-pullout" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Pull-out This Account</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="PulloutDate">Pullout Date</label>
+                    <input type="text" name="PulloutDate" id="PulloutDate" value="" class="form-control">
+
+                    <label for="PulloutTime">Pullout Time</label>
+                    <input type="text" name="PulloutTime" id="PulloutTime" value="" class="form-control">
+
+                    <textarea type="text" name="PulloutNotes" id="PulloutNotes" value="" placeholder="Notes/Remarks" class="form-control" style="margin-top: 8px;" rows="3"></textarea>
+                </div>
+
+                @push('page_scripts')
+                    <script type="text/javascript">
+                        $('#PulloutDate').datetimepicker({
+                            format: 'YYYY-MM-DD',
+                            useCurrent: false,
+                            sideBySide: true
+                        })
+
+                        $('#PulloutTime').datetimepicker({
+                            format: 'hh:mm:ss',
+                            useCurrent: false,
+                            sideBySide: true
+                        })
+                    </script>
+                @endpush
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="pullout-proceed">Proceed</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('page_scripts')
     <script>
         $(document).ready(function() {
             $('#disconnect-proceed').on('click', function() {
                 disconnect()
+            })
+
+            $('#apprehend-proceed').on('click', function() {
+                apprehend()
+            })
+
+            $('#pullout-proceed').on('click', function() {
+                pullout()
             })
         })
 
@@ -156,6 +264,52 @@
                         icon: 'error',
                         title: 'Oops...',
                         text: 'An error occurred while disconnecting this account!',
+                    })
+                }
+            })
+        }
+
+        function apprehend() {
+            $.ajax({
+                url : "{{ route('serviceAccounts.apprehend-manual') }}",
+                type : 'GET',
+                data : {
+                    id : "{{ $serviceAccounts->id }}",
+                    Notes : $('#ApprehensionNotes').val(),
+                    DateDisconnected : $('#ApprehensionDate').val(),
+                    TimeDisconnected : $('#ApprehensionTime').val(),
+                },
+                success : function(res) {
+                    location.reload()
+                },
+                error : function (err) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'An error occurred while apprehending this account!',
+                    })
+                }
+            })
+        }
+
+        function pullout() {
+            $.ajax({
+                url : "{{ route('serviceAccounts.pullout-manual') }}",
+                type : 'GET',
+                data : {
+                    id : "{{ $serviceAccounts->id }}",
+                    Notes : $('#PulloutNotes').val(),
+                    DateDisconnected : $('#PulloutDate').val(),
+                    TimeDisconnected : $('#PulloutTime').val(),
+                },
+                success : function(res) {
+                    location.reload()
+                },
+                error : function (err) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'An error occurred while pulling this account out!',
                     })
                 }
             })

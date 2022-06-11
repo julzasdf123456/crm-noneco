@@ -7,7 +7,7 @@
                 <a href="{{ route('billingMeters.edit', [$meters->id]) }}" class="btn btn-tool text-success" title="Update meter data"><i class="fas fa-pen"></i></a>
             @endif
             <a href="#" class="btn btn-tool text-primary" title="Change Meter"><i class="fas fa-random"></i></a>
-            <a href="#" class="btn btn-tool" title="Meter history"><i class="fas fa-history"></i></a>
+            <button class="btn btn-tool"  data-toggle="modal" data-target="#modal-meter-logs" title="Meter history"><i class="fas fa-history"></i></button>
         </div>
     </div>
     <div class="card-body table-responsive px-0">
@@ -78,3 +78,5 @@
         @endif
     </div>
 </div>
+
+@include('service_accounts.change_meter_history')

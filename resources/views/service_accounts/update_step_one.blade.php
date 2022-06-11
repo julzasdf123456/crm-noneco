@@ -16,10 +16,13 @@
 
 <div class="row px-2">
     <div class="col-lg-12">
+        @include('adminlte-templates::common.errors')
         <div class="card">
             {!! Form::model($serviceAccount, ['route' => ['serviceAccounts.update', $serviceAccount->id], 'method' => 'patch']) !!}
+
+            <input type="hidden" name="ServiceAccountName" value="{{ $serviceAccount->ServiceAccountName }}">
             <div class="card-header">
-                <span class="card-title">Account Information</span>
+                <span class="card-title">Account Information - <strong>{{ $serviceAccount->ServiceAccountName }}</strong></span>
 
                 <div class="card-tools">
                     <!-- New Account Number Field -->
@@ -39,15 +42,14 @@
 
             <div class="card-body">
 
-                <div class="row">   
-                    <!-- Legacy Account Number Field -->
-                    <div class="form-group col-lg-7 col-md-8 col-sm-12">
+                <div class="row"> 
+                    <div class="form-group col-sm-12">
                         <div class="row">
-                            <div class="col-lg-2 col-md-4">
+                            <div class="col-lg-1 col-md-2">
                                 {!! Form::label('OldAccountNo', 'Legacy Acct. No:') !!}
                             </div>
 
-                            <div class="col-lg-10 col-md-8">
+                            <div class="col-lg-3 col-md-2">
                                 <div class="input-group">
                                     {!! Form::text('OldAccountNo', $serviceAccount != null ? $serviceAccount->OldAccountNo : null, ['class' => 'form-control','maxlength' => 12, 'data-inputmask' => "'alias': 'phonebe'"]) !!}
                                 </div>
@@ -70,36 +72,14 @@
                                     });
                                 </script>
                             @endpush
-                        </div> 
-                    </div>
 
-                    <!-- Sequencecode Field -->
-                    <div class="form-group col-lg-5 col-md-4 col-sm-12">
-                        <div class="row">
-                            <div class="col-lg-3 col-md-5">
+                            <div class="col-lg-1 col-md-2">
                                 {!! Form::label('SequenceCode', 'Seq. No:') !!}
                             </div>
 
-                            <div class="col-lg-9 col-md-7">
+                            <div class="col-lg-3 col-md-2">
                                 <div class="input-group">
                                     {!! Form::text('SequenceCode', $serviceAccount != null ? $serviceAccount->SequenceCode : null, ['class' => 'form-control','maxlength' => 50,'maxlength' => 50]) !!}
-                                </div>
-                            </div>
-                        </div> 
-                    </div>
-
-                    <div class="divider"></div>
-
-                    <div class="form-group col-sm-12">
-                        <div class="row">
-                            <!-- Serviceaccountname Field -->
-                            <div class="col-lg-1 col-md-2">
-                                {!! Form::label('ServiceAccountName', 'Account Name:') !!}
-                            </div>
-
-                            <div class="col-lg-6 col-md-6">
-                                <div class="input-group">
-                                    {!! Form::text('ServiceAccountName', $serviceAccount != null ? $serviceAccount->ServiceAccountName : null, ['class' => 'form-control','maxlength' => 600,'maxlength' => 600]) !!}
                                 </div>
                             </div>
 
@@ -108,7 +88,7 @@
                                 {!! Form::label('AreaCode', 'Areacode/Route:') !!}
                             </div>
 
-                            <div class="col-lg-4 col-md-2">
+                            <div class="col-lg-3 col-md-2">
                                 <div class="input-group">
                                     {!! Form::text('AreaCode', $serviceAccount != null ? $serviceAccount->AreaCode : null, ['class' => 'form-control','maxlength' => 5]) !!}
                                 </div>

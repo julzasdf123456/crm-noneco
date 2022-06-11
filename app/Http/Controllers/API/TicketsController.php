@@ -138,6 +138,7 @@ class TicketsController extends Controller {
                 $meter->Brand = $tickets->NewMeterBrand;
                 $meter->Multiplier = "1";
                 $meter->InitialReading = $tickets->NewMeterReading;
+                $meter->ConnectionDate = $tickets->DateTimeLinemanExecuted;
                 $meter->save();
 
                 if ($tickets->PercentError=='FOR AVERAGING') {

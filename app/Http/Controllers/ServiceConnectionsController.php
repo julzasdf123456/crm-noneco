@@ -32,6 +32,7 @@ use App\Models\PreDefinedMaterials;
 use App\Models\PreDefinedMaterialsMatrix;
 use App\Models\TransactionDetails;
 use App\Models\TransactionIndex;
+use App\Models\ServiceAccounts;
 use App\Exports\ServiceConnectionApplicationsReportExport;
 use App\Exports\ServiceConnectionEnergizationReportExport;
 use Illuminate\Support\Facades\DB;
@@ -2375,6 +2376,23 @@ class ServiceConnectionsController extends AppBaseController
 
         return view('/service_connections/relocation_search', [
             'serviceAccounts' => $serviceAccounts
+        ]);
+    }
+
+    public function createRelocation($id) {
+        $account = ServiceAccounts::find($id);
+
+        $towns = Towns::orderBy('Town')->pluck('Town', 'id');
+
+        $accountTypes = ServiceConnectionAccountTypes::orderBy('id')->get();
+
+        $crew = ServiceConnectionCrew::orderBy('StationName')->pluck('StationName', 'id');
+
+        return view('/service_connections/create_relocation', [
+            'account' => $account,
+            'towns' => $towns,
+            'accountTypes' => $accountTypes,
+            'crew' => $crew,
         ]);
     }
 }

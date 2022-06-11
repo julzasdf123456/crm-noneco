@@ -40,7 +40,7 @@ use Illuminate\Support\Facades\Auth;
                             <img id="prof-img" class="profile-user-img img-fluid img-circle" src="" alt="User profile picture">
                         </div>
 
-                        <h3 title="Go to Membership Profile" class="profile-username text-center"><a href="{{ route('memberConsumers.show', [$serviceConnections->MemberConsumerId]) }}">{{ $serviceConnections->ServiceAccountName }}</a></h3>
+                        <h3 title="Go to Membership Profile" class="profile-username text-center"><a href="{{ $serviceConnections->MemberConsumerId != null ? route('memberConsumers.show', [$serviceConnections->MemberConsumerId]) : '' }}">{{ $serviceConnections->ServiceAccountName }}</a></h3>
                         <p class="text-muted text-center">{{ $serviceConnections->id }} ({{ $serviceConnections->AccountApplicationType }})</p>
 
                         <hr>

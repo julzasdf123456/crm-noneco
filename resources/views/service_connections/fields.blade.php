@@ -438,7 +438,7 @@ use App\Models\IDGenerator;
                 <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
                 </div>
-                {!! Form::select('AccountOrganization', ['Individual' => 'Individual', 'BAPA' => 'BAPA', 'ECA' => 'ECA'], $cond=='new' ? '' : $serviceConnections->AccountOrganization, ['class' => 'form-control']) !!}
+                {!! Form::select('AccountOrganization', ['Individual' => 'Individual', 'BAPA' => 'BAPA'], $cond=='new' ? '' : $serviceConnections->AccountOrganization, ['class' => 'form-control']) !!}
             </div>
         </div>
     </div>  

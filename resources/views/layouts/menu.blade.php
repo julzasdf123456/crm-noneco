@@ -97,6 +97,14 @@ use Illuminate\Support\Facades\Auth;
                         <p>New Application</p>
                     </a>
                 </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('serviceConnections.relocation-search') }}"
+                    class="nav-link {{ Request::is('serviceConnections.relocation-search') ? 'active' : '' }}">
+                        <i class="fas fa-plus nav-icon text-warning"></i>
+                        <p>New Relocation</p>
+                    </a>
+                </li>
             @endcanany
 
             @if (Auth::user()->hasRole('Metering Personnel'))

@@ -9,6 +9,7 @@
         <th>Disco/Reco Date</th>
         <th>Disco/Reco Time</th>
         <th>Disconnection Personnel</th>
+        <th>Remarks/Notes</th>
     </thead>
     <tbody>
         @if ($disconnectionHistory != null)
@@ -22,6 +23,7 @@
                     <td>{{ date('F d, Y', strtotime($item->DateDisconnected)) }}</td>
                     <td>{{ date('h:i:s A', strtotime($item->TimeDisconnected)) }}</td>
                     <td>{{ $user != null ? $user->name : 'n/a' }}</td>
+                    <td>{{ $item->Notes }}</td>
                 </tr>
             @endforeach
         @endif

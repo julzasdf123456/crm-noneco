@@ -47,6 +47,7 @@ class CreateTableCRMServiceConnections extends Migration
             $table->string('Office')->nullable();
             $table->string('TypeOfOccupancy')->nullable();
             $table->string('ResidenceNumber')->nullable();
+            $table->string('AccountNumber')->nullable();
             $table->timestamps();
         });
     }

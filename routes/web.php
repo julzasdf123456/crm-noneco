@@ -123,6 +123,7 @@ Route::get('/service_connections/fetch-application-count-via-status', [ServiceCo
 Route::get('/service_connections/print-service-connection-application/{id}', [ServiceConnectionsController::class, 'printServiceConnectionApplication'])->name('serviceConnections.print-service-connection-application');
 Route::get('/service_connections/print-service-connection-contract/{id}', [ServiceConnectionsController::class, 'printServiceConnectionContract'])->name('serviceConnections.print-service-connection-contract');
 Route::get('/service_connections/relocation-search', [ServiceConnectionsController::class, 'relocationSearch'])->name('serviceConnections.relocation-search');
+Route::get('/service_connections/create-relocation/{id}', [ServiceConnectionsController::class, 'createRelocation'])->name('serviceConnections.create-relocation');
 Route::resource('serviceConnections', App\Http\Controllers\ServiceConnectionsController::class);
 
 
@@ -205,6 +206,9 @@ Route::get('/service_accounts/update-gps-coordinates', [App\Http\Controllers\Ser
 Route::get('/service_accounts/search-global', [App\Http\Controllers\ServiceAccountsController::class,  'searchGlobal'])->name('serviceAccounts.search-global');
 Route::get('/service_accounts/termed-payment-accounts', [App\Http\Controllers\ServiceAccountsController::class,  'termedPaymentAccounts'])->name('serviceAccounts.termed-payment-accounts');
 Route::get('/service_accounts/disconnect-manual', [App\Http\Controllers\ServiceAccountsController::class,  'disconnectManual'])->name('serviceAccounts.disconnect-manual');
+Route::get('/service_accounts/apprehend-manual', [App\Http\Controllers\ServiceAccountsController::class,  'apprehendManual'])->name('serviceAccounts.apprehend-manual');
+Route::get('/service_accounts/pullout-manual', [App\Http\Controllers\ServiceAccountsController::class,  'pulloutManual'])->name('serviceAccounts.pullout-manual');
+Route::get('/service_accounts/change-name', [App\Http\Controllers\ServiceAccountsController::class,  'changeName'])->name('serviceAccounts.change-name');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 
@@ -595,3 +599,6 @@ Route::resource('transacionPaymentDetails', App\Http\Controllers\TransacionPayme
 
 
 Route::resource('billsOriginals', App\Http\Controllers\BillsOriginalController::class);
+
+
+Route::resource('accountNameHistories', App\Http\Controllers\AccountNameHistoryController::class);

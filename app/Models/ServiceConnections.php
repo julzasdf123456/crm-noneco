@@ -81,7 +81,8 @@ class ServiceConnections extends Model
         'LongSpan',
         'Office',
         'TypeOfOccupancy',
-        'ResidenceNumber'
+        'ResidenceNumber',
+        'AccountNumber'
     ];
 
     /**
@@ -122,7 +123,8 @@ class ServiceConnections extends Model
         'LongSpan' => 'string',
         'Office' => 'string',
         'TypeOfOccupancy' => 'string',
-        'ResidenceNumber' => 'string'
+        'ResidenceNumber' => 'string',
+        'AccountNumber' => 'string'
     ];
 
     /**
@@ -165,7 +167,8 @@ class ServiceConnections extends Model
         'LongSpan' => 'nullable|string',
         'Office' => 'nullable|string',
         'TypeOfOccupancy' => 'nullable|string',
-        'ResidenceNumber' => 'nullable|string'
+        'ResidenceNumber' => 'nullable|string',
+        'AccountNumber' => 'nullable|string'
     ];
 
     public static function getAccountCount($consumerId) {

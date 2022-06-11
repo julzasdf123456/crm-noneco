@@ -6,6 +6,11 @@
         <span class="card-title">
             <strong>{{ $serviceAccounts->ServiceAccountName }}  {{ $serviceAccounts->AccountCount != null ? '(# ' . $serviceAccounts->AccountCount . ')' : '' }}</strong>
         </span>
+
+        <div class="card-tools">
+            <button class="btn btn-tool" id="change-name" data-toggle="modal" data-target="#modal-change-name" title="Change Name"><i class="fas fa-pen"></i></button>
+            <button class="btn btn-tool" data-toggle="modal" data-target="#modal-change-name-history" title="Change Name History"><i class="fas fa-history"></i></button>
+        </div>
     </div>
     <div class="card-body table-responsive px-0">
         <table class="table table-hover table-sm">
@@ -13,7 +18,7 @@
             <tbody>
                 <tr>
                     <td class="text-muted">Status</td>
-                    <td><strong>{{ $serviceAccounts->AccountStatus }}</td>
+                    <td><strong class="badge {{ $serviceAccounts->AccountStatus=='ACTIVE' ? 'badge-success' : 'badge-danger' }}">{{ $serviceAccounts->AccountStatus }}</td>
                 </tr>
                 <tr>
                     <td class="text-muted">Account Number</td>
@@ -92,15 +97,113 @@
             </tbody>
             
         </table>
-
-        {{-- <div class="content px-3"> --}}
-            {{-- <div class="divider"></div> --}}
-            {{-- <span class="text-muted"><i>Tools</i></span><br> --}}
-            
-            {{-- <a href="" class="btn btn-tool text-danger" title="Disconnect this account"><i class="fas fa-unlink"></i></a> --}}
-        {{-- </div> --}}
     </div>
-    {{-- <div class="card-footer">
-
-    </div> --}}
 </div>
+
+{{-- CHANGE NAME --}}
+<div class="modal fade" id="modal-change-name" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Change Name</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="From">From</label>
+                    <input type="text" name="From" id="From" value="{{ $serviceAccounts->ServiceAccountName }}" class="form-control" readonly>
+
+                    <label for="To">To</label>
+                    <input type="text" name="To" id="To" class="form-control" autofocus>
+
+                    <label for="ChangeNameNotes">Notes</label>
+                    <textarea type="text" name="ChangeNameNotes" id="ChangeNameNotes" placeholder="Notes/Remarks" class="form-control" style="margin-top: 8px;" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="change-name-proceed">Proceed</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- CHANGE NAME HISTORY --}}
+<div class="modal fade" id="modal-change-name-history" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Previous Account Names</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <th>Account Names</th>
+                        <th>Remarks</th>
+                        <th>Changed By</th>
+                        <th>Changed On</th>
+                    </thead>
+                    <tbody>
+                        @foreach ($changeNameHistory as $item)
+                            <tr>
+                                <td>{{ $item->OldAccountName }}</td>
+                                <td>{{ $item->Notes }}</td>
+                                <td>{{ $item->name }}</td>
+                                <td>{{ date('F d, Y, h:i:s A', strtotime($item->created_at)) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default float-right" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('page_scripts')
+    <script>
+        $(document).ready(function() {
+            $('#change-name-proceed').on('click', function() {
+                changeName()
+            })
+        })   
+        
+        function changeName() {
+            if (jQuery.isEmptyObject($('#To').val())) {
+                Swal.fire({
+                    title : 'Empty Name',
+                    text : 'Provide a new name to continue',
+                    icon : 'error'
+                })
+            } else {
+                $.ajax({
+                    url : "{{ route('serviceAccounts.change-name') }}",
+                    type : 'GET',
+                    data : {
+                        id : '{{ $serviceAccounts->id }}',
+                        NewName : $('#To').val(),
+                        Notes : $('#ChangeNameNotes').val()
+                    },
+                    success : function(res) {
+                        location.reload()
+                    },
+                    error : function(err) {
+                        Swal.fire({
+                            title : 'Oops',
+                            text : 'An error occurred while trying to change the name',
+                            icon : 'error'
+                        })
+                    }
+                })
+            }
+            
+        }
+    </script>
+@endpush

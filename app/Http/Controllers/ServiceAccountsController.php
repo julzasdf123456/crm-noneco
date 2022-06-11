@@ -19,6 +19,7 @@ use App\Models\ServiceConnectionAccountTypes;
 use App\Models\ServiceAccounts;
 use App\Models\MeterReaders;
 use App\Models\BillingMeters;
+use App\Models\AccountNameHistory;
 use App\Models\BillingTransformers;
 use App\Models\ServiceConnectionMtrTrnsfrmr;
 use App\Models\User;
@@ -193,7 +194,8 @@ class ServiceAccountsController extends AppBaseController
             ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
             ->where('Billing_Bills.AccountNumber', $id)
-            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('AccountNumber', $id)->pluck('ObjectSourceId'))
+            ->whereRaw("Billing_Bills.id NOT IN (SELECT ObjectSourceId FROM Cashier_PaidBills WHERE AccountNumber='" . $id . "')")
+            // ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('AccountNumber', $id)->pluck('ObjectSourceId'))
             ->select('Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.AccountCount',
@@ -214,7 +216,8 @@ class ServiceAccountsController extends AppBaseController
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
             ->where('Billing_Bills.AccountNumber', $id)
             ->whereNull('Billing_Bills.MergedToCollectible')
-            ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('AccountNumber', $id)->pluck('Cashier_PaidBills.ObjectSourceId'))
+            ->whereRaw("Billing_Bills.id NOT IN (SELECT ObjectSourceId FROM Cashier_PaidBills WHERE AccountNumber='" . $id . "')")
+            // ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('AccountNumber', $id)->pluck('Cashier_PaidBills.ObjectSourceId'))
             ->select('Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.AccountCount',
@@ -296,6 +299,20 @@ class ServiceAccountsController extends AppBaseController
             ->orderByDesc('Billing_PrePaymentTransactionHistory.created_at')
             ->get();
 
+        $meterHistory = DB::table('Billing_Meters')
+            ->where('ServiceAccountId', $id)
+            ->orderByDesc('created_at')
+            ->offset(1)
+            ->get();
+
+        $changeNameHistory = DB::table('Billing_AccountNameHistory')
+            ->leftJoin('users', 'Billing_AccountNameHistory.UserId', '=', 'users.id')
+            ->where('Billing_AccountNameHistory.AccountNumber', $id)
+            ->select('users.name',
+                'Billing_AccountNameHistory.*')
+            ->orderByDesc('Billing_AccountNameHistory.created_at')
+            ->get();
+
         return view('service_accounts.show', [
             'serviceAccounts' => $serviceAccounts,
             'meters' => $meters,
@@ -312,6 +329,8 @@ class ServiceAccountsController extends AppBaseController
             'violations' => $violations,
             'prepaymentBalance' => $prepaymentBalance,
             'prepaymentHistory' => $prepaymentHistory,
+            'meterHistory' => $meterHistory,
+            'changeNameHistory' => $changeNameHistory,
         ]);
     }
 
@@ -1054,6 +1073,69 @@ class ServiceAccountsController extends AppBaseController
             $disconnectionHistory->save();
         }
 
+        return response()->json('ok', 200);
+    }
+
+    public function apprehendManual(Request $request) {
+        $account = ServiceAccounts::find($request['id']);
+
+        if ($account != null) {
+            $account->AccountStatus = 'APPREHENDED';
+            $account->save();
+
+            $disconnectionHistory = new DisconnectionHistory;
+            $disconnectionHistory->id = IDGenerator::generateIDandRandString();
+            $disconnectionHistory->AccountNumber = $account->id;
+            $disconnectionHistory->ServicePeriod = date('Y-m-01');
+            $disconnectionHistory->Status = 'APPREHENDED';
+            $disconnectionHistory->UserId = Auth::id();
+            $disconnectionHistory->Notes = $request['Notes'];
+            $disconnectionHistory->DateDisconnected = $request['DateDisconnected'];
+            $disconnectionHistory->TimeDisconnected = $request['TimeDisconnected'];
+            $disconnectionHistory->save();
+        }
+
+        return response()->json('ok', 200);
+    }
+
+    public function pulloutManual(Request $request) {
+        $account = ServiceAccounts::find($request['id']);
+
+        if ($account != null) {
+            $account->AccountStatus = 'PULLOUT';
+            $account->save();
+
+            $disconnectionHistory = new DisconnectionHistory;
+            $disconnectionHistory->id = IDGenerator::generateIDandRandString();
+            $disconnectionHistory->AccountNumber = $account->id;
+            $disconnectionHistory->ServicePeriod = date('Y-m-01');
+            $disconnectionHistory->Status = 'PULLOUT';
+            $disconnectionHistory->UserId = Auth::id();
+            $disconnectionHistory->Notes = $request['Notes'];
+            $disconnectionHistory->DateDisconnected = $request['DateDisconnected'];
+            $disconnectionHistory->TimeDisconnected = $request['TimeDisconnected'];
+            $disconnectionHistory->save();
+        }
+
+        return response()->json('ok', 200);
+    }
+
+    public function changeName(Request $request) {
+        $account = ServiceAccounts::find($request['id']);
+
+        if ($account != null) {
+            $acctNameHist = new AccountNameHistory;
+            $acctNameHist->id = IDGenerator::generateIDandRandString();
+            $acctNameHist->AccountNumber = $account->id;
+            $acctNameHist->OldAccountName = $account->ServiceAccountName;
+            $acctNameHist->Notes = $request['Notes'];
+            $acctNameHist->UserId = Auth::id();
+            $acctNameHist->save();
+
+            $account->ServiceAccountName = $request['NewName'];
+            $account->save();
+        } 
+        
         return response()->json('ok', 200);
     }
 }
