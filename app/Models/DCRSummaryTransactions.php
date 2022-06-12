@@ -119,6 +119,8 @@ class DCRSummaryTransactions extends Model
                 floatval($bill->OtherTransmissionCostAdjustmentKWH) +
                 floatval($bill->OtherSystemLossCostAdjustment) +
                 floatval($bill->OtherLifelineRateCostAdjustment) +
+                floatval($bill->LifelineRate) +
+                floatval($bill->SeniorCitizenSubsidy) +
                 floatval($bill->SeniorCitizenDiscountAndSubsidyAdjustment);
 
         return round($amount, 4);

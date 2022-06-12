@@ -646,6 +646,7 @@ class BillsController extends AppBaseController
         if ($request['params'] == null) {
             $bills = DB::table('Billing_Bills')
                         ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                        ->leftJoin('Cashier_PaidBills', 'Billing_Bills.id', '=', 'Cashier_PaidBills.ObjectSourceId')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
                         ->select('Billing_ServiceAccounts.ServiceAccountName', 
@@ -653,8 +654,10 @@ class BillsController extends AppBaseController
                             'CRM_Towns.Town', 
                             'CRM_Barangays.Barangay', 
                             'Billing_ServiceAccounts.AccountCount',
+                            'Billing_ServiceAccounts.OldAccountNo',
                             'Billing_Bills.BillNumber',
                             'Billing_Bills.id',
+                            'Cashier_PaidBills.ORNumber',
                             'Billing_Bills.ServicePeriod')
                         ->orderByDesc('Billing_Bills.created_at')
                         ->limit(60)
@@ -663,14 +666,17 @@ class BillsController extends AppBaseController
             $bills = DB::table('Billing_Bills')
                         ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('Cashier_PaidBills', 'Billing_Bills.id', '=', 'Cashier_PaidBills.ObjectSourceId')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
                         ->select('Billing_ServiceAccounts.ServiceAccountName', 
                             'Billing_ServiceAccounts.id as AccountNumber', 
                             'CRM_Towns.Town', 
                             'CRM_Barangays.Barangay', 
                             'Billing_ServiceAccounts.AccountCount',
+                            'Billing_ServiceAccounts.OldAccountNo',
                             'Billing_Bills.BillNumber',
                             'Billing_Bills.id',
+                            'Cashier_PaidBills.ORNumber',
                             'Billing_Bills.ServicePeriod')
                         ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')

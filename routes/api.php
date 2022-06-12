@@ -38,6 +38,7 @@ Route::get('get-inspections-for-energization-data', [ServiceConnectionsEnergizat
 Route::post('update-energized', [ServiceConnectionsEnergization::class, 'updateEnergized']);
 Route::post('create-timeframes', [ServiceConnectionsEnergization::class, 'createTimeFrames']);
 Route::get('update-downloaded-service-connection-status', [ServiceConnectionsEnergization::class, 'updateDownloadedServiceConnectionStatus']);
+Route::post('receive-mast-poles', [ServiceConnectionsEnergization::class, 'receiveMastPoles']);
 
 Route::get('get-towns', [OtherData::class, 'getTowns']);
 Route::get('get-barangays', [OtherData::class, 'getBarangays']);

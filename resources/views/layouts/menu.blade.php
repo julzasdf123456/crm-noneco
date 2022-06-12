@@ -814,7 +814,7 @@ use Illuminate\Support\Facades\Auth;
            class="nav-link {{ Request::is('accountGLCodes*') ? 'active' : '' }}">
            <i class="fas fa-circle nav-icon text-info"></i><p>GL Codes</p>
         </a>
-    </li>
+    </li>  
 @endcanany
 
 <li class="nav-header">MISCELLANEOUS</li>
@@ -904,3 +904,6 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
+
+
+

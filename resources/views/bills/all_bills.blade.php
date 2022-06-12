@@ -25,10 +25,12 @@
     <table class="table table-hover">
         <thead>
             <th>Bill Number</th>
+            <th>Account ID</th>
             <th>Account Number</th>
             <th>Service Account Name</th>
             <th>Address</th>
             <th>Billing Month</th>
+            <th>OR Number</th>
             <th></th>
         </thead>
         <tbody>
@@ -36,9 +38,11 @@
                 <tr>
                     <td>{{ $item->BillNumber }}</td>
                     <td><a href="{{ route('serviceAccounts.show', [$item->AccountNumber]) }}">{{ $item->AccountNumber }}</a></td>
+                    <td>{{ $item->OldAccountNo }}</td>
                     <td>{{ $item->ServiceAccountName }} {{ $item->AccountCount != null ? '(# ' . $item->AccountCount . ')' : '' }}</td>                
                     <td>{{ $item->Barangay }}, {{ $item->Town }}</td>
                     <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
+                    <td>{{ $item->ORNumber }}</td>
                     <td width="120">
                         <div class='btn-group'>
                             <a href="{{ route('bills.show', [$item->id]) }}"

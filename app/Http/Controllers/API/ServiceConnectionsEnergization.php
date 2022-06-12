@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\ServiceConnectionTimeframes;
 use App\Models\ServiceConnectionImages;
 use App\Models\ServiceConnectionCrew;
+use App\Models\MastPoles;
 use App\Models\IDGenerator;
 
 class ServiceConnectionsEnergization extends Controller {
@@ -164,4 +165,25 @@ class ServiceConnectionsEnergization extends Controller {
         }
     }
 
+    public function receiveMastPoles(Request $request) {
+        $mastPole = MastPoles::where('ServiceConnectionId', $request['ServiceConnectionId'])
+            ->where('Latitude', $request['Latitude'])
+            ->where('Longitude', $request['Longitude'])
+            ->first();
+
+        if ($mastPole != null) {
+
+        } else {
+            $mastPole = new MastPoles;
+            $mastPole->id = $request['id'];
+            $mastPole->ServiceConnectionId = $request['ServiceConnectionId'];
+            $mastPole->Latitude = $request['Latitude'];
+            $mastPole->Longitude = $request['Longitude'];
+            $mastPole->PoleRemarks = $request['PoleRemarks'];
+            $mastPole->DateTimeTaken = $request['DateTimeTaken'];
+            $mastPole->save();
+        }
+
+        return response()->json('ok', 200);
+    }
 }

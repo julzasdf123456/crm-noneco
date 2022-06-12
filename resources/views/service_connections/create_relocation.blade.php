@@ -154,6 +154,33 @@
 
                 <div class="divider"></div>
 
+                <div class="form-group col-sm-12">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-5">
+                            {!! Form::label('LoadCategory', 'Projected Load') !!}
+                        </div>
+            
+                        <div class="col-lg-9 col-md-7"> 
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
+                                </div>
+            
+                                <div class="radio-group-horizontal">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="LoadCategory" value="below 5kVa" checked>
+                                        <label class="form-check-label">Below 5KVA</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="LoadCategory" value="above 5kVa">
+                                        <label class="form-check-label">Above 5KVA</label>
+                                    </div>
+                                </div>                    
+                            </div>
+                        </div>
+                    </div>  
+                </div>
+
                 <!-- Station Field -->
                 <div class="form-group col-sm-12">
                     <div class="row">

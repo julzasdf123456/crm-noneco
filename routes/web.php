@@ -602,3 +602,9 @@ Route::resource('billsOriginals', App\Http\Controllers\BillsOriginalController::
 
 
 Route::resource('accountNameHistories', App\Http\Controllers\AccountNameHistoryController::class);
+
+
+Route::resource('mastPoles', App\Http\Controllers\MastPolesController::class);
+
+
+Route::resource('dCRIndices', App\Http\Controllers\DCRIndexController::class);
