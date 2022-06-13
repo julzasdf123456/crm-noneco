@@ -10,6 +10,7 @@
         <div class="card-tools">
             <button class="btn btn-tool" id="change-name" data-toggle="modal" data-target="#modal-change-name" title="Change Name"><i class="fas fa-pen"></i></button>
             <button class="btn btn-tool" data-toggle="modal" data-target="#modal-change-name-history" title="Change Name History"><i class="fas fa-history"></i></button>
+            <button class="btn btn-tool" data-toggle="modal" data-target="#modal-relocation-history" title="Location History (Relocations)"><i class="fas fa-map-marker-alt"></i></button>
         </div>
     </div>
     <div class="card-body table-responsive px-0">
@@ -155,6 +156,43 @@
                                 <td>{{ $item->Notes }}</td>
                                 <td>{{ $item->name }}</td>
                                 <td>{{ date('F d, Y, h:i:s A', strtotime($item->created_at)) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default float-right" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- RELOCATION HISTORY --}}
+<div class="modal fade" id="modal-relocation-history" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Previous Account Addresses</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <th>Address</th>
+                        <th>Area Code</th>
+                        <th>Sequence</th>
+                        <th>Relocation Date</th>
+                    </thead>
+                    <tbody>
+                        @foreach ($relocationHistory as $item)
+                            <tr>
+                                <td>{{ ServiceAccounts::getAddress($item) }}</td>
+                                <td>{{ $item->AreaCode }}</td>
+                                <td>{{ $item->SequenceCode }}</td>
+                                <td>{{ date('F d, Y', strtotime($item->RelocationDate)) }}</td>
                             </tr>
                         @endforeach
                     </tbody>

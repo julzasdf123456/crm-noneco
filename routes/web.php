@@ -209,6 +209,8 @@ Route::get('/service_accounts/disconnect-manual', [App\Http\Controllers\ServiceA
 Route::get('/service_accounts/apprehend-manual', [App\Http\Controllers\ServiceAccountsController::class,  'apprehendManual'])->name('serviceAccounts.apprehend-manual');
 Route::get('/service_accounts/pullout-manual', [App\Http\Controllers\ServiceAccountsController::class,  'pulloutManual'])->name('serviceAccounts.pullout-manual');
 Route::get('/service_accounts/change-name', [App\Http\Controllers\ServiceAccountsController::class,  'changeName'])->name('serviceAccounts.change-name');
+Route::get('/service_accounts/relocation-form/{accountNo}/{scId}', [App\Http\Controllers\ServiceAccountsController::class,  'relocationForm'])->name('serviceAccounts.relocation-form');
+Route::post('/service_accounts/store-relocation', [App\Http\Controllers\ServiceAccountsController::class,  'storeRelocation'])->name('serviceAccounts.store-relocation');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 
@@ -608,3 +610,6 @@ Route::resource('mastPoles', App\Http\Controllers\MastPolesController::class);
 
 
 Route::resource('dCRIndices', App\Http\Controllers\DCRIndexController::class);
+
+
+Route::resource('accountLocationHistories', App\Http\Controllers\AccountLocationHistoryController::class);

@@ -857,6 +857,7 @@ class TransactionIndexController extends AppBaseController
         $transactionIndex->Source = 'Reconnection Payments';
         $transactionIndex->Notes = "Object Id: Account Number";
         $transactionIndex->PaymentUsed = $request['PaymentUsed'];
+        $transactionIndex->AccountNumber = $request['AccountNumber'];
         $transactionIndex->UserId = Auth::id();
         $transactionIndex->save();
 

@@ -35,6 +35,7 @@ use App\Models\DisconnectionHistory;
 use App\Models\Tickets;
 use App\Models\PrePaymentBalance;
 use App\Models\PrePaymentTransHistory;
+use App\Models\AccountLocationHistory;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Flash;
 use Response;
@@ -313,6 +314,38 @@ class ServiceAccountsController extends AppBaseController
             ->orderByDesc('Billing_AccountNameHistory.created_at')
             ->get();
 
+        $relocationHistory = DB::table('Billing_AccountLocationHistory')        
+            ->leftJoin('CRM_Towns', 'Billing_AccountLocationHistory.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_AccountLocationHistory.Barangay', '=', 'CRM_Barangays.id')
+            ->select('Billing_AccountLocationHistory.Purok',
+                'Billing_AccountLocationHistory.AreaCode',
+                'Billing_AccountLocationHistory.SequenceCode',
+                'Billing_AccountLocationHistory.RelocationDate',
+                'CRM_Towns.Town',
+                'CRM_Barangays.Barangay')
+            ->where('Billing_AccountLocationHistory.AccountNumber', $id)
+            ->orderByDesc('Billing_AccountLocationHistory.created_at')
+            ->get();
+
+        // ALL TRANSACTIONS
+        $paidBills = DB::table('Cashier_PaidBills')
+            ->where("AccountNumber", $id)
+            ->select('id', 'ORNumber', 'ORDate', 'NetAmount', DB::raw("'BILLS PAYMENT' AS PaymentType"), 'Source', 'created_at');
+        $allPayments = DB::table('Cashier_TransactionIndex')
+            ->where("AccountNumber", $id)
+            ->select('id', 'ORNumber', 'ORDate', 'Total', DB::raw("'OTHER PAYMENT' AS PaymentType"), 'Source', 'created_at')
+            ->union($paidBills)
+            ->orderByDesc('created_at')
+            ->get();
+
+        // reading history
+        $readings = DB::table('Billing_Readings')
+            ->leftJoin('users', 'Billing_Readings.MeterReader', '=', 'users.id')
+            ->select('Billing_Readings.*', 'users.name')
+            ->where('Billing_Readings.AccountNumber', $id)
+            ->orderByDesc('Billing_Readings.ServicePeriod')
+            ->get();
+
         return view('service_accounts.show', [
             'serviceAccounts' => $serviceAccounts,
             'meters' => $meters,
@@ -331,6 +364,9 @@ class ServiceAccountsController extends AppBaseController
             'prepaymentHistory' => $prepaymentHistory,
             'meterHistory' => $meterHistory,
             'changeNameHistory' => $changeNameHistory,
+            'relocationHistory' => $relocationHistory,
+            'ledger' => $allPayments,
+            'readings' => $readings,
         ]);
     }
 
@@ -416,6 +452,8 @@ class ServiceAccountsController extends AppBaseController
                             'CRM_ServiceConnections.ContactNumber as ContactNumber', 
                             'CRM_ServiceConnections.EmailAddress as EmailAddress',  
                             'CRM_ServiceConnections.AccountCount as AccountCount',  
+                            'CRM_ServiceConnections.ConnectionApplicationType',  
+                            'CRM_ServiceConnections.AccountNumber',  
                             'CRM_ServiceConnections.Sitio as Sitio', 
                             'CRM_Towns.Town as Town',
                             'CRM_Barangays.Barangay as Barangay')
@@ -1137,5 +1175,93 @@ class ServiceAccountsController extends AppBaseController
         } 
         
         return response()->json('ok', 200);
+    }
+
+    public function relocationForm($accountNumber, $scId) {
+        $account = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.ForDistribution',
+                    'Billing_ServiceAccounts.Organization',
+                    'Billing_ServiceAccounts.Main',
+                    'Billing_ServiceAccounts.GroupCode',
+                    'Billing_ServiceAccounts.Multiplier',
+                    'Billing_ServiceAccounts.Coreloss',
+                    'Billing_ServiceAccounts.ConnectionDate',
+                    'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.SeniorCitizen',
+                    'Billing_ServiceAccounts.Evat5Percent',
+                    'Billing_ServiceAccounts.Ewt2Percent',
+                    'Billing_ServiceAccounts.Contestable',
+                    'Billing_ServiceAccounts.NetMetered',
+                    'Billing_ServiceAccounts.AccountRetention',
+                    'Billing_ServiceAccounts.DurationInMonths',
+                    'Billing_ServiceAccounts.AccountExpiration',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->where('Billing_ServiceAccounts.id', $accountNumber)
+            ->first();
+        $serviceConnection = ServiceConnections::find($scId);
+        $towns = Towns::where('id', $serviceConnection->Town)->pluck('Town', 'id');
+        $barangays = Barangays::where('TownId', $serviceConnection->Town)->pluck('Barangay', 'id');        
+        $meterReaders = User::role('Meter Reader')->get();
+
+        return view('/service_accounts/relocation_form', [
+            'account' => $account,
+            'serviceConnection' => $serviceConnection,
+            'town' => $towns,
+            'barangays' => $barangays,
+            'meterReaders' => $meterReaders,
+        ]);
+    }
+
+    public function storeRelocation(Request $request) {
+        $account = ServiceAccounts::find($request['AccountNumber']);
+        $serviceConnection = ServiceConnections::find($request['ServiceConnectionId']);
+
+        if ($account != null) {
+            // ADD TO HISTORY
+            $acctLocHistory = new AccountLocationHistory;
+            $acctLocHistory->id = IDGenerator::generateIDandRandString();
+            $acctLocHistory->AccountNumber = $account->id;
+            $acctLocHistory->Town = $account->Town;
+            $acctLocHistory->Barangay = $account->Barangay;
+            $acctLocHistory->Purok = $account->Purok;
+            $acctLocHistory->AreaCode = $account->AreaCode;
+            $acctLocHistory->SequenceCode = $account->SequenceCode;
+            $acctLocHistory->MeterReader = $account->MeterReader;
+            $acctLocHistory->ServiceConnectionId = ($serviceConnection != null ? $serviceConnection->id : null);
+            $acctLocHistory->RelocationDate = ($serviceConnection != null ? $serviceConnection->DateTimeOfEnergization : null);
+            $acctLocHistory->save();
+
+            // UPDATE ACCOUNT
+            $account->Town = $request['Town'];
+            $account->Barangay = $request['Barangay'];
+            $account->Purok = $request['Purok'];
+            $account->AreaCode = $request['AreaCode'];
+            $account->SequenceCode = $request['SequenceCode'];
+            $account->GroupCode = $request['GroupCode'];
+            $account->MeterReader = $request['MeterReader'];
+            $account->save();
+
+            // update service connection
+            if ($serviceConnection != null) {
+                $serviceConnection->Status = 'Closed';
+                $serviceConnection->save();
+            }
+        }
+
+        Flash::success('Account relocated successfully.');
+
+        return redirect(route('serviceAccounts.pending-accounts'));
     }
 }

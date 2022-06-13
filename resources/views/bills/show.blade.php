@@ -203,7 +203,7 @@
                                                     <td class="indent-td">Metering Retail Customer Charge</td>
                                                     <td class="indent-td">Per cust/mo</td>
                                                     <td class="text-right">{{ $rate->MeteringRetailCustomerCharge }}</td>
-                                                    <td class="text-right">{{ number_format($bills->MeteringRetailCustomerCharge, 2) }}</td>
+                                                    <td class="text-right">{{ $bills->MeteringRetailCustomerCharge }}</td>
                                                 </tr>
                                                 <tr>
                                                     <td class="indent-td">Metering System Charge</td>

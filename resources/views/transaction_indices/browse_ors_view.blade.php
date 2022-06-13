@@ -64,9 +64,9 @@
                 <div class="col-lg-5">
                     <p class="text-muted">Payor</p>
                     <span><strong><a href="{{ $account != null ? (route('serviceAccounts.show', [$account->id])) : '' }}">{{ $account != null ? $account->ServiceAccountName : '-' }}</a></strong></span><br>
-                    <span>{{ $account->OldAccountNo }}</span><br>
-                    <span>{{ ServiceAccounts::getAddress($account) }}</span><br>
-                    <span>{{ $account->AccountType }}</span><br>
+                    <span>{{ $account != null ? $account->OldAccountNo : '-' }}</span><br>
+                    <span>{{ $account != null ? ServiceAccounts::getAddress($account) : '' }}</span><br>
+                    <span>{{ $account != null ? $account->AccountType : '-' }}</span><br>
                 </div>
 
                 <div class="col-lg-4">

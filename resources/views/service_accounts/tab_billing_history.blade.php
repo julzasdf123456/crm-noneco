@@ -1,8 +1,11 @@
 <div class="content">
+    <button class="btn btn-xs btn-success float-right" data-toggle="modal" data-target="#modal-ledger-history">View Full Ledger</button>
+    <button class="btn btn-xs btn-default float-right" style="margin-right: 10px; margin-bottom: 5px;" data-toggle="modal" data-target="#modal-reading-history">View Reading History</button>
+
     @if ($bills == null)
         <p class="center-text"><i>No billing history recorded</i></p>
     @else
-        <table class="table table-sm table-hover">
+        <table class="table table-sm table-hover"">
             <thead>
                 <th>Bill Number</th>
                 <th>Billing Month</th>
@@ -36,6 +39,82 @@
             </tbody>
         </table>
     @endif
+</div>
+
+{{-- Reading History --}}
+<div class="modal fade" id="modal-reading-history" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Reading History</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <th>Billing Month</th>
+                        <th>Consumption (in kWh)</th>
+                        <th>Reading Timestamp</th>
+                        <th>Meter Reader</th>
+                        <th>Remarks</th>
+                    </thead>
+                    <tbody>
+                        @foreach ($readings as $item)
+                            <tr>
+                                <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
+                                <td>{{ $item->KwhUsed }}</td>
+                                <td>{{ date('F d, Y h:i:s A', strtotime($item->ReadingTimestamp)) }}</td>
+                                <td>{{ $item->name }}</td>
+                                <td>{{ $item->Notes }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default float-right" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Ledger History --}}
+<div class="modal fade" id="modal-ledger-history" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Ledger</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <th>OR Number</th>
+                        <th>OR Date</th>
+                        <th class="text-right">Amount</th>
+                        <th>Payment For</th>
+                    </thead>
+                    <tbody>
+                        @foreach ($ledger as $item)
+                            <tr>
+                                <td><a href="{{ route('transactionIndices.browse-ors-view', [$item->id, $item->PaymentType]) }}">{{ $item->ORNumber }}</a></td>
+                                <td>{{ $item->ORDate }}</td>
+                                <td class="text-right">{{ number_format($item->Total, 2) }}</td>
+                                <td>{{ $item->Source }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default float-right" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('page_scripts')

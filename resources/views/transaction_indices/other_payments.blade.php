@@ -9,7 +9,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <span><h4>Other Payments</h4> {{ $transactionId }}</span>
+                    <span><h4>Other Payments</h4></span>
                 </div>
                 <div class="col-sm-6">
                     <button class="btn btn-success float-right" title="Search Consumer"  data-toggle="modal" data-target="#modal-search"><i class="fas fa-search-dollar ico-tab"></i>Search</button>

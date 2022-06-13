@@ -35,6 +35,7 @@
                     <th>Account No.</th>
                     <th>Account Name</th>
                     <th>Account Address</th>
+                    <th>Application</th>
                     <th width="8%"></th>
                 </thead>
                 <tbody>
@@ -47,8 +48,13 @@
                             <td>{{ $item->id }}</td>
                             <td>{{ $item->ServiceAccountName }} ({{ $item->AccountCount }})<i class="fas fa-check-circle text-primary" style="font-size: .75em;"></i></td>
                             <td>{{ ServiceConnections::getAddress($item) }}</td>
+                            <td>{{ $item->ConnectionApplicationType }}</td>
                             <td class="text-right" >
-                                <a href="{{ route('serviceAccounts.account-migration', [$item->id]) }}" title="Proceed activating {{ $item->ServiceAccountName }}" ><i class="fas fa-arrow-circle-right text-success"></i></a>
+                                @if ($item->ConnectionApplicationType == 'Relocation')
+                                    <a href="{{ route('serviceAccounts.relocation-form', [$item->AccountNumber, $item->id]) }}" title="Proceed relocating {{ $item->ServiceAccountName }}" ><i class="fas fa-arrow-circle-right text-success"></i></a>
+                                @else
+                                    <a href="{{ route('serviceAccounts.account-migration', [$item->id]) }}" title="Proceed activating {{ $item->ServiceAccountName }}" ><i class="fas fa-arrow-circle-right text-success"></i></a>
+                                @endif                                
                             </td>
                         </tr>
                     @php
