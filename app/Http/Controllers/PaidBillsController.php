@@ -16,6 +16,7 @@ use App\Models\PaidBills;
 use App\Models\PaidBillsDetails;
 use App\Models\ORAssigning;
 use App\Models\Notifiers;
+use App\Models\BillingMeters;
 use App\Models\ORCancellations;
 use App\Models\Towns;
 use App\Models\BAPAPayments;
@@ -883,16 +884,54 @@ class PaidBillsController extends AppBaseController
     public function printBillPayment($paidBillId) {
         $paidBill = PaidBills::where('ORNumber', $paidBillId)->get();
 
-        $paidBillTmp = PaidBills::where('ORNumber', $paidBillId)->first();
+        $paidBillSingle = PaidBills::where('ORNumber', $paidBillId)->first();
     
-        if ($paidBillTmp != null) {
-            $account = ServiceAccounts::find($paidBillTmp->AccountNumber);
+        if ($paidBillSingle != null) {
+            $account = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.ForDistribution',
+                    'Billing_ServiceAccounts.Organization',
+                    'Billing_ServiceAccounts.Main',
+                    'Billing_ServiceAccounts.GroupCode',
+                    'Billing_ServiceAccounts.Multiplier',
+                    'Billing_ServiceAccounts.Coreloss',
+                    'Billing_ServiceAccounts.ConnectionDate',
+                    'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.SeniorCitizen',
+                    'Billing_ServiceAccounts.Evat5Percent',
+                    'Billing_ServiceAccounts.Ewt2Percent',
+                    'Billing_ServiceAccounts.Contestable',
+                    'Billing_ServiceAccounts.NetMetered',
+                    'Billing_ServiceAccounts.AccountRetention',
+                    'Billing_ServiceAccounts.DurationInMonths',
+                    'Billing_ServiceAccounts.AccountExpiration',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->where('Billing_ServiceAccounts.id', $paidBillSingle->AccountNumber)
+            ->first();
+            $meter = BillingMeters::where('ServiceAccountId', $paidBillSingle->AccountNumber)
+                ->orderByDesc('created_at')
+                ->first();
         }
+
+        $user = Auth::user();
 
         return view('/paid_bills/print_bill_payment', [
             'paidBill' => $paidBill,
-            'paidBillSingle' => $paidBillTmp,
+            'paidBillSingle' => $paidBillSingle,
             'account' => $account,
+            'meter' => $meter,
+            'user' => $user,
         ]);
     }
 
@@ -1133,20 +1172,21 @@ class PaidBillsController extends AppBaseController
         $bapaName = $request['BAPAName'];
         $period = $request['Period'];
 
-        $accounts = DB::table('Billing_Readings')
-            ->leftJoin('Billing_ServiceAccounts', 'Billing_ServiceAccounts.id', '=', 'Billing_Readings.AccountNumber')
-            ->whereRaw("Billing_Readings.ServicePeriod <= '" . $period . "'")
+        $accounts = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_ServiceAccounts.id', '=', 'Billing_Bills.AccountNumber')
+            ->whereRaw("Billing_Bills.ServicePeriod <= '" . $period . "'")
             ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+            ->whereRaw("Billing_Bills.id NOT IN (SELECT ObjectSourceId FROM Cashier_PaidBills WHERE ObjectSourceId IS NOT NULL)")
             ->select('Billing_ServiceAccounts.id AS AccountNumber',
                 'Billing_ServiceAccounts.ServiceAccountName',
                 'Billing_ServiceAccounts.AccountStatus',
                 'Billing_ServiceAccounts.OldAccountNo',
-                'Billing_Readings.KwhUsed',
-                'Billing_Readings.ServicePeriod',
-                'Billing_Readings.id',
-                DB::raw("(SELECT TOP 1 id FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod) AS BillId"),
-                DB::raw("(SELECT TOP 1 NetAmount FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod) AS NetAmount"),
-                DB::raw("(SELECT TOP 1 ORNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Readings.ServicePeriod AND Status IS NULL) AS ORNumber"),)
+                'Billing_Bills.KwhUsed',
+                'Billing_Bills.ServicePeriod',
+                'Billing_Bills.id',
+                DB::raw("(SELECT TOP 1 id FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Bills.ServicePeriod) AS BillId"),
+                DB::raw("(SELECT TOP 1 NetAmount FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Bills.ServicePeriod) AS NetAmount"),
+                DB::raw("(SELECT TOP 1 ORNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Bills.ServicePeriod AND Status IS NULL) AS ORNumber"),)
             ->orderBy('Billing_ServiceAccounts.AccountStatus')
             ->get();
 
@@ -1187,6 +1227,7 @@ class PaidBillsController extends AppBaseController
         $period = $request['Period'];
 
         $orStart = intval($request['ORNumber']) + 1;
+        $dcrNum = 'BAPA-' . IDGenerator::generateID();
 
         // SAVE EACH TRANSACTION
         for($i=0; $i<$len; $i++) {
@@ -1218,6 +1259,7 @@ class PaidBillsController extends AppBaseController
                 $paidBill->OfficeTransacted = env('APP_LOCATION');
                 $paidBill->PostingDate = date('Y-m-d');
                 $paidBill->PostingTime = date('H:i:s');
+                $paidBill->DCRNumber = $dcrNum;
                 
                 $paidBill->PaymentUsed = $request['PaymentUsed'];
                 // CHECK IF PAYMENT IS CASH, CHECK, OR CARD
@@ -1714,7 +1756,29 @@ class PaidBillsController extends AppBaseController
         $bapaPayments->NoOfConsumersPaid = $len;
         $bapaPayments->save(); 
 
-        return response()->json($accounts, 200);
+        return response()->json($dcrNum, 200);
+    }
+
+    public function printBapaPayments($dcrNum) {
+        $paidBills = DB::table('Cashier_PaidBills')
+            ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->where('Cashier_PaidBills.DCRNumber', $dcrNum)
+            ->select('Cashier_PaidBills.*',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.Purok',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.AccountType',
+                'Billing_ServiceAccounts.AccountStatus',
+                'CRM_Towns.Town',
+                'CRM_Barangays.Barangay',
+                DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id AND created_at IS NOT NULL ORDER BY created_at DESC) AS MeterNumber"))
+            ->get();
+
+        return view('/paid_bills/print_bapa_payments', [
+            'paidBills' => $paidBills
+        ]);
     }
 
     public function billsCollection() {

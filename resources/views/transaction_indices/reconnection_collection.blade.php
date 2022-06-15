@@ -297,7 +297,7 @@
                     if (jQuery.isEmptyObject(res)) {
 
                     } else {
-                        window.location.href = "{{ url('/transaction_indices/print-other-payments') }}" + "/" + res['id'];
+                        window.location.href = "{{ url('/transaction_indices/print-reconnection-collection') }}" + "/" + res['id'];
                     }
                 },
                 error : function(err) {

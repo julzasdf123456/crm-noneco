@@ -258,7 +258,8 @@ class TransactionIndexController extends AppBaseController
         $transactionIndex = new TransactionIndex;
         $transactionIndex->id = $id;
         $transactionIndex->TransactionNumber = env('APP_LOCATION') . '-' . $id;
-        $transactionIndex->PaymentTitle = "Service Connection Application Payment of " . $totalTransactions->ServiceAccountName;
+        $transactionIndex->PaymentTitle = $totalTransactions->ServiceAccountName;
+        $transactionIndex->PaymentDetails = "Service Connection Application Payment of " . $totalTransactions->ServiceAccountName;
         $transactionIndex->ORNumber = $request['ORNumber'];
         $transactionIndex->ORDate = date('Y-m-d');
         $transactionIndex->SubTotal = $totalTransactions->SubTotal;
@@ -571,7 +572,8 @@ class TransactionIndexController extends AppBaseController
         $transactionIndex = new TransactionIndex;
         $transactionIndex->id = $id;
         $transactionIndex->TransactionNumber = env('APP_LOCATION') . '-' . $id;
-        $transactionIndex->PaymentTitle = "Partial Payment to the arrears of " . $account->ServiceAccountName;
+        $transactionIndex->PaymentTitle = $account->ServiceAccountName;
+        $transactionIndex->PaymentDetails = "Partial Payment to the arrears of " . $account->ServiceAccountName;
         $transactionIndex->ORNumber = $request['ORNumber'];
         $transactionIndex->ORDate = date('Y-m-d');
         $transactionIndex->SubTotal = round($total, 2);
@@ -654,10 +656,12 @@ class TransactionIndexController extends AppBaseController
     public function printORTermedLedgerArrears($transactionIndexId) {
         $transactionIndex = TransactionIndex::find($transactionIndexId);
         $transactionDetails = TransactionDetails::where('TransactionIndexId', $transactionIndexId)->get();
+        $user = Auth::user();
 
         return view('/transaction_indices/print_or_termed_ledger_arrears', [
             'transactionIndex' => $transactionIndex,
             'transactionDetails' => $transactionDetails,
+            'user' => $user,
         ]);
     }
 
@@ -742,10 +746,12 @@ class TransactionIndexController extends AppBaseController
     public function printOtherPayments($transactionIndexId) {
         $transactionIndex = TransactionIndex::find($transactionIndexId);
         $transactionDetails = TransactionDetails::where('TransactionIndexId', $transactionIndexId)->get();
+        $user = Auth::user();
 
         return view('/transaction_indices/print_other_payments', [
             'transactionIndex' => $transactionIndex,
             'transactionDetails' => $transactionDetails,
+            'user' => $user,
         ]);
     }
 
@@ -847,7 +853,8 @@ class TransactionIndexController extends AppBaseController
         $transactionIndex = new TransactionIndex;
         $transactionIndex->id = $id;
         $transactionIndex->TransactionNumber = env('APP_LOCATION') . '-' . $id;
-        $transactionIndex->PaymentTitle = "Reconnection Payment for Account Name " . $serviceAccount->ServiceAccountName;
+        $transactionIndex->PaymentTitle = $serviceAccount->ServiceAccountName;
+        $transactionIndex->PaymentDetails = "Reconnection Payment for Account Name " . $serviceAccount->ServiceAccountName;
         $transactionIndex->ORNumber = $request['ORNumber'];
         $transactionIndex->ORDate = date('Y-m-d');
         $transactionIndex->SubTotal = round(floatval($request['SubTotal']), 2);
@@ -915,6 +922,18 @@ class TransactionIndexController extends AppBaseController
         return response()->json($transactionIndex, 200);
     }
 
+    public function printOrReconnection($transactionIndexId) {
+        $transactionIndex = TransactionIndex::find($transactionIndexId);
+        $transactionDetails = TransactionDetails::where('TransactionIndexId', $transactionIndexId)->get();
+        $user = Auth::user();
+
+        return view('/transaction_indices/print_reconnection_collection', [
+            'transactionIndex' => $transactionIndex,
+            'transactionDetails' => $transactionDetails,
+            'user' => $user,
+        ]);
+    }
+
     public function addCheckPayment(Request $request) {
         $transactionPaymentDetails = new TransacionPaymentDetails;
         $transactionPaymentDetails->id = IDGenerator::generateIDandRandString();
@@ -975,6 +994,18 @@ class TransactionIndexController extends AppBaseController
         return view('/transaction_indices/browse_ors_view', [
             'id' => $id,
             'paymentType' => $paymentType,
+        ]);
+    }
+
+    public function printOrTransactions($transactionIndexId) {
+        $transactionIndex = TransactionIndex::find($transactionIndexId);
+        $transactionDetails = TransactionDetails::where('TransactionIndexId', $transactionIndexId)->get();
+        $user = Auth::user();
+
+        return view('/transaction_indices/print_or_transactions', [
+            'transactionIndex' => $transactionIndex,
+            'transactionDetails' => $transactionDetails,
+            'user' => $user,
         ]);
     }
 }

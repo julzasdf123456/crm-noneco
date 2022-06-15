@@ -1,5 +1,5 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <a href="{{ route('home') }}" class="brand-link">
+    <a href="{{ route('home') }}" class="brand-link text-sm">
         {{-- <img src="https://boheco1.com/wp-content/uploads/2018/06/boheco-1-1024x1012.png" class="brand-image img-circle elevation-3" alt="User Image"> --}}
         <img src="https://www.kindpng.com/picc/m/344-3445724_travel-logo-design-travel-agency-logo-hd-png.png"
              alt="{{ config('app.name') }} Logo"
@@ -8,8 +8,18 @@
     </a>
 
     <div class="sidebar">
+        <div class="form-inline">
+            <div class="input-group" data-widget="sidebar-search">
+                <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
+                <div class="input-group-append">
+                    <button class="btn btn-sidebar">
+                    <i class="fas fa-search fa-fw"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
         <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            <ul class="nav nav-pills nav-sidebar flex-column text-sm nav-child-indent nav-flat" data-widget="treeview" role="menu" data-accordion="false">
                 @include('layouts.menu')
             </ul>
         </nav>

@@ -195,15 +195,15 @@
                     getDetails(res)
                     $.each(res, function(index, element) {
                         $('#accounts-table tbody').append(addToRow(res[index]['OldAccountNo'],
-                            res[index]['ServiceAccountName'],
-                            res[index]['AccountStatus'],
-                            res[index]['KwhUsed'],
-                            res[index]['ServicePeriod'],
-                            res[index]['BillNumber'],
-                            res[index]['NetAmount'],
-                            res[index]['ORNumber'],
-                            res[index]['BillId'],
-                            res[index]['AccountNumber']))
+                                res[index]['ServiceAccountName'],
+                                res[index]['AccountStatus'],
+                                res[index]['KwhUsed'],
+                                res[index]['ServicePeriod'],
+                                res[index]['BillNumber'],
+                                res[index]['NetAmount'],
+                                res[index]['ORNumber'],
+                                res[index]['BillId'],
+                                res[index]['AccountNumber']))
                     })
                     $('#spinner').hide()
                     $('#ServicePeriod').removeAttr('disabled')

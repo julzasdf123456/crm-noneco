@@ -466,6 +466,8 @@ Route::get('/transaction_indices/add-check-payment', [App\Http\Controllers\Trans
 Route::get('/transaction_indices/delete-check-payment', [App\Http\Controllers\TransactionIndexController::class, 'deleteCheckPayment'])->name('transactionIndices.delete-check-payment');
 Route::get('/transaction_indices/browse-ors', [App\Http\Controllers\TransactionIndexController::class, 'browseORs'])->name('transactionIndices.browse-ors');
 Route::get('/transaction_indices/browse-ors-view/{id}/{paymentType}', [App\Http\Controllers\TransactionIndexController::class, 'browseORView'])->name('transactionIndices.browse-ors-view');
+Route::get('/transaction_indices/print-or-transactions/{transactionIndexId}', [App\Http\Controllers\TransactionIndexController::class, 'printOrTransactions'])->name('transactionIndices.print-or-transactions');
+Route::get('/transaction_indices/print-reconnection-collection/{transactionIndexId}', [App\Http\Controllers\TransactionIndexController::class, 'printOrReconnection'])->name('transactionIndices.print-reconnection-collection');
 Route::resource('transactionIndices', App\Http\Controllers\TransactionIndexController::class);
 
 
@@ -492,6 +494,7 @@ Route::get('/paid_bills/get-adjusted-bapa-bills', [App\Http\Controllers\PaidBill
 Route::get('/paid_bills/add-check-payments', [App\Http\Controllers\PaidBillsController::class, 'addCheckPayments'])->name('paidBills.add-check-payments');
 Route::get('/paid_bills/delete-check-payment', [App\Http\Controllers\PaidBillsController::class, 'deleteCheckPayment'])->name('paidBills.delete-check-payment');
 Route::get('/paid_bills/fetch-account-by-old-account-number', [App\Http\Controllers\PaidBillsController::class, 'fetchAccountByOldAccountNumber'])->name('paidBills.fetch-account-by-old-account-number');
+Route::get('/paid_bills/print-bapa-payments/{dcrNum}', [App\Http\Controllers\PaidBillsController::class, 'printBapaPayments'])->name('paidBills.print-bapa-payments');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);
 
 

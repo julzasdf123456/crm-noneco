@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\DCRSummaryTransactions;
 use App\Models\TransacionPaymentDetails;
 use App\Models\ORAssigning;
+use App\Models\ServiceAccounts;
 use Flash;
 use Response;
 
@@ -172,6 +173,7 @@ class CacheOtherPaymentsController extends AppBaseController
 
     public function saveOtherPayments(Request $request) {
         $cacheOtherPayments = CacheOtherPayments::where('AccountNumber', $request['AccountNumber'])->get();
+        $account = ServiceAccounts::find($request['AccountNumber']);
 
         // SAVE TRANSACTION
         // $id = $request['TransactionId'];
@@ -184,19 +186,16 @@ class CacheOtherPaymentsController extends AppBaseController
         $transactionIndex = new TransactionIndex;
         $transactionIndex->id = $id;
         $transactionIndex->TransactionNumber = env('APP_LOCATION') . '-' . $id;
-        $transactionIndex->PaymentTitle = $request['PaymentTitle'];
+        $transactionIndex->PaymentTitle = $account != null ? $account->ServiceAccountName : $request['PaymentTitle'];
+        $transactionIndex->PaymentDetails = $request['PaymentTitle'];
         $transactionIndex->ORNumber = $request['ORNumber'];
         $transactionIndex->ORDate = date('Y-m-d');
-        $transactionIndex->SubTotal = round($subTotal, 2);
-        $transactionIndex->VAT = round($vat, 2);
-        $transactionIndex->Total = round($total, 2);
         $transactionIndex->ObjectId = $request['AccountNumber'];
         $transactionIndex->Source = 'Other Payments';
         $transactionIndex->PaymentUsed = $request['PaymentUsed'];
         $transactionIndex->PayeeName = $request['PaymentTitle'];
         $transactionIndex->UserId = Auth::id();
         $transactionIndex->AccountNumber = $request['AccountNumber'];
-        $transactionIndex->save();
 
         foreach($cacheOtherPayments as $item) {
             $subTotal += floatval($item->Amount);
@@ -228,6 +227,11 @@ class CacheOtherPaymentsController extends AppBaseController
                 $dcrSum->save();
             }
         }
+        
+        $transactionIndex->SubTotal = round($subTotal, 2);
+        $transactionIndex->VAT = round($vat, 2);
+        $transactionIndex->Total = round($total, 2);
+        $transactionIndex->save();
 
         // SAVE TRANSACTION PAYMENT DETAILS LOGS
         if ($request['PaymentUsed'] == 'Cash' | $request['PaymentUsed'] == 'Cash and Check') {

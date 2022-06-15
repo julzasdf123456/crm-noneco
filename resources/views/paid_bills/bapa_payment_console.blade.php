@@ -4,7 +4,7 @@
     use App\Models\ORAssigning;
 
     // GET PREVIOUS MONTHS
-    for ($i = 0; $i <= 12; $i++) {
+    for ($i = -1; $i <= 12; $i++) {
         $months[] = date("Y-m-01", strtotime( date( 'Y-m-01' )." -$i months"));
     }
 @endphp
@@ -422,6 +422,7 @@
         });
 
         function transact(paymentUsed) {
+            $('#spinner').show()
             $.ajax({
                 url : "{{ route('paidBills.save-bapa-payments') }}",
                 type : 'GET',
@@ -438,12 +439,19 @@
                     Bank : $('#bank').val()
                 },
                 success : function(res) {
-                    alert('PRINT OR BAPA')
+                    // alert('PRINT OR BAPA')
                     // location.reload()
+                    $('#spinner').hide()
+                    window.location.href = "{{ url('/paid_bills/print-bapa-payments') }}" + "/" + res
                     console.log(res)
                 },
                 error : function(err) {
-                    alert('An error occurred during the transaction')
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'An error occurred during the transaction.',
+                    })
+                    $('#spinner').hide()
                 }
             })
         }

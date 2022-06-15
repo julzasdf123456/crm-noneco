@@ -106,6 +106,6 @@
     window.print();
 
     window.setTimeout(function(){
-        window.location.href = "{{ route('transactionIndices.other-payments') }}";
+        window.location.href = "{{ route('transactionIndices.reconnection-collection') }}";
     }, 800);
 </script>

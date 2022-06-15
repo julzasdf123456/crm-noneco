@@ -438,7 +438,7 @@
                     CashAmount : $('#cashAmountPaid').val(),
                 },
                 success : function(res) {
-                    window.location.href = "{{ url('/transaction_indices/print-or-service-connections') }}" + "/" + res['id'];
+                    window.location.href = "{{ url('/transaction_indices/print-or-transactions') }}" + "/" + res['id'];
                 },
                 error : function(err) {
                     Swal.fire({

@@ -39,7 +39,7 @@
             </div>
 
             <div class="col-lg-8 col-md-7">
-                <div class="card">
+                <div class="card shadow-none">
                     <div class="card-header p-2">
                         <ul class="nav nav-pills">
                             <li class="nav-item"><a class="nav-link active" href="#billing-hist" data-toggle="tab">
