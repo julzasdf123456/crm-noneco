@@ -416,6 +416,7 @@ Route::get('/bills/print-single-bill-old/{billId}', [App\Http\Controllers\BillsC
 Route::get('/bills/bulk-print-bill', [App\Http\Controllers\BillsController::class,  'bulkPrintBill'])->name('bills.bulk-print-bill');
 Route::get('/bills/get-routes-from-town', [App\Http\Controllers\BillsController::class,  'getRoutesFromTown'])->name('bills.get-routes-from-town');
 Route::get('/bills/print-bulk-bill-new-format/{period}/{town}/{route}', [App\Http\Controllers\BillsController::class,  'printBulkBillNewFormat'])->name('bills.print-bulk-bill-new-format');
+Route::get('/bills/print-bulk-bill-old-format/{period}/{town}/{route}', [App\Http\Controllers\BillsController::class,  'printBulkBillOldFormat'])->name('bills.print-bulk-bill-old-format');
 Route::get('/bills/bapa-manual-billing', [App\Http\Controllers\BillsController::class,  'bapaManualBilling'])->name('bills.bapa-manual-billing');
 Route::get('/bills/search-bapa-for-billing', [App\Http\Controllers\BillsController::class,  'searchBapaForBilling'])->name('bills.search-bapa-for-billing');
 Route::get('/bills/bapa-manual-billing-console/{bapaName}', [App\Http\Controllers\BillsController::class,  'bapaManualBillingConsole'])->name('bills.bapa-manual-billing-console');
@@ -434,6 +435,7 @@ Route::resource('bills', App\Http\Controllers\BillsController::class);
 Route::resource('readingImages', App\Http\Controllers\ReadingImagesController::class);
 
 Route::get('/collectibles/ledgerize', [App\Http\Controllers\CollectiblesController::class, 'ledgerize'])->name('collectibles.ledgerize');
+Route::get('/collectibles/add-to-month', [App\Http\Controllers\CollectiblesController::class, 'addToMonth'])->name('collectibles.add-to-month');
 Route::post('/collectibles/clear-ledger/{id}', [App\Http\Controllers\CollectiblesController::class, 'clearLedger'])->name('collectibles.clear-ledger');
 Route::resource('collectibles', App\Http\Controllers\CollectiblesController::class);
 

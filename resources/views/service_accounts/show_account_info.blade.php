@@ -46,8 +46,12 @@
                     <th>{{ $serviceAccounts->SequenceCode }}</th>
                 </tr>
                 <tr>
-                    <td class="text-muted">Group Code</td>
+                    <td class="text-muted">Group Code/Day</td>
                     <th>{{ $serviceAccounts->GroupCode }}</th>
+                </tr>
+                <tr>
+                    <td class="text-muted">Meter Reader</td>
+                    <th>{{ $serviceAccounts->MeterReader }}</th>
                 </tr>
                 <tr>
                     <td class="text-muted">For Distribution</td>
@@ -59,7 +63,7 @@
                 </tr>
                 <tr>
                     <td class="text-muted">BAPA</td>
-                    <th class="{{ $serviceAccounts->Organization=='BAPA' ? 'text-success' : 'text-muted' }}">{{ $serviceAccounts->Organization=='BAPA' ? 'Yes' : 'No' }}</th>
+                    <th class="{{ $serviceAccounts->Organization=='BAPA' ? 'text-success' : 'text-muted' }}">{{ $serviceAccounts->Organization=='BAPA' ? ('Yes (' . $serviceAccounts->OrganizationParentAccount . ')') : 'No' }}</th>
                 </tr>
                 <tr>
                     <td class="text-muted">Senior Citizen</td>
@@ -68,6 +72,10 @@
                 <tr>
                     <td class="text-muted">Contestable</td>
                     <th class="{{ $serviceAccounts->Contestable=='Yes' ? 'text-success' : 'text-muted' }}">{{ $serviceAccounts->Contestable=='Yes' ? 'Yes' : 'No' }}</th>
+                </tr>
+                <tr>
+                    <td class="text-muted">Net Metered</td>
+                    <th class="{{ $serviceAccounts->NetMetered=='Yes' ? 'text-success' : 'text-muted' }}">{{ $serviceAccounts->NetMetered=='Yes' ? 'Yes' : 'No' }}</th>
                 </tr>
                 <tr>
                     <td class="text-muted">Longevity</td>

@@ -63,6 +63,7 @@ class ReadAndBillAPI extends Controller {
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
             ->where('Billing_ServiceAccounts.Town', $request['AreaCode'])
             ->where('Billing_ServiceAccounts.GroupCode', $request['GroupCode'])
+            ->where('Billing_ServiceAccounts.MeterReader', $request['MeterReader'])
             ->whereIn('Billing_ServiceAccounts.AccountStatus', ['ACTIVE', 'DISCONNECTED'])
             ->whereNull('Billing_ServiceAccounts.OrganizationParentAccount')
             ->whereRaw("Billing_ServiceAccounts.id NOT IN (SELECT AccountNumber FROM Billing_Readings WHERE ServicePeriod='" . $request['ServicePeriod'] . "' AND AccountNumber IS NOT NULL)")

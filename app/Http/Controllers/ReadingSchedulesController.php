@@ -228,8 +228,9 @@ class ReadingSchedulesController extends AppBaseController
     }
 
     public function createReadingSchedule() {
+        $towns = Towns::all();
         return view('/reading_schedules/create_reading_schedule', [
-
+            'towns' => $towns,
         ]);
     }
 

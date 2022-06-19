@@ -35,7 +35,11 @@
                 <div class="card-body">
                     <div class="form-group row">
                         <label for="Area" class="col-md-3">Area</label>
-                        <input type="text" readonly name="AreaCode" value="{{ env("APP_AREA_CODE") }}" class="form-control col-md-9"/>
+                        <select name="AreaCode" id="" class="form-control col-md-9">
+                            @foreach ($towns as $item)
+                                <option value="{{ $item->id }}" {{ env('APP_AREA_CODE') == $item->id ? 'selected' : '' }}>{{ $item->Town }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="form-group row">
                         <label for="ServicePeriod" class="col-md-3">Billing Month</label>

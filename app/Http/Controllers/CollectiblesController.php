@@ -189,4 +189,23 @@ class CollectiblesController extends AppBaseController
 
         return redirect(route('serviceAccounts.show', [$id]));
     }
+
+    public function addToMonth(Request $request) {
+        $collectibles = Collectibles::where('AccountNumber', $request['AccountNumber'])
+            ->first();
+
+        if ($collectibles != null) {
+            $collectibles->Balance = floatval($collectibles->Balance) + floatval($request['Amount']);
+            $collectibles->save();
+
+            $arrearLedger = new ArrearsLedgerDistribution;
+            $arrearLedger->id = IDGenerator::generateIDandRandString();
+            $arrearLedger->AccountNumber = $collectibles->AccountNumber;
+            $arrearLedger->ServicePeriod = $request['Month'];
+            $arrearLedger->Amount = $request['Amount'];
+            $arrearLedger->save();
+        }
+
+        return response()->json(['res' => 'ok'], 200);
+    }
 }

@@ -131,6 +131,7 @@ class ServiceAccountsController extends AppBaseController
         $serviceAccounts = DB::table('Billing_ServiceAccounts')
             ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
             ->select('Billing_ServiceAccounts.id',
                     'Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.OldAccountNo',
@@ -142,6 +143,7 @@ class ServiceAccountsController extends AppBaseController
                     'Billing_ServiceAccounts.SequenceCode',
                     'Billing_ServiceAccounts.ForDistribution',
                     'Billing_ServiceAccounts.Organization',
+                    'Billing_ServiceAccounts.OrganizationParentAccount',
                     'Billing_ServiceAccounts.Main',
                     'Billing_ServiceAccounts.GroupCode',
                     'Billing_ServiceAccounts.Multiplier',
@@ -157,7 +159,8 @@ class ServiceAccountsController extends AppBaseController
                     'Billing_ServiceAccounts.DurationInMonths',
                     'Billing_ServiceAccounts.AccountExpiration',
                     'CRM_Towns.Town',
-                    'CRM_Barangays.Barangay')
+                    'CRM_Barangays.Barangay',
+                    'users.name as MeterReader')
             ->where('Billing_ServiceAccounts.id', $id)
             ->first();
 

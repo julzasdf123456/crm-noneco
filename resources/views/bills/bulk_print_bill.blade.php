@@ -98,5 +98,13 @@
                 window.location.href = "{{ url('/bills/print-bulk-bill-new-format') }}" + "/" + $('#Period').val() + "/" + $('#Town').val() + "/" + $('#Route').val();
             }            
         }
+
+        function printOld() {
+            if (jQuery.isEmptyObject($('#Route').val())) {
+                alert('Select route first')
+            } else {
+                window.location.href = "{{ url('/bills/print-bulk-bill-old-format') }}" + "/" + $('#Period').val() + "/" + $('#Town').val() + "/" + $('#Route').val();
+            }            
+        }
     </script>
 @endpush

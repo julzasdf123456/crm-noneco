@@ -26,7 +26,7 @@
                             <img class="profile-user-img img-fluid img-circle" src="#" alt="User profile picture">
                         </div>
                         <h3 class="profile-username text-center">{{ $users->name }}</h3>
-                        <p class="text-muted text-center">{{ $users->email }}</p>
+                        <p class="text-muted text-center">{{ $users->username }} | {{ $users->email }}</p>
                     </div>
                 </div>
             </div>

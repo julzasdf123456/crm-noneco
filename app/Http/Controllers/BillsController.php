@@ -1265,11 +1265,38 @@ class BillsController extends AppBaseController
             ->where('ConsumerType', $bills->ConsumerType)
             ->first();
 
+        if ($account != null) {
+            $arrears = DB::table('Billing_Bills')
+                ->whereRaw("Billing_Bills.id NOT IN (SELECT ObjectSourceId FROM Cashier_PaidBills WHERE AccountNumber='" . $account->id . "')")
+                ->where('Billing_Bills.AccountNumber', $account->id)
+                ->whereNotIN('Billing_Bills.id', [$billId])
+                ->select('Billing_Bills.*')
+                ->get();
+        } else {
+            $arrears = null;
+        }
+        
+
         return view('/bills/print_single_bill_old', [
             'bills' => $bills,
             'account' => $account,
             'meters' => $meters,
             'rate' => $rate,
+            'arrears' => $arrears
+        ]);
+    }
+
+    public function printBulkBillOldFormat($servicePeriod, $town, $route) {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+            ->where('Billing_ServiceAccounts.Town', $town)
+            ->where('Billing_ServiceAccounts.AreaCode', $route)
+            ->select('Billing_Bills.*')
+            ->get();
+
+        return view('/bills/print_bulk_old_format', [
+            'bills' => $bills
         ]);
     }
 

@@ -166,6 +166,7 @@
                             <div class="col-lg-3 col-md-2">
                                 <div class="input-group">
                                     <select class="custom-select select2"  name="MeterReader">
+                                        <option value="">-- Select --</option>
                                         @foreach ($meterReaders as $items)
                                             <option value="{{ $items->id }}" {{ $serviceAccount->MeterReader==$items->id ? 'selected' : '' }}>{{ $items->name }}</option>
                                         @endforeach
@@ -391,7 +392,7 @@
                                     <select class="custom-select select2"  name="OrganizationParentAccount" id="OrganizationParentAccount" disabled>
                                         <option value="NULL">-- Select --</option>
                                         @foreach ($bapa as $item)
-                                            <option value="{{ $item->OrganizationParentAccount }}">{{ $item->OrganizationParentAccount }}</option>
+                                            <option value="{{ $item->OrganizationParentAccount }}" {{ $item->OrganizationParentAccount==$serviceAccount->OrganizationParentAccount ? 'selected' : '' }}>{{ $item->OrganizationParentAccount }}</option>
                                         @endforeach
                                     </select>
                                 </div>

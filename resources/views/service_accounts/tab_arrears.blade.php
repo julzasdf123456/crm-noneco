@@ -1,6 +1,11 @@
 @php
     use App\Models\Bills;
     use App\Models\IDGenerator;
+
+    // GET PREVIOUS MONTHS
+    for ($i = -1; $i <= 90; $i++) {
+        $months[] = date("Y-m-01", strtotime( date( 'Y-m-01' ) . " +$i months"));
+    }
 @endphp
 <div class="content">
     <div class="row">
@@ -48,6 +53,7 @@
                                 </tbody>
                             </table>
 
+                            <button class="btn btn-link text-success float-right" data-toggle="modal" data-target="#modal-add-month"><i class="fas fa-plus"></i></button>
                             {!! Form::open(['route' => ['collectibles.clear-ledger', $serviceAccounts->id], 'method' => 'post']) !!}
                             {!! Form::button('<i class="fas fa-trash"></i>', ['type' => 'submit', 'class' => 'btn btn-sm btn-link text-danger float-right', 'title' => 'Clear ledger', 'onclick' => "return confirm('Are you sure you want to clear this ledger?')"]) !!}
                             {!! Form::close() !!}
@@ -91,8 +97,8 @@
                                     <tr>
                                         <td>{{ $item->BillNumber }}</td>
                                         <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
-                                        <td>{{ number_format($item->NetAmount, 2) }}</td>
-                                        <td>{{ number_format(Bills::getPenalty($item->NetAmount), 2) }}</td>
+                                        <td>{{ number_format(str_replace(',', '', $item->NetAmount), 2) }}</td>
+                                        <td>{{ number_format(Bills::getFinalPenalty($item), 2) }}</td>
                                         <td>
                                             @if ($item->MergedToCollectible == 'Yes')
                                                 <a href="{{ route('serviceAccounts.unmerge-bill-arrear', [$item->id]) }}" class="btn btn-xs btn-link text-primary" title="Unmerge this arrear to collectibles"><i class="fas fa-folder-minus"></i></a>
@@ -211,12 +217,46 @@
     </div>
 </div>
 
+{{-- ADD MONTH MODAL ON LEDGER/OCL --}}
+<div class="modal fade" id="modal-add-month" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Another Month in this OCL</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="Month">Month</label>
+                    <select name="Month" id="Month" class="form-control">
+                        @for ($i = 0; $i < count($months); $i++)
+                            <option value="{{ $months[$i] }}">{{ date('F Y', strtotime($months[$i])) }}</option>
+                        @endfor
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="AmountToAdd">Amount</label>
+                    <input type="number" id="AmountToAdd" step="any" placeholder="Enter amount" class="form-control"/>
+                </div>
+                
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="add-month-btn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('page_scripts')
     <script>
         $(document).ready(function() {
             $('#term-btn').on('click', function() {
                 $.ajax({
-                    url : '/collectibles/ledgerize',
+                    url : '{{ route("collectibles.ledgerize") }}',
                     type : 'GET',
                     data : {
                         CollectibleId : "{{ $collectibles != null ? $collectibles->id : 0 }}",
@@ -226,8 +266,35 @@
                         location.reload();
                     }, 
                     error : function(err) {
-                        alert('An error occurred while ledgerizing this arrear')
-                        console.log(err)
+                        Swal.fire({
+                            title : 'Oops!',
+                            text : 'An error occurred during the transaction',
+                            icon : 'error'
+                        })
+                    }
+                })
+            })
+
+            // ADD MONTH
+            $('#add-month-btn').on('click', function() {
+                $.ajax({
+                    url : '{{ route("collectibles.add-to-month") }}',
+                    type : 'GET',
+                    data : {
+                        AccountNumber : "{{ $serviceAccounts->id }}",
+                        Amount : $('#AmountToAdd').val(),
+                        Month : $('#Month').val(),
+                        
+                    },
+                    success : function(res) {
+                        location.reload();
+                    }, 
+                    error : function(err) {
+                        Swal.fire({
+                            title : 'Oops!',
+                            text : 'An error occurred during the transaction',
+                            icon : 'error'
+                        })
                     }
                 })
             })
