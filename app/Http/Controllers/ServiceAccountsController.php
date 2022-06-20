@@ -306,7 +306,7 @@ class ServiceAccountsController extends AppBaseController
         $meterHistory = DB::table('Billing_Meters')
             ->where('ServiceAccountId', $id)
             ->orderByDesc('created_at')
-            ->offset(1)
+            // ->offset(1)
             ->get();
 
         $changeNameHistory = DB::table('Billing_AccountNameHistory')

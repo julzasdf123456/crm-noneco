@@ -178,7 +178,7 @@
     @stack('page_css')
 </head>
 
-<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed"> {{--  sidebar-collapse --}}
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed sidebar-collapse"> {{--  sidebar-collapse --}}
 <div class="wrapper">
     <!-- Main Header -->
     <nav class="main-header navbar navbar-expand navbar-white navbar-light border-bottom-0">
