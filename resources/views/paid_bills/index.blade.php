@@ -40,7 +40,7 @@
     <div class="content">
         <div class="row">
             {{-- QUEUE --}}
-            <div class="col-lg-8 col-md-6">
+            <div class="col-lg-7 col-md-6">
                 {{-- DETAILS CARD --}}
                 <div class="card" style="height: 60vh;">
                     <div class="card-header border-0">
@@ -67,7 +67,7 @@
             </div>
 
             {{-- PAYMENT SECTION --}}
-            <div class="col-lg-4 col-md-6">
+            <div class="col-lg-5 col-md-6">
                 <div class="card">
                     <div class="card-body">
                         <div class="row">
@@ -96,7 +96,7 @@
                                         <strong class="text-right" id="surcharges"></strong>
                                     </td>
                                 </tr>
-                                <tr>                        
+                                {{-- <tr>                        
                                     <td>
                                         <div class="input-group">
                                             <input type="hidden" value="" name="Vat2">
@@ -119,7 +119,7 @@
                                     <td class="text-right">
                                         <strong class="text-right" id="vat5">-</strong>
                                     </td>
-                                </tr>
+                                </tr> --}}
                                 <tr style="border-top: 1px solid #dcdcdc">
                                     <th>Total Amount Due</th>
                                     <th class="text-right">
