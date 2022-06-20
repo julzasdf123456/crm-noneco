@@ -618,3 +618,6 @@ Route::resource('dCRIndices', App\Http\Controllers\DCRIndexController::class);
 
 
 Route::resource('accountLocationHistories', App\Http\Controllers\AccountLocationHistoryController::class);
+
+
+Route::resource('denominations', App\Http\Controllers\DenominationsController::class);

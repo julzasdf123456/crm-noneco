@@ -207,11 +207,6 @@
                     </tbody>
                 </table>
             </div>
-            {{-- <div class="modal-footer justify-content-between">--}}
-                {{-- <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> --}}
-                {{-- <button type="button" class="btn btn-primary" id="submit">Save changes</button> --}}
-                {{-- <input type="submit" value="Add" id="submit" class="btn btn-primary"> --}}
-            {{-- </div>  --}}
         </div>
     </div>
 </div>
@@ -241,6 +236,8 @@
     </div>
 </div>
 
+@include('paid_bills.modal_confirm_payment')
+
 @include('paid_bills.check_modal')
 
 @push('page_scripts')
@@ -267,6 +264,8 @@
         var checkIds = []
 
         var hasTransacted = false
+
+        var confirmModalShown = false
 
         $(document).ready(function() {
             //basic search
@@ -310,7 +309,6 @@
             // AMOUNT PAID ON KEY PRESSED
             $('#amountPaid').keyup(function() {
                 change = (parseFloat(this.value) - totalAmount).toFixed(2).toLocaleString()
-
                 if (parseFloat(change)) {
                     $('#change').val(change)
                     if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(selectedPayments)) {
@@ -326,18 +324,19 @@
 
             // AMOUNT PAID ON CHANGE
             $('#amountPaid').on('change', function() {
-                change = (parseFloat(this.value) - totalAmount).toFixed(2).toLocaleString()
-
-                if (parseFloat(change)) {
+                change = (parseFloat(this.value) - totalAmount).toFixed(2)
+                
+                if (parseFloat(change) || $('#amountPaid').val() == parseFloat(totalAmount).toFixed(2)) {
                     $('#change').val(change)
-                    if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(selectedPayments)) {
+
+                    if (change >= 0 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(selectedPayments)) {
                         buttonEnablers(true)                        
                     } else {
                         buttonEnablers(false)
                     }
                 } else {
                     $('#change').val('')
-                    buttonEnablers(false)
+                    buttonEnablers(false)                    
                 }                
             })
 
@@ -345,17 +344,45 @@
                 computePayments()
             })
 
+            $('#cashAmount').on('change', function() {
+                computePayments()
+            })
+
             // CASH BUTTON EVENT
             $('#cashBtn').on('click', function() {
-                if (parseFloat(change)) {
-                    if (change > -1) {
-                        transact('Cash')            
+                if (parseFloat(change) || $('#amountPaid').val() == parseFloat(totalAmount).toFixed(2)) {
+                    if (change >= 0) {
+                        if ($('#modal-confirm-payment').hasClass('show')) {
+                            // transact because modal is shown alread
+                            transact('Cash')         
+                        } else {
+                            // show confirm modal first
+                            $('#modal-confirm-payment').modal('show');
+                        }          
                     } else {
 
                     }
                 } else {
 
                 }  
+            })
+
+            $('#confirm-modal-btn').on('click', function() {
+                if (parseFloat(change) || $('#amountPaid').val() == parseFloat(totalAmount).toFixed(2)) {
+                    if (change >= 0) {
+                        if ($('#modal-confirm-payment').hasClass('show')) {
+                            // transact because modal is shown alread
+                            transact('Cash')         
+                        } else {
+                            // show confirm modal first
+                            $('#modal-confirm-payment').modal('show');
+                        }          
+                    } else {
+
+                    }
+                } else {
+
+                }   
             })
 
             // OR NO ON KEY PRESSED
@@ -429,6 +456,36 @@
             $('#save-check-transaction').on('click', function() {
                 addCheck()           
             })
+
+            // MODAL CONFIRM SHOW EVENT
+            $("#modal-confirm-payment" ).on('shown.bs.modal', function(){      
+                /**
+                 *  DISPLAY MODAL
+                 **/
+                $('#cash-modal-confirm').val($('#cashAmount').val()).focus().select()
+                $('#check-modal-confirm').val(parseFloat(checkAmountTotal).toFixed(2))
+                
+                var cashAmnt = parseFloat($('#cashAmount').val()) ? parseFloat($('#cashAmount').val()) : 0
+                var totalAll = cashAmnt + checkAmountTotal
+
+                $('#total-modal-confirm').val(parseFloat(totalAll).toFixed(2))
+                $('#change-modal-confirm').val(change)
+            });
+
+            // MODAL CONFIRM HIDE EVENT
+            $('#modal-confirm-payment').on('hidden.bs.modal', function () {
+                $('#cashAmount').focus().select()
+            })
+
+            // MODAL CONFIRM CASH INPUT
+            $('#cash-modal-confirm').keyup(function() {
+                $('#cashAmount').val(this.value).change()
+                computePayables()
+                var cashAmnt = parseFloat($('#cashAmount').val()) ? parseFloat($('#cashAmount').val()) : 0
+                var totalAll = cashAmnt + checkAmountTotal
+                $('#total-modal-confirm').val(parseFloat(totalAll).toFixed(2))
+                $('#change-modal-confirm').val(change)
+            })
         })
 
         function addToPayables(id) {
@@ -457,9 +514,9 @@
             // VALIDATE BUTTONS
             change = (parseFloat($('#amountPaid').val()) - totalAmount).toFixed(2).toLocaleString()
 
-            if (parseFloat(change)) {
+            if (parseFloat(change) || $('#amountPaid').val() == parseFloat(totalAmount).toFixed(2)) {
                 $('#change').val(change)
-                if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(selectedPayments)) {
+                if (change >= 0 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(selectedPayments)) {
                     buttonEnablers(true)                        
                 } else {
                     buttonEnablers(false)
@@ -476,7 +533,8 @@
             $('#additional-charges').text('P ' + Number(additionals.toFixed(2)).toLocaleString())
             $('#deductions').text('P ' + Number(deductions.toFixed(2)).toLocaleString())
             $('#surcharges').text('P ' + Number(surcharge.toFixed(2)).toLocaleString())
-            $('#cashAmount').focus()
+            $('#cashAmount').val(parseFloat(totalAmount).toFixed(2)).change()
+            $('#cashAmount').focus().select()
 
             if(vat2Checked == true) {
                 $('#vat2').text(vat2)
@@ -575,12 +633,14 @@
                 // enable
                 $('#cashBtn').removeAttr('disabled')   
                 $('#checkBtn').removeAttr('disabled')  
-                $('#cardBtn').removeAttr('disabled')               
+                $('#cardBtn').removeAttr('disabled')   
+                $('#confirm-modal-btn').removeAttr('disabled')            
             } else {
                 // disable
                 $('#cashBtn').attr('disabled', 'true')
                 $('#checkBtn').attr('disabled', 'true')
                 $('#cardBtn').attr('disabled', 'true')
+                $('#confirm-modal-btn').attr('disabled', 'true')
             }   
         }
 
@@ -769,9 +829,15 @@
                 if ($('#modal-check-payment').hasClass('show')) {
                     // ENTER KEY IS DISABLED IF SHOW CHECK MODAL IS SHOWN
                 } else {
-                    if (parseFloat(change)) {
-                        if (change > -1 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(selectedPayments)) {  
-                            transact('Cash')                     
+                    if (parseFloat(change) || $('#amountPaid').val() == parseFloat(totalAmount).toFixed(2)) {
+                        if (change >= 0 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(selectedPayments)) {  
+                            if ($('#modal-confirm-payment').hasClass('show')) {
+                                // transact because modal is shown alread
+                                transact('Cash')         
+                            } else {
+                                // show confirm modal first
+                                $('#modal-confirm-payment').modal('show');
+                            }                                        
                         } else {
 
                         }
@@ -785,7 +851,7 @@
             }
         });
 
-        function transact(paymentUsed) {
+        function transact(paymentUsed) {            
             if (!hasTransacted) {
                 hasTransacted = true
                 if (jQuery.isEmptyObject($('#cashAmount').val())) {

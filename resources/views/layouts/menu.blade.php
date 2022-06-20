@@ -904,4 +904,3 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcan
-
