@@ -15,17 +15,8 @@
                 </div>
                 <div class="col-sm-5">
                     <div class="form-row align-items-center float-right">
-                        {{-- <div class="col-auto">
-                            <input id="area-search" type="text" maxlength="2" class="form-control" style="width: 60px;">
-                        </div>
                         <div class="col-auto">
-                            <input id="route-search" type="text" maxlength="5" class="form-control" style="width: 90px;">
-                        </div>
-                        <div class="col-auto">
-                            <input id="sequence-search" type="text" maxlength="3" class="form-control" style="width: 70px;">
-                        </div> --}}
-                        <div class="col-auto">
-                            <input class="form-control" id="old-account-no" data-inputmask="'alias': 'phonebe'" maxlength="12">
+                            <input class="form-control" id="old-account-no" data-inputmask="'alias': 'phonebe'" maxlength="12" value="{{ env('APP_AREA_CODE') }}">
                         </div>
                     </div>    
                 </div>
@@ -275,6 +266,8 @@
         var selectedPayments = []
         var checkIds = []
 
+        var hasTransacted = false
+
         $(document).ready(function() {
             //basic search
             $('#old-account-no').focus()
@@ -298,35 +291,6 @@
                     searchOldAccountNumber()
                 }
             })
-
-            // basic search
-            // $('#area-search').focus()
-            // $('#area-search').keyup(function(e) {
-            //     var charCount = this.value.length
-            //     if (charCount == 2) {
-            //         $('#route-search').focus()
-            //     }
-            // })
-
-            // $('#route-search').keyup(function() {
-            //     var charCount = this.value.length
-            //     if (charCount == 5) {
-            //         $('#sequence-search').focus()
-            //     } else if (charCount == 0) {
-            //         $('#area-search').focus()
-            //     }
-            // })
-
-
-            // $('#sequence-search').keyup(function() {
-            //     var charCount = this.value.length
-            //     if (charCount == 3) {
-            //         // SEARCH CONSUMER
-            //         searchOldAccountNumber()
-            //     } else if (charCount == 0) {
-            //         $('#route-search').focus()
-            //     }
-            // })
 
             $('#search').keyup(function() {
                 var letterCount = this.value.length;
@@ -576,7 +540,7 @@
 
         function requestUnlock(id) {
             $.ajax({
-                url : '/paid_bills/request-bills-payment-unlock',
+                url : '{{ route("paidBills.request-bills-payment-unlock") }}',
                 type : 'GET',
                 data : {
                     id : id
@@ -622,7 +586,7 @@
 
         function performSearch(regex) {
             $.ajax({
-                url : '/paid_bills/search',
+                url : '{{ route("paidBills.search") }}',
                 type : 'GET',
                 data : {
                     query : regex,
@@ -678,7 +642,7 @@
 
             // FETCH ACCOUNT DETAILS
             $.ajax({
-                url : '/paid_bills/fetch-account',
+                url : '{{ route("paidBills.fetch-account") }}',
                 type : 'GET',
                 data : {
                     AccountNumber : id,
@@ -702,7 +666,7 @@
 
             // FETCH UNPAID BILLS
             $.ajax({
-                url : '/paid_bills/fetch-details',
+                url : '{{ route("paidBills.fetch-details") }}',
                 type : 'GET',
                 data : {
                     AccountNumber : id,
@@ -822,47 +786,51 @@
         });
 
         function transact(paymentUsed) {
-            if (jQuery.isEmptyObject($('#cashAmount').val())) {
-                paymentUsed = 'Check'
-            } else {
-                if (checkIds.length > 0) {
-                    paymentUsed = 'Cash and Check'
+            if (!hasTransacted) {
+                hasTransacted = true
+                if (jQuery.isEmptyObject($('#cashAmount').val())) {
+                    paymentUsed = 'Check'
                 } else {
-                    paymentUsed = 'Cash'
+                    if (checkIds.length > 0) {
+                        paymentUsed = 'Cash and Check'
+                    } else {
+                        paymentUsed = 'Cash'
+                    }
                 }
-            }
 
-            $.ajax({
-                url : '{{ route("paidBills.save-paid-bill-and-print") }}',
-                type : 'GET',
-                data : {
-                    BillNumber : billNumber,
-                    AccountNumber : acctNo,
-                    ServicePeriod: svcPeriod,
-                    KwhUsed : kwhUsed,
-                    Surcharge : surcharge,
-                    AdditionalCharges : additionals,
-                    Deductions : deductions,
-                    NetAmount : totalAmount,
-                    BillId : billId,
-                    ORNumber : $('#orNumber').val(),
-                    BillsId : selectedPayments,
-                    Ewt : vat2Checked,
-                    VAT : vat5Checked,
-                    PaymentUsed : paymentUsed,
-                    CheckNo : $('#checkNo').val(),
-                    Bank : $('#bank').val(),
-                    CheckIds : checkIds,
-                    CashAmount : $('#cashAmount').val(),
-                }, 
-                success : function(res) {
-                    window.location.href = "{{ url('/paid_bills/print-bill-payment') }}" + "/" + res['ORNumber']
-                },
-                error : function(err) {
-                    alert('An error occurred while performing the transaction. Contact support for more.')
-                    console.log(err)
-                }
-            })
+                $.ajax({
+                    url : '{{ route("paidBills.save-paid-bill-and-print") }}',
+                    type : 'GET',
+                    data : {
+                        BillNumber : billNumber,
+                        AccountNumber : acctNo,
+                        ServicePeriod: svcPeriod,
+                        KwhUsed : kwhUsed,
+                        Surcharge : surcharge,
+                        AdditionalCharges : additionals,
+                        Deductions : deductions,
+                        NetAmount : totalAmount,
+                        BillId : billId,
+                        ORNumber : $('#orNumber').val(),
+                        BillsId : selectedPayments,
+                        Ewt : vat2Checked,
+                        VAT : vat5Checked,
+                        PaymentUsed : paymentUsed,
+                        CheckNo : $('#checkNo').val(),
+                        Bank : $('#bank').val(),
+                        CheckIds : checkIds,
+                        CashAmount : $('#cashAmount').val(),
+                    }, 
+                    success : function(res) {
+                        window.location.href = "{{ url('/paid_bills/print-bill-payment') }}" + "/" + res['ORNumber']
+                    },
+                    error : function(err) {
+                        alert('An error occurred while performing the transaction. Contact support for more.')
+                        console.log(err)
+                    }
+                })
+            }
+            
         }
 
         function addCheck() {

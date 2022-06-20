@@ -76,3 +76,7 @@ You can also check out our other paid products on [CodeCanyon](https://codecanyo
 
 ### User - Special Authentication
 - In UsersController.authenticate(), update the permissions
+
+
+### KIOSK PRINTING IN CHROME
+ --kiosk --kiosk-printing "http://localhost:8000"

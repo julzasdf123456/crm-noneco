@@ -5,13 +5,15 @@
 <style>
     html, body {
         font-family: sans-serif;
-        font-size: .82em;
+        font-stretch: condensed;
+        font-size: .85em;
     }
 
     table tbody th,td,
     table thead th {
         font-family: sans-serif;
-        font-size: .7em;
+        font-stretch: condensed;
+        font-size: .80em;
     }
     @media print {
         @page {
@@ -46,17 +48,14 @@
 {{-- <link rel="stylesheet" href="{{ URL::asset('adminlte.min.css') }}"> --}}
 
 <div id="print-area" class="content">
-    <br>
-    <br>
-    <div style="margin-top: 4px;">
-        <span style="margin-left: 10px;">Meter #: {{ $meter != null ? $meter->SerialNumber : '-' }}</span>
+    <div style="margin-top: 15px;">
+        <span style="margin-left: 20px;">Meter #: {{ $meter != null ? $meter->SerialNumber : '-' }}</span>
         <span style="margin-left: 176px;">{{ $paidBillSingle != null ? $paidBillSingle->ORNumber : '-' }}</span><br>
         @if ($account != null)
-            <span style="margin-left: 10px;">{{ $account->OldAccountNo }}</span>
-            <span style="margin-left: 26px;">{{ $account->ServiceAccountName }}</span><br>
-            <span style="margin-left: 10px;">{{ ServiceAccounts::getAddress($account) }}</span>
-            <span style="margin-left: 26px;">{{ $account->AccountStatus }}</span><br>
-            <span style="margin-left: 10px;">{{ $account->AccountType }}</span>
+            <span style="margin-left: 20px;">{{ $account->OldAccountNo }}</span>
+            <span style="margin-left: 15px;">{{ $account->ServiceAccountName }}</span><br>
+            <span style="margin-left: 20px;">{{ ServiceAccounts::getAddress($account) }}</span>
+            <span style="margin-left: 26px;">{{ $account->AccountStatus }}</span>
         @else
             <span style="margin-left: 40px;">Account Details Not Found</span>
         @endif
@@ -70,7 +69,7 @@
         $total = 0.0;
     @endphp
     <div style="width: 100%;">
-        <table style="margin-top: 35px; width: 100%;">
+        <table style="margin-top: 24px; width: 100%;">
             <tbody>     
                 @foreach ($paidBill as $item)
                     @php
@@ -92,19 +91,9 @@
             </tbody>
         </table>
     </div>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <div style="position: fixed; bottom: 1px; width: 100%; left: 10px;">
+    <div style="position: absolute; bottom: 20px; width: 100%; left: 10px;">
         <span>{{ $user != null ? $user->name : 'Teller: n/a' }}</span>
-        <span style="float: right; margin-right: 60px;">{{ number_format($total, 2) }}</span>
+        <span style="float: right; margin-right: 40px;">{{ number_format($total, 2) }}</span>
     </div>
     
 </div>
