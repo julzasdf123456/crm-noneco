@@ -30,6 +30,8 @@ class CreateTableCashierDenominations extends Migration
             $table->string('PaidBillId')->nullable();
             $table->string('Notes')->nullable();
             $table->string('Total')->nullable();
+            $table->date('ORDate')->nullable();
+            $table->string('ORNumber')->nullable();
             $table->timestamps();
         });
     }

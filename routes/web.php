@@ -497,6 +497,8 @@ Route::get('/paid_bills/add-check-payments', [App\Http\Controllers\PaidBillsCont
 Route::get('/paid_bills/delete-check-payment', [App\Http\Controllers\PaidBillsController::class, 'deleteCheckPayment'])->name('paidBills.delete-check-payment');
 Route::get('/paid_bills/fetch-account-by-old-account-number', [App\Http\Controllers\PaidBillsController::class, 'fetchAccountByOldAccountNumber'])->name('paidBills.fetch-account-by-old-account-number');
 Route::get('/paid_bills/print-bapa-payments/{dcrNum}', [App\Http\Controllers\PaidBillsController::class, 'printBapaPayments'])->name('paidBills.print-bapa-payments');
+Route::get('/paid_bills/get-ors-from-range', [App\Http\Controllers\PaidBillsController::class, 'getORsFromRange'])->name('paidBills.get-ors-from-range');
+Route::get('/paid_bills/add-denomination', [App\Http\Controllers\PaidBillsController::class, 'addDenomination'])->name('paidBills.add-denomination');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);
 
 

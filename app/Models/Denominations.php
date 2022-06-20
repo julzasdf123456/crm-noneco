@@ -59,7 +59,9 @@ class Denominations extends Model
         'Cents',
         'PaidBillId',
         'Notes',
-        'Total'
+        'Total',
+        'ORDate',
+        'ORNumber'
     ];
 
     /**
@@ -82,7 +84,9 @@ class Denominations extends Model
         'Cents' => 'string',
         'PaidBillId' => 'string',
         'Notes' => 'string',
-        'Total' => 'string'
+        'Total' => 'string',
+        'ORDate' => 'string',
+        'ORNumber' => 'string'
     ];
 
     /**
@@ -107,7 +111,9 @@ class Denominations extends Model
         'Notes' => 'nullable|string|max:255',
         'created_at' => 'nullable',
         'updated_at' => 'nullable',
-        'Total' => 'nullable|string|max:50'
+        'Total' => 'nullable|string|max:50',
+        'ORDate' => 'nullable|string',
+        'ORNumber' => 'nullable|string'
     ];
 
     

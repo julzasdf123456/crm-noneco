@@ -126,7 +126,8 @@
                                 <tr>
                                     <td>Cash Payment</td>
                                     <td class="text-right">
-                                        <input type="number" class="form-control text-right" style="font-size: 1.2em;" id="cashAmount" step="any">
+                                        <input type="number" class="form-control text-right float-left" style="font-size: 1.2em; width: 88%; display: inline-block;" id="cashAmount" step="any">
+                                        <button id="denominationBtn" disabled class="btn btn-warning float-right ico-tab-mini" data-toggle="modal" data-target="#modal-denominate" title="Add Denomination"><i class="fas fa-list"></i></button>
                                     </td>
                                 </tr>
                                 <tr>
@@ -160,6 +161,7 @@
                         </div>
                     </div>
                     <div class="card-footer">
+                        <button id="sumOrBtn" class="btn btn-lg btn-warning" data-toggle="modal" data-target="#modal-sum-or"><i class="fas fa-plus-circle ico-tab-mini"></i> Sum OR</button>
                         <button id="cashBtn" class="btn btn-lg btn-primary float-right" disabled><i class="fas fa-dollar-sign"></i> Transact</button>
                         {{-- <button id="checkBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled data-toggle="modal" data-target="#modal-check-payment"><i class="fas fa-money-check-alt"></i> Check</button> --}}
                         <button id="cardBtn" class="btn btn-sm btn-default float-right ico-tab-mini" disabled><i class="fas fa-credit-card"></i> Debit/Credit Card</button>
@@ -239,6 +241,10 @@
 @include('paid_bills.modal_confirm_payment')
 
 @include('paid_bills.check_modal')
+
+@include('paid_bills.modal_sum_or')
+
+@include('paid_bills.modal_denomination')
 
 @push('page_scripts')
     <script>
@@ -486,6 +492,13 @@
                 $('#total-modal-confirm').val(parseFloat(totalAll).toFixed(2))
                 $('#change-modal-confirm').val(change)
             })
+
+            /**
+             *  DENOMINATIONS
+             **/
+            $('#save-denomination').on('click', function() {
+                saveDenomination()
+            })
         })
 
         function addToPayables(id) {
@@ -497,6 +510,8 @@
 
                 $('#' + id).attr('ischecked', 'true')
                 billId = id
+
+                $('#denominationBtn').removeAttr('disabled')
             } else {
                 $('#' + id).removeClass('text-primary').addClass('text-muted')
 
@@ -1048,6 +1063,65 @@
                             icon: 'error',
                         })
                     }
+                }
+            })
+        }
+
+        /**
+         *  DENOMINATIONS
+         **/
+         $('#modal-denominate').on('hidden.bs.modal', function () {
+            $('#cashAmount').focus().select()
+        })
+
+        function saveDenomination() {
+            var thousand = jQuery.isEmptyObject($('#thousand').val()) ? '' : $('#thousand').val()
+            var fivehundred = jQuery.isEmptyObject($('#fivehundred').val()) ? '' : $('#fivehundred').val()
+            var onehundred = jQuery.isEmptyObject($('#onehundred').val()) ? '' : $('#onehundred').val()
+            var fifty = jQuery.isEmptyObject($('#fifty').val()) ? '' : $('#fifty').val()
+            var twenty = jQuery.isEmptyObject($('#twenty').val()) ? '' : $('#twenty').val()
+            var ten = jQuery.isEmptyObject($('#ten').val()) ? '' : $('#ten').val()
+            var five = jQuery.isEmptyObject($('#five').val()) ? '' : $('#five').val()
+            var one = jQuery.isEmptyObject($('#one').val()) ? '' : $('#one').val()
+            var cents = jQuery.isEmptyObject($('#cents').val()) ? '' : $('#cents').val()
+
+            $.ajax({
+                url : "{{ route('paidBills.add-denomination') }}",
+                type : 'GET',
+                data : {
+                    AccountNumber : acctNo,
+                    ServicePeriod : '',
+                    ORNumber : $('#orNumber').val(),
+                    OneThousand : thousand,
+                    FiveHundred : fivehundred,
+                    OneHundred : onehundred,
+                    Fifty : fifty,
+                    Twenty : twenty,
+                    Ten : ten,
+                    Five : five,
+                    Peso : one,
+                    Cents : cents,
+                },
+                success : function(res) {
+                    if (!jQuery.isEmptyObject($('#thousand').val())) {
+                        $('#thousand').val(res['OneThousand'])
+                        $('#fivehundred').val(res['FiveHundred'])
+                        $('#onehundred').val(res['OneHundred'])
+                        $('#fifty').val(res['Fifty'])
+                        $('#twenty').val(res['Twenty'])
+                        $('#ten').val(res['Ten'])
+                        $('#five').val(res['Five'])
+                        $('#one').val(res['Peso'])
+                        $('#cents').val(res['Cents'])
+                    }
+                    $('#modal-denominate').modal('hide')
+                },
+                error : function(err) {
+                    Swal.fire({
+                        title : 'Oops!',
+                        text : 'An error occurred while inserting the denominations',
+                        icon : 'error'
+                    })
                 }
             })
         }

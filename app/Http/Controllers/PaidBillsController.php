@@ -23,6 +23,7 @@ use App\Models\BAPAPayments;
 use App\Models\DCRSummaryTransactions;
 use App\Models\ArrearsLedgerDistribution;
 use App\Models\BAPAAdjustmentDetails;
+use App\Models\Denominations;
 use Flash;
 use Response;
 
@@ -292,6 +293,7 @@ class PaidBillsController extends AppBaseController
                         ';
                     }                  
                 } else {
+                    // PROMPT PAYMENTS
                     $output .= '
                         <tr onclick=addToPayables("' . $item->id . '")>
                             <td>' . $item->BillNumber . '</td>
@@ -1827,6 +1829,61 @@ class PaidBillsController extends AppBaseController
         } else {
             return response()->json('Account not found', 404);
         }
+    }
+
+    public function getORsFromRange(Request $request) {
+        $from = $request['From'];
+        $to = $request['To'];
+
+        $paidBills = PaidBills::whereBetween('ORNumber', [$from, $to])
+            ->get();
+
+        return response()->json($paidBills, 200);
+    }
+
+    public function addDenomination(Request $request) {
+        $acctNo = $request['AccountNumber'];
+        $period = $request['ServicePeriod'];
+
+        $denominations = Denominations::where('AccountNumber', $acctNo)
+            ->where('ServicePeriod', $period)
+            ->first();
+
+        if ($denominations != null) {
+            // update
+            $denominations->OneThousand = $request['OneThousand'];
+            $denominations->FiveHundred = $request['FiveHundred'];
+            $denominations->OneHundred = $request['OneHundred'];
+            $denominations->Fifty = $request['Fifty'];
+            $denominations->Twenty = $request['Twenty'];
+            $denominations->Ten = $request['Ten'];
+            $denominations->Five = $request['Five'];
+            $denominations->Peso = $request['Peso'];
+            $denominations->Cents = $request['Cents'];
+            $denominations->ORNumber = $request['ORNumber'];
+            $denominations->ORDate = date('Y-m-d');
+            $denominations->save();
+        } else {
+            // save
+            $denominations = new Denominations;
+            $denominations->id = IDGenerator::generateIDandRandString();
+            $denominations->ServicePeriod = $period;
+            $denominations->AccountNumber = $acctNo;
+            $denominations->OneThousand = $request['OneThousand'];
+            $denominations->FiveHundred = $request['FiveHundred'];
+            $denominations->OneHundred = $request['OneHundred'];
+            $denominations->Fifty = $request['Fifty'];
+            $denominations->Twenty = $request['Twenty'];
+            $denominations->Ten = $request['Ten'];
+            $denominations->Five = $request['Five'];
+            $denominations->Peso = $request['Peso'];
+            $denominations->Cents = $request['Cents'];
+            $denominations->ORNumber = $request['ORNumber'];
+            $denominations->ORDate = date('Y-m-d');
+            $denominations->save();
+        }
+
+        return response()->json($denominations, 200);
     }
 }
 
