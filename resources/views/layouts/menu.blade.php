@@ -314,7 +314,7 @@ use Illuminate\Support\Facades\Auth;
 @endcanany
 
 {{-- TICKETS --}}
-@canany(['Super Admin'])
+@canany(['Super Admin', 'tickets create'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-ambulance nav-icon text-danger"></i>
