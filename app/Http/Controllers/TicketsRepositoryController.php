@@ -45,7 +45,11 @@ class TicketsRepositoryController extends AppBaseController
      */
     public function create()
     {
-        return view('tickets_repositories.create');
+        $parentReps = TicketsRepository::whereNull('ParentTicket')->pluck('Name', 'id');
+
+        return view('tickets_repositories.create', [
+            'parentReps' => $parentReps
+        ]);
     }
 
     /**
