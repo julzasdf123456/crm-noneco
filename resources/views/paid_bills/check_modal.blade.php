@@ -26,11 +26,12 @@
                     </div>
 
                     <div class="form-group col-lg-12">
-                        <select name="bank" id="bank" class="form-control">
+                        <!-- <select name="bank" id="bank" class="form-control">
                             @foreach ($banks as $item)
                                 <option value="{{ $item->BankAbbrev }}">{{ $item->BankFullName }} ({{ $item->BankAbbrev }})</option>
                             @endforeach
-                        </select>
+                        </select> -->
+                        <input type="text" id="bank" placeholder="Bank" name="bank" class="form-control">
                     </div>
                 </div>                
             </div>

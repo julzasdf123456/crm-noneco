@@ -60,7 +60,8 @@
                 </div>
             </div>
             <div class="card-body table-responsive">
-                <p><i>Press <strong>F3</strong> to search</i></p>
+                <span><i>Press <strong>F3</strong> to search</i></span>
+                <input class="form-control float-right" id="old-account-no" data-inputmask="'alias': 'phonebe'" maxlength="12" value="{{ env('APP_AREA_CODE') }}" style="font-size: 1.3em; color: #b91400; font-weight: bold; width: 250px;">
                 <table class="table table-sm table-hover" id="accounts-table">
                     <thead>
                         <th>Account Number</th>
@@ -143,6 +144,27 @@
             // init
             $('#spinner').show()
 
+            $("#old-account-no").inputmask({
+                mask: '99-99999-999',
+                placeholder: '',
+                showMaskOnHover: false,
+                showMaskOnFocus: false,
+                onBeforePaste: function (pastedValue, opts) {
+                    var processedValue = pastedValue;
+
+                    return processedValue;
+                }
+            });
+
+            $("#old-account-no").keyup(function() {
+                if (this.value.length == 12) {
+                    var value = $("#old-account-no").val().toLowerCase()
+                    $("#accounts-table tr").filter(function() {
+                        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                    });
+                }
+            })
+
             fetchBills($('#ServicePeriod').val())
 
             $('#ServicePeriod').on('change', function() {                
@@ -192,7 +214,8 @@
                     Period : period,
                 },
                 success : function(res) {
-                    getDetails(res)
+                    // getDetails(res)
+                    var acctInit = ""
                     $.each(res, function(index, element) {
                         $('#accounts-table tbody').append(addToRow(res[index]['OldAccountNo'],
                                 res[index]['ServiceAccountName'],
@@ -204,10 +227,12 @@
                                 res[index]['ORNumber'],
                                 res[index]['BillId'],
                                 res[index]['AccountNumber']))
+                        acctInit = res[index]['OldAccountNo']
                     })
                     $('#spinner').hide()
                     $('#ServicePeriod').removeAttr('disabled')
                     $('#saveBtn').removeAttr('disabled')
+                    $("#old-account-no").val(acctInit.slice(0, 8)).focus()
                 },
                 error : function(err) {
                     alert('An error occurred while fetching accounts')
@@ -231,7 +256,7 @@
                             '</tr>';
                 } else { // PAYABLE AREA
                     if (billmo == $('#ServicePeriod').val()) {
-                        return '<tr onclick=addToPayables("' + id + '")>' +
+                        return '<tr onclick=addToPayables("' + id + '") acctNo="' + acctNo + '" id="' + id + '">' +
                                     '<td><i class="ico-tab fas fa-exclamation text-primary"></i>' + acctNo + '</td>' +
                                     '<td>' + acctName + '</td>' +
                                     '<td>' + status + '</td>' +
@@ -239,10 +264,10 @@
                                     '<td>' + billmo + '</td>' +
                                     '<td class="text-right">' + (billno != null ? billno : '') + '</td>' +
                                     '<td class="text-right">' + (parseFloat(amtdue) ? Number(parseFloat(amtdue).toFixed(2)).toLocaleString() : '') + '</td>' +
-                                    '<td><button class="btn btn-link btn-sm"><i ischecked=true amount="' + amtdue + '" id="btn-' + id + '" acctNo="' + acctId + '" class="fas fa-check-circle text-success"></i></button></td>' +
+                                    '<td><button class="btn btn-link btn-sm"><i ischecked=false amount="' + amtdue + '" id="btn-' + id + '" acctNo="' + acctId + '" class="fas fa-check-circle text-muted"></i></button></td>' +
                                 '</tr>';
                     } else { // arrears
-                        return '<tr onclick=addToPayables("' + id + '") style="background-color: #ef9a9a;">' +
+                        return '<tr onclick=addToPayables("' + id + '") acctNo="' + acctNo + '" id="' + id + '" style="background-color: #ef9a9a;">' +
                                     '<td><i class="ico-tab fas fa-exclamation text-primary"></i>' + acctNo + '</td>' +
                                     '<td>' + acctName + '</td>' +
                                     '<td>' + status + '</td>' +
@@ -250,7 +275,7 @@
                                     '<td>' + billmo + '</td>' +
                                     '<td class="text-right">' + (billno != null ? billno : '') + '</td>' +
                                     '<td class="text-right">' + (parseFloat(amtdue) ? Number(parseFloat(amtdue).toFixed(2)).toLocaleString() : '') + '</td>' +
-                                    '<td><button class="btn btn-link btn-sm"><i ischecked=true amount="' + amtdue + '" id="btn-' + id + '" acctNo="' + acctId + '" class="fas fa-check-circle text-success"></i></button></td>' +
+                                    '<td><button class="btn btn-link btn-sm"><i ischecked=false amount="' + amtdue + '" id="btn-' + id + '" acctNo="' + acctId + '" class="fas fa-check-circle text-muted"></i></button></td>' +
                                 '</tr>';
                     }                    
                 }
@@ -279,6 +304,11 @@
                 // ADD PAYABLE
                 totalAmount += parseFloat($('#btn-' + id).attr('amount'))
                 amountDue = totalAmount
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Account Added'
+                })
             } else if ($('#btn-' + id).attr('ischecked') == 'true') {
                 $('#btn-' + id).attr('ischecked', 'false')
                 $('#btn-' + id).removeClass('text-primary').addClass('text-muted')
@@ -287,6 +317,11 @@
                 removeItemFromArray(id)
                 totalAmount -= parseFloat($('#btn-' + id).attr('amount'))
                 amountDue = totalAmount
+
+                Toast.fire({
+                    icon: 'warning',
+                    title: 'Account Removed!'
+                })
             }
 
             computeAmounts()
@@ -395,5 +430,37 @@
                 }
             })
         }
+
+        $(document).keydown(function(event){
+            var keycode = (event.keyCode ? event.keyCode : event.which);  
+            if(keycode == '13'){
+                var row = $('tr[acctNo="' + $('#old-account-no').val() + '"]')
+                var index = row.index() + 1
+                var idSelected = row.attr('id')
+                // console.log(idSelected)
+                addToPayables(idSelected)
+
+                var value = ''
+                $("#accounts-table tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+
+                if (jQuery.isEmptyObject(idSelected)) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Account Not Found!'
+                    })
+                }
+
+                $("#old-account-no").val($("#old-account-no").val().slice(0, 8)).focus()
+            } 
+        });
+
+        var Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000
+        });
     </script>
 @endpush

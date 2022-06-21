@@ -16,7 +16,7 @@
                 <div class="col-sm-5">
                     <div class="form-row align-items-center float-right">
                         <div class="col-auto">
-                            <input class="form-control" id="old-account-no" data-inputmask="'alias': 'phonebe'" maxlength="12" value="{{ env('APP_AREA_CODE') }}">
+                            <input class="form-control" id="old-account-no" data-inputmask="'alias': 'phonebe'" maxlength="12" value="{{ env('APP_AREA_CODE') }}" style="font-size: 1.5em; color: #b91400; font-weight: bold;">
                         </div>
                     </div>    
                 </div>
@@ -36,7 +36,7 @@
                 <div class="card" style="height: 60vh;">
                     <div class="card-header border-0">
                         <span class="card-title">
-                            <h4 id="account-name">...</h4>
+                            <h4 id="account-name" style="font-weight: bold; font-size: 1.5em;">...</h4>
                             <address class="text-muted" id="account-number">...</address>
                         </span>
                     </div>
@@ -114,13 +114,13 @@
                                 <tr style="border-top: 1px solid #dcdcdc">
                                     <th>Total Amount Due</th>
                                     <th class="text-right">
-                                        <h3 class="text-right text-danger" id="total-amount"></h3>
+                                        <h3 class="text-right text-danger" style="font-size: 1.5em; color: #b91400; font-weight: bold;" id="total-amount"></h3>
                                     </th>
                                 </tr>                                    
                                 <tr>
                                     <td>OR Number</td>
                                     <td class="text-right">
-                                        <input type="number" class="form-control text-right" style="font-size: 1.2em;" id="orNumber" value="{{ ORAssigning::getORIncrement(1, $orAssignedLast) }}">
+                                        <input type="number" class="form-control text-right" style="font-size: 1.5em; color: #b91400; font-weight: bold;" id="orNumber" value="{{ ORAssigning::getORIncrement(1, $orAssignedLast) }}">
                                     </td>
                                 </tr>
                                 <tr>

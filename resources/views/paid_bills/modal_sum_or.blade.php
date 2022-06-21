@@ -104,11 +104,11 @@
                 },
                 success : function(res) {
                     if (jQuery.isEmptyObject(res)) {
-                        Swal.fire({
-                            title : 'No Payments Found',
-                            text : "The OR series you inputted doesn't exist",
-                            icon : 'warning'
-                        })
+                        // Swal.fire({
+                        //     title : 'No Payments Found',
+                        //     text : "The OR series you inputted doesn't exist",
+                        //     icon : 'warning'
+                        // })
                     } else {
                         // GET TOTAL
                         $.each(res, function(index, element) {
