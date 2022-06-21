@@ -81,6 +81,8 @@
             $('#to-or-sum').val('')
             $('#change-sum').val(change)
             $('#amount-paid-sum').val('')
+
+            $('#to-or-sum').val($('#orNumber').val())
         });
 
         // AMOUNT SUM ON TYPE

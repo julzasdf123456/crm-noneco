@@ -272,6 +272,7 @@
         var hasTransacted = false
 
         var confirmModalShown = false
+        var sumORModalShown = false
 
         $(document).ready(function() {
             //basic search
@@ -492,6 +493,18 @@
                 $('#total-modal-confirm').val(parseFloat(totalAll).toFixed(2))
                 $('#change-modal-confirm').val(change)
             })
+
+            /**
+             *  SUM OR
+             **/
+            $('#modal-sum-or').on('shown.bs.modal', function(){      
+                sumORModalShown = true    
+            });
+
+            $('#modal-sum-or').on('hidden.bs.modal', function(){      
+                sumORModalShown = false
+                $('#cashAmount').focus()
+            });
 
             /**
              *  DENOMINATIONS
@@ -841,8 +854,8 @@
         $(document).keydown(function(event){
             var keycode = (event.keyCode ? event.keyCode : event.which);  
             if(keycode == '13'){
-                if ($('#modal-check-payment').hasClass('show')) {
-                    // ENTER KEY IS DISABLED IF SHOW CHECK MODAL IS SHOWN
+                if ($('#modal-check-payment').hasClass('show') | sumORModalShown) {
+                    // ENTER KEY IS DISABLED IF SHOW CHECK MODAL OR SUM OR IS SHOWN
                 } else {
                     if (parseFloat(change) || $('#amountPaid').val() == parseFloat(totalAmount).toFixed(2)) {
                         if (change >= 0 && !jQuery.isEmptyObject($('#orNumber').val()) && !jQuery.isEmptyObject(selectedPayments)) {  
