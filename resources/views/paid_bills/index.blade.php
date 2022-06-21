@@ -120,13 +120,14 @@
                                 <tr>
                                     <td>OR Number</td>
                                     <td class="text-right">
-                                        <input type="number" class="form-control text-right" style="font-size: 1.5em; color: #b91400; font-weight: bold;" id="orNumber" value="{{ ORAssigning::getORIncrement(1, $orAssignedLast) }}">
+                                        <input readonly='true' type="number" class="form-control text-right float-left" style="font-size: 1.5em; color: #b91400; font-weight: bold; width: 84%; display: inline-block;" id="orNumber" value="{{ ORAssigning::getORIncrement(1, $orAssignedLast) }}">
+                                        <button id="unlock-btn" class="btn btn-warning float-right ico-tab-mini" title="Unlock to edit OR number"><i class="fas fa-unlock"></i></button>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>Cash Payment</td>
                                     <td class="text-right">
-                                        <input type="number" class="form-control text-right float-left" style="font-size: 1.2em; width: 88%; display: inline-block;" id="cashAmount" step="any">
+                                        <input type="number" class="form-control text-right float-left" style="font-size: 1.2em; width: 84%; display: inline-block;" id="cashAmount" step="any">
                                         <button id="denominationBtn" disabled class="btn btn-warning float-right ico-tab-mini" data-toggle="modal" data-target="#modal-denominate" title="Add Denomination"><i class="fas fa-list"></i></button>
                                     </td>
                                 </tr>
@@ -353,6 +354,10 @@
 
             $('#cashAmount').on('change', function() {
                 computePayments()
+            })
+
+            $('#unlock-btn').on('click', function() {
+                $('#orNumber').removeAttr('readonly')
             })
 
             // CASH BUTTON EVENT
