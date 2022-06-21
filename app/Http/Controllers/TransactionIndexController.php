@@ -894,7 +894,7 @@ class TransactionIndexController extends AppBaseController
             $dcrSum->save();
         }  
 
-        // CREATE RECONNECTION TICKET
+        // CREATE RECONNECTION TICKET 
         $ticket = new Tickets;
         $ticket->id = IDGenerator::generateIDandRandString();
         $ticket->AccountNumber = $request['AccountNumber'];
@@ -918,6 +918,22 @@ class TransactionIndexController extends AppBaseController
         $ticketLog->LogDetails = "Ticket automatically created via Reconnection Payment Module";
         $ticketLog->UserId = Auth::id();
         $ticketLog->save();
+
+        // ADD OR LOG
+        // SAVE OR
+        $saveOR = ORAssigning::where('ORNumber', $request['ORNumber'])
+            ->where('UserId', Auth::id())
+            ->first();        
+        if ($saveOR == null) {
+            $saveOR = new ORAssigning;
+            $saveOR->id = IDGenerator::generateIDandRandString();
+            $saveOR->ORNumber = $request['ORNumber'];
+            $saveOR->UserId = Auth::id();
+            $saveOR->DateAssigned = $transactionIndex->ORDate;
+            $saveOR->TimeAssigned = date('H:i:s');
+            $saveOR->Office = env('APP_LOCATION');
+            $saveOR->save();
+        } 
 
         return response()->json($transactionIndex, 200);
     }
