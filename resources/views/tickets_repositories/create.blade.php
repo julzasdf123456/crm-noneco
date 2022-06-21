@@ -1,3 +1,7 @@
+@php
+    use App\Models\IDGenerator;
+@endphp
+
 @extends('layouts.app')
 
 @section('content')
@@ -22,6 +26,7 @@
             <div class="card-body">
 
                 <div class="row">
+                    <input type="hidden" name="id" value="{{ IDGenerator::generateID() }}">
                     <!-- Name Field -->
                     <div class="form-group col-sm-6">
                         {!! Form::label('Name', 'Name:') !!}
