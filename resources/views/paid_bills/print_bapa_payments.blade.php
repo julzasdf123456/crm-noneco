@@ -41,17 +41,14 @@
 @foreach ($paidBills as $item)
 @if ($i<1)
 <div class="print-area">
-    <br>
-    <br>
-    <br>
     <div>
-        <span style="margin-left: 10px;">Meter #: {{ $item->MeterNumber != null ? $meter->MeterNumber : '-' }}</span>
+        <span style="margin-left: 10px;">Meter #: {{ $item->MeterNumber != null ? $item->MeterNumber : '-' }}</span>
         <span style="margin-left: 176px;">{{ $item != null ? $item->ORNumber : '-' }}</span><br>
         <span style="margin-left: 10px;">{{ $item->OldAccountNo }}</span>
         <span style="margin-left: 26px;">{{ $item->ServiceAccountName }}</span><br>
         <span style="margin-left: 10px;">{{ ServiceAccounts::getAddress($item) }}</span>
         <span style="margin-left: 26px;">{{ $item->AccountStatus }}</span><br>
-        <span style="margin-left: 10px;">{{ $item->AccountType }}</span>
+        <!-- <span style="margin-left: 10px;">{{ $item->AccountType }}</span> -->
         
         <br>
         <br>
@@ -63,7 +60,7 @@
         $total = 0.0;
     @endphp
     <br>
-    <table style="height: 45vh; margin-top: 10px;">
+    <table style="height: 49vh; margin-top: 1px;">
         <tbody>     
             @php
                 // GET BILLS
@@ -84,19 +81,19 @@
             </tr>  
         </tbody>
     </table>
-    <span style="">{{ $user != null ? $user->name : 'Teller: n/a' }}</span>
+    <span style="margin-top: 60px">{{ $user != null ? $user->name : 'Teller: n/a' }}</span>
     <span style="float: right; margin-right: 50px;">{{ number_format($total, 2) }}</span>
 </div>
 @else
 <div class="print-area">
-    <div style="margin-top: 40px;">
-        <span style="margin-left: 10px;">Meter #: {{ $item->MeterNumber != null ? $meter->MeterNumber : '-' }}</span>
+    <div style="margin-top: 20px;">
+        <span style="margin-left: 10px;">Meter #: {{ $item->MeterNumber != null ? $item->MeterNumber : '-' }}</span>
         <span style="margin-left: 176px;">{{ $item != null ? $item->ORNumber : '-' }}</span><br>
         <span style="margin-left: 10px;">{{ $item->OldAccountNo }}</span>
         <span style="margin-left: 26px;">{{ $item->ServiceAccountName }}</span><br>
         <span style="margin-left: 10px;">{{ ServiceAccounts::getAddress($item) }}</span>
         <span style="margin-left: 26px;">{{ $item->AccountStatus }}</span><br>
-        <span style="margin-left: 10px;">{{ $item->AccountType }}</span>
+        <!-- <span style="margin-left: 10px;">{{ $item->AccountType }}</span> -->
         
         <br>
         <br>
@@ -109,7 +106,7 @@
     @endphp
     <br>
     <br>
-    <table style="height: 45vh; margin-top: 10px;">
+    <table style="height: 46vh; margin-top: 1px;">
         <tbody>     
             @php
                 // GET BILLS
@@ -130,7 +127,7 @@
             </tr>  
         </tbody>
     </table>
-    <span style="">{{ $user != null ? $user->name : 'Teller: n/a' }}</span>
+    <span style="margin-top: 60px;">{{ $user != null ? $user->name : 'Teller: n/a' }}</span>
     <span style="float: right; margin-right: 50px;">{{ number_format($total, 2) }}</span>
 </div>
 @endif
