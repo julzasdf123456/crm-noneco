@@ -4,6 +4,7 @@
             <tr>
                 <th>Name</th>
         <th>Email</th>
+        <th>Username</th>
         <th>Employee Id</th>
         <th>Email Verified At</th>
         <th>Password</th>
@@ -16,6 +17,7 @@
             <tr>
                 <td>{{ $users->name }}</td>
             <td>{{ $users->email }}</td>
+            <td>{{ $users->username }}</td>
             <td>{{ $users->employee_id }}</td>
             <td>{{ $users->email_verified_at }}</td>
             <td>{{ $users->password }}</td>
