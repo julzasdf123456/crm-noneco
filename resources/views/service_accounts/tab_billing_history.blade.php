@@ -23,7 +23,7 @@
                         <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
                         <td class="text-right">{{ $item->KwhUsed != null ? number_format($item->KwhUsed, 2) : '0' }}</td>
                         <td class="text-right">{{ $item->EffectiveRate != null ? number_format($item->EffectiveRate, 4) : '0' }}</td>
-                        <td class="text-right">{{ $item->NetAmount != null ? number_format(str_replace(',', '', $item->NetAmount), 2) : '0' }}</td>
+                        <td class="text-right">{{ $item->NetAmount != null ? $item->NetAmount : '0' }}</td>
                         <td class="text-right"><a href="{{ $item->PaidBillId != null ? (route('transactionIndices.browse-ors-view', [$item->PaidBillId, 'BILLS PAYMENT'])) : '' }}">{{ $item->ORNumber != null ? $item->ORNumber : '-' }}</a></td>
                         <td class="text-right">{{ $item->ORDate != null ? date('F d, Y', strtotime($item->ORDate)) : '-' }}</td>
                         <td class="text-right">
