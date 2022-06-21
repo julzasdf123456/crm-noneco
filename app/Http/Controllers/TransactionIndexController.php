@@ -919,6 +919,22 @@ class TransactionIndexController extends AppBaseController
         $ticketLog->UserId = Auth::id();
         $ticketLog->save();
 
+        // ADD OR LOG
+        // SAVE OR
+        $saveOR = ORAssigning::where('ORNumber', $request['ORNumber'])
+            ->where('UserId', Auth::id())
+            ->first();        
+        if ($saveOR == null) {
+            $saveOR = new ORAssigning;
+            $saveOR->id = IDGenerator::generateIDandRandString();
+            $saveOR->ORNumber = $request['ORNumber'];
+            $saveOR->UserId = Auth::id();
+            $saveOR->DateAssigned = $transactionIndex->ORDate;
+            $saveOR->TimeAssigned = date('H:i:s');
+            $saveOR->Office = env('APP_LOCATION');
+            $saveOR->save();
+        } 
+
         return response()->json($transactionIndex, 200);
     }
 

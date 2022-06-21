@@ -6,14 +6,14 @@
     html, body {
         font-family: sans-serif;
         font-stretch: condensed;
-        font-size: .85em;
+        font-size: .88em;
     }
 
     table tbody th,td,
     table thead th {
         font-family: sans-serif;
         font-stretch: condensed;
-        font-size: .80em;
+        font-size: .83em;
     }
     @media print {
         @page {
@@ -50,7 +50,7 @@
 <div id="print-area" class="content">
     <div style="margin-top: 15px;">
         <span style="margin-left: 20px;">Meter #: {{ $meter != null ? $meter->SerialNumber : '-' }}</span>
-        <span style="margin-left: 176px;">{{ $paidBillSingle != null ? $paidBillSingle->ORNumber : '-' }}</span><br>
+        <span style="margin-left: 200px;">{{ $paidBillSingle != null ? $paidBillSingle->ORNumber : '-' }}</span><br>
         @if ($account != null)
             <span style="margin-left: 20px;">{{ $account->OldAccountNo }}</span>
             <span style="margin-left: 15px;">{{ $account->ServiceAccountName }}</span><br>

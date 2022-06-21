@@ -425,7 +425,7 @@ use Illuminate\Support\Facades\Auth;
 
 <li class="nav-header">BILLING</li>
 {{-- SERVICE ACCOUNTS --}}
-@canany(['Super Admin'])
+@canany(['Super Admin', 'billing re-bill'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-file-invoice-dollar nav-icon text-primary"></i>
