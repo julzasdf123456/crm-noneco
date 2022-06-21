@@ -48,7 +48,7 @@
                     <!-- Type Field -->
                     <div class="form-group col-sm-6">
                         {!! Form::label('Type', 'Type:') !!}
-                        {!! Form::select('ParentTicket', ['Request' => 'Request', 'Complain' => 'Complain'], null, ['class' => 'form-control', 'placeholder' => 'This is a parent ticket']) !!}
+                        {!! Form::select('Type', ['Request' => 'Request', 'Complain' => 'Complain'], null, ['class' => 'form-control', 'placeholder' => 'This is a parent ticket']) !!}
                     </div>
 
                     <!-- Kpscategory Field -->
