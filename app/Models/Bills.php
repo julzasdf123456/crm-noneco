@@ -1047,6 +1047,7 @@ class Bills extends Model
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
+                    $bill->BillingDate = $readDate;
                     $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
                     $bill->DueDate = Bills::createDueDate($readDate);
@@ -1385,6 +1386,7 @@ class Bills extends Model
                     $bill->Coreloss = $account->Coreloss;
                     $bill->KwhUsed = $kwhAmountUsed;
                     $bill->PreviousKwh = $prev;
+                    $bill->BillingDate = $readDate;
                     $bill->PresentKwh = round(floatval($pres), 4);
                     $bill->EffectiveRate = $effectiveRate;
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
@@ -1682,6 +1684,7 @@ class Bills extends Model
                     $bill->EffectiveRate = $effectiveRate;
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
+                    $bill->BillingDate = $readDate;
                     $bill->Deductions = $deductions;
                     $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
