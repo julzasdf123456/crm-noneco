@@ -135,22 +135,28 @@ class ReadAndBillAPI extends Controller {
     public function receiveReadings(Request $request) {
         $input = $request->all();
 
-        if ($request['AccountNumber'] != null) {
-            $readings = Readings::where('ServicePeriod', $input['ServicePeriod'])
-                ->where('AccountNumber', $request['AccountNumber'])
-                ->first();
-            
-            if ($readings != null) {
-                // update
-                // $reading = Readings::update($request->all(), $readings->id);
-            } else {
-                //create
-                $reading = Readings::create($input);
-            }
-        } else {
+        $readingsOg = Readings::find($request['id']);
+
+        if ($readingsOg != null) {
+            $input['id'] = IDGenerator::generateIDandRandString();
             $reading = Readings::create($input);
-        }
-        
+        } else {
+            if ($request['AccountNumber'] != null) {
+                $readings = Readings::where('ServicePeriod', $input['ServicePeriod'])
+                    ->where('AccountNumber', $request['AccountNumber'])
+                    ->first();
+                
+                if ($readings != null) {
+                    // update
+                    // $reading = Readings::update($request->all(), $readings->id);
+                } else {
+                    //create
+                    $reading = Readings::create($input);
+                }
+            } else {
+                $reading = Readings::create($input);
+            } 
+        }              
 
         return response()->json(['res' => 'ok'], $this->successStatus);
     }
