@@ -469,7 +469,7 @@ class Bills extends Model
                     $bill->SupplySystemCharge +
                     $bill->MeteringSystemCharge;
 
-        if ($account->AccountType == 'RESIDENTIAL') {
+        if ($account->AccountType == 'RESIDENTIAL' || $account->AccountType == 'RURAL RESIDENTIAL') {
             if ($kwhUsed < 15) {
                 return -($deductibles * .5);
             } elseif ($kwhUsed >= 16 && $kwhUsed < 17) {
@@ -587,10 +587,10 @@ class Bills extends Model
 
                     // CHARGES
                     $bill->GenerationSystemCharge = round($kwh * Rates::floatRate($rate->GenerationSystemCharge), 4);
-                    // $bill->TransmissionDeliveryChargeKW = round($kwh * Rates::floatRate($rate->TransmissionDeliveryChargeKW), 4);
+                    $bill->TransmissionDeliveryChargeKW = 0;
                     $bill->TransmissionDeliveryChargeKWH = round($kwh * Rates::floatRate($rate->TransmissionDeliveryChargeKWH), 4);
                     $bill->SystemLossCharge = round($kwh * Rates::floatRate($rate->SystemLossCharge), 4);
-                    // $bill->DistributionDemandCharge = round($kwh * Rates::floatRate($rate->DistributionDemandCharge), 4);
+                    $bill->DistributionDemandCharge = 0;
                     $bill->DistributionSystemCharge = round($kwh * Rates::floatRate($rate->DistributionSystemCharge), 4);
                     $bill->SupplyRetailCustomerCharge = round(Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
                     $bill->SupplySystemCharge = round($kwh * Rates::floatRate($rate->SupplySystemCharge), 4);
@@ -611,15 +611,14 @@ class Bills extends Model
                     $bill->RealPropertyTax = round($kwh * Rates::floatRate($rate->RealPropertyTax), 4);
                     
                     $bill->OtherGenerationRateAdjustment = round($kwh * Rates::floatRate($rate->OtherGenerationRateAdjustment), 4);
-                    // $bill->OtherTransmissionCostAdjustmentKW = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKW), 4);
+                    $bill->OtherTransmissionCostAdjustmentKW = 0;
                     $bill->OtherTransmissionCostAdjustmentKWH = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKWH), 4);
                     $bill->OtherSystemLossCostAdjustment = round($kwh * Rates::floatRate($rate->OtherSystemLossCostAdjustment), 4);
+                    $bill->OtherLifelineRateCostAdjustment = round($kwh * Rates::floatRate($rate->OtherLifelineRateCostAdjustment), 4);
 
                     if ($account->SeniorCitizen == 'Yes' && $kwh <= 100) {
-                        $bill->OtherLifelineRateCostAdjustment = 0;
                         $bill->SeniorCitizenDiscountAndSubsidyAdjustment = 0;
                     } else {
-                        $bill->OtherLifelineRateCostAdjustment = 0;
                         $bill->SeniorCitizenDiscountAndSubsidyAdjustment = round($kwh * Rates::floatRate($rate->SeniorCitizenDiscountAndSubsidyAdjustment), 4);
                     }                    
                     
@@ -677,10 +676,10 @@ class Bills extends Model
 
                     // CHARGES
                     $bill->GenerationSystemCharge = round($kwh * Rates::floatRate($rate->GenerationSystemCharge), 4);
-                    // $bill->TransmissionDeliveryChargeKW = round($kwh * Rates::floatRate($rate->TransmissionDeliveryChargeKW), 4);
+                    $bill->TransmissionDeliveryChargeKW = 0;
                     $bill->TransmissionDeliveryChargeKWH = round($kwh * Rates::floatRate($rate->TransmissionDeliveryChargeKWH), 4);
                     $bill->SystemLossCharge = round($kwh * Rates::floatRate($rate->SystemLossCharge), 4);
-                    // $bill->DistributionDemandCharge = round($kwh * Rates::floatRate($rate->DistributionDemandCharge), 4);
+                    $bill->DistributionDemandCharge = 0;
                     $bill->DistributionSystemCharge = round($kwh * Rates::floatRate($rate->DistributionSystemCharge), 4);
                     $bill->SupplyRetailCustomerCharge = round(Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
                     $bill->SupplySystemCharge = round($kwh * Rates::floatRate($rate->SupplySystemCharge), 4);
@@ -701,15 +700,14 @@ class Bills extends Model
                     $bill->RealPropertyTax = round($kwh * Rates::floatRate($rate->RealPropertyTax), 4);
 
                     $bill->OtherGenerationRateAdjustment = round($kwh * Rates::floatRate($rate->OtherGenerationRateAdjustment), 4);
-                    // $bill->OtherTransmissionCostAdjustmentKW = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKW), 4);
+                    $bill->OtherTransmissionCostAdjustmentKW = 0;
                     $bill->OtherTransmissionCostAdjustmentKWH = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKWH), 4);
                     $bill->OtherSystemLossCostAdjustment = round($kwh * Rates::floatRate($rate->OtherSystemLossCostAdjustment), 4);
+                    $bill->OtherLifelineRateCostAdjustment = round($kwh * Rates::floatRate($rate->OtherLifelineRateCostAdjustment), 4);
                     
                     if ($account->SeniorCitizen == 'Yes' && $kwh <= 100) {
-                        $bill->OtherLifelineRateCostAdjustment = 0;
                         $bill->SeniorCitizenDiscountAndSubsidyAdjustment = 0;
                     } else {
-                        $bill->OtherLifelineRateCostAdjustment = 0;
                         $bill->SeniorCitizenDiscountAndSubsidyAdjustment = round($kwh * Rates::floatRate($rate->SeniorCitizenDiscountAndSubsidyAdjustment), 4);
                     } 
 
@@ -768,10 +766,10 @@ class Bills extends Model
 
                     // CHARGES
                     $bill->GenerationSystemCharge = round($kwh * Rates::floatRate($rate->GenerationSystemCharge), 4);
-                    // $bill->TransmissionDeliveryChargeKW = round($kwh * Rates::floatRate($rate->TransmissionDeliveryChargeKW), 4);
+                    $bill->TransmissionDeliveryChargeKW = 0;
                     $bill->TransmissionDeliveryChargeKWH = round($kwh * Rates::floatRate($rate->TransmissionDeliveryChargeKWH), 4);
                     $bill->SystemLossCharge = round($kwh * Rates::floatRate($rate->SystemLossCharge), 4);
-                    // $bill->DistributionDemandCharge = round($kwh * Rates::floatRate($rate->DistributionDemandCharge), 4);
+                    $bill->DistributionDemandCharge = 0;
                     $bill->DistributionSystemCharge = round($kwh * Rates::floatRate($rate->DistributionSystemCharge), 4);
                     $bill->SupplyRetailCustomerCharge = round(Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
                     $bill->SupplySystemCharge = round($kwh * Rates::floatRate($rate->SupplySystemCharge), 4);
@@ -792,15 +790,14 @@ class Bills extends Model
                     $bill->RealPropertyTax = round($kwh * Rates::floatRate($rate->RealPropertyTax), 4);
 
                     $bill->OtherGenerationRateAdjustment = round($kwh * Rates::floatRate($rate->OtherGenerationRateAdjustment), 4);
-                    // $bill->OtherTransmissionCostAdjustmentKW = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKW), 4);
+                    $bill->OtherTransmissionCostAdjustmentKW = 0;
                     $bill->OtherTransmissionCostAdjustmentKWH = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKWH), 4);
                     $bill->OtherSystemLossCostAdjustment = round($kwh * Rates::floatRate($rate->OtherSystemLossCostAdjustment), 4);
+                    $bill->OtherLifelineRateCostAdjustment = round($kwh * Rates::floatRate($rate->OtherLifelineRateCostAdjustment), 4);
                     
                     if ($account->SeniorCitizen == 'Yes' && $kwh <= 100) {
-                        $bill->OtherLifelineRateCostAdjustment = 0;
                         $bill->SeniorCitizenDiscountAndSubsidyAdjustment = 0;
                     } else {
-                        $bill->OtherLifelineRateCostAdjustment = 0;
                         $bill->SeniorCitizenDiscountAndSubsidyAdjustment = round($kwh * Rates::floatRate($rate->SeniorCitizenDiscountAndSubsidyAdjustment), 4);
                     } 
 
@@ -884,10 +881,10 @@ class Bills extends Model
 
                     // CHARGES
                     $bill->GenerationSystemCharge = round($kwh * Rates::floatRate($rate->GenerationSystemCharge), 4);
-                    // $bill->TransmissionDeliveryChargeKW = round($kwh * Rates::floatRate($rate->TransmissionDeliveryChargeKW), 4);
+                    $bill->TransmissionDeliveryChargeKW = 0;
                     $bill->TransmissionDeliveryChargeKWH = round($kwh * Rates::floatRate($rate->TransmissionDeliveryChargeKWH), 4);
                     $bill->SystemLossCharge = round($kwh * Rates::floatRate($rate->SystemLossCharge), 4);
-                    // $bill->DistributionDemandCharge = round($kwh * Rates::floatRate($rate->DistributionDemandCharge), 4);
+                    $bill->DistributionDemandCharge = 0;
                     $bill->DistributionSystemCharge = round($kwh * Rates::floatRate($rate->DistributionSystemCharge), 4);
                     $bill->SupplyRetailCustomerCharge = round(Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
                     $bill->SupplySystemCharge = round($kwh * Rates::floatRate($rate->SupplySystemCharge), 4);
@@ -908,15 +905,14 @@ class Bills extends Model
                     $bill->RealPropertyTax = round($kwh * Rates::floatRate($rate->RealPropertyTax), 4);
                     
                     $bill->OtherGenerationRateAdjustment = round($kwh * Rates::floatRate($rate->OtherGenerationRateAdjustment), 4);
-                    // $bill->OtherTransmissionCostAdjustmentKW = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKW), 4);
+                    $bill->OtherTransmissionCostAdjustmentKW = 0;
                     $bill->OtherTransmissionCostAdjustmentKWH = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKWH), 4);
                     $bill->OtherSystemLossCostAdjustment = round($kwh * Rates::floatRate($rate->OtherSystemLossCostAdjustment), 4);
+                    $bill->OtherLifelineRateCostAdjustment = round($kwh * Rates::floatRate($rate->OtherLifelineRateCostAdjustment), 4);
 
                     if ($account->SeniorCitizen == 'Yes' && $kwh <= 100) {
-                        $bill->OtherLifelineRateCostAdjustment = 0;
                         $bill->SeniorCitizenDiscountAndSubsidyAdjustment = 0;
                     } else {
-                        $bill->OtherLifelineRateCostAdjustment = 0;
                         $bill->SeniorCitizenDiscountAndSubsidyAdjustment = round($kwh * Rates::floatRate($rate->SeniorCitizenDiscountAndSubsidyAdjustment), 4);
                     }                    
                     
@@ -973,10 +969,10 @@ class Bills extends Model
 
                     // CHARGES
                     $bill->GenerationSystemCharge = round($kwh * Rates::floatRate($rate->GenerationSystemCharge), 4);
-                    // $bill->TransmissionDeliveryChargeKW = round($kwh * Rates::floatRate($rate->TransmissionDeliveryChargeKW), 4);
+                    $bill->TransmissionDeliveryChargeKW = 0;
                     $bill->TransmissionDeliveryChargeKWH = round($kwh * Rates::floatRate($rate->TransmissionDeliveryChargeKWH), 4);
                     $bill->SystemLossCharge = round($kwh * Rates::floatRate($rate->SystemLossCharge), 4);
-                    // $bill->DistributionDemandCharge = round($kwh * Rates::floatRate($rate->DistributionDemandCharge), 4);
+                    $bill->DistributionDemandCharge = 0;
                     $bill->DistributionSystemCharge = round($kwh * Rates::floatRate($rate->DistributionSystemCharge), 4);
                     $bill->SupplyRetailCustomerCharge = round(Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
                     $bill->SupplySystemCharge = round($kwh * Rates::floatRate($rate->SupplySystemCharge), 4);
@@ -997,15 +993,14 @@ class Bills extends Model
                     $bill->RealPropertyTax = round($kwh * Rates::floatRate($rate->RealPropertyTax), 4);
 
                     $bill->OtherGenerationRateAdjustment = round($kwh * Rates::floatRate($rate->OtherGenerationRateAdjustment), 4);
-                    // $bill->OtherTransmissionCostAdjustmentKW = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKW), 4);
+                    $bill->OtherTransmissionCostAdjustmentKW = 0;
                     $bill->OtherTransmissionCostAdjustmentKWH = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKWH), 4);
                     $bill->OtherSystemLossCostAdjustment = round($kwh * Rates::floatRate($rate->OtherSystemLossCostAdjustment), 4);
+                    $bill->OtherLifelineRateCostAdjustment = round($kwh * Rates::floatRate($rate->OtherLifelineRateCostAdjustment), 4);
                     
                     if ($account->SeniorCitizen == 'Yes' && $kwh <= 100) {
-                        $bill->OtherLifelineRateCostAdjustment = 0;
                         $bill->SeniorCitizenDiscountAndSubsidyAdjustment = 0;
                     } else {
-                        $bill->OtherLifelineRateCostAdjustment = 0;
                         $bill->SeniorCitizenDiscountAndSubsidyAdjustment = round($kwh * Rates::floatRate($rate->SeniorCitizenDiscountAndSubsidyAdjustment), 4);
                     } 
 
@@ -1063,10 +1058,10 @@ class Bills extends Model
 
                     // CHARGES
                     $bill->GenerationSystemCharge = round($kwh * Rates::floatRate($rate->GenerationSystemCharge), 4);
-                    // $bill->TransmissionDeliveryChargeKW = round($kwh * Rates::floatRate($rate->TransmissionDeliveryChargeKW), 4);
+                    $bill->TransmissionDeliveryChargeKW = 0;
                     $bill->TransmissionDeliveryChargeKWH = round($kwh * Rates::floatRate($rate->TransmissionDeliveryChargeKWH), 4);
                     $bill->SystemLossCharge = round($kwh * Rates::floatRate($rate->SystemLossCharge), 4);
-                    // $bill->DistributionDemandCharge = round($kwh * Rates::floatRate($rate->DistributionDemandCharge), 4);
+                    $bill->DistributionDemandCharge = 0;
                     $bill->DistributionSystemCharge = round($kwh * Rates::floatRate($rate->DistributionSystemCharge), 4);
                     $bill->SupplyRetailCustomerCharge = round(Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
                     $bill->SupplySystemCharge = round($kwh * Rates::floatRate($rate->SupplySystemCharge), 4);
@@ -1087,15 +1082,14 @@ class Bills extends Model
                     $bill->RealPropertyTax = round($kwh * Rates::floatRate($rate->RealPropertyTax), 4);
 
                     $bill->OtherGenerationRateAdjustment = round($kwh * Rates::floatRate($rate->OtherGenerationRateAdjustment), 4);
-                    // $bill->OtherTransmissionCostAdjustmentKW = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKW), 4);
+                    $bill->OtherTransmissionCostAdjustmentKW = 0;
                     $bill->OtherTransmissionCostAdjustmentKWH = round($kwh * Rates::floatRate($rate->OtherTransmissionCostAdjustmentKWH), 4);
                     $bill->OtherSystemLossCostAdjustment = round($kwh * Rates::floatRate($rate->OtherSystemLossCostAdjustment), 4);
+                    $bill->OtherLifelineRateCostAdjustment = round($kwh * Rates::floatRate($rate->OtherLifelineRateCostAdjustment), 4);
                     
                     if ($account->SeniorCitizen == 'Yes' && $kwh <= 100) {
-                        $bill->OtherLifelineRateCostAdjustment = 0;
                         $bill->SeniorCitizenDiscountAndSubsidyAdjustment = 0;
                     } else {
-                        $bill->OtherLifelineRateCostAdjustment = 0;
                         $bill->SeniorCitizenDiscountAndSubsidyAdjustment = round($kwh * Rates::floatRate($rate->SeniorCitizenDiscountAndSubsidyAdjustment), 4);
                     } 
 
