@@ -1187,6 +1187,7 @@ class BillsController extends AppBaseController
                     'Billing_ServiceAccounts.AreaCode',
                     'Billing_ServiceAccounts.SequenceCode',
                     'Billing_ServiceAccounts.ForDistribution',
+                    'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.Organization',
                     'Billing_ServiceAccounts.Main',
                     'Billing_ServiceAccounts.GroupCode',
