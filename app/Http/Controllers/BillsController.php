@@ -1325,12 +1325,14 @@ class BillsController extends AppBaseController
         return response()->json($output, 200);
     }
 
-    public function printBulkBillNewFormat($period, $town, $route) {
+    public function printBulkBillNewFormat($period, $town, $route, $day) {
         $bills = DB::table('Billing_Bills')
             ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
             ->where('Billing_Bills.ServicePeriod', $period)
             ->where('Billing_ServiceAccounts.Town', $town)
             ->where('Billing_ServiceAccounts.AreaCode', $route)
+            ->where('Billing_Bills.UserId', Auth::id())
+            ->where('Billing_Bills.BillingDate', $day)
             ->select('Billing_Bills.*')
             ->get();
 

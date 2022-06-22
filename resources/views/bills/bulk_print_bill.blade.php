@@ -27,7 +27,7 @@
             <div class="card-body">
                 <div class="row">
                     {{-- BILLING MONTH --}}
-                    <div class="form-group col-lg-4">
+                    <div class="form-group col-lg-3">
                         <label for="Period">Billing Month</label>
                         <select name="Period" id="Period" class="form-control">
                             @for ($i = 0; $i < count($months); $i++)
@@ -37,7 +37,7 @@
                     </div>
 
                     {{-- TOWN --}}
-                    <div class="form-group col-lg-4">
+                    <div class="form-group col-lg-3">
                         <label for="Town">Town</label>
                         <select name="Town" id="Town" class="form-control">
                             @foreach ($towns as $item)
@@ -47,12 +47,27 @@
                     </div>
 
                     {{-- ROUTES --}}
-                    <div class="form-group col-lg-4">
+                    <div class="form-group col-lg-3">
                         <label for="Route">Route</label>
                         <select name="Route" id="Route" class="form-control">
                             
                         </select>
                     </div>
+
+                    {{-- ROUTES --}}
+                    <div class="form-group col-lg-3">
+                        <label for="Day">Day</label>
+                        <input type="text" name="Day" id="Day" class="form-control" value="{{ date('Y-m-d') }}">
+                    </div>
+                    @push('page_scripts')
+                        <script type="text/javascript">
+                            $('#Day').datetimepicker({
+                                format: 'YYYY-MM-DD',
+                                useCurrent: true,
+                                sideBySide: true
+                            })
+                        </script>
+                    @endpush
                 </div>
             </div>
             <div class="card-footer">
@@ -95,7 +110,7 @@
             if (jQuery.isEmptyObject($('#Route').val())) {
                 alert('Select route first')
             } else {
-                window.location.href = "{{ url('/bills/print-bulk-bill-new-format') }}" + "/" + $('#Period').val() + "/" + $('#Town').val() + "/" + $('#Route').val();
+                window.location.href = "{{ url('/bills/print-bulk-bill-new-format') }}" + "/" + $('#Period').val() + "/" + $('#Town').val() + "/" + $('#Route').val()+ "/" + $('#Day').val();
             }            
         }
 
