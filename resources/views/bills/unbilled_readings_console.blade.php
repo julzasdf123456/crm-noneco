@@ -22,7 +22,7 @@
                 <form class="row" action="{{ route("bills.unbilled-readings-console", ['servicePeriod' => $servicePeriod]) }}" method="get">
                     <div class="form-group col-lg-3">
                         <label for="Area">Area</label>
-                        <input type="text" readonly name="Area" value="{{ env("APP_AREA_CODE") }}" class="form-control">
+                        <input type="text" name="Area" value="{{ env('APP_AREA_CODE') }}" class="form-control">
                     </div>
                     <div class="form-group col-lg-3">
                         <label for="MeterReader">Meter Reader</label>

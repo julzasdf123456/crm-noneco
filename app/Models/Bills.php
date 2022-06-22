@@ -582,7 +582,7 @@ class Bills extends Model
                     $bill->SystemLossCharge = round($kwh * Rates::floatRate($rate->SystemLossCharge), 4);
                     $bill->DistributionDemandCharge = round($kwh * Rates::floatRate($rate->DistributionDemandCharge), 4);
                     $bill->DistributionSystemCharge = round($kwh * Rates::floatRate($rate->DistributionSystemCharge), 4);
-                    $bill->SupplyRetailCustomerCharge = round($kwh * Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
+                    $bill->SupplyRetailCustomerCharge = round(Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
                     $bill->SupplySystemCharge = round($kwh * Rates::floatRate($rate->SupplySystemCharge), 4);
                     $bill->MeteringRetailCustomerCharge = round(Rates::floatRate($rate->MeteringRetailCustomerCharge), 4);
                     $bill->MeteringSystemCharge = round($kwh * Rates::floatRate($rate->MeteringSystemCharge), 4);
@@ -672,7 +672,7 @@ class Bills extends Model
                     $bill->SystemLossCharge = round($kwh * Rates::floatRate($rate->SystemLossCharge), 4);
                     $bill->DistributionDemandCharge = round($kwh * Rates::floatRate($rate->DistributionDemandCharge), 4);
                     $bill->DistributionSystemCharge = round($kwh * Rates::floatRate($rate->DistributionSystemCharge), 4);
-                    $bill->SupplyRetailCustomerCharge = round($kwh * Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
+                    $bill->SupplyRetailCustomerCharge = round(Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
                     $bill->SupplySystemCharge = round($kwh * Rates::floatRate($rate->SupplySystemCharge), 4);
                     $bill->MeteringRetailCustomerCharge = round(Rates::floatRate($rate->MeteringRetailCustomerCharge), 4);
                     $bill->MeteringSystemCharge = round($kwh * Rates::floatRate($rate->MeteringSystemCharge), 4);
@@ -763,7 +763,7 @@ class Bills extends Model
                     $bill->SystemLossCharge = round($kwh * Rates::floatRate($rate->SystemLossCharge), 4);
                     $bill->DistributionDemandCharge = round($kwh * Rates::floatRate($rate->DistributionDemandCharge), 4);
                     $bill->DistributionSystemCharge = round($kwh * Rates::floatRate($rate->DistributionSystemCharge), 4);
-                    $bill->SupplyRetailCustomerCharge = round($kwh * Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
+                    $bill->SupplyRetailCustomerCharge = round(Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
                     $bill->SupplySystemCharge = round($kwh * Rates::floatRate($rate->SupplySystemCharge), 4);
                     $bill->MeteringRetailCustomerCharge = round(Rates::floatRate($rate->MeteringRetailCustomerCharge), 4);
                     $bill->MeteringSystemCharge = round($kwh * Rates::floatRate($rate->MeteringSystemCharge), 4);
@@ -879,7 +879,7 @@ class Bills extends Model
                     $bill->SystemLossCharge = round($kwh * Rates::floatRate($rate->SystemLossCharge), 4);
                     $bill->DistributionDemandCharge = round($kwh * Rates::floatRate($rate->DistributionDemandCharge), 4);
                     $bill->DistributionSystemCharge = round($kwh * Rates::floatRate($rate->DistributionSystemCharge), 4);
-                    $bill->SupplyRetailCustomerCharge = round($kwh * Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
+                    $bill->SupplyRetailCustomerCharge = round(Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
                     $bill->SupplySystemCharge = round($kwh * Rates::floatRate($rate->SupplySystemCharge), 4);
                     $bill->MeteringRetailCustomerCharge = round(Rates::floatRate($rate->MeteringRetailCustomerCharge), 4);
                     $bill->MeteringSystemCharge = round($kwh * Rates::floatRate($rate->MeteringSystemCharge), 4);
@@ -968,7 +968,7 @@ class Bills extends Model
                     $bill->SystemLossCharge = round($kwh * Rates::floatRate($rate->SystemLossCharge), 4);
                     $bill->DistributionDemandCharge = round($kwh * Rates::floatRate($rate->DistributionDemandCharge), 4);
                     $bill->DistributionSystemCharge = round($kwh * Rates::floatRate($rate->DistributionSystemCharge), 4);
-                    $bill->SupplyRetailCustomerCharge = round($kwh * Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
+                    $bill->SupplyRetailCustomerCharge = round(Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
                     $bill->SupplySystemCharge = round($kwh * Rates::floatRate($rate->SupplySystemCharge), 4);
                     $bill->MeteringRetailCustomerCharge = round(Rates::floatRate($rate->MeteringRetailCustomerCharge), 4);
                     $bill->MeteringSystemCharge = round($kwh * Rates::floatRate($rate->MeteringSystemCharge), 4);
@@ -1058,7 +1058,7 @@ class Bills extends Model
                     $bill->SystemLossCharge = round($kwh * Rates::floatRate($rate->SystemLossCharge), 4);
                     $bill->DistributionDemandCharge = round($kwh * Rates::floatRate($rate->DistributionDemandCharge), 4);
                     $bill->DistributionSystemCharge = round($kwh * Rates::floatRate($rate->DistributionSystemCharge), 4);
-                    $bill->SupplyRetailCustomerCharge = round($kwh * Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
+                    $bill->SupplyRetailCustomerCharge = round(Rates::floatRate($rate->SupplyRetailCustomerCharge), 4);
                     $bill->SupplySystemCharge = round($kwh * Rates::floatRate($rate->SupplySystemCharge), 4);
                     $bill->MeteringRetailCustomerCharge = round(Rates::floatRate($rate->MeteringRetailCustomerCharge), 4);
                     $bill->MeteringSystemCharge = round($kwh * Rates::floatRate($rate->MeteringSystemCharge), 4);
