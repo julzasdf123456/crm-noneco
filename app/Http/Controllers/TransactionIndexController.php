@@ -22,6 +22,8 @@ use App\Models\IDGenerator;
 use App\Models\AccountPayables;
 use App\Models\ORAssigning;
 use App\Models\Bills;
+use App\Models\PaidBills;
+use App\Models\PaidBillsDetails;
 use App\Models\Tickets;
 use App\Models\TicketLogs;
 use App\Models\DCRSummaryTransactions;
@@ -1023,5 +1025,105 @@ class TransactionIndexController extends AppBaseController
             'transactionDetails' => $transactionDetails,
             'user' => $user,
         ]);
+    }
+
+    public function orMaintenance(Request $request) {
+        if ($request['Date'] != null) {
+            $paidBills = DB::table('Cashier_PaidBills')
+                ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->where('Cashier_PaidBills.ORDate', $request['Date'])
+                ->where('Cashier_PaidBills.Teller', Auth::id())
+                ->whereNull('Status')
+                ->select('Cashier_PaidBills.*',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.AccountType')
+                ->get();
+
+            $nonPowerBills = TransactionIndex::where('ORDate', $request['Date'])
+                ->where('UserId', Auth::id())
+                ->whereNull('Status')
+                ->get();
+        } else {
+            $paidBills = DB::table('Cashier_PaidBills')
+                ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->where('Cashier_PaidBills.ORDate', date('Y-m-d'))
+                ->where('Cashier_PaidBills.Teller', Auth::id())
+                ->whereNull('Status')
+                ->select('Cashier_PaidBills.*',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.AccountType')
+                ->get();
+            
+            $nonPowerBills = TransactionIndex::where('ORDate', date('Y-m-d'))
+                ->where('UserId', Auth::id())
+                ->whereNull('Status')
+                ->get();
+        }
+        
+
+        return view('/transaction_indices/or_maintenance', [
+            'paidBills' => $paidBills,
+            'nonPowerBills' => $nonPowerBills
+        ]);
+    }
+
+    public function updateORNumber(Request $request) {
+        if ($request['Type'] == 'POWERBILL') {
+            $paidBills = PaidBills::find($request['id']);
+
+            if ($paidBills != null) {
+                $originalOR = $paidBills->ORNumber;
+                // UPDATE PaidbillDetails
+                DB::table('Cashier_PaidBillsDetails')
+                    ->where('ORNumber', $originalOR)
+                    ->update(['ORNumber' => $request['ORNumber']]);
+
+                // UPDATE DCR SUmmary transactions
+                DB::table('Cashier_DCRSummaryTransactions')
+                    ->where('ORNumber', $originalOR)
+                    ->update(['ORNumber' => $request['ORNumber']]);
+
+                // UPDATE Denominations
+                DB::table('Cashier_Denominations')
+                    ->where('ORNumber', $originalOR)
+                    ->update(['ORNumber' => $request['ORNumber']]);
+
+                $paidBills->ORNumber = $request['ORNumber'];
+                $paidBills->save();
+
+                return response()->json(['res' => 'ok', 'message' => 'OR ' . $originalOR . ' changed to ' . $paidBills->ORNumber], 200);
+            } else {
+                return response()->json(['res' => 'error', 'message' => 'Payment not found!'], 200);
+            }
+        } else {
+            $transactionIndex = TransactionIndex::find($request['id']);
+
+            if ($transactionIndex != null) {
+                $originalOR = $transactionIndex->ORNumber;
+                // UPDATE TRANSACTION DETAILS
+                DB::table('Cashier_TransactionPaymentDetails')
+                    ->where('ORNumber', $originalOR)
+                    ->update(['ORNumber' => $request['ORNumber']]);
+
+                // UPDATE DCR SUmmary transactions
+                DB::table('Cashier_DCRSummaryTransactions')
+                    ->where('ORNumber', $originalOR)
+                    ->update(['ORNumber' => $request['ORNumber']]);
+
+                // UPDATE Denominations
+                DB::table('Cashier_Denominations')
+                    ->where('ORNumber', $originalOR)
+                    ->update(['ORNumber' => $request['ORNumber']]);
+
+                $transactionIndex->ORNumber = $request['ORNumber'];
+                $transactionIndex->save();
+
+                return response()->json(['res' => 'ok', 'message' => 'OR ' . $originalOR . ' changed to ' . $transactionIndex->ORNumber], 200);
+            } else {
+                return response()->json(['res' => 'error', 'message' => 'Payment not found!'], 200);
+            }
+        }
     }
 }

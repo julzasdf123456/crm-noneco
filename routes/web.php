@@ -474,6 +474,8 @@ Route::get('/transaction_indices/browse-ors', [App\Http\Controllers\TransactionI
 Route::get('/transaction_indices/browse-ors-view/{id}/{paymentType}', [App\Http\Controllers\TransactionIndexController::class, 'browseORView'])->name('transactionIndices.browse-ors-view');
 Route::get('/transaction_indices/print-or-transactions/{transactionIndexId}', [App\Http\Controllers\TransactionIndexController::class, 'printOrTransactions'])->name('transactionIndices.print-or-transactions');
 Route::get('/transaction_indices/print-reconnection-collection/{transactionIndexId}', [App\Http\Controllers\TransactionIndexController::class, 'printOrReconnection'])->name('transactionIndices.print-reconnection-collection');
+Route::get('/transaction_indices/or-maintenance', [App\Http\Controllers\TransactionIndexController::class, 'orMaintenance'])->name('transactionIndices.or-maintenance');
+Route::get('/transaction_indices/update-or-number', [App\Http\Controllers\TransactionIndexController::class, 'updateORNumber'])->name('transactionIndices.update-or-number');
 Route::resource('transactionIndices', App\Http\Controllers\TransactionIndexController::class);
 
 

@@ -734,6 +734,12 @@ use Illuminate\Support\Facades\Auth;
         <i class="fas fa-search nav-icon text-info"></i><p>Browse ORs</p>
         </a>
     </li>
+    <li class="nav-item">
+        <a href="{{ route('transactionIndices.or-maintenance') }}"
+        class="nav-link {{ Request::is('transactionIndices.or-maintenance*') ? 'active' : '' }}">
+        <i class="fas fa-circle nav-icon text-info"></i><p>OR Maintenance</p>
+        </a>
+    </li>
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-ban nav-icon text-info"></i>
