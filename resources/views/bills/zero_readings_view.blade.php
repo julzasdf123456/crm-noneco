@@ -55,7 +55,7 @@
                             <tbody>
                                 <tr>
                                     <td>Account Number</td>
-                                    <th><a href="{{ route('serviceAccounts.show', [$reading->AccountNumber]) }}">{{ $reading->AccountNumber }}</a></th>
+                                    <th><a href="{{ route('serviceAccounts.show', [$reading->AccountNumber]) }}">{{ $account->OldAccountNo }}</a></th>
                                 </tr>
                                 <tr>
                                     <td>Consumer Name</td>

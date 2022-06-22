@@ -263,10 +263,10 @@
     </div>
 </div>
 @else 
-<p class="text-center"><i>No inspection data found!</i></p>
+<!-- <p class="text-center"><i>No inspection data found!</i></p>
     @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Inspector', 'Service Connection Assessor'])) 
         <a href="{{ route('serviceConnectionInspections.create-step-two', [$serviceConnections->id]) }}" class="btn btn-primary btn-sm" title="Add Verification Details"><i class="fas fa-pen ico-tab"></i>Create Verification</a>
-    @endif
+    @endif -->
 @endif
 
 @push('page_scripts')

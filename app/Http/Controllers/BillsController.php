@@ -342,6 +342,7 @@ class BillsController extends AppBaseController
                     'Billing_ServiceAccounts.AreaCode',
                     'Billing_ServiceAccounts.SequenceCode',
                     'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.MeterDetailsId')
             ->where('Billing_ServiceAccounts.id', $reading->AccountNumber)
             ->first();
