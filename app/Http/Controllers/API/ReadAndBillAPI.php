@@ -136,7 +136,7 @@ class ReadAndBillAPI extends Controller {
         $input = $request->all();
 
         $readings = Readings::where('ServicePeriod', $input['ServicePeriod'])
-            ->where('AccountNumber')
+            ->where('AccountNumber', $input['AccountNumber'])
             ->first();
         
         if ($readings != null) {
