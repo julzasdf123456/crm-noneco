@@ -101,7 +101,7 @@ html {
                 <table class="table table-borderless table-sm">
                     <tr>
                         <td>Account Number</td>
-                        <th class="text-right">{{ $item->AccountNumber }}</th>
+                        <th class="text-right">{{ $item->OldAccountNo }}</th>
                         <td class="left-pad">Prev. Reading</td>
                         <th class="text-right">{{ $item->PreviousKwh }}</th>
                         <td class="left-pad">Date From</td>
