@@ -8,11 +8,15 @@ use App\Repositories\ReadingsRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
 use App\Models\Bills;
+use App\Models\Rates;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\Readings;
 use App\Models\Towns;
+use App\Models\BillingMeters;
+use App\Models\ServiceAccounts;
+use App\Models\IDGenerator;
 use Flash;
 use Response;
 
@@ -199,5 +203,188 @@ class ReadingsController extends AppBaseController
             ->get();
 
         return response()->json($readings, 200);
+    }
+
+    public function manualReading(Request $request) {
+        if ($request['params'] == null) {
+            $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.Purok', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
+                        ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                        ->paginate(18);
+        } else {
+            $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.Purok', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
+                        ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
+                        ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                        ->paginate(18);
+        }    
+
+        return view('/readings/manual_reading', [
+            'serviceAccounts' => $serviceAccounts
+        ]);
+    }
+
+    public function manualReadingConsole($id) {
+        $serviceAccounts = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.ForDistribution',
+                    'Billing_ServiceAccounts.Organization',
+                    'Billing_ServiceAccounts.OrganizationParentAccount',
+                    'Billing_ServiceAccounts.Main',
+                    'Billing_ServiceAccounts.GroupCode',
+                    'Billing_ServiceAccounts.Multiplier',
+                    'Billing_ServiceAccounts.Town as TownId',
+                    'Billing_ServiceAccounts.Coreloss',
+                    'Billing_ServiceAccounts.ConnectionDate',
+                    'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.SeniorCitizen',
+                    'Billing_ServiceAccounts.Evat5Percent',
+                    'Billing_ServiceAccounts.Ewt2Percent',
+                    'Billing_ServiceAccounts.Contestable',
+                    'Billing_ServiceAccounts.NetMetered',
+                    'Billing_ServiceAccounts.AccountRetention',
+                    'Billing_ServiceAccounts.DurationInMonths',
+                    'Billing_ServiceAccounts.AccountExpiration',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'users.name as MeterReader')
+            ->where('Billing_ServiceAccounts.id', $id)
+            ->first();
+
+        $meters = BillingMeters::where('ServiceAccountId', $id)
+            ->orderByDesc('created_at')
+            ->first();
+
+        $bills = DB::table('Billing_Bills')
+            ->where('Billing_Bills.AccountNumber', $id)
+            ->select('Billing_Bills.*',
+                DB::raw("(SELECT TOP 1 ORNumber FROM Cashier_PaidBills WHERE ObjectSourceId=Billing_Bills.id AND Status IS NULL) AS ORNumber"),
+                DB::raw("(SELECT TOP 1 ORDate FROM Cashier_PaidBills WHERE ObjectSourceId=Billing_Bills.id AND Status IS NULL) AS ORDate"),
+                DB::raw("(SELECT TOP 1 id FROM Cashier_PaidBills WHERE ObjectSourceId=Billing_Bills.id AND Status IS NULL) AS PaidBillId"))
+            ->orderByDesc('Billing_Bills.ServicePeriod')
+            ->get();
+
+        if ($serviceAccounts != null) {
+            $rate = Rates::where('ConsumerType', Bills::getAccountType($serviceAccounts))
+                ->where('AreaCode', $serviceAccounts->TownId)
+                ->orderByDesc('ServicePeriod')
+                ->first();
+
+            $presentReading = Readings::where('AccountNumber', $id)
+                ->orderByDesc('ServicePeriod')
+                ->first();
+
+            return view('/readings/manual_reading_console', [
+                'account' => $serviceAccounts,
+                'meter' => $meters,
+                'bills' => $bills,
+                'rate' => $rate,
+                'presentReading' => $presentReading,
+            ]);
+        } else {
+            return abort(404, 'Account not found!');
+        }
+    }
+
+    public function getComputedBill(Request $request) {
+        $account = ServiceAccounts::find($request['AccountNumber']);
+
+        if (Bills::isHighVoltage(Bills::getAccountType($account))) {
+            $bills = Bills::computeHighVoltageBillAndDontSave($account, 
+                null, 
+                $request['KwhUsed'], 
+                $request['PreviousKwh'], 
+                $request['PresentKwh'], 
+                $request['ServicePeriod'], 
+                $request['BillingDate'], 
+                0, 
+                0, 
+                $request['Is2307'],
+                $request['Demand']);
+        } else {
+            $bills = Bills::computeRegularBillAndDontSave($account, 
+                null, 
+                $request['KwhUsed'], 
+                $request['PreviousKwh'], 
+                $request['PresentKwh'], 
+                $request['ServicePeriod'], 
+                $request['BillingDate'], 
+                0, 
+                0, 
+                $request['Is2307']);
+        }
+        
+        return response()->json($bills, 200);
+    }
+
+    public function createManualBilling(Request $request) {
+        $account = ServiceAccounts::find($request['AccountNumber']);
+
+        if (Bills::isHighVoltage(Bills::getAccountType($account))) {
+            // CREATE READING
+            $readings = new Readings;
+            $readings->id = IDGenerator::generateIDandRandString();
+            $readings->AccountNumber = $account->id;
+            $readings->ServicePeriod = $request['ServicePeriod'];
+            $readings->ReadingTimestamp = date('Y-m-d H:i:s');
+            $readings->KwhUsed = $request['PresentKwh'];
+            $readings->DemandKwhUsed = $request['Demand'];
+            $readings->MeterReader = Auth::id();
+            $readings->save();
+
+            $bills = Bills::computeHighVoltageBill($account, 
+                null, 
+                $request['KwhUsed'], 
+                $request['PreviousKwh'], 
+                $request['PresentKwh'], 
+                $request['ServicePeriod'], 
+                $request['ReadingDate'], 
+                0, 
+                0, 
+                $request['Is2307'],
+                $request['Demand']);
+        } else {
+            // CREATE READING
+            $readings = new Readings;
+            $readings->id = IDGenerator::generateIDandRandString();
+            $readings->AccountNumber = $account->id;
+            $readings->ServicePeriod = $request['ServicePeriod'];
+            $readings->ReadingTimestamp = date('Y-m-d H:i:s');
+            $readings->KwhUsed = $request['PresentKwh'];
+            $readings->MeterReader = Auth::id();
+            $readings->save();
+
+            $bills = Bills::computeRegularBill($account, 
+                null, 
+                $request['KwhUsed'], 
+                $request['PreviousKwh'], 
+                $request['PresentKwh'], 
+                $request['ServicePeriod'], 
+                $request['ReadingDate'], 
+                0, 
+                0, 
+                $request['Is2307']);
+        }
+
+        Flash::success('Billing and reading saved!.');
+
+        return redirect(route('readings.manual-reading'));
     }
 }

@@ -571,6 +571,12 @@ use Illuminate\Support\Facades\Auth;
                 </a>
             </li>
             <li class="nav-item">
+                <a href="{{ route('readings.manual-reading') }}"
+                   class="nav-link {{ Request::is('readings.manual-reading*') ? 'active' : '' }}">                   
+                   <i class="fas fa-circle nav-icon text-primary"></i><p>Manual Reading</p>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="{{ route('readings.reading-monitor') }}"
                    class="nav-link {{ Request::is('readings.reading-monitor*') ? 'active' : '' }}">                   
                    <i class="fas fa-street-view nav-icon text-primary"></i><p>Reading Monitoring</p>

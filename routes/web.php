@@ -381,6 +381,10 @@ Route::resource('rates', App\Http\Controllers\RatesController::class);
 Route::get('/readings/reading-monitor', [App\Http\Controllers\ReadingsController::class, 'readingMonitor'])->name('readings.reading-monitor');
 Route::get('/readings/reading-monitor-view/{servicePeriod}', [App\Http\Controllers\ReadingsController::class, 'readingMonitorView'])->name('readings.reading-monitor-view');
 Route::get('/readings/get-readings-from-meter-reader', [App\Http\Controllers\ReadingsController::class, 'getReadingsFromMeterReader'])->name('readings.get-readings-from-meter-reader');
+Route::get('/readings/manual-reading', [App\Http\Controllers\ReadingsController::class, 'manualReading'])->name('readings.manual-reading');
+Route::get('/readings/manual-reading-console/{id}', [App\Http\Controllers\ReadingsController::class, 'manualReadingConsole'])->name('readings.manual-reading-console');
+Route::get('/readings/get-computed-bill', [App\Http\Controllers\ReadingsController::class, 'getComputedBill'])->name('readings.get-computed-bill');
+Route::post('/readings/create-manual-billing', [App\Http\Controllers\ReadingsController::class, 'createManualBilling'])->name('readings.create-manual-billing');
 Route::resource('readings', App\Http\Controllers\ReadingsController::class);
 
 Route::get('/bills/unbilled-readings', [App\Http\Controllers\BillsController::class, 'unbilledReadings'])->name('bills.unbilled-readings');
