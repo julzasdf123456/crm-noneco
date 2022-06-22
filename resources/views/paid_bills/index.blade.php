@@ -16,7 +16,7 @@
                 <div class="col-sm-5">
                     <div class="form-row align-items-center float-right">
                         <div class="col-auto">
-                            <input class="form-control" id="old-account-no" data-inputmask="'alias': 'phonebe'" maxlength="12" value="{{ env('APP_AREA_CODE') }}" style="font-size: 1.5em; color: #b91400; font-weight: bold;">
+                            <input class="form-control" id="old-account-no" autocomplete="off" data-inputmask="'alias': 'phonebe'" maxlength="12" value="{{ env('APP_AREA_CODE') }}" style="font-size: 1.5em; color: #b91400; font-weight: bold;">
                         </div>
                     </div>    
                 </div>
@@ -293,7 +293,7 @@
                 }
             });
 
-            $("#old-account-no").keyup(function() {
+            $("#old-account-no").off('keyup').on('keyup', function(event) {
                 if (this.value.length == 12) {
                     searchOldAccountNumber()
                 }

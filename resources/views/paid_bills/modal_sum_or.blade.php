@@ -56,21 +56,21 @@
         var total = 0.0
         var change = 0.0
 
-        $('#from-or-sum').keyup(function() {
-            if (this.value.length > 4) {
-                if (!jQuery.isEmptyObject(this.value) && !jQuery.isEmptyObject($('#to-or-sum').val())) {
-                    getORs()
-                }                
-            }            
-        })
+        // $('#from-or-sum').on('keyup', function() {
+        //     if (this.value.length > 4) {
+        //         if (!jQuery.isEmptyObject(this.value) && !jQuery.isEmptyObject($('#to-or-sum').val())) {
+        //             getORs()
+        //         }                
+        //     }     
+        // })
 
-        $('#to-or-sum').keyup(function() {
-            if (this.value.length > 4) {
-                if (!jQuery.isEmptyObject(this.value) && !jQuery.isEmptyObject($('#from-or-sum').val())) {
-                    getORs()
-                } 
-            }
-        })
+        // $('#to-or-sum').keyup(function() {
+        //     if (this.value.length > 4) {
+        //         if (!jQuery.isEmptyObject(this.value) && !jQuery.isEmptyObject($('#from-or-sum').val())) {
+        //             getORs()
+        //         } 
+        //     }
+        // })
 
         // MODAL ON SHOW
         $("#modal-sum-or" ).on('shown.bs.modal', function(){      
@@ -82,7 +82,7 @@
             $('#change-sum').val(change)
             $('#amount-paid-sum').val('')
 
-            $('#to-or-sum').val($('#orNumber').val())
+            $('#to-or-sum').val(parseInt($('#orNumber').val()) - 1)
         });
 
         // AMOUNT SUM ON TYPE
@@ -97,6 +97,9 @@
             total = 0.0
             change = 0.0
 
+            updateUI(total, 0)
+            updateAmount()
+
             $.ajax({
                 url : "{{ route('paidBills.get-ors-from-range') }}",
                 type : 'GET',
@@ -105,22 +108,14 @@
                     To : to,
                 },
                 success : function(res) {
-                    if (jQuery.isEmptyObject(res)) {
-                        // Swal.fire({
-                        //     title : 'No Payments Found',
-                        //     text : "The OR series you inputted doesn't exist",
-                        //     icon : 'warning'
-                        // })
-                    } else {
-                        // GET TOTAL
-                        $.each(res, function(index, element) {
-                            total = total + parseFloat(res[index]['NetAmount'])
-                        })
+                    // GET TOTAL
+                    $.each(res, function(index, element) {
+                        total = total + parseFloat(res[index]['NetAmount'])
+                    })
 
-                        // UPDATE UI
-                        updateUI(total, res.length)
-                        updateAmount()
-                    }                    
+                    // UPDATE UI
+                    updateUI(total, res.length)
+                    updateAmount()                  
                 },
                 error : function(error) {
                     Swal.fire({
@@ -146,5 +141,29 @@
                 $('#change-sum').val(parseFloat(change).toFixed(2))
             }            
         }
+
+        // DETECT ENTER
+        $($('#from-or-sum')).keydown(function(event){
+            var keycode = (event.keyCode ? event.keyCode : event.which);  
+            if(keycode == '13'){
+                getORs()
+                $('#to-or-sum').focus() 
+            }
+        })
+
+        $($('#to-or-sum')).keydown(function(event){
+            var keycode = (event.keyCode ? event.keyCode : event.which);  
+            if(keycode == '13'){
+                getORs()
+                $('#amount-paid-sum').focus() 
+            }
+        })
+
+        $($('#amount-paid-sum')).keydown(function(event){
+            var keycode = (event.keyCode ? event.keyCode : event.which);  
+            if(keycode == '13'){
+                $('#modal-sum-or').modal('hide') 
+            }
+        })
     </script>
 @endpush
