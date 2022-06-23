@@ -4,14 +4,14 @@
 @endphp
 <style>
     html, body {
-        font-family: sans-serif;
+        font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
         font-stretch: condensed;
         font-size: .88em;
     }
 
     table tbody th,td,
     table thead th {
-        font-family: sans-serif;
+        font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
         font-stretch: condensed;
         font-size: .83em;
     }
