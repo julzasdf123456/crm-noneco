@@ -18,7 +18,7 @@
                         <tr>
                             <td>{{ $item->ORNumber }}</td>
                             <td>{{ $item->ORDate }}</td>
-                            <td>{{ $item->AccountNumber }}</td>
+                            <td>{{ $item->OldAccountNo }}</td>
                             <td>{{ $item->ServiceAccountName }}</td>
                             <td class="text-right">{{ $item->NetAmount }}</td>
                         </tr>   
