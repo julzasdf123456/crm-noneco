@@ -593,6 +593,7 @@ Route::resource('accountGLCodes', App\Http\Controllers\AccountGLCodesController:
 
 Route::resource('dCRSummaryTransactions', App\Http\Controllers\DCRSummaryTransactionsController::class);
 Route::get('/d_c_r_summary_transactions/sales-dcr-monitor', [App\Http\Controllers\DCRSummaryTransactionsController::class, 'salesDcrMonitor'])->name('dCRSummaryTransactions.sales-dcr-monitor');
+Route::get('/d_c_r_summary_transactions/print-dcr/{teller}/{day}', [App\Http\Controllers\DCRSummaryTransactionsController::class, 'printDcr'])->name('dCRSummaryTransactions.print-dcr');
 
 
 Route::resource('banks', App\Http\Controllers\BanksController::class);

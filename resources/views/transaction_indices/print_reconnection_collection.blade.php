@@ -3,16 +3,23 @@
     use App\Models\Bills;
 @endphp
 <style>
-    html, body {
-        font-family: sans-serif;
-        font-size: .82em;
-    }
+@font-face {
+    font-family: 'sax-mono';
+    src: url('/fonts/saxmono.ttf');
+}
+html, body {
+    font-family: sax-mono, Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+    /* font-stretch: condensed; */
+    font-size: .88em;
+}
 
-    table tbody th,td,
-    table thead th {
-        font-family: sans-serif;
-        font-size: .7em;
-    }
+table tbody th,td,
+table thead th {
+    font-family: sax-mono, Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+    /* font-stretch: condensed; */
+    /* , Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; */
+    font-size: .75em;
+}
     @media print {
         @page {
             /* margin: 10px; */
@@ -45,20 +52,16 @@
 
 {{-- <link rel="stylesheet" href="{{ URL::asset('adminlte.min.css') }}"> --}}
 
-<div id="print-area" class="content">
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <span style="margin-left: 2px;">{{ $transactionIndex != null ? $transactionIndex->PaymentTitle : '-' }}</span>
-    <span style="margin-left: 170px;">{{ $transactionIndex != null ? $transactionIndex->ORNumber : '-' }}</span><br>
-    <span style="margin-left: 2px;">{{ $transactionIndex != null ? $transactionIndex->Source : '-' }}</span><br>
+<div id="print-area" class="content" style="padding-top: 10px;">
+    <span style="margin-left: 20px;">{{ $account != null ? $account->OldAccountNo : '-' }}</span>
+    <span style="margin-left: 240px;">{{ $transactionIndex != null ? $transactionIndex->ORNumber : '-' }}</span><br>
+    <span style="margin-left: 20px;">{{ $transactionIndex != null ? $transactionIndex->PaymentTitle : '-' }}</span><br>
+    <span style="margin-left: 20px;">{{ $transactionIndex != null ? $transactionIndex->Source : '-' }}</span><br>
     
     <br>
-    <span style="float: right; margin-right: 90px; margin-top: 13px;">{{ $transactionIndex != null ? date('h:i:s A m/d/Y', strtotime($transactionIndex->created_at)) : '-' }}</span><br>
+    <span style="float: right;">{{ $transactionIndex != null ? date('h:i:s A m/d/Y', strtotime($transactionIndex->created_at)) : '-' }}</span><br>
     <br>
-    <table style="margin-top: 38px;">
+    <table style="margin-top: 20px;">
         <tbody>    
             @php
                 $i = 0;
@@ -96,7 +99,7 @@
             @endif 
         </tbody>
     </table>
-    <div style="position: fixed; bottom: 50px; width: 100%; left: 10px;">
+    <div style="position: absolute; bottom: 15px; width: 100%; left: 10px;">
         <span>{{ $user != null ? $user->name : 'Teller: n/a' }}</span>
         <span style="float: right; margin-right: 60px;">{{ number_format($transactionIndex->Total, 2) }}</span>
     </div>

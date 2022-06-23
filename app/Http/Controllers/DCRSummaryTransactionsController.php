@@ -142,6 +142,129 @@ class DCRSummaryTransactionsController extends AppBaseController
         ]);
     }
 
+    public function printDcr($teller, $day) {
+        if ($day != null) {
+            $data = DB::table('Cashier_DCRSummaryTransactions')
+                ->where('Day', $day)
+                ->where('Teller', $teller)
+                ->where('ReportDestination', 'COLLECTION')
+                ->select('GLCode',
+                    DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
+                    DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
+                )
+                ->groupBy('GLCode')
+                ->orderBy('GLCode')
+                ->get();
+        } else {
+            $data = DB::table('Cashier_DCRSummaryTransactions')
+                ->where('Day', date('Y-m-d'))
+                ->where('Teller', $teller)
+                ->where('ReportDestination', 'COLLECTION')
+                ->select('GLCode',
+                    DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
+                    DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
+                )
+                ->groupBy('GLCode')
+                ->orderBy('GLCode')
+                ->get();
+        }
+
+        $powerBills = DB::table('Cashier_PaidBills')
+            ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Cashier_PaidBills.PostingDate', $day != null ? $day : date('Y-m-d'))
+            ->where('Cashier_PaidBills.Teller', $teller)
+            ->whereNull('Cashier_PaidBills.Status')
+            ->select('Cashier_PaidBills.*', 'Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.OldAccountNo',
+                DB::raw("(SELECT TOP 1 BillNumber FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Cashier_PaidBills.ServicePeriod) AS BillNumber"))
+            ->get();
+
+        $nonPowerBills = DB::table('Cashier_TransactionDetails')
+            ->leftJoin('Cashier_TransactionIndex', 'Cashier_TransactionDetails.TransactionIndexId', '=', 'Cashier_TransactionIndex.id')
+            ->where('Cashier_TransactionIndex.ORDate', $day != null ? $day : date('Y-m-d'))
+            ->where('Cashier_TransactionIndex.UserId', $teller)
+            ->whereNull('Cashier_TransactionIndex.Status')
+            ->select('Cashier_TransactionIndex.ORNumber',
+                'Cashier_TransactionDetails.Total',
+                'Cashier_TransactionIndex.AccountNumber',
+                'Cashier_TransactionIndex.PayeeName',
+                'Cashier_TransactionDetails.AccountCode',
+                'Cashier_TransactionIndex.CheckNo',
+                'Cashier_TransactionIndex.Bank',
+                'Cashier_TransactionIndex.PaymentUsed',
+                DB::raw("(SELECT TOP 1 OldAccountNo FROM Billing_ServiceAccounts WHERE id=Cashier_TransactionIndex.AccountNumber) AS OldAccountNo"),
+                DB::raw("(SELECT TOP 1 ServiceAccountName FROM Billing_ServiceAccounts WHERE id=Cashier_TransactionIndex.AccountNumber) AS ServiceAccountName"),
+                'Cashier_TransactionDetails.Particular',
+                'Cashier_TransactionIndex.PayeeName')
+            ->orderBy('Cashier_TransactionDetails.TransactionIndexId')
+            ->get();
+
+        $powerBillsCheck = DB::table('Cashier_PaidBills')
+            ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->leftJoin('Cashier_PaidBillsDetails', 'Cashier_PaidBills.ORNumber', '=', 'Cashier_PaidBillsDetails.ORNumber')
+            ->where('Cashier_PaidBills.PostingDate', $day != null ? $day : date('Y-m-d'))
+            ->where('Cashier_PaidBills.Teller', $teller)
+            ->whereRaw("Cashier_PaidBillsDetails.PaymentUsed='Check'")
+            ->whereNull('Cashier_PaidBills.Status')
+            ->select('Cashier_PaidBills.ORNumber', 
+                'Billing_ServiceAccounts.ServiceAccountName', 
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Cashier_PaidBillsDetails.CheckNo',
+                'Cashier_PaidBillsDetails.Bank',
+                'Cashier_PaidBillsDetails.Amount AS Total');
+
+        $allCheck = DB::table('Cashier_TransactionDetails')
+            ->leftJoin('Cashier_TransactionIndex', 'Cashier_TransactionDetails.TransactionIndexId', '=', 'Cashier_TransactionIndex.id')
+            ->leftJoin('Cashier_TransactionPaymentDetails', 'Cashier_TransactionPaymentDetails.ORNumber', '=', 'Cashier_TransactionIndex.ORNumber')
+            ->where('Cashier_TransactionIndex.ORDate', $day != null ? $day : date('Y-m-d'))
+            ->where('Cashier_TransactionIndex.UserId', $teller)
+            ->whereRaw("Cashier_TransactionPaymentDetails.PaymentUsed = 'Check'")
+            ->whereNull('Cashier_TransactionIndex.Status')
+            ->select('Cashier_TransactionIndex.ORNumber',
+                'Cashier_TransactionIndex.PaymentTitle as ServiceAccountName',
+                DB::raw("(SELECT TOP 1 OldAccountNo FROM Billing_ServiceAccounts WHERE id=Cashier_TransactionIndex.AccountNumber) AS OldAccountNo"),
+                'Cashier_TransactionPaymentDetails.CheckNo',
+                'Cashier_TransactionPaymentDetails.Bank',
+                'Cashier_TransactionPaymentDetails.Amount AS Total')
+            ->union($powerBillsCheck)
+            ->get();
+
+        $powerBillsCancelled = DB::table('Cashier_PaidBills')
+            ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Cashier_PaidBills.PostingDate', $day != null ? $day : date('Y-m-d'))
+            ->where('Cashier_PaidBills.Teller', $teller)
+            ->where('Cashier_PaidBills.Status', 'CANCELLED')
+            ->select('Cashier_PaidBills.ORNumber', 
+                'Billing_ServiceAccounts.ServiceAccountName', 
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Cashier_PaidBills.ServicePeriod', 
+                DB::raw("(SELECT TOP 1 BillNumber FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Cashier_PaidBills.ServicePeriod) AS BillNumber"),
+                'Cashier_PaidBills.NetAmount');
+
+        $allCancelled = DB::table('Cashier_TransactionIndex')
+            ->where('Cashier_TransactionIndex.ORDate', $day != null ? $day : date('Y-m-d'))
+            ->where('Cashier_TransactionIndex.UserId', $teller)
+            ->where('Cashier_TransactionIndex.Status', 'CANCELLED')
+            ->select('Cashier_TransactionIndex.ORNumber',
+                DB::raw("(SELECT TOP 1 ServiceAccountName FROM Billing_ServiceAccounts WHERE id=Cashier_TransactionIndex.AccountNumber) AS ServiceAccountName"),
+                DB::raw("(SELECT TOP 1 OldAccountNo FROM Billing_ServiceAccounts WHERE id=Cashier_TransactionIndex.AccountNumber) AS OldAccountNo"),
+                DB::raw("NULL AS ServicePeriod"),
+                DB::raw("'' AS BillNumber"),
+                'Cashier_TransactionIndex.Total')
+            ->union($powerBillsCancelled)
+            ->get();
+
+        return view('/d_c_r_summary_transactions/print_dcr', [
+            'data' => $data,
+            'day' => $day != null ? $day : date('Y-m-d'),
+            'powerBills' => $powerBills,
+            'nonPowerBills' => $nonPowerBills,
+            'allCheck' => $allCheck,
+            // 'nonPowerBillsCheck' => $nonPowerBillsCheck,
+            // 'powerBillsCancelled' => $powerBillsCancelled,
+            'allCancelled' => $allCancelled,
+        ]);
+    }
+
     /**
      * Show the form for creating a new DCRSummaryTransactions.
      *

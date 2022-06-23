@@ -6,6 +6,7 @@
                 <th>OR Date</th>
                 <th>Account Number</th>
                 <th>Account Name</th>
+                <th>Billing Month</th>
                 <th class="text-right">Amount Paid</th>
             </thead>
             <tbody>
@@ -20,7 +21,8 @@
                             <td>{{ $item->ORDate }}</td>
                             <td>{{ $item->OldAccountNo }}</td>
                             <td>{{ $item->ServiceAccountName }}</td>
-                            <td class="text-right">{{ $item->NetAmount }}</td>
+                            <td>{{ $item->ServicePeriod }}</td>
+                            <td class="text-right">{{ number_format($item->NetAmount, 2) }}</td>
                         </tr>   
                         @php
                             $total = $total + floatval($item->NetAmount);
@@ -30,6 +32,7 @@
                     <tr>
                         <th>Total ({{ $i }} payments)</th> 
                         <th></th>   
+                        <th></th>
                         <th></th>
                         <th></th>
                         <th class="text-right">{{ number_format($total, 2) }}</th>

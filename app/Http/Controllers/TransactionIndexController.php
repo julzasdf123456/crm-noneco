@@ -748,12 +748,14 @@ class TransactionIndexController extends AppBaseController
     public function printOtherPayments($transactionIndexId) {
         $transactionIndex = TransactionIndex::find($transactionIndexId);
         $transactionDetails = TransactionDetails::where('TransactionIndexId', $transactionIndexId)->get();
+        $account = ServiceAccounts::find($transactionIndex->AccountNumber);
         $user = Auth::user();
 
         return view('/transaction_indices/print_other_payments', [
             'transactionIndex' => $transactionIndex,
             'transactionDetails' => $transactionDetails,
             'user' => $user,
+            'account' => $account
         ]);
     }
 
@@ -943,12 +945,14 @@ class TransactionIndexController extends AppBaseController
     public function printOrReconnection($transactionIndexId) {
         $transactionIndex = TransactionIndex::find($transactionIndexId);
         $transactionDetails = TransactionDetails::where('TransactionIndexId', $transactionIndexId)->get();
+        $account = ServiceAccounts::find($transactionIndex->AccountNumber);
         $user = Auth::user();
 
         return view('/transaction_indices/print_reconnection_collection', [
             'transactionIndex' => $transactionIndex,
             'transactionDetails' => $transactionDetails,
             'user' => $user,
+            'account' => $account
         ]);
     }
 

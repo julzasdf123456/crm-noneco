@@ -46,6 +46,7 @@
                 </div>
                 <div class="card-footer">
                     {!! Form::submit('Go', ['class' => 'btn btn-primary']) !!}
+                    <button id="printdcr" class="btn btn-warning float-right"><i class="fas fa-print ico-tab"></i>Print DCR</button>
                 </div>
                 {!! Form::close() !!}
             </div>
@@ -106,4 +107,15 @@
 </div>
 
 @endsection
+
+@push('page_scripts')
+    <script>
+        $(document).ready(function() {
+            $('#printdcr').on('click', function(e) {
+                e.preventDefault()
+                window.location.href = "{{ url('/d_c_r_summary_transactions/print-dcr') }}" + "/{{ Auth::id() }}/" + $('#Day').val()
+            })
+        })
+    </script>
+@endpush
 
