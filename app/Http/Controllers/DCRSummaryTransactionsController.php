@@ -87,7 +87,7 @@ class DCRSummaryTransactionsController extends AppBaseController
             ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
             ->where('Cashier_PaidBills.PostingDate', $request['Day'] != null ? $request['Day'] : date('Y-m-d'))
             ->where('Cashier_PaidBills.Teller', $request['Teller'])
-            ->where('Cashier_PaidBills.PaymentUsed', 'Check')
+            ->whereRaw("Cashier_PaidBills.PaymentUsed LIKE '%Check%'")
             ->whereNull('Cashier_PaidBills.Status')
             ->select('Cashier_PaidBills.*', 'Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.OldAccountNo')
             ->get();
@@ -96,7 +96,7 @@ class DCRSummaryTransactionsController extends AppBaseController
             ->leftJoin('Cashier_TransactionIndex', 'Cashier_TransactionDetails.TransactionIndexId', '=', 'Cashier_TransactionIndex.id')
             ->where('Cashier_TransactionIndex.ORDate', $request['Day'] != null ? $request['Day'] : date('Y-m-d'))
             ->where('Cashier_TransactionIndex.UserId', $request['Teller'])
-            ->where('Cashier_TransactionIndex.PaymentUsed', 'Check')
+            ->whereRaw("Cashier_TransactionIndex.PaymentUsed LIKE '%Check%'")
             ->whereNull('Cashier_TransactionIndex.Status')
             ->select('Cashier_TransactionIndex.ORNumber',
                 'Cashier_TransactionIndex.Total',
@@ -272,7 +272,7 @@ class DCRSummaryTransactionsController extends AppBaseController
         if ($request['From'] != null || $request['To'] != null) {
             if ($request['Teller'] == 'All') {
                 if ($request['Office'] == 'All') {
-                    $collection = DB::table('Cashier_DCRSummaryTransactions')
+                        $collection = DB::table('Cashier_DCRSummaryTransactions')
                             ->whereBetween('Day', [$request['From'], $request['To']])
                             // ->where('Teller', $request['Teller'])
                             ->where('ReportDestination', 'COLLECTION')

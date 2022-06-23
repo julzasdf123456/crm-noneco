@@ -24,9 +24,9 @@
             
         @endforeach
         <tr>
-            <td>Total</td>
+            <th>Total</th>
             <td></td>
-            <td class="text-right">{{ number_format($total, 2) }}</td>
+            <th class="text-right">{{ number_format($total, 2) }}</th>
         </tr>
     </tbody>
 </table>

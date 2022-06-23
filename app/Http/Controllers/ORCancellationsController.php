@@ -16,6 +16,7 @@ use App\Models\TransactionIndex;
 use App\Models\TransactionDetails;
 use App\Models\ORCancellations;
 use App\Models\DCRSummaryTransactions;
+use App\Models\TransacionPaymentDetails;
 use Illuminate\Support\Facades\DB;   
 use Illuminate\Support\Facades\Auth; 
 use Flash;
@@ -371,6 +372,10 @@ class ORCancellationsController extends AppBaseController
 
             // REMOVE FROM DCR 
             DCRSummaryTransactions::where('ORNumber', $transaction->ORNumber)->delete();
+
+            // REMOVE FROM Transaction Details
+            TransactionDetails::where('TransactionIndexId', $transaction->id)->delete();
+            TransacionPaymentDetails::where('ORNumber', $transaction->ORNumber)->delete();
 
             // ADD NOTIFICATION
             $notifier = new Notifiers;

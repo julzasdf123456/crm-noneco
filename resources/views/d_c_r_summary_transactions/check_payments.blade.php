@@ -1,3 +1,8 @@
+@php
+    use App\Models\PaidBillsDetails;
+    use App\Models\TransacionPaymentDetails;
+@endphp
+
 <div class="row">
     <div class="col-lg-6">
         <div class="card" style="height: 70vh;">
@@ -16,14 +21,23 @@
                     </thead>
                     <tbody>
                         @foreach ($powerBillsCheck as $item)
-                            <tr>
-                                <td>{{ $item->ORNumber }}</td>
-                                <td>{{ $item->ServiceAccountName }}</td>
-                                <td>{{ $item->OldAccountNo }}</td>
-                                <td class="text-right">{{ $item->CheckNo }}</td>
-                                <td>{{ $item->Bank }}</td>
-                                <td class="text-right">{{ $item->NetAmount != null ? number_format($item->NetAmount, 2) : '0' }}</td>
-                            </tr>
+                            @php
+                                $checks = PaidBillsDetails::where('ORNumber', $item->ORNumber)
+                                    ->where('AccountNumber', $item->AccountNumber)
+                                    ->where('PaymentUsed', 'Check')
+                                    ->get();
+                            @endphp
+                            @foreach ($checks as $check)
+                                <tr>
+                                    <td>{{ $check->ORNumber }}</td>
+                                    <td>{{ $item->ServiceAccountName }}</td>
+                                    <td>{{ $item->OldAccountNo }}</td>
+                                    <td class="text-right">{{ $check->CheckNo }}</td>
+                                    <td>{{ $check->Bank }}</td>
+                                    <td class="text-right">{{ $check->Amount != null ? number_format($check->Amount, 2) : '0' }}</td>
+                                </tr>
+                            @endforeach
+                            
                         @endforeach
                     </tbody>
                 </table>
@@ -48,14 +62,22 @@
                     </thead>
                     <tbody>
                         @foreach ($nonPowerBillsCheck as $item)
-                            <tr>
-                                <td>{{ $item->ORNumber }}</td>
-                                <td>{{ $item->PayeeName }}</td>
-                                <td>{{ $item->AccountNumber }}</td>
-                                <td class="text-right">{{ $item->CheckNo }}</td>
-                                <td>{{ $item->Bank }}</td>
-                                <td class="text-right">{{ $item->Total != null ? number_format($item->Total, 2) : '0' }}</td>
-                            </tr>
+                            @php
+                                $checks = TransacionPaymentDetails::where('ORNumber', $item->ORNumber)
+                                    ->where('PaymentUsed', 'Check')
+                                    ->get();
+                            @endphp
+                            @foreach ($checks as $check)
+                                <tr>
+                                    <td>{{ $check->ORNumber }}</td>
+                                    <td>{{ $item->PayeeName }}</td>
+                                    <td>{{ $item->AccountNumber }}</td>
+                                    <td class="text-right">{{ $item->CheckNo }}</td>
+                                    <td>{{ $item->Bank }}</td>
+                                    <td class="text-right">{{ $item->Total != null ? number_format($item->Total, 2) : '0' }}</td>
+                                </tr>
+                            @endforeach
+                            
                         @endforeach
                     </tbody>
                 </table>

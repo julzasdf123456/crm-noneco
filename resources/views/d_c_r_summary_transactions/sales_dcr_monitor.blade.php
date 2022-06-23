@@ -104,8 +104,11 @@
                             <th class="text-right">Amount</th>
                         </thead>
                         <tbody>
+                            @php
+                                $totalDcr = 0;
+                            @endphp
                             @foreach ($collection as $item)
-                                @if (intval($item->Amount) == 0)
+                                @if (floatval($item->Amount) == 0)
                                     
                                 @else
                                     <tr>
@@ -113,9 +116,18 @@
                                         <td>{{ $item->Description }}</td>
                                         <td class="text-right">{{ number_format($item->Amount, 2) }}</td>
                                     </tr>
+                                    
+                                    @php
+                                        $totalDcr = $totalDcr + floatval($item->Amount);
+                                    @endphp
                                 @endif
                                 
                             @endforeach
+                            <tr>
+                                <th>Total</th>
+                                <th></th>
+                                <th class="text-right">{{ number_format($totalDcr, 2) }}</th>
+                            </tr>
                         </tbody>
                     </table>
 
@@ -130,8 +142,11 @@
                             <th class="text-right">Amount</th>
                         </thead>
                         <tbody>
+                            @php
+                                $totalSales = 0;
+                            @endphp
                             @foreach ($sales as $item)
-                                @if (intval($item->Amount) == 0)
+                                @if (floatval($item->Amount) == 0)
                                     
                                 @else
                                     <tr>
@@ -139,9 +154,16 @@
                                         <td>{{ $item->Description }}</td>
                                         <td class="text-right">{{ number_format($item->Amount, 2) }}</td>
                                     </tr>
-                                @endif
-                                
+                                    @php
+                                        $totalSales = $totalSales + floatval($item->Amount);
+                                    @endphp
+                                @endif                                
                             @endforeach
+                            <tr>
+                                <th>Total</th>
+                                <th></th>
+                                <th class="text-right">{{ number_format($totalSales, 2) }}</th>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
