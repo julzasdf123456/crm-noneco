@@ -10,7 +10,7 @@
     html, body {
         font-family: sax-mono, Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
         /* font-stretch: condensed; */
-        font-size: 1.05em;
+        font-size: .88em;
     }
 
     table tbody th,td,
@@ -18,7 +18,7 @@
         font-family: sax-mono, Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
         /* font-stretch: condensed; */
         /* , Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; */
-        font-size: 1.05em;
+        font-size: .78em;
     }
     @media print {
         @page {
@@ -72,7 +72,7 @@
         $total = 0.0;
     @endphp
     <div style="width: 100%;">
-        <table style="margin-top: 24px; width: 100%;">
+        <table style="margin-top: 24px; width: 100%; padding: 0px;">
             <tbody>     
                 @foreach ($paidBill as $item)
                     @php
