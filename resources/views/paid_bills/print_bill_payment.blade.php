@@ -10,7 +10,7 @@
     html, body {
         font-family: sax-mono, Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
         /* font-stretch: condensed; */
-        font-size: .88em;
+        font-size: 1.05em;
     }
 
     table tbody th,td,
@@ -18,7 +18,7 @@
         font-family: sax-mono, Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
         /* font-stretch: condensed; */
         /* , Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; */
-        font-size: .83em;
+        font-size: 1.05em;
     }
     @media print {
         @page {
@@ -103,7 +103,7 @@
 <script type="text/javascript">
     window.print();
 
-    window.setTimeout(function(){
-        window.location.href = "{{ route('paidBills.index') }}";
-    }, 800);
+    // window.setTimeout(function(){
+    //     window.location.href = "{{ route('paidBills.index') }}";
+    // }, 800);
 </script>
