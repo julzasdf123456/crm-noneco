@@ -103,7 +103,7 @@
 <script type="text/javascript">
     window.print();
 
-    // window.setTimeout(function(){
-    //     window.location.href = "{{ route('paidBills.index') }}";
-    // }, 800);
+    window.setTimeout(function(){
+        window.location.href = "{{ route('paidBills.index') }}";
+    }, 800);
 </script>

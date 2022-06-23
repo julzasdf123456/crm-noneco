@@ -481,6 +481,7 @@
                 var totalAll = cashAmnt + checkAmountTotal
 
                 $('#total-modal-confirm').val(parseFloat(totalAll).toFixed(2))
+                $('#amntdue-modal-confirm').val(parseFloat(totalAmount).toFixed(2))
                 $('#change-modal-confirm').val(change)
             });
 
@@ -705,7 +706,6 @@
         }
 
         function fetchDetails(id) {
-            $('#account-number').text(id)
 
             // CLEAR DETAILS
             $('#bill-no').text('-')
@@ -748,6 +748,7 @@
                         $('#account-name').html('<i class="fas fa-check-circle text-success ico-tab"></i>' + res['ServiceAccountName'])
                         acctNo = id
                     }
+                    $('#account-number').text(res['OldAccountNo'])
                     $('#modal-search').modal('hide')
                 },
                 error : function(err) {

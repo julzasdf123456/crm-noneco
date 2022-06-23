@@ -29,6 +29,12 @@
                         </td>
                     </tr>
                     <tr>
+                        <th style="width: 40%;" class="text-right">Amount Due</th>
+                        <td style="width: 60%;">
+                            <input type="number" step="any" class="form-control" id="amntdue-modal-confirm" style="width: 300px; color: red; font-size: 1.5em;" readonly="true">
+                        </td>
+                    </tr>
+                    <tr>
                         <th style="width: 40%;" class="text-right">Change</th>
                         <td style="width: 60%;">
                             <input type="number" step="any" class="form-control" id="change-modal-confirm" style="width: 300px; font-size: 1.5em;" readonly="true">

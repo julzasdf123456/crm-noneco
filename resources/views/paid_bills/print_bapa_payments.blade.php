@@ -4,15 +4,22 @@
     use App\Models\User;
 @endphp
 <style>
+    @font-face {
+        font-family: 'sax-mono';
+        src: url('/fonts/saxmono.ttf');
+    }
     html, body {
-        font-family: sans-serif;
-        font-size: .82em;
+        font-family: sax-mono, Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+        /* font-stretch: condensed; */
+        font-size: 1.05em;
     }
 
     table tbody th,td,
     table thead th {
-        font-family: sans-serif;
-        font-size: .7em;
+        font-family: sax-mono, Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+        /* font-stretch: condensed; */
+        /* , Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; */
+        font-size: 1.05em;
     }
 
     @media print {
@@ -42,11 +49,11 @@
 @if ($i<1)
 <div class="print-area">
     <div>
-        <span style="margin-left: 10px;">Meter #: {{ $item->MeterNumber != null ? $item->MeterNumber : '-' }}</span>
+        <span style="margin-left: 15px;">{{ $item->OldAccountNo }}</span>
         <span style="margin-left: 176px;">{{ $item != null ? $item->ORNumber : '-' }}</span><br>
-        <span style="margin-left: 10px;">{{ $item->OldAccountNo }}</span>
+        <span style="margin-left: 15px;">Meter #: {{ $item->MeterNumber != null ? $item->MeterNumber : '-' }}</span>
         <span style="margin-left: 26px;">{{ $item->ServiceAccountName }}</span><br>
-        <span style="margin-left: 10px;">{{ ServiceAccounts::getAddress($item) }}</span>
+        <span style="margin-left: 15px;">{{ ServiceAccounts::getAddress($item) }}</span>
         <span style="margin-left: 26px;">{{ $item->AccountStatus }}</span><br>
         <!-- <span style="margin-left: 10px;">{{ $item->AccountType }}</span> -->
         
@@ -87,11 +94,11 @@
 @else
 <div class="print-area">
     <div style="margin-top: 20px;">
-        <span style="margin-left: 10px;">Meter #: {{ $item->MeterNumber != null ? $item->MeterNumber : '-' }}</span>
+        <span style="margin-left: 15px;">{{ $item->OldAccountNo }}</span>
         <span style="margin-left: 176px;">{{ $item != null ? $item->ORNumber : '-' }}</span><br>
-        <span style="margin-left: 10px;">{{ $item->OldAccountNo }}</span>
+        <span style="margin-left: 15px;">Meter #: {{ $item->MeterNumber != null ? $item->MeterNumber : '-' }}</span>
         <span style="margin-left: 26px;">{{ $item->ServiceAccountName }}</span><br>
-        <span style="margin-left: 10px;">{{ ServiceAccounts::getAddress($item) }}</span>
+        <span style="margin-left: 15px;">{{ ServiceAccounts::getAddress($item) }}</span>
         <span style="margin-left: 26px;">{{ $item->AccountStatus }}</span><br>
         <!-- <span style="margin-left: 10px;">{{ $item->AccountType }}</span> -->
         
