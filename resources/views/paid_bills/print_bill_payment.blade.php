@@ -3,16 +3,21 @@
     use App\Models\Bills;
 @endphp
 <style>
+    @font-face {
+        font-family: 'sax-mono';
+        src: url('/fonts/saxmono.ttf');
+    }
     html, body {
-        font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
-        font-stretch: condensed;
+        font-family: sax-mono, Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+        /* font-stretch: condensed; */
         font-size: .88em;
     }
 
     table tbody th,td,
     table thead th {
-        font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
-        font-stretch: condensed;
+        font-family: sax-mono;
+        /* font-stretch: condensed; */
+        /* , Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; */
         font-size: .83em;
     }
     @media print {
@@ -49,12 +54,12 @@
 
 <div id="print-area" class="content">
     <div style="margin-top: 15px;">
-        <span style="margin-left: 20px;">Meter #: {{ $meter != null ? $meter->SerialNumber : '-' }}</span>
-        <span style="margin-left: 200px;">{{ $paidBillSingle != null ? $paidBillSingle->ORNumber : '-' }}</span><br>
+        <span style="margin-left: 25px;">Meter #: {{ $meter != null ? $meter->SerialNumber : '-' }}</span>
+        <span style="margin-left: 205px;">{{ $paidBillSingle != null ? $paidBillSingle->ORNumber : '-' }}</span><br>
         @if ($account != null)
-            <span style="margin-left: 20px;">{{ $account->OldAccountNo }}</span>
-            <span style="margin-left: 15px;">{{ $account->ServiceAccountName }}</span><br>
-            <span style="margin-left: 20px;">{{ ServiceAccounts::getAddress($account) }}</span>
+            <span style="margin-left: 25px;">{{ $account->OldAccountNo }}</span>
+            <span style="margin-left: 20px;">{{ $account->ServiceAccountName }}</span><br>
+            <span style="margin-left: 25px;">{{ ServiceAccounts::getAddress($account) }}</span>
             <span style="margin-left: 26px;">{{ $account->AccountStatus }}</span>
         @else
             <span style="margin-left: 40px;">Account Details Not Found</span>
