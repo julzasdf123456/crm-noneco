@@ -15,7 +15,7 @@
 
     table tbody th,td,
     table thead th {
-        font-family: sax-mono;
+        font-family: sax-mono, Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
         /* font-stretch: condensed; */
         /* , Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif; */
         font-size: .83em;
@@ -49,17 +49,15 @@
 
 </style>
 
-
-{{-- <link rel="stylesheet" href="{{ URL::asset('adminlte.min.css') }}"> --}}
-
 <div id="print-area" class="content">
     <div style="margin-top: 15px;">
-        <span style="margin-left: 22px;">Meter #: {{ $meter != null ? $meter->SerialNumber : '-' }}</span>
+        <span style="margin-left: 25px;">{{ $account->OldAccountNo }}</span>        
         <span style="margin-left: 200px;">{{ $paidBillSingle != null ? $paidBillSingle->ORNumber : '-' }}</span><br>
         @if ($account != null)
-            <span style="margin-left: 22px;">{{ $account->OldAccountNo }}</span>
-            <span style="margin-left: 12px;">{{ $account->ServiceAccountName }}</span><br>
-            <span style="margin-left: 22px;">{{ ServiceAccounts::getAddress($account) }}</span>
+        <div style="margin-top: 3px;"></div>
+            <span style="margin-left: 22px;">Meter #: {{ $meter != null ? $meter->SerialNumber : '-' }}</span>
+            <span style="margin-left: 1px;">{{ $account->ServiceAccountName }}</span><br>
+            <text style="margin-left: 22px;" style="font-size: .5em !important;">{{ ServiceAccounts::getAddress($account) }}</text>
             <span style="margin-left: 26px;">{{ $account->AccountStatus }}</span>
         @else
             <span style="margin-left: 40px;">Account Details Not Found</span>
