@@ -67,7 +67,7 @@ html {
 } 
 </style>
 
-{{-- <link rel="stylesheet" href="{{ URL::asset('adminlte.min.css') }}"> --}}
+<link rel="stylesheet" href="{{ URL::asset('adminlte.min.css') }}">
 
 <div id="print-area" class="content">
     <div class="row">
