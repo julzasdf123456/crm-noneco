@@ -87,7 +87,7 @@
                                         <strong class="text-right" id="surcharges"></strong>
                                     </td>
                                 </tr>
-                                {{-- <tr>                        
+                                <tr>                        
                                     <td>
                                         <div class="input-group">
                                             <input type="hidden" value="" name="Vat2">
@@ -110,7 +110,7 @@
                                     <td class="text-right">
                                         <strong class="text-right" id="vat5">-</strong>
                                     </td>
-                                </tr> --}}
+                                </tr>
                                 <tr style="border-top: 1px solid #dcdcdc">
                                     <th>Total Amount Due</th>
                                     <th class="text-right">
