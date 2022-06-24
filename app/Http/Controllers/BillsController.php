@@ -315,7 +315,7 @@ class BillsController extends AppBaseController
                     'Billing_Readings.FieldStatus')
                 ->get();
         }        
-
+ 
         $meterReaders = User::role('Meter Reader')->get();
         
         return view('/bills/unbilled_readings_console', [

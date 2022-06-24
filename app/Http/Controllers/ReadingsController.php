@@ -387,4 +387,45 @@ class ReadingsController extends AppBaseController
 
         return redirect(route('readings.manual-reading'));
     }
+
+    public function capturedReadings(Request $request) {
+        // $area = $request['Area'];
+        // $groupCode = $request['GroupCode'];
+        $meterReader = $request['MeterReader'];
+        $period = $request['ServicePeriod'];
+
+        if ($meterReader==null | $period==null) {
+            $readings = null;
+        } else {
+            $readings = Readings::whereNull('AccountNumber')
+                ->where('ServicePeriod', $period)
+                ->where('MeterReader', $meterReader)
+                ->get();
+        }
+
+        $meterReaders = User::role('Meter Reader')->get();
+
+        return view('/readings/captured_readings', [
+            'meterReaders' => $meterReaders,
+            'readings' => $readings,
+        ]);
+    }
+
+    public function markAsDone(Request $request) {
+        $readings = Readings::find($request['id']);
+
+        if ($readings != null) {
+            $readings->AccountNumber = 'ERRONEOUS';
+            $readings->save();
+        }
+
+        return response()->json($readings, 200);
+    }
+
+    public function fetchAccount(Request $request) {
+        $account = ServiceAccounts::where('OldAccountNo', $request['OldAccountNo'])
+            ->first();
+
+        return response()->json($account, 200);
+    }
 }
