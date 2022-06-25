@@ -6,6 +6,7 @@ use Eloquent as Model;
 use App\Models\Rates;
 use App\Models\Bills;
 use App\Models\IDGenerator;
+use App\Models\ArrearsLedgerDistribution;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -367,7 +368,7 @@ class Bills extends Model
         if ($bill->ConsumerType == 'RESIDENTIAL' || $bill->ConsumerType == 'RESIDENTIAL RURAL' || $bill->ConsumerType == 'RURAL RESIDENTIAL') {
             return 0;
         } else {
-            return round(floatval($bill->NetAmount) * .05, 2);
+            return (floatval($bill->NetAmount) * .05);
         }
     }
 
@@ -446,14 +447,16 @@ class Bills extends Model
                 $bill->FranchiseTax +
                 $bill->BusinessTax +
                 $bill->AdditionalCharges -
-                $bill->Deductions;
+                $bill->Deductions -
+                $bill->Evat2Percent -
+                $bill->Evat5Percent;
 
         return round($amount, 4);
     }
 
     // MODIFY THIS
     public static function computeLifeLine($account, $bill, $rate) {
-        $kwhUsed = floatval($bill->KwhUsed) * floatval($bill->Multiplier);
+        $kwhUsed = floatval($bill->KwhUsed) /* * floatval($bill->Multiplier)*/;
         // MODIFY THIS
         $deductibles = $bill->GenerationSystemCharge +
                     $bill->TransmissionDeliveryChargeKWH +
@@ -494,7 +497,7 @@ class Bills extends Model
 
     // MODIFY HIS
     public static function computeSeniorCitizen($account, $bill, $rate) {
-        $kwhUsed = floatval($bill->KwhUsed) * floatval($bill->Multiplier);
+        $kwhUsed = floatval($bill->KwhUsed) /* * floatval($bill->Multiplier)*/;
         // MODIFY THIS
         $deductibles = $bill->GenerationSystemCharge +
                     $bill->TransmissionDeliveryChargeKWH +
@@ -557,13 +560,20 @@ class Bills extends Model
             ->orderByDesc('created_at')
             ->first();
 
+        /**
+         * GET OCL
+         */
+        $ocl = ArrearsLedgerDistribution::where('AccountNumber', $account->id)
+            ->where('ServicePeriod', $period)
+            ->first();
+
         if ($rate != null) {            
             // VARIABLES
             $effectiveRate = Rates::floatRate($rate->TotalRateVATIncluded);
             $kwhAmountUsed = round(floatval($kwh), 4);
             $multiplier = round(floatval($account->Multiplier != null ? $account->Multiplier : 1), 4);
-            $kwh = $kwhAmountUsed * $multiplier;
-            $additionalCharges = round(floatval($additionalCharges), 4);
+            $kwh = $kwhAmountUsed;
+            $additionalCharges = $ocl != null ? round(floatval($ocl->Amount), 4) : 0;
             $deductions = round(floatval($deductions), 4);
 
             // IF BILL UPDATE
@@ -629,6 +639,18 @@ class Bills extends Model
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
                     
                     $bill->DistributionVAT = round(Bills::getDistributionVat($bill), 4);
+                    // $bill->DistributionVAT = round($kwh * Rates::floatRate($rate->DistributionVAT), 4);
+
+                    /**
+                     * COMPUTE EVAT
+                     */
+                    if ($account->Evat5Percent=='Yes') {
+                        $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    }
+
+                    if ($account->Ewt2Percent=='Yes') {
+                        $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    }
 
                     if ($is2307 == 'true') {
                         $form2307 = Bills::get2307($bill);
@@ -718,6 +740,18 @@ class Bills extends Model
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
 
                     $bill->DistributionVAT = round(Bills::getDistributionVat($bill), 4);
+                    // $bill->DistributionVAT = round($kwh * Rates::floatRate($rate->DistributionVAT), 4);
+
+                    /**
+                     * COMPUTE EVAT
+                     */
+                    if ($account->Evat5Percent=='Yes') {
+                        $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    }
+
+                    if ($account->Ewt2Percent=='Yes') {
+                        $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    }
 
                     if ($is2307 == 'true') {
                         $form2307 = Bills::get2307($bill);
@@ -808,6 +842,18 @@ class Bills extends Model
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
 
                     $bill->DistributionVAT = round(Bills::getDistributionVat($bill), 4);
+                    // $bill->DistributionVAT = round($kwh * Rates::floatRate($rate->DistributionVAT), 4);
+
+                    /**
+                     * COMPUTE EVAT
+                     */
+                    if ($account->Evat5Percent=='Yes') {
+                        $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    }
+
+                    if ($account->Ewt2Percent=='Yes') {
+                        $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    }
 
                     if ($is2307 == 'true') {
                         $form2307 = Bills::get2307($bill);
@@ -852,13 +898,20 @@ class Bills extends Model
             ->orderByDesc('created_at')
             ->first();
 
+        /**
+         * GET OCL
+         */
+        $ocl = ArrearsLedgerDistribution::where('AccountNumber', $account->id)
+            ->where('ServicePeriod', $period)
+            ->first();
+
         if ($rate != null) {            
             // VARIABLES
             $effectiveRate = Rates::floatRate($rate->TotalRateVATIncluded);
             $kwhAmountUsed = round(floatval($kwh), 4);
             $multiplier = round(floatval($account->Multiplier != null ? $account->Multiplier : 1), 4);
-            $kwh = $kwhAmountUsed * $multiplier;
-            $additionalCharges = round(floatval($additionalCharges), 4);
+            $kwh = $kwhAmountUsed;
+            $additionalCharges = $ocl != null ? round(floatval($ocl->Amount), 4) : 0;
             $deductions = round(floatval($deductions), 4);
 
             // IF BILL UPDATE
@@ -923,6 +976,18 @@ class Bills extends Model
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
                     
                     $bill->DistributionVAT = round(Bills::getDistributionVat($bill), 4);
+                    // $bill->DistributionVAT = round($kwh * Rates::floatRate($rate->DistributionVAT), 4);
+
+                    /**
+                     * COMPUTE EVAT
+                     */
+                    if ($account->Evat5Percent=='Yes') {
+                        $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    }
+
+                    if ($account->Ewt2Percent=='Yes') {
+                        $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    }
 
                     if ($is2307 == 'true') {
                         $form2307 = Bills::get2307($bill);
@@ -1011,6 +1076,18 @@ class Bills extends Model
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
 
                     $bill->DistributionVAT = round(Bills::getDistributionVat($bill), 4);
+                    // $bill->DistributionVAT = round($kwh * Rates::floatRate($rate->DistributionVAT), 4);
+
+                    /**
+                     * COMPUTE EVAT
+                     */
+                    if ($account->Evat5Percent=='Yes') {
+                        $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    }
+
+                    if ($account->Ewt2Percent=='Yes') {
+                        $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    }
 
                     if ($is2307 == 'true') {
                         $form2307 = Bills::get2307($bill);
@@ -1101,6 +1178,18 @@ class Bills extends Model
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
 
                     $bill->DistributionVAT = round(Bills::getDistributionVat($bill), 4);
+                    // $bill->DistributionVAT = round($kwh * Rates::floatRate($rate->DistributionVAT), 4);
+
+                    /**
+                     * COMPUTE EVAT
+                     */
+                    if ($account->Evat5Percent=='Yes') {
+                        $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    }
+
+                    if ($account->Ewt2Percent=='Yes') {
+                        $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    }
 
                     if ($is2307 == 'true') {
                         $form2307 = Bills::get2307($bill);
@@ -1181,6 +1270,23 @@ class Bills extends Model
         return $bill;
     }
 
+    public static function getFivePercent($item) {
+        return round((floatval($item->DistributionSystemCharge) + 
+                floatval($item->SupplyRetailCustomerCharge) + 
+                floatval($item->MeteringRetailCustomerCharge) + 
+                floatval($item->LifelineRate) + 
+                floatval($item->OtherLifelineRateCostAdjustment) + 
+                floatval($item->InterClassCrossSubsidyCharge)) * .05, 2);
+    }
+
+    public static function getTwoPercent($item) {
+        return round((floatval($item->DistributionSystemCharge) + 
+                floatval($item->SupplyRetailCustomerCharge) + 
+                floatval($item->MeteringRetailCustomerCharge) + 
+                floatval($item->OtherLifelineRateCostAdjustment) + 
+                floatval($item->InterClassCrossSubsidyCharge)) * .02, 2);
+    }
+
     /**
      * COMPUTES THE HIGH VOLTAGE BILL ONLY
      */
@@ -1195,14 +1301,21 @@ class Bills extends Model
             ->orderByDesc('created_at')
             ->first();
 
+        /**
+         * GET OCL
+         */
+        $ocl = ArrearsLedgerDistribution::where('AccountNumber', $account->id)
+            ->where('ServicePeriod', $period)
+            ->first();
+
         if ($rate != null) {            
             // VARIABLES
             $effectiveRate = Rates::floatRate($rate->TotalRateVATIncluded);
             $kwhAmountUsed = round(floatval($kwh), 4);
             $multiplier = round(floatval($account->Multiplier != null ? $account->Multiplier : 1), 4);
-            $kwh = $kwhAmountUsed * $multiplier;
+            $kwh = $kwhAmountUsed;
             $demand = round(floatval($demand), 2);
-            $additionalCharges = round(floatval($additionalCharges), 4);
+            $additionalCharges = $ocl != null ? round(floatval($ocl->Amount), 4) : 0;
             $deductions = round(floatval($deductions), 4);
 
             // IF BILL UPDATE
@@ -1268,6 +1381,18 @@ class Bills extends Model
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
                     
                     $bill->DistributionVAT = round(Bills::getDistributionVat($bill), 4);
+                    // $bill->DistributionVAT = round($kwh * Rates::floatRate($rate->DistributionVAT), 4);
+
+                    /**
+                     * COMPUTE EVAT
+                     */
+                    if ($account->Evat5Percent=='Yes') {
+                        $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    }
+
+                    if ($account->Ewt2Percent=='Yes') {
+                        $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    }
 
                     if ($is2307 == 'true') {
                         $form2307 = Bills::get2307($bill);
@@ -1357,6 +1482,18 @@ class Bills extends Model
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
 
                     $bill->DistributionVAT = round(Bills::getDistributionVat($bill), 4);
+                    // $bill->DistributionVAT = round($kwh * Rates::floatRate($rate->DistributionVAT), 4);
+
+                    /**
+                     * COMPUTE EVAT
+                     */
+                    if ($account->Evat5Percent=='Yes') {
+                        $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    }
+
+                    if ($account->Ewt2Percent=='Yes') {
+                        $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    }
 
                     if ($is2307 == 'true') {
                         $form2307 = Bills::get2307($bill);
@@ -1448,6 +1585,18 @@ class Bills extends Model
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
 
                     $bill->DistributionVAT = round(Bills::getDistributionVat($bill), 4);
+                    // $bill->DistributionVAT = round($kwh * Rates::floatRate($rate->DistributionVAT), 4);
+
+                    /**
+                     * COMPUTE EVAT
+                     */
+                    if ($account->Evat5Percent=='Yes') {
+                        $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    }
+
+                    if ($account->Ewt2Percent=='Yes') {
+                        $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    }
 
                     if ($is2307 == 'true') {
                         $form2307 = Bills::get2307($bill);
@@ -1492,14 +1641,21 @@ class Bills extends Model
             ->orderByDesc('created_at')
             ->first();
 
+        /**
+         * GET OCL
+         */
+        $ocl = ArrearsLedgerDistribution::where('AccountNumber', $account->id)
+            ->where('ServicePeriod', $period)
+            ->first();
+
         if ($rate != null) {            
             // VARIABLES
             $effectiveRate = Rates::floatRate($rate->TotalRateVATIncluded);
             $kwhAmountUsed = round(floatval($kwh), 4);
             $multiplier = round(floatval($account->Multiplier != null ? $account->Multiplier : 1), 4);
-            $kwh = $kwhAmountUsed * $multiplier;
+            $kwh = $kwhAmountUsed;
             $demand = round(floatval($demand), 2);
-            $additionalCharges = round(floatval($additionalCharges), 4);
+            $additionalCharges = $ocl != null ? round(floatval($ocl->Amount), 4) : 0;
             $deductions = round(floatval($deductions), 4);
 
             // IF BILL UPDATE
@@ -1565,6 +1721,18 @@ class Bills extends Model
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
                     
                     $bill->DistributionVAT = round(Bills::getDistributionVat($bill), 4);
+                    // $bill->DistributionVAT = round($kwh * Rates::floatRate($rate->DistributionVAT), 4);
+
+                    /**
+                     * COMPUTE EVAT
+                     */
+                    if ($account->Evat5Percent=='Yes') {
+                        $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    }
+
+                    if ($account->Ewt2Percent=='Yes') {
+                        $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    }
 
                     if ($is2307 == 'true') {
                         $form2307 = Bills::get2307($bill);
@@ -1654,6 +1822,18 @@ class Bills extends Model
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
 
                     $bill->DistributionVAT = round(Bills::getDistributionVat($bill), 4);
+                    // $bill->DistributionVAT = round($kwh * Rates::floatRate($rate->DistributionVAT), 4);
+
+                    /**
+                     * COMPUTE EVAT
+                     */
+                    if ($account->Evat5Percent=='Yes') {
+                        $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    }
+
+                    if ($account->Ewt2Percent=='Yes') {
+                        $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    }
 
                     if ($is2307 == 'true') {
                         $form2307 = Bills::get2307($bill);
@@ -1745,6 +1925,18 @@ class Bills extends Model
                     $bill->SeniorCitizenSubsidy = round(Bills::computeSeniorCitizen($account, $bill, $rate), 4);
 
                     $bill->DistributionVAT = round(Bills::getDistributionVat($bill), 4);
+                    // $bill->DistributionVAT = round($kwh * Rates::floatRate($rate->DistributionVAT), 4);
+
+                    /**
+                     * COMPUTE EVAT
+                     */
+                    if ($account->Evat5Percent=='Yes') {
+                        $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    }
+
+                    if ($account->Ewt2Percent=='Yes') {
+                        $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    }
 
                     if ($is2307 == 'true') {
                         $form2307 = Bills::get2307($bill);

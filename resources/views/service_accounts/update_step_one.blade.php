@@ -148,7 +148,7 @@
                                 <div class="input-group">
                                     <select class="form-control" name="AccountType" id="AccountType">
                                         @foreach ($accountTypes as $item)
-                                            <option value="{{ $item->AccountType }}" f-name="{{ $item->Alias }}" {{ $item->Alias==$serviceAccount->AccountType ? 'selected' : '' }}>{{ $item->AccountType }}</option>
+                                            <option value="{{ $item->AccountType }}" f-name="{{ $item->Alias }}" {{ $item->AccountType==$serviceAccount->AccountType ? 'selected' : '' }}>{{ $item->AccountType }}</option>
                                         @endforeach
                                     </select>
                                 </div>

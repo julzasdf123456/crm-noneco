@@ -128,8 +128,8 @@
                         <tr>
                             <th>Kwh Used</th>
                             <td>
-                                <input type="hidden" step="any" name="KwhUsed" id="KwhUsed"  class="form-control form-control-sm" style="font-size: 1.6em;">
-                                <input type="number" step="any" name="KwhUsedProxy" id="KwhUsedProxy"  class="form-control form-control-sm" style="font-size: 1.6em;">
+                                <input type="text" step="any" name="KwhUsed" id="KwhUsed"  class="form-control form-control-sm" style="font-size: 1.6em;">
+                                {{-- <input type="number" step="any" name="KwhUsedProxy" id="KwhUsedProxy"  class="form-control form-control-sm" style="font-size: 1.6em;"> --}}
                             </td>
                             <th>Net Amount</th>
                             <td>
@@ -374,6 +374,20 @@
                                 <input type="text" step="any" name="SeniorCitizenDiscountAndSubsidyAdjustment" id="SeniorCitizenDiscountAndSubsidyAdjustment" class="form-control form-control-sm text-right" readonly="true">
                             </td>
                         </tr>
+                        <tr>
+                            <td>
+                                <label for="Evat2Percent">EWT 2%</label>
+                            </td>
+                            <td>
+                                <input type="text" step="any"  name="Evat2Percent" id="Evat2Percent" class="form-control form-control-sm text-right" readonly="true">
+                            </td>
+                            <td>
+                                <label for="Evat5Percent">EVAT 5%</label>
+                            </td>
+                            <td>
+                                <input type="text" step="any"  name="Evat5Percent" id="Evat5Percent" class="form-control form-control-sm text-right" readonly="true">
+                            </td>
+                        </tr>
                     </table>
                 </div>
             </div>
@@ -459,9 +473,9 @@
                 is2307Checked = false
             }
 
-            $('#KwhUsedProxy').keyup(function() {
-                $('#KwhUsed').val(this.value).change()
-            })
+            // $('#KwhUsedProxy').keyup(function() {
+            //     $('#KwhUsed').val(this.value).change()
+            // })
 
             $('#KwhUsed').keyup(function() {
                 adjustBill(this.value, $('#AdditionalCharges').val(), $('#Deductions').val(), is2307Checked)
@@ -515,9 +529,9 @@
             var dif = pres - prev
 
             var kwhFinal = parseFloat($('#multiplier').text()) * dif
-            console.log(kwhFinal)
-            $('#KwhUsed').val(parseFloat(dif).toFixed(2)).change()              
-            $('#KwhUsedProxy').val(parseFloat(kwhFinal).toFixed(2)).change()   
+         
+            $('#KwhUsed').val(parseFloat(kwhFinal).toFixed(2)).change()              
+            // $('#KwhUsedProxy').val(parseFloat(kwhFinal).toFixed(2)).change()   
         }
 
         function adjustBill(kwh, additionalCharges, deductions, is2307) {
@@ -570,7 +584,9 @@
                         $('#SeniorCitizenSubsidy').val(Number(parseFloat(res['SeniorCitizenSubsidy']).toFixed(2)).toLocaleString())
                         $('#OtherLifelineRateCostAdjustment').val(Number(parseFloat(res['OtherLifelineRateCostAdjustment']).toFixed(2)).toLocaleString())
                         $('#SeniorCitizenDiscountAndSubsidyAdjustment').val(Number(parseFloat(res['SeniorCitizenDiscountAndSubsidyAdjustment']).toFixed(2)).toLocaleString())
-                        $('#Form2307Amount').val(Number(parseFloat(res['Form2307Amount']).toFixed(2)).toLocaleString())
+                        $('#Form2307Amount').val(Number(parseFloat(res['Form2307Amount']).toFixed(2)).toLocaleString())                     
+                        $('#Evat2Percent').val(Number(parseFloat(res['Evat2Percent']).toFixed(2)).toLocaleString())
+                        $('#Evat5Percent').val(Number(parseFloat(res['Evat5Percent']).toFixed(2)).toLocaleString())
                     },
                     error : function(error) {
                         Swal.fire({

@@ -95,8 +95,8 @@
                                     <tr>
                                         <td>Consumer Type</td>
                                         <th class="text-right">{{ $bills->ConsumerType }}</th>
-                                        <td class="left-pad">Form 2307</td>
-                                        <th class="text-right">{{ $bills->Form2307Amount != null ? number_format($bills->Form2307Amount, 4) : 'none' }}</th>
+                                        <td class="left-pad">Rate</td>
+                                        <th class="text-right">{{ $rate != null ? number_format($rate->TotalRateVATExcludedWithAdjustments, 4) : 'none' }}</th>
                                         <td class="left-pad">Kwh Used</td>
                                         <th class="text-right">{{ $bills->KwhUsed }}</th>
                                     </tr>

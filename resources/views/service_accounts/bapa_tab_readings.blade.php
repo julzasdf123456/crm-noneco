@@ -10,6 +10,7 @@
                 <td><a href="{{ route('bills.bapa-view-readings', [$item->ServicePeriod, urlencode($bapaName)]) }}">{{ date('F Y', strtotime($item->ServicePeriod)) }}</a></td>
                 <td class="text-right">{{ number_format($item->NoOfReadings) }}</td>
                 <td class="text-right">
+                    <a href="{{ route('bills.print-bulk-bill-old-format-bapa', [$item->ServicePeriod, urlencode($bapaName)]) }}" style="margin-right: 10px;"><i class="fas fa-print text-warning"></i></a>
                     <a href="{{ route('bills.bapa-view-readings', [$item->ServicePeriod, urlencode($bapaName)]) }}"><i class="fas fa-eye"></i></a>
                 </td>
             </tr>

@@ -19,7 +19,6 @@
     <div class="col-lg-8 offset-lg-2 col-md-12">
         <div class="card">
             {!! Form::model($bill, ['route' => ['bills.update', $bill->id], 'method' => 'patch']) !!}
-            {{ app\Models\Bills::isHighVoltage(app\Models\Bills::getAccountType($account)) }}
             <div class="card-header">
                 <span class="card-title">Bill Number : <strong>{{ $bill->BillNumber }}</strong> | Rate: <strong>{{ number_format($bill->EffectiveRate, 4) }}</strong> | Billing Month: <strong>{{ date('F Y', strtotime($bill->ServicePeriod)) }}</strong></span>
                 
@@ -76,8 +75,8 @@
 
                     <div class="form-group col-lg-3">
                         <label for="KwhUsed">Kwh Used</label>
-                        <input type="hidden" name="KwhUsed" id="KwhUsed" value="{{ floatval($bill->KwhUsed) * floatval($bill->Multiplier) }}" class="form-control text-right">
-                        <input type="number" step="any" name="KwhUsedProxy" id="KwhUsedProxy" value="{{ floatval($bill->KwhUsed) * floatval($bill->Multiplier) }}" class="form-control text-right">
+                        <input type="number" step="any" name="KwhUsed" id="KwhUsed" value="{{ $bill->KwhUsed }}" class="form-control text-right">
+                        {{-- <input type="number" step="any" name="KwhUsedProxy" id="KwhUsedProxy" value="{{ floatval($bill->KwhUsed) * floatval($bill->Multiplier) }}" class="form-control text-right"> --}}
                     </div>
 
                     <div class="form-group col-lg-3">
@@ -87,7 +86,7 @@
 
                     <div class="form-group col-lg-3">
                         <label for="AdditionalCharges">Termed Payment Attached</label>
-                        <input type="number" step="any" name="AdditionalCharges" id="AdditionalCharges" value="{{ $bill->AdditionalCharges }}" class="form-control text-right" readonly>
+                        <input type="number" step="any" name="AdditionalCharges" id="AdditionalCharges" value="{{ $ocl != null ? $ocl->Amount : '0' }}" class="form-control text-right" readonly>
                     </div>
 
                     <div class="form-group col-lg-3">
@@ -95,18 +94,18 @@
                         <input type="number" step="any" name="Deductions" id="Deductions" value="{{ $bill->Deductions }}" class="form-control text-right">
                     </div>
 
-                    <div class="col-lg-3">
+                    {{-- <div class="col-lg-3">
                         {!! Form::label('Form 2307:') !!}
                         <div class="input-group">
                             <input type="hidden" value="" name="Form2307">
                             <input type="checkbox" value="{{ $bill->Form2307Amount }}" name="Form2307" id="Form2307" class="custom-checkbox" {{ $bill->Form2307Amount != null ? 'checked' : '' }}>
                         </div>
-                    </div>
+                    </div> --}}
 
-                    <div class="form-group col-lg-3">
+                    {{-- <div class="form-group col-lg-3">
                         <label for="Form2307Amount">Form 2307 Amount</label>
                         <input type="number" step="any" name="Form2307Amount" id="Form2307Amount" value="{{ $bill->Form2307Amount }}" class="form-control text-right" readonly>
-                    </div>
+                    </div> --}}
                 </div>
 
                 <div class="divider"></div>
@@ -358,6 +357,20 @@
                             <input type="number" step="any" value="{{ $bill->SeniorCitizenDiscountAndSubsidyAdjustment }}"  name="SeniorCitizenDiscountAndSubsidyAdjustment" id="SeniorCitizenDiscountAndSubsidyAdjustment" class="form-control text-right" readonly="true">
                         </td>
                     </tr>
+                    <tr>
+                        <td>
+                            <label for="Evat2Percent">EWT 2%</label>
+                        </td>
+                        <td>
+                            <input type="number" step="any" value="{{ $bill->Evat2Percent }}"  name="Evat2Percent" id="Evat2Percent" class="form-control text-right" readonly="true">
+                        </td>
+                        <td>
+                            <label for="Evat5Percent">EVAT 5%</label>
+                        </td>
+                        <td>
+                            <input type="number" step="any" value="{{ $bill->Evat5Percent }}"  name="Evat5Percent" id="Evat5Percent" class="form-control text-right" readonly="true">
+                        </td>
+                    </tr>
                 </table>
             </div>
             <div class="card-footer">
@@ -380,9 +393,9 @@
                 is2307Checked = false
             }
 
-            $('#KwhUsedProxy').keyup(function() {
-                $('#KwhUsed').val(this.value).change()
-            })
+            // $('#KwhUsedProxy').keyup(function() {
+            //     $('#KwhUsed').val(this.value).change()
+            // })
 
             $('#KwhUsed').keyup(function() {
                 adjustBill(this.value, $('#AdditionalCharges').val(), $('#Deductions').val(), is2307Checked)
@@ -437,8 +450,8 @@
 
             var kwhFinal = parseFloat($('#Multiplier').val()) * dif
 
-            $('#KwhUsedProxy').val(parseFloat(kwhFinal).toFixed(2)).change()   
-            $('#KwhUsed').val(parseFloat(dif).toFixed(2)).change()          
+            // $('#KwhUsedProxy').val(parseFloat(kwhFinal).toFixed(2)).change()   
+            $('#KwhUsed').val(parseFloat(kwhFinal).toFixed(2)).change()          
         }
 
         function adjustBill(kwh, additionalCharges, deductions, is2307) {
@@ -490,7 +503,9 @@
                         $('#SeniorCitizenSubsidy').val(res['SeniorCitizenSubsidy'])
                         $('#OtherLifelineRateCostAdjustment').val(res['OtherLifelineRateCostAdjustment'])
                         $('#SeniorCitizenDiscountAndSubsidyAdjustment').val(res['SeniorCitizenDiscountAndSubsidyAdjustment'])
-                        $('#Form2307Amount').val(res['Form2307Amount'])
+                        $('#Form2307Amount').val(res['Form2307Amount'])                        
+                        $('#Evat2Percent').val(res['Evat2Percent'])
+                        $('#Evat5Percent').val(res['Evat5Percent'])
                     },
                     error : function(error) {
                         Swal.fire({

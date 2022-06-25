@@ -626,9 +626,14 @@ class BillsController extends AppBaseController
 
         $account = ServiceAccounts::find($bill->AccountNumber);
 
+        $ocl = ArrearsLedgerDistribution::where('AccountNumber', $account->id)
+            ->where('ServicePeriod', $bill->ServicePeriod)
+            ->first();
+
         return view('/bills/adjust_bill', [
             'bill' => $bill,
             'account' => $account,
+            'ocl' => $ocl
         ]);
     }
 
@@ -1300,6 +1305,20 @@ class BillsController extends AppBaseController
             ->where('Billing_Bills.ServicePeriod', $servicePeriod)
             ->where('Billing_ServiceAccounts.Town', $town)
             ->where('Billing_ServiceAccounts.AreaCode', $route)
+            ->select('Billing_Bills.*')
+            ->get();
+
+        return view('/bills/print_bulk_old_format', [
+            'bills' => $bills
+        ]);
+    }
+
+    public function printBulkBillOldFormatBapa($servicePeriod, $bapaName) {
+        $bapaName = urldecode($bapaName);
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
             ->select('Billing_Bills.*')
             ->get();
 
