@@ -128,11 +128,12 @@
                         <tr>
                             <th>Kwh Used</th>
                             <td>
-                                <input type="number" step="any" name="KwhUsed" id="KwhUsed"  class="form-control form-control-sm" style="font-size: 1.6em;">
+                                <input type="hidden" step="any" name="KwhUsed" id="KwhUsed"  class="form-control form-control-sm" style="font-size: 1.6em;">
+                                <input type="number" step="any" name="KwhUsedProxy" id="KwhUsedProxy"  class="form-control form-control-sm" style="font-size: 1.6em;">
                             </td>
                             <th>Net Amount</th>
                             <td>
-                                <input type="text" name="NetAmount" id="NetAmount" class="form-control form-control-sm text-right" readonly="true" step="any" style="font-size: 1.6em;">
+                                <input type="text" name="NetAmount" id="NetAmount" class="form-control form-control-sm text-right" readonly="true" step="any" style="font-size: 1.6em; font-weight: bold; color: blue;">
                             </td>
                         </tr>
                         <tr>
@@ -411,7 +412,7 @@
                     </tr>
                     <tr>
                         <td>Multiplier</td>
-                        <th>{{ $account->Multiplier }}</th>
+                        <th id="multiplier">{{ $account->Multiplier }}</th>
                     </tr>
                 </table>
             </div>
@@ -457,6 +458,10 @@
             } else {
                 is2307Checked = false
             }
+
+            $('#KwhUsedProxy').keyup(function() {
+                $('#KwhUsed').val(this.value).change()
+            })
 
             $('#KwhUsed').keyup(function() {
                 adjustBill(this.value, $('#AdditionalCharges').val(), $('#Deductions').val(), is2307Checked)
@@ -509,7 +514,10 @@
             var prev = parseFloat($('#PreviousKwh').val())
             var dif = pres - prev
 
-            $('#KwhUsed').val(parseFloat(dif).toFixed(2)).change()            
+            var kwhFinal = parseFloat($('#multiplier').text()) * dif
+            console.log(kwhFinal)
+            $('#KwhUsed').val(parseFloat(dif).toFixed(2)).change()              
+            $('#KwhUsedProxy').val(parseFloat(kwhFinal).toFixed(2)).change()   
         }
 
         function adjustBill(kwh, additionalCharges, deductions, is2307) {

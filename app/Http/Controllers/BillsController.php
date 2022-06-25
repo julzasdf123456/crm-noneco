@@ -640,7 +640,13 @@ class BillsController extends AppBaseController
         $additionalCharges = $request['AdditionalCharges'] != null ? floatval($request['AdditionalCharges']) : 0;
         $deductions = $request['Deductions'] != null ? floatval($request['Deductions']) : 0;
 
-        return response()->json(Bills::computeRegularBillAndDontSave($account, $bill->id, $request['KwhUsed'], $bill->PreviousKwh, $bill->PresentKwh, $bill->ServicePeriod, $bill->BillingDate, $additionalCharges, $deductions, $request['Is2307']), 200);
+        if (Bills::isHighVoltage(Bills::getAccountType($account))) {
+            $bills = Bills::computeHighVoltageBillAndDontSave($account, $bill->id, $request['KwhUsed'], $bill->PreviousKwh, $bill->PresentKwh, $bill->ServicePeriod, $bill->BillingDate, $additionalCharges, $deductions, $request['Is2307'], $request['Demand']);
+        } else {
+            $bills = Bills::computeRegularBillAndDontSave($account, $bill->id, $request['KwhUsed'], $bill->PreviousKwh, $bill->PresentKwh, $bill->ServicePeriod, $bill->BillingDate, $additionalCharges, $deductions, $request['Is2307']);
+        }        
+
+        return response()->json($bills, 200);
     }
 
     public function allBills(Request $request) {

@@ -9,7 +9,7 @@
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h4>Adjust {{ $account->ServiceAccountName }}'s Bill (Account No: <strong>{{ $bill->AccountNumber }}</strong>)</h4>
+                <h4>Adjust {{ $account->ServiceAccountName }}'s Bill (Account No: <strong><a href="{{ route('serviceAccounts.show', [$account->id]) }}">{{ $account->OldAccountNo }}</a></strong>)</h4>
             </div>
         </div>
     </div>
@@ -19,6 +19,7 @@
     <div class="col-lg-8 offset-lg-2 col-md-12">
         <div class="card">
             {!! Form::model($bill, ['route' => ['bills.update', $bill->id], 'method' => 'patch']) !!}
+            {{ app\Models\Bills::isHighVoltage(app\Models\Bills::getAccountType($account)) }}
             <div class="card-header">
                 <span class="card-title">Bill Number : <strong>{{ $bill->BillNumber }}</strong> | Rate: <strong>{{ number_format($bill->EffectiveRate, 4) }}</strong> | Billing Month: <strong>{{ date('F Y', strtotime($bill->ServicePeriod)) }}</strong></span>
                 
@@ -28,9 +29,11 @@
             </div>
             <div class="card-body">
                 <div class="row">
+                    <input type="hidden" name="AdjustmentNumber" id="AdjustmentNumber" value="{{ IDGenerator::generateID() }}" class="form-control">
+
                     <div class="form-group col-lg-3">
-                        <label for="AdjustmentNumber">Adjustment Number</label>
-                        <input type="text" name="AdjustmentNumber" id="AdjustmentNumber" value="{{ IDGenerator::generateID() }}" class="form-control" readonly>
+                        <label for="Multiplier">Multiplier</label>
+                        <input type="text" name="Multiplier" id="Multiplier" value="{{ $account->Multiplier }}" class="form-control" readonly>
                     </div>
 
                     <div class="form-group col-lg-3">
@@ -73,7 +76,13 @@
 
                     <div class="form-group col-lg-3">
                         <label for="KwhUsed">Kwh Used</label>
-                        <input type="number" step="any" name="KwhUsed" id="KwhUsed" value="{{ $bill->KwhUsed }}" class="form-control text-right">
+                        <input type="hidden" name="KwhUsed" id="KwhUsed" value="{{ floatval($bill->KwhUsed) * floatval($bill->Multiplier) }}" class="form-control text-right">
+                        <input type="number" step="any" name="KwhUsedProxy" id="KwhUsedProxy" value="{{ floatval($bill->KwhUsed) * floatval($bill->Multiplier) }}" class="form-control text-right">
+                    </div>
+
+                    <div class="form-group col-lg-3">
+                        <label for="Demand">Demand Kwh</label>
+                        <input type="number" step="any" name="Demand" id="Demand" value="{{ $bill->DemandPresentKwh }}" class="form-control text-right">
                     </div>
 
                     <div class="form-group col-lg-3">
@@ -108,7 +117,7 @@
                         <td></td>
                         <td></td>
                         <td>
-                            <input type="text" name="NetAmount" value="{{ $bill->NetAmount }}" id="NetAmount" class="form-control text-right" readonly="true" step="any" style="font-size: 1.6em;">
+                            <input type="text" name="NetAmount" value="{{ $bill->NetAmount }}" id="NetAmount" class="form-control text-right" readonly="true" step="any" style="font-size: 1.6em; font-weight: bold; color: blue;">
                         </td>
                     </tr>
                     <tr>
@@ -371,12 +380,20 @@
                 is2307Checked = false
             }
 
+            $('#KwhUsedProxy').keyup(function() {
+                $('#KwhUsed').val(this.value).change()
+            })
+
             $('#KwhUsed').keyup(function() {
                 adjustBill(this.value, $('#AdditionalCharges').val(), $('#Deductions').val(), is2307Checked)
             })
 
             $('#KwhUsed').on('change', function() {
                 adjustBill(this.value, $('#AdditionalCharges').val(), $('#Deductions').val(), is2307Checked)
+            })
+
+            $('#Demand').keyup(function() {
+                adjustBill($('#KwhUsed').val(), $('#AdditionalCharges').val(), $('#Deductions').val(), is2307Checked)
             })
 
             $('#AdditionalCharges').keyup(function() {
@@ -418,7 +435,10 @@
             var prev = parseFloat($('#PreviousKwh').val())
             var dif = pres - prev
 
-            $('#KwhUsed').val(dif).change()            
+            var kwhFinal = parseFloat($('#Multiplier').val()) * dif
+
+            $('#KwhUsedProxy').val(parseFloat(kwhFinal).toFixed(2)).change()   
+            $('#KwhUsed').val(parseFloat(dif).toFixed(2)).change()          
         }
 
         function adjustBill(kwh, additionalCharges, deductions, is2307) {
@@ -432,6 +452,7 @@
                         Deductions : deductions,
                         Is2307 : is2307,
                         KwhUsed : kwh,
+                        Demand : $('#Demand').val()
                     },
                     success : function(res) {
                         $('#NetAmount').val(res['NetAmount'])

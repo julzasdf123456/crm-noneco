@@ -380,7 +380,7 @@ class Bills extends Model
     }
 
     public static function isHighVoltage($accountType) {
-        if ($accountType == 'INDUSTRIAL HIGH VOLTAGE' || $accountType == 'COMMERCIAL HIGH VOLTAGE' || $accountType=='PUBLIC BUILDING HIGH VOLTAGE') {
+        if ($accountType == 'COMMERCIAL HIGH VOLTAGE' || $accountType == 'INDUSTRIAL HIGH VOLTAGE' || $accountType=='PUBLIC BUILDING HIGH VOLTAGE' || $accountType == 'COMMERCIAL' || $accountType == 'INDUSTRIAL' || $accountType=='PUBLIC BUILDING' || $accountType=='IRRIGATION/WATER SYSTEMS') {
             return true;
         } else {
             return false;
@@ -1211,6 +1211,7 @@ class Bills extends Model
 
                 if ($bill != null) {
                     $bill->KwhUsed = $kwhAmountUsed;
+                    $bill->DemandPresentKwh = $demand;
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
@@ -1299,6 +1300,7 @@ class Bills extends Model
 
                 if ($bill != null) {
                     $bill->KwhUsed = $kwhAmountUsed;
+                    $bill->DemandPresentKwh = $demand;
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
@@ -1385,6 +1387,7 @@ class Bills extends Model
                     $bill->Multiplier = $account->Multiplier;
                     $bill->Coreloss = $account->Coreloss;
                     $bill->KwhUsed = $kwhAmountUsed;
+                    $bill->DemandPresentKwh = $demand;
                     $bill->PreviousKwh = $prev;
                     $bill->BillingDate = $readDate;
                     $bill->PresentKwh = round(floatval($pres), 4);
@@ -1505,6 +1508,7 @@ class Bills extends Model
 
                 if ($bill != null) {
                     $bill->KwhUsed = $kwhAmountUsed;
+                    $bill->DemandPresentKwh = $demand;
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
@@ -1593,6 +1597,7 @@ class Bills extends Model
 
                 if ($bill != null) {
                     $bill->KwhUsed = $kwhAmountUsed;
+                    $bill->DemandPresentKwh = $demand;
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
@@ -1679,6 +1684,7 @@ class Bills extends Model
                     $bill->Multiplier = $account->Multiplier;
                     $bill->Coreloss = $account->Coreloss;
                     $bill->KwhUsed = $kwhAmountUsed;
+                    $bill->DemandPresentKwh = $demand;
                     $bill->PreviousKwh = $prev;
                     $bill->PresentKwh = round(floatval($pres), 4);
                     $bill->EffectiveRate = $effectiveRate;

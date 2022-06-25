@@ -339,48 +339,111 @@ class ReadingsController extends AppBaseController
 
         if (Bills::isHighVoltage(Bills::getAccountType($account))) {
             // CREATE READING
-            $readings = new Readings;
-            $readings->id = IDGenerator::generateIDandRandString();
-            $readings->AccountNumber = $account->id;
-            $readings->ServicePeriod = $request['ServicePeriod'];
-            $readings->ReadingTimestamp = date('Y-m-d H:i:s');
-            $readings->KwhUsed = $request['PresentKwh'];
-            $readings->DemandKwhUsed = $request['Demand'];
-            $readings->MeterReader = Auth::id();
-            $readings->save();
+            $readings = Readings::where('AccountNumber', $account->id)
+                ->where('ServicePeriod', $request['ServicePeriod'])
+                ->first();
 
-            $bills = Bills::computeHighVoltageBill($account, 
-                null, 
-                $request['KwhUsed'], 
-                $request['PreviousKwh'], 
-                $request['PresentKwh'], 
-                $request['ServicePeriod'], 
-                $request['ReadingDate'], 
-                0, 
-                0, 
-                $request['Is2307'],
-                $request['Demand']);
+            if ($readings != null) {
+                $readings->AccountNumber = $account->id;
+                $readings->ServicePeriod = $request['ServicePeriod'];
+                $readings->ReadingTimestamp = date('Y-m-d H:i:s');
+                $readings->KwhUsed = $request['PresentKwh'];
+                $readings->DemandKwhUsed = $request['Demand'];
+                $readings->MeterReader = Auth::id();
+                $readings->save();
+            } else {
+                $readings = new Readings;
+                $readings->id = IDGenerator::generateIDandRandString();
+                $readings->AccountNumber = $account->id;
+                $readings->ServicePeriod = $request['ServicePeriod'];
+                $readings->ReadingTimestamp = date('Y-m-d H:i:s');
+                $readings->KwhUsed = $request['PresentKwh'];
+                $readings->DemandKwhUsed = $request['Demand'];
+                $readings->MeterReader = Auth::id();
+                $readings->save();
+            }
+            
+            $bills = Bills::where('AccountNumber', $account->id)
+                ->where('ServicePeriod', $request['ServicePeriod'])
+                ->first();
+            
+            if ($bills != null) {
+                $bills = Bills::computeHighVoltageBill($account, 
+                    $bills->id, 
+                    $request['KwhUsed'], 
+                    $request['PreviousKwh'], 
+                    $request['PresentKwh'], 
+                    $request['ServicePeriod'], 
+                    $request['ReadingDate'], 
+                    0, 
+                    0, 
+                    $request['Is2307'],
+                    $request['Demand']);
+            } else {
+                $bills = Bills::computeHighVoltageBill($account, 
+                    null, 
+                    $request['KwhUsed'], 
+                    $request['PreviousKwh'], 
+                    $request['PresentKwh'], 
+                    $request['ServicePeriod'], 
+                    $request['ReadingDate'], 
+                    0, 
+                    0, 
+                    $request['Is2307'],
+                    $request['Demand']);
+            }
+            
         } else {
             // CREATE READING
-            $readings = new Readings;
-            $readings->id = IDGenerator::generateIDandRandString();
-            $readings->AccountNumber = $account->id;
-            $readings->ServicePeriod = $request['ServicePeriod'];
-            $readings->ReadingTimestamp = date('Y-m-d H:i:s');
-            $readings->KwhUsed = $request['PresentKwh'];
-            $readings->MeterReader = Auth::id();
-            $readings->save();
+            $readings = Readings::where('AccountNumber', $account->id)
+                ->where('ServicePeriod', $request['ServicePeriod'])
+                ->first();
 
-            $bills = Bills::computeRegularBill($account, 
-                null, 
-                $request['KwhUsed'], 
-                $request['PreviousKwh'], 
-                $request['PresentKwh'], 
-                $request['ServicePeriod'], 
-                $request['ReadingDate'], 
-                0, 
-                0, 
-                $request['Is2307']);
+            if ($readings != null) {
+                $readings->AccountNumber = $account->id;
+                $readings->ServicePeriod = $request['ServicePeriod'];
+                $readings->ReadingTimestamp = date('Y-m-d H:i:s');
+                $readings->KwhUsed = $request['PresentKwh'];
+                $readings->MeterReader = Auth::id();
+                $readings->save();
+            } else {
+                $readings = new Readings;
+                $readings->id = IDGenerator::generateIDandRandString();
+                $readings->AccountNumber = $account->id;
+                $readings->ServicePeriod = $request['ServicePeriod'];
+                $readings->ReadingTimestamp = date('Y-m-d H:i:s');
+                $readings->KwhUsed = $request['PresentKwh'];
+                $readings->MeterReader = Auth::id();
+                $readings->save();
+            }
+
+            $bills = Bills::where('AccountNumber', $account->id)
+                ->where('ServicePeriod', $request['ServicePeriod'])
+                ->first();
+            
+            if ($bills != null) {
+                $bills = Bills::computeRegularBill($account, 
+                    $bills->id, 
+                    $request['KwhUsed'], 
+                    $request['PreviousKwh'], 
+                    $request['PresentKwh'], 
+                    $request['ServicePeriod'], 
+                    $request['ReadingDate'], 
+                    0, 
+                    0, 
+                    $request['Is2307']);
+            } else {
+                $bills = Bills::computeRegularBill($account, 
+                    null, 
+                    $request['KwhUsed'], 
+                    $request['PreviousKwh'], 
+                    $request['PresentKwh'], 
+                    $request['ServicePeriod'], 
+                    $request['ReadingDate'], 
+                    0, 
+                    0, 
+                    $request['Is2307']);
+            }            
         }
 
         Flash::success('Billing and reading saved!.');
