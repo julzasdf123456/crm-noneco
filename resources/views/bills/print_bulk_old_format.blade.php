@@ -146,11 +146,12 @@ p {
     <br>
     <br>
     <span style="margin-left: 40px;">{{ $account->ServiceAccountName }}</span>
-    <span style="margin-left: 280px;">{{ date('M d, Y', strtotime($item->ServiceDateFrom)) }}</span>
+    <span style="margin-left: 230px;">{{ date('M d, Y', strtotime($item->ServiceDateFrom)) }}</span>
     <span style="margin-left: 10px;">{{ date('M d, Y', strtotime($item->ServiceDateTo)) }}</span>
     <span style="margin-left: 15px;">{{ $item->PresentKwh }}</span>
     <span style="margin-left: 15px;">{{ $item->PreviousKwh }}</span>
     <span style="margin-left: 25px;">{{ $item->KwhUsed }}</span>
+    <span style="margin-left: 45px;">{{ round(floatval($item->KwhUsed) * floatval($item->Multiplier), 2) }}</span>
     <br>
 
     <span style="margin-left: 40px">{{ ServiceAccounts::getAddress($account) }}</span>
@@ -301,9 +302,16 @@ p {
         <p style="text-align: right; ">{{ number_format($item->Evat2Percent, 2) ? number_format($item->Evat2Percent, 2) : $item->Evat2Percent }}</p>
         <p style="text-align: right; margin-top: 8px; ">{{ number_format($item->NetAmount, 2) ? number_format($item->NetAmount, 2) : $item->NetAmount }}</p>
             
-        <p style="text-align: right; margin-top: 5px; ">{{ number_format(Bills::getFinalPenalty($item), 2) }}</p>
-        <p style="text-align: right; margin-top: 5px; ">{{ number_format(floatval(Bills::getFinalPenalty($item)) + floatval($item->NetAmount), 2)  }}</span>
-        <p style="text-align: right; margin-top: 15px; ">{{ number_format(floatval(Bills::getFinalPenalty($item)) + floatval($item->NetAmount), 2)  }}</span>
+        @if (Bills::getAccountTypeByType($item->ConsumerType) == 'RESIDENTIAL')
+            <p style="text-align: right; margin-top: 5px;  opacity: 0;">0</p>
+            <p style="text-align: right; margin-top: 5px; ">{{ number_format(floatval($item->NetAmount), 2)  }}</span>
+            <p style="text-align: right; margin-top: 15px; ">{{ number_format(floatval($item->NetAmount), 2)  }}</span>
+        @else
+            <p style="text-align: right; margin-top: 5px; ">{{ number_format(Bills::getFinalPenalty($item), 2) }}</p>
+            <p style="text-align: right; margin-top: 5px; ">{{ number_format(floatval(Bills::getFinalPenalty($item)) + floatval($item->NetAmount), 2)  }}</span>
+            <p style="text-align: right; margin-top: 15px; ">{{ number_format(floatval(Bills::getFinalPenalty($item)) + floatval($item->NetAmount), 2)  }}</span>
+        @endif
+        
         @php
             $totalArr = 0.0;
             if ($arrears != null) {

@@ -388,6 +388,7 @@ Route::post('/readings/create-manual-billing', [App\Http\Controllers\ReadingsCon
 Route::get('/readings/captured-readings', [App\Http\Controllers\ReadingsController::class, 'capturedReadings'])->name('readings.captured-readings');
 Route::get('/readings/mark-as-done', [App\Http\Controllers\ReadingsController::class, 'markAsDone'])->name('readings.mark-as-done');
 Route::get('/readings/fetch-account', [App\Http\Controllers\ReadingsController::class, 'fetchAccount'])->name('readings.fetch-account');
+Route::get('/readings/view-full-report/{period}/{meterReader}/{day}/{town}', [App\Http\Controllers\ReadingsController::class, 'viewFullReport'])->name('readings.view-full-report');
 Route::resource('readings', App\Http\Controllers\ReadingsController::class);
 
 Route::get('/bills/unbilled-readings', [App\Http\Controllers\BillsController::class, 'unbilledReadings'])->name('bills.unbilled-readings');
