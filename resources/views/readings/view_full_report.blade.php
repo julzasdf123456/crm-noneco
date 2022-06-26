@@ -21,31 +21,33 @@
         {{-- SUMMARY --}}
         <div class="col-lg-12">
             <div class="card shadow-none">
-                <div class="card-header border-0">
+                {{-- <div class="card-header">
                     <span class="card-title"><i class="fas fa-check-circle ico-tab"></i>Summary</span>
-                </div>
-                <div class="card-body table-responsive px-0">
+                </div> --}}
+                <div class="card-body table-responsive p-0">
                     <table class="table table-sm">
                         <thead>
-                            <th class="text-muted">Captured Readings</th>
-                            <th class="text-muted">Stuck Up</th>
-                            <th class="text-muted">Change Meters</th>
-                            <th class="text-muted">No Display</th>
-                            <th class="text-muted">Not in Use</th>
-                            <th class="text-muted">Other Unbilled</th>
-                            <th class="text-muted">Total Billed</th>
-                            <th class="text-muted">Total Readings</th>
+                            <td class="text-muted text-center">Disconnected<br>Readings</td>
+                            <td class="text-muted text-center">Captured <br> Readings</td>
+                            <td class="text-muted text-center">Stuck Up</td>
+                            <td class="text-muted text-center">Change <br> Meters</td>
+                            <td class="text-muted text-center">No Display</td>
+                            <td class="text-muted text-center">Not in <br> Use</td>
+                            <td class="text-muted text-center">Otder <br> Unbilled</td>
+                            <td class="text-muted text-center">Total <br> Billed</td>
+                            <td class="text-muted text-center">Total <br> Readings</td>
                         </thead>
                         <tbody>
                             <tr>
-                                <th>{{ $summary != null ? $summary->Captured : '0' }}</th>
-                                <th>{{ $summary != null ? $summary->StuckUp : '0' }}</th>
-                                <th>{{ $summary != null ? $summary->ChangeMeter : '0' }}</th>
-                                <th>{{ $summary != null ? $summary->NoDisplay : '0' }}</th>
-                                <th>{{ $summary != null ? $summary->NotInUse : '0' }}</th>
-                                <th>{{ $summary != null ? $summary->OtherUnbilled : '0' }}</th>
-                                <th>{{ $summary != null ? $summary->TotalBilled : '0' }}</th>
-                                <th>{{ $summary != null ? number_format(intval($summary->Total) + intval($summary->Captured)) : '0' }}</th>
+                                <th class="text-center">{{ $summary != null ? $summary->Disconnected : '0' }}</th>
+                                <th class="text-center">{{ $summary != null ? $summary->Captured : '0' }}</th>
+                                <th class="text-center">{{ $summary != null ? $summary->StuckUp : '0' }}</th>
+                                <th class="text-center">{{ $summary != null ? $summary->ChangeMeter : '0' }}</th>
+                                <th class="text-center">{{ $summary != null ? $summary->NoDisplay : '0' }}</th>
+                                <th class="text-center">{{ $summary != null ? $summary->NotInUse : '0' }}</th>
+                                <th class="text-center">{{ $summary != null ? $summary->OtherUnbilled : '0' }}</th>
+                                <th class="text-center text-primary">{{ $summary != null ? $summary->TotalBilled : '0' }}</th>
+                                <th class="text-center text-success">{{ $summary != null ? number_format(intval($summary->Total) + intval($summary->Captured)) : '0' }}</th>
                             </tr>
                         </tbody>
                     </table>
@@ -55,29 +57,29 @@
 
         {{-- INDIVIDUALIZED --}}
         <div class="col-lg-12">
-            <div class="card shadow-none" style="height: 60vh;">
+            <div class="card shadow-none" style="height: 70vh;">
                 <div class="card-header">
                     <span class="card-title"><i class="fas fa-list ico-tab"></i>Reading Full Report</span>
                 </div>
                 <div class="card-body table-responsive p-0">
-                    <table class="table table-sm table-hover table-head-fixed text-nowrap">
+                    <table class="table table-sm table-hover table-head-fixed text-nowrap table-bordered">
                         <thead>
-                            <th>Account #</th>
-                            <th>Sequence #</th>
-                            <th>Name</th>
-                            <th>Acct. Status</th>
-                            <th>Timestamp</th>
-                            <th class="text-right">Prev</th>
-                            <th class="text-right">Pres</th>
-                            <th class="text-right">Current <br>Kwh Used</th>
-                            <th class="text-right">Daily <br>Average</th>
-                            <th class="text-right">Previous <br>Kwh Used</th>
-                            <th class="text-right">% Inc/Dec</th>
-                            <th class="text-right"># of Days</th>
-                            <th class="text-right">Meter #</th>
-                            <th>Field <br>Findings</th>
-                            <th>Remarks</th>
-                            <th></th>
+                            <th class="text-center">Account #</th>
+                            <th class="text-center">Sequence #</th>
+                            <th class="text-center">Name</th>
+                            <th class="text-center">Acct. Status</th>
+                            <th class="text-center">Timestamp</th>
+                            <th class="text-center">Prev</th>
+                            <th class="text-center">Pres</th>
+                            <th class="text-center">Current <br>Kwh Used</th>
+                            <th class="text-center">Daily <br>Average</th>
+                            <th class="text-center">Previous <br>Kwh Used</th>
+                            <th class="text-center">% Inc/Dec</th>
+                            <th class="text-center"># of Days</th>
+                            <th class="text-center">Meter #</th>
+                            <th class="text-center">Field <br>Findings</th>
+                            <th class="text-center">Remarks</th>
+                            <th class="text-center"></th>
                         </thead>
                         <tbody>
                             @foreach ($readingReport as $item)
@@ -119,7 +121,7 @@
                                     <td class="text-right">{{ $item->CurrentKwh != null ? round(floatval($item->CurrentKwh) / floatval($noOfDays), 2) : '-' }}</td>
                                     <td class="text-right">{{ $item->PrevKwh != null ? $item->PrevKwh : '0' }}</td>
                                     @if ($item->CurrentKwh != null)
-                                        <td class="text-right {{ floatval($percentage) < 0 ? 'text-success' : 'text-danger' }}"><i class="fas {{ floatval($percentage) < 0 ? 'fa-caret-down' : 'fa-caret-up' }} ico-tab"></i>{{ $item->CurrentKwh != null ? ($percentage * 100) . '%' : '-' }}</td>
+                                        <td class="text-right {{ floatval($percentage) < 0 ? 'text-success' : 'text-danger' }}"><i class="float-left fas {{ floatval($percentage) < 0 ? 'fa-caret-down' : 'fa-caret-up' }}"></i>{{ $item->CurrentKwh != null ? ($percentage * 100) . '%' : '-' }}</td>
                                     @else
                                         <td class="text-right">-</td>
                                     @endif                                    
