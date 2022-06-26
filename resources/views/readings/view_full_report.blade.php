@@ -65,6 +65,7 @@
                             <th>Account #</th>
                             <th>Sequence #</th>
                             <th>Name</th>
+                            <th>Acct. Status</th>
                             <th>Timestamp</th>
                             <th class="text-right">Prev</th>
                             <th class="text-right">Pres</th>
@@ -98,9 +99,15 @@
 
                                 @endphp
                                 <tr title="{{ $item->CurrentKwh != null ? '' : 'No Bill' }}">
-                                    <td><i class="fas {{ $item->CurrentKwh != null ? 'fa-check-circle ico-tab text-success' : 'fa-exclamation-circle ico-tab text-danger' }}"></i><a href="{{ route('serviceAccounts.show', [$item->AccountId]) }}">{{ $item->OldAccountNo }}</a></td>
+                                    @if ($item->AccountStatus == 'ACTIVE')
+                                        <td><i class="fas {{ $item->CurrentKwh != null ? 'fa-check-circle ico-tab text-success' : 'fa-exclamation-circle ico-tab text-danger' }}"></i><a href="{{ route('serviceAccounts.show', [$item->AccountId]) }}">{{ $item->OldAccountNo }}</a></td>
+                                    @else
+                                        <td><i class="fas fa-info-circle ico-tab text-muted"></i><a href="{{ route('serviceAccounts.show', [$item->AccountId]) }}">{{ $item->OldAccountNo }}</a></td>
+                                    @endif
+                                    
                                     <td>{{ $item->SequenceCode }}</td>
                                     <td>{{ $item->ServiceAccountName }}</td>
+                                    <td>{{ $item->AccountStatus }}</td>
                                     <td>{{ date('Y-m-d h:i:s A', strtotime($item->ReadingTimestamp )) }}</td>
                                     <td class="text-right">{{ $item->PrevReading }}</td>
                                     <td class="text-right">{{ $item->KwhUsed }}</td>
@@ -121,7 +128,7 @@
                                     <td>{{ $item->FieldStatus }}</td>
                                     <td>{{ $item->Notes }}</td>
                                     <td class="text-right">
-                                        @if ($item->CurrentKwh == null)
+                                        @if ($item->CurrentKwh == null && $item->AccountStatus == 'ACTIVE')
                                             <a href="{{ route('bills.zero-readings-view', [$item->id]) }}"><i class="fas fa-pen"></i></a>
                                         @endif                                        
                                     </td>
