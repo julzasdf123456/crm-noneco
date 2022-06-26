@@ -131,7 +131,7 @@ class BillsController extends AppBaseController
             ->first();
 
         $rate = Rates::where('ServicePeriod', $bills->ServicePeriod)
-            ->where('ConsumerType', $bills->ConsumerType)
+            ->where('ConsumerType', Bills::getAccountType($account))
             ->first();
 
         if (empty($bills)) {
@@ -1275,7 +1275,7 @@ class BillsController extends AppBaseController
             ->first();
 
         $rate = Rates::where('ServicePeriod', $bills->ServicePeriod)
-            ->where('ConsumerType', $bills->ConsumerType)
+            ->where('ConsumerType', Bills::getAccountType($account))
             ->first();
 
         if ($account != null) {
