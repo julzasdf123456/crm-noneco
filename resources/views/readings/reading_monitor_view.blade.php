@@ -286,8 +286,6 @@
 
         // VIEW FULL REPORT
         $('#view-report-btn').on('click', function() {
-            // window.location.href = "{{ url('/bills/print-bulk-bill-old-format') }}" + "/" + $('#Period').val() + "/" + $('#Town').val() + "/" + $('#Route').val();
-            // alert("{{ url('/bills/print-bulk-bill-old-format') }}" + "/2022-06-01/" + $('#Town').val() + "/02055") readings.view-full-report
             window.location.href  = "{{ url('/readings/view-full-report') }}" + "/{{ $servicePeriod }}/" + $('#MeterReader').val() + "/" + $('#Day').val() + "/" + $('#Town').val()
         })
     </script>

@@ -210,6 +210,7 @@ Route::get('/service_accounts/apprehend-manual', [App\Http\Controllers\ServiceAc
 Route::get('/service_accounts/pullout-manual', [App\Http\Controllers\ServiceAccountsController::class,  'pulloutManual'])->name('serviceAccounts.pullout-manual');
 Route::get('/service_accounts/change-name', [App\Http\Controllers\ServiceAccountsController::class,  'changeName'])->name('serviceAccounts.change-name');
 Route::get('/service_accounts/relocation-form/{accountNo}/{scId}', [App\Http\Controllers\ServiceAccountsController::class,  'relocationForm'])->name('serviceAccounts.relocation-form');
+Route::get('/service_accounts/print-ledger/{id}/{from}/{to}', [App\Http\Controllers\ServiceAccountsController::class,  'printLedger'])->name('serviceAccounts.print-ledger');
 Route::post('/service_accounts/store-relocation', [App\Http\Controllers\ServiceAccountsController::class,  'storeRelocation'])->name('serviceAccounts.store-relocation');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 

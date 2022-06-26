@@ -1,6 +1,7 @@
 <div class="content">
-    <button class="btn btn-xs btn-success float-right" data-toggle="modal" data-target="#modal-ledger-history">View Full Ledger</button>
-    <button class="btn btn-xs btn-default float-right" style="margin-right: 10px; margin-bottom: 5px;" data-toggle="modal" data-target="#modal-reading-history">View Reading History</button>
+    <button class="btn btn-xs btn-success float-right" data-toggle="modal" data-target="#modal-print-ledger">Print Ledger</button>
+    <button class="btn btn-xs btn-success float-right" data-toggle="modal" style="margin-right: 5px; margin-bottom: 5px;" data-target="#modal-ledger-history">View Full Ledger</button>
+    <button class="btn btn-xs btn-default float-right" style="margin-right: 5px; margin-bottom: 5px;" data-toggle="modal" data-target="#modal-reading-history">View Reading History</button>
 
     @if ($bills == null)
         <p class="center-text"><i>No billing history recorded</i></p>
@@ -121,6 +122,35 @@
     </div>
 </div>
 
+{{-- Print Ledger History --}}
+<div class="modal fade" id="modal-print-ledger" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Print Ledger</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group col-lg-6">
+                        <label for="FromLedger">From Year</label>
+                        <input type="text" id="FromLedger" maxlength=4 class="form-control">
+                    </div>
+                    <div class="form-group col-lg-6">
+                        <label for="ToLedger">To Year</label>
+                        <input type="text" id="ToLedger" maxlength=4 class="form-control" value="{{ date('Y') }}">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="print-ledger"><i class="fas fa-print ico-tab-mini"></i>Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('page_scripts')
     <script>
         function requestCancel(id) {
@@ -154,5 +184,21 @@
                 }
             })()
         }
+
+        $(document).ready(function() {
+            $('#print-ledger').on('click', function() {
+                var from = $('#FromLedger').val()
+                var to = $('#ToLedger').val()
+
+                if (jQuery.isEmptyObject(from) | jQuery.isEmptyObject(to)) {
+                    Swal.fire({
+                        title : 'Provide Years First!',
+                        icon : 'error'
+                    })
+                } else {                   
+                    window.location.href  = "{{ url('/service_accounts/print-ledger') }}" + "/{{ $serviceAccounts->id }}/" + from + "/" + to
+                }
+            })
+        })
     </script>
 @endpush
