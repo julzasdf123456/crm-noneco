@@ -74,6 +74,7 @@
                             <th class="text-right">% Inc/Dec</th>
                             <th class="text-right"># of Days</th>
                             <th class="text-right">Meter #</th>
+                            <th>Field <br>Findings</th>
                             <th>Remarks</th>
                             <th></th>
                         </thead>
@@ -117,6 +118,7 @@
                                     @endif                                    
                                     <td class="text-right">{{ $noOfDays }}</td>
                                     <td class="text-right">{{ $item->MeterNumber }}</td>
+                                    <td>{{ $item->FieldStatus }}</td>
                                     <td>{{ $item->Notes }}</td>
                                     <td class="text-right">
                                         @if ($item->CurrentKwh == null)

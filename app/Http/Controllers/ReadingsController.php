@@ -546,6 +546,7 @@ class ReadingsController extends AppBaseController
                 DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
                 )
             ->orderBy('CurrentKwh')
+            ->orderBy('FieldStatus')
             ->get();
         
         return view('/readings/view_full_report', [
