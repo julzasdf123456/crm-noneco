@@ -448,7 +448,7 @@
                     <tbody>
                         @foreach ($bills as $item)
                             <tr>
-                                <td>{{ $item->ServicePeriod }}</td>
+                                <td>{{ date('F Y', strtotime($item->ServicePeriod ))}}</td>
                                 <td class="text-right">{{ $item->PresentKwh }}</td>
                                 <td class="text-right">{{ $item->KwhUsed }}</td>
                                 <td class="text-right">{{ $item->NetAmount }}</td>
@@ -476,6 +476,14 @@
             // $('#KwhUsedProxy').keyup(function() {
             //     $('#KwhUsed').val(this.value).change()
             // })
+
+            $('#ReadingDate').keyup(function() {
+                validateDueDate(this.value)
+            })
+
+            $('#ReadingDate').on('dp.change', function() {
+                validateDueDate(this.value)
+            })
 
             $('#KwhUsed').keyup(function() {
                 adjustBill(this.value, $('#AdditionalCharges').val(), $('#Deductions').val(), is2307Checked)
@@ -523,15 +531,48 @@
             })
         })
 
+        function validateDueDate(date) {
+            var date = moment(date)
+            if (date.isValid()) {
+                var dueDate = moment(date, "YYYY-MM-DD").add(9, 'days')
+                $('#DueDate').val(dueDate.format("YYYY-MM-DD"))
+            } else {
+                Swal.fire({
+                    title : 'Invalid date!',
+                    icon : 'error'
+                })
+            }
+        }
+
         function computeKwhUsed() {
             var pres = parseFloat($('#PresentKwh').val())
             var prev = parseFloat($('#PreviousKwh').val())
             var dif = pres - prev
 
+            // GET PREVISOU KWH
+            var prevUsage = "{{ $latestBill != null ? $latestBill->KwhUsed : '0' }}"
+            prevUsage = parseFloat(prevUsage)
+
+            // GET PERCENTAGE ALERT
+            var percentageHigh = "{{ Bills::getHighConsumptionPercentageAlert() }}"
+            percentageHigh = parseFloat(percentageHigh)
+
             var kwhFinal = parseFloat($('#multiplier').text()) * dif
          
             $('#KwhUsed').val(parseFloat(kwhFinal).toFixed(2)).change()              
             // $('#KwhUsedProxy').val(parseFloat(kwhFinal).toFixed(2)).change()   
+
+            // FILTER HIGH USAGE
+            var prevDifference = kwhFinal - prevUsage
+            var percentageOfDifference = prevDifference/kwhFinal
+            console.log(percentageOfDifference + ' - ' + percentageHigh)
+            if (kwhFinal > -1 && percentageOfDifference > percentageHigh) {
+                Swal.fire({
+                    title : 'High Consumption Alert',
+                    text : 'The new Kwh Consumption is ' + parseFloat(percentageOfDifference*100).toFixed(2) + '% higher from the previous consumption (from ' + prevUsage + ' to ' + kwhFinal + ' kwh). You might wanna check the reading for verification',
+                    icon : 'warning'
+                })
+            }
         }
 
         function adjustBill(kwh, additionalCharges, deductions, is2307) {

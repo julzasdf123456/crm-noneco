@@ -344,6 +344,10 @@ class Bills extends Model
         'CancelApprovedBy' => 'nullable|string'
     ];
 
+    public static function getHighConsumptionPercentageAlert() {
+        return .5;
+    }
+
     public static function createDueDate($readDate) {
         return date('Y-m-d', strtotime($readDate . ' +9 days'));
     }
@@ -377,6 +381,14 @@ class Bills extends Model
             return 'RESIDENTIAL';
         } else {
             return $account->AccountType;
+        }
+    }
+
+    public static function getAccountTypeByType($type) {
+        if ($type == 'RESIDENTIAL RURAL' || $type == 'RURAL RESIDENTIAL') {
+            return 'RESIDENTIAL';
+        } else {
+            return $type;
         }
     }
 
@@ -556,7 +568,7 @@ class Bills extends Model
             ->first();
 
         $meter = DB::table('Billing_Meters')
-            ->where('ServiceAccountId', $account->AccountNumber)
+            ->where('ServiceAccountId', $account->id)
             ->orderByDesc('created_at')
             ->first();
 
@@ -585,7 +597,7 @@ class Bills extends Model
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
-                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
+                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->id, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
                     $bill->BillingDate = date('Y-m-d');
                     $bill->DueDate = Bills::createDueDate($readDate);
@@ -646,10 +658,14 @@ class Bills extends Model
                      */
                     if ($account->Evat5Percent=='Yes') {
                         $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    } else {
+                        $bill->Evat5Percent = '0';
                     }
 
                     if ($account->Ewt2Percent=='Yes') {
                         $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    } else {
+                        $bill->Evat2Percent = '0';
                     }
 
                     if ($is2307 == 'true') {
@@ -686,7 +702,7 @@ class Bills extends Model
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
-                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
+                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->id, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
                     $bill->BillingDate = date('Y-m-d');
                     $bill->DueDate = Bills::createDueDate($readDate);
@@ -747,10 +763,14 @@ class Bills extends Model
                      */
                     if ($account->Evat5Percent=='Yes') {
                         $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    } else {
+                        $bill->Evat5Percent = '0';
                     }
 
                     if ($account->Ewt2Percent=='Yes') {
                         $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    } else {
+                        $bill->Evat2Percent = '0';
                     }
 
                     if ($is2307 == 'true') {
@@ -788,7 +808,7 @@ class Bills extends Model
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
-                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
+                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->id, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
                     $bill->BillingDate = date('Y-m-d');
                     $bill->DueDate = Bills::createDueDate($readDate);
@@ -849,10 +869,14 @@ class Bills extends Model
                      */
                     if ($account->Evat5Percent=='Yes') {
                         $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    } else {
+                        $bill->Evat5Percent = '0';
                     }
 
                     if ($account->Ewt2Percent=='Yes') {
                         $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    } else {
+                        $bill->Evat2Percent = '0';
                     }
 
                     if ($is2307 == 'true') {
@@ -894,7 +918,7 @@ class Bills extends Model
             ->first();
 
         $meter = DB::table('Billing_Meters')
-            ->where('ServiceAccountId', $account->AccountNumber)
+            ->where('ServiceAccountId', $account->id)
             ->orderByDesc('created_at')
             ->first();
 
@@ -923,7 +947,7 @@ class Bills extends Model
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
-                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
+                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->id, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
                     $bill->DueDate = Bills::createDueDate($readDate);
                     $bill->MeterNumber = $meter != null ? $meter->SerialNumber : null;
@@ -983,10 +1007,14 @@ class Bills extends Model
                      */
                     if ($account->Evat5Percent=='Yes') {
                         $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    } else {
+                        $bill->Evat5Percent = '0';
                     }
 
                     if ($account->Ewt2Percent=='Yes') {
                         $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    } else {
+                        $bill->Evat2Percent = '0';
                     }
 
                     if ($is2307 == 'true') {
@@ -1023,7 +1051,7 @@ class Bills extends Model
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
-                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
+                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->id, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
                     $bill->DueDate = Bills::createDueDate($readDate);
                     $bill->MeterNumber = $meter != null ? $meter->SerialNumber : null;
@@ -1083,10 +1111,14 @@ class Bills extends Model
                      */
                     if ($account->Evat5Percent=='Yes') {
                         $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    } else {
+                        $bill->Evat5Percent = '0';
                     }
 
                     if ($account->Ewt2Percent=='Yes') {
                         $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    } else {
+                        $bill->Evat2Percent = '0';
                     }
 
                     if ($is2307 == 'true') {
@@ -1125,7 +1157,7 @@ class Bills extends Model
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
                     $bill->BillingDate = $readDate;
-                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
+                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->id, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
                     $bill->DueDate = Bills::createDueDate($readDate);
                     $bill->MeterNumber = $meter != null ? $meter->SerialNumber : null;
@@ -1185,10 +1217,14 @@ class Bills extends Model
                      */
                     if ($account->Evat5Percent=='Yes') {
                         $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    } else {
+                        $bill->Evat5Percent = '0';
                     }
 
                     if ($account->Ewt2Percent=='Yes') {
                         $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    } else {
+                        $bill->Evat2Percent = '0';
                     }
 
                     if ($is2307 == 'true') {
@@ -1297,7 +1333,7 @@ class Bills extends Model
             ->first();
 
         $meter = DB::table('Billing_Meters')
-            ->where('ServiceAccountId', $account->AccountNumber)
+            ->where('ServiceAccountId', $account->id)
             ->orderByDesc('created_at')
             ->first();
 
@@ -1328,7 +1364,7 @@ class Bills extends Model
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
-                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
+                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->id, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
                     $bill->DueDate = Bills::createDueDate($readDate);
                     $bill->MeterNumber = $meter != null ? $meter->SerialNumber : null;
@@ -1388,10 +1424,14 @@ class Bills extends Model
                      */
                     if ($account->Evat5Percent=='Yes') {
                         $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    } else {
+                        $bill->Evat5Percent = '0';
                     }
 
                     if ($account->Ewt2Percent=='Yes') {
                         $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    } else {
+                        $bill->Evat2Percent = '0';
                     }
 
                     if ($is2307 == 'true') {
@@ -1429,7 +1469,7 @@ class Bills extends Model
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
-                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
+                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->id, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
                     $bill->DueDate = Bills::createDueDate($readDate);
                     $bill->MeterNumber = $meter != null ? $meter->SerialNumber : null;
@@ -1489,10 +1529,14 @@ class Bills extends Model
                      */
                     if ($account->Evat5Percent=='Yes') {
                         $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    } else {
+                        $bill->Evat5Percent = '0';
                     }
 
                     if ($account->Ewt2Percent=='Yes') {
                         $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    } else {
+                        $bill->Evat2Percent = '0';
                     }
 
                     if ($is2307 == 'true') {
@@ -1532,7 +1576,7 @@ class Bills extends Model
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
-                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
+                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->id, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
                     $bill->DueDate = Bills::createDueDate($readDate);
                     $bill->MeterNumber = $meter != null ? $meter->SerialNumber : null;
@@ -1592,10 +1636,14 @@ class Bills extends Model
                      */
                     if ($account->Evat5Percent=='Yes') {
                         $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    } else {
+                        $bill->Evat5Percent = '0';
                     }
 
                     if ($account->Ewt2Percent=='Yes') {
                         $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    } else {
+                        $bill->Evat2Percent = '0';
                     }
 
                     if ($is2307 == 'true') {
@@ -1637,7 +1685,7 @@ class Bills extends Model
             ->first();
 
         $meter = DB::table('Billing_Meters')
-            ->where('ServiceAccountId', $account->AccountNumber)
+            ->where('ServiceAccountId', $account->id)
             ->orderByDesc('created_at')
             ->first();
 
@@ -1668,7 +1716,7 @@ class Bills extends Model
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
-                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
+                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->id, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
                     $bill->DueDate = Bills::createDueDate($readDate);
                     $bill->MeterNumber = $meter != null ? $meter->SerialNumber : null;
@@ -1728,10 +1776,14 @@ class Bills extends Model
                      */
                     if ($account->Evat5Percent=='Yes') {
                         $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    } else {
+                        $bill->Evat5Percent = '0';
                     }
 
                     if ($account->Ewt2Percent=='Yes') {
                         $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    } else {
+                        $bill->Evat2Percent = '0';
                     }
 
                     if ($is2307 == 'true') {
@@ -1769,7 +1821,7 @@ class Bills extends Model
                     $bill->KwhAmount = round($kwh * $effectiveRate, 2);
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->Deductions = $deductions;
-                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
+                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->id, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
                     $bill->DueDate = Bills::createDueDate($readDate);
                     $bill->MeterNumber = $meter != null ? $meter->SerialNumber : null;
@@ -1829,10 +1881,14 @@ class Bills extends Model
                      */
                     if ($account->Evat5Percent=='Yes') {
                         $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    } else {
+                        $bill->Evat5Percent = '0';
                     }
 
                     if ($account->Ewt2Percent=='Yes') {
                         $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    } else {
+                        $bill->Evat2Percent = '0';
                     }
 
                     if ($is2307 == 'true') {
@@ -1872,7 +1928,7 @@ class Bills extends Model
                     $bill->AdditionalCharges = $additionalCharges;
                     $bill->BillingDate = $readDate;
                     $bill->Deductions = $deductions;
-                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->AccountNumber, $readDate, $period);
+                    $bill->ServiceDateFrom = Bills::getServiceDateFrom($account->id, $readDate, $period);
                     $bill->ServiceDateTo = $readDate;
                     $bill->DueDate = Bills::createDueDate($readDate);
                     $bill->MeterNumber = $meter != null ? $meter->SerialNumber : null;
@@ -1932,10 +1988,14 @@ class Bills extends Model
                      */
                     if ($account->Evat5Percent=='Yes') {
                         $bill->Evat5Percent = round(Bills::getFivePercent($bill), 2);
+                    } else {
+                        $bill->Evat5Percent = '0';
                     }
 
                     if ($account->Ewt2Percent=='Yes') {
                         $bill->Evat2Percent = round(Bills::getTwoPercent($bill), 2);
+                    } else {
+                        $bill->Evat2Percent = '0';
                     }
 
                     if ($is2307 == 'true') {

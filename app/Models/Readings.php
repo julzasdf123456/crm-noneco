@@ -92,5 +92,11 @@ class Readings extends Model
         'MeterReader' => 'nullable|string'
     ];
 
-    
+    public static function getDaysBetweenDates($from, $to) {
+        $from = strtotime($from); 
+        $to = strtotime($to);
+        $datediff = $to - $from;
+
+        return round($datediff / (60 * 60 * 24));
+    }
 }
