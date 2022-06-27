@@ -65,17 +65,17 @@
                     <table class="table table-sm table-hover table-head-fixed text-nowrap table-bordered">
                         <thead>
                             <th class="text-center">#</th>
-                            <th class="text-center">Account #</th>
+                            <th class="text-center text-primary">Account #</th>
                             <th class="text-center">Sequence #</th>
                             <th class="text-center">Name</th>
                             <th class="text-center">Acct. Status</th>
                             <th class="text-center">Timestamp</th>
-                            <th class="text-center">Prev</th>
                             <th class="text-center">Pres</th>
-                            <th class="text-center">Current <br>Kwh Used</th>
+                            <th class="text-center">Prev</th>
+                            <th class="text-center text-success">Current <br>Kwh Used</th>
+                            <th class="text-center text-info">Previous <br>Kwh Used</th>
                             <th class="text-center">Daily <br>Average</th>
-                            <th class="text-center">Previous <br>Kwh Used</th>
-                            <th class="text-center">% Inc/Dec</th>
+                            <th class="text-center">% <span class="text-danger">Inc</span>/<span class="text-success">Dec</span></th>
                             <th class="text-center"># of Days</th>
                             <th class="text-center">Meter #</th>
                             <th class="text-center">Field <br>Findings</th>
@@ -116,15 +116,15 @@
                                     <td>{{ $item->ServiceAccountName }}</td>
                                     <td>{{ $item->AccountStatus }}</td>
                                     <td>{{ date('Y-m-d h:i:s A', strtotime($item->ReadingTimestamp )) }}</td>
-                                    <td class="text-right">{{ $item->PrevReading }}</td>
                                     <td class="text-right">{{ $item->KwhUsed }}</td>
+                                    <td class="text-right">{{ $item->PrevReading }}</td>
                                     @if ($item->CurrentKwh != null)
                                         <td class="{{ $item->CurrentKwh != null ? 'text-success' : 'text-danger' }} text-right">{{ $item->CurrentKwh != null ? $item->CurrentKwh : (round(floatval($item->KwhUsed) - floatval($item->PrevReading), 2)) }}</td>
                                     @else
                                         <th class="{{ $item->CurrentKwh != null ? 'text-success' : 'text-danger' }} text-right">{{ $item->CurrentKwh != null ? $item->CurrentKwh : (round(floatval($item->KwhUsed) - floatval($item->PrevReading), 2)) }}</th>
                                     @endif
+                                    <td class="text-right text-info">{{ $item->PrevKwh != null ? $item->PrevKwh : '0' }}</td>
                                     <td class="text-right">{{ $item->CurrentKwh != null ? round(floatval($item->CurrentKwh) / floatval($noOfDays), 2) : '-' }}</td>
-                                    <td class="text-right">{{ $item->PrevKwh != null ? $item->PrevKwh : '0' }}</td>
                                     @if ($item->CurrentKwh != null)
                                         <td class="text-right {{ floatval($percentage) < 0 ? 'text-success' : 'text-danger' }}"><i class="float-left fas {{ floatval($percentage) < 0 ? 'fa-caret-down' : 'fa-caret-up' }}"></i>{{ $item->CurrentKwh != null ? ($percentage * 100) . '%' : '-' }}</td>
                                     @else
