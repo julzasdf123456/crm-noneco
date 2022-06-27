@@ -74,8 +74,8 @@
                             <th class="text-center">Prev</th>
                             <th class="text-center text-success">Current <br>Kwh Used</th>
                             <th class="text-center text-info">Previous <br>Kwh Used</th>
-                            <th class="text-center">Daily <br>Average</th>
                             <th class="text-center">% <span class="text-danger">Inc</span>/<span class="text-success">Dec</span></th>
+                            <th class="text-center">Daily <br>Average</th>
                             <th class="text-center"># of Days</th>
                             <th class="text-center">Meter #</th>
                             <th class="text-center">Field <br>Findings</th>
@@ -124,12 +124,12 @@
                                         <th class="{{ $item->CurrentKwh != null ? 'text-success' : 'text-danger' }} text-right">{{ $item->CurrentKwh != null ? $item->CurrentKwh : (round(floatval($item->KwhUsed) - floatval($item->PrevReading), 2)) }}</th>
                                     @endif
                                     <td class="text-right text-info">{{ $item->PrevKwh != null ? $item->PrevKwh : '0' }}</td>
-                                    <td class="text-right">{{ $item->CurrentKwh != null ? round(floatval($item->CurrentKwh) / floatval($noOfDays), 2) : '-' }}</td>
                                     @if ($item->CurrentKwh != null)
                                         <td class="text-right {{ floatval($percentage) < 0 ? 'text-success' : 'text-danger' }}"><i class="float-left fas {{ floatval($percentage) < 0 ? 'fa-caret-down' : 'fa-caret-up' }}"></i>{{ $item->CurrentKwh != null ? ($percentage * 100) . '%' : '-' }}</td>
                                     @else
                                         <td class="text-right">-</td>
-                                    @endif                                    
+                                    @endif   
+                                    <td class="text-right">{{ $item->CurrentKwh != null ? round(floatval($item->CurrentKwh) / floatval($noOfDays), 2) : '-' }}</td>                                 
                                     <td class="text-right">{{ $noOfDays }}</td>
                                     <td class="text-right">{{ $item->MeterNumber }}</td>
                                     <td>{{ $item->FieldStatus }}</td>
