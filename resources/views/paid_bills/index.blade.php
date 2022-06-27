@@ -314,6 +314,11 @@
                 }
             })
 
+            $('#addCheckBtn').on('click', function() {
+                $('#checkAmount').val(parseFloat(totalAmount).toFixed(2))
+                $('#cashAmount').val('').change()
+            })
+
             // AMOUNT PAID ON KEY PRESSED
             $('#amountPaid').keyup(function() {
                 change = (parseFloat(this.value) - totalAmount).toFixed(2).toLocaleString()
