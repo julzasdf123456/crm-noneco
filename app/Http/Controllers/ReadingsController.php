@@ -500,6 +500,66 @@ class ReadingsController extends AppBaseController
         return response()->json($account, 200);
     }
 
+    public function viewFullReportBapa($period, $bapaName) {
+        $bapaName = urldecode($bapaName);
+
+        // GET READING DAY FROM TIMESTAMP
+        $reading = DB::table('Billing_Readings')
+            ->whereNotNull('Billing_Readings.AccountNumber')
+            ->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')")
+            ->where('Billing_Readings.ServicePeriod', $period)
+            ->first();
+
+        if ($reading != null) {
+            $summary = DB::table('Billing_Readings')
+                ->select(
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND AccountNumber IS NULL AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')) AS Captured"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')) AS Total"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE AccountStatus='DISCONNECTED' AND OrganizationParentAccount='" . $bapaName . "')) AS Disconnected"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND FieldStatus='STUCK-UP' AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')) AS StuckUp"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND FieldStatus='CHANGE METER' AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')) AS ChangeMeter"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND FieldStatus='NOT IN USE' AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')) AS NotInUse"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND FieldStatus='NO DISPLAY' AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')) AS NoDisplay"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND AccountNumber IS NOT NULL AND FieldStatus NOT IN ('STUCK-UP', 'CHANGE METER', 'NOT IN USE', 'NO DISPLAY') AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "') AND AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')) AS OtherUnbilled"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND AccountNumber IS NOT NULL AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "') AND AccountNumber IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')) AS TotalBilled")
+                )
+                ->first();
+        } else {
+            $summary = null;
+        } 
+
+        $readingReport = DB::table('Billing_Readings')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Readings.ServicePeriod', $period)
+            ->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')")
+            ->select('Billing_Readings.*',
+                'Billing_ServiceAccounts.id AS AccountId',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.SequenceCode',
+                'Billing_ServiceAccounts.AccountStatus',
+                DB::raw("(SELECT TOP 1 ReadingTimestamp FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReadingTimestamp"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReading"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS CurrentKwh"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "') AS PrevKwh"),
+                DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                )
+            ->orderBy('AccountStatus')
+            ->orderBy('CurrentKwh')
+            ->orderBy('FieldStatus')
+            ->get();
+
+        return view('/readings/view_full_report', [
+            'period' => $period,
+            'day' => '-',
+            'meterReader' => null,
+            'summary' => $summary,
+            'reading' => $reading,
+            'readingReport' => $readingReport,
+            'bapaName' => $bapaName,
+        ]);
+    }
+
     public function viewFullReport($period, $meterReader, $day, $town) {
         $meterReader = User::find($meterReader);
 
@@ -557,7 +617,8 @@ class ReadingsController extends AppBaseController
             'meterReader' => $meterReader,
             'summary' => $summary,
             'reading' => $reading,
-            'readingReport' => $readingReport
+            'readingReport' => $readingReport,
+            'bapaName' => null,
         ]);
     }
 }

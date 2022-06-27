@@ -10,7 +10,7 @@
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h4><i class="text-muted">Reading Report </i> | <i class="text-muted">Billing Month: </i> <strong>{{ date('F Y', strtotime($period)) }}</strong>
-                        | <i class="text-muted">Meter Reader: </i> <strong>{{ $meterReader != null ? $meterReader->name : '-' }} </strong>
+                        | <i class="text-muted">Meter Reader: </i> <strong>{{ $meterReader != null ? $meterReader->name : ($bapaName != null ? $bapaName : '') }} </strong>
                         | <i class="text-muted">Day: </i><strong>{{ $day }}</strong></h4>
                 </div>
             </div>
@@ -64,6 +64,7 @@
                 <div class="card-body table-responsive p-0">
                     <table class="table table-sm table-hover table-head-fixed text-nowrap table-bordered">
                         <thead>
+                            <th class="text-center">#</th>
                             <th class="text-center">Account #</th>
                             <th class="text-center">Sequence #</th>
                             <th class="text-center">Name</th>
@@ -82,6 +83,9 @@
                             <th class="text-center"></th>
                         </thead>
                         <tbody>
+                            @php
+                                $i=1;
+                            @endphp
                             @foreach ($readingReport as $item)
                                 @php
                                     // NUMBER OF DAYS
@@ -101,6 +105,7 @@
 
                                 @endphp
                                 <tr title="{{ $item->CurrentKwh != null ? '' : 'No Bill' }}">
+                                    <td>{{ $i }}</td>
                                     @if ($item->AccountStatus == 'ACTIVE')
                                         <td><i class="fas {{ $item->CurrentKwh != null ? 'fa-check-circle ico-tab text-success' : 'fa-exclamation-circle ico-tab text-danger' }}"></i><a href="{{ route('serviceAccounts.show', [$item->AccountId]) }}">{{ $item->OldAccountNo }}</a></td>
                                     @else
@@ -135,6 +140,9 @@
                                         @endif                                        
                                     </td>
                                 </tr>
+                                @php
+                                    $i++;
+                                @endphp
                             @endforeach
                         </tbody>
                     </table>

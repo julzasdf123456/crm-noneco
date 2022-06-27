@@ -110,7 +110,7 @@
             if (jQuery.isEmptyObject($('#Route').val())) {
                 alert('Select route first')
             } else {
-                window.location.href = "{{ url('/bills/print-bulk-bill-new-format') }}" + "/" + $('#Period').val() + "/" + $('#Town').val() + "/" + $('#Route').val()+ "/" + $('#Day').val();
+                window.location.href = "{{ url('/bills/print-bulk-bill-new-format') }}" + "/" + $('#Period').val() + "/" + $('#Town').val() + "/" + $('#Route').val() + "/" + $('#Day').val();
             }            
         }
 
@@ -118,7 +118,7 @@
             if (jQuery.isEmptyObject($('#Route').val())) {
                 alert('Select route first')
             } else {
-                window.location.href = "{{ url(route('bills.print-bulk-bill-new-format')) }}" + "/" + $('#Period').val() + "/" + $('#Town').val() + "/" + $('#Route').val();
+                window.location.href = "{{ url('/bills/print-bulk-bill-new-format') }}" + "/" + $('#Period').val() + "/" + $('#Town').val() + "/" + $('#Route').val() + "/" + $('#Day').val();
             }            
         }
     </script>
