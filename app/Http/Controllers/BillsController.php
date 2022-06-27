@@ -1306,6 +1306,7 @@ class BillsController extends AppBaseController
             ->where('Billing_ServiceAccounts.Town', $town)
             ->where('Billing_ServiceAccounts.AreaCode', $route)
             ->select('Billing_Bills.*')
+            ->orderBy('Billing_Bills.BillNumber')
             ->get();
 
         return view('/bills/print_bulk_old_format', [
@@ -1320,6 +1321,7 @@ class BillsController extends AppBaseController
             ->where('Billing_Bills.ServicePeriod', $servicePeriod)
             ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
             ->select('Billing_Bills.*')
+            ->orderBy('Billing_Bills.BillNumber')
             ->get();
 
         return view('/bills/print_bulk_old_format', [

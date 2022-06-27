@@ -135,7 +135,8 @@ p {
     <br>
     <br>
     <span style="margin-left: 55px;">{{ date('F Y', strtotime($item->ServicePeriod)) }}</span>
-    <span style="margin-left: 135px;">{{ date('F d, Y', strtotime($item->BillingDate)) }}</span><br>
+    <span style="margin-left: 135px;">{{ date('F d, Y', strtotime($item->BillingDate)) }}</span>
+    <span style="margin-left: 200px;">{{ $item->BillNumber }}</span><br>
     <br>
     <br>
     <span>{{ $account->OldAccountNo }}</span>
