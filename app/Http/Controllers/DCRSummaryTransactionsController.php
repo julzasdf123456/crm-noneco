@@ -64,6 +64,7 @@ class DCRSummaryTransactionsController extends AppBaseController
             ->where('Cashier_PaidBills.PostingDate', $request['Day'] != null ? $request['Day'] : date('Y-m-d'))
             ->where('Cashier_PaidBills.Teller', $request['Teller'])
             ->whereNull('Cashier_PaidBills.Status')
+            ->whereRaw("Cashier_PaidBills.PaymentUsed LIKE '%Cash%'")
             ->select('Cashier_PaidBills.*', 'Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.OldAccountNo')
             ->get();
 
@@ -174,6 +175,7 @@ class DCRSummaryTransactionsController extends AppBaseController
             ->where('Cashier_PaidBills.PostingDate', $day != null ? $day : date('Y-m-d'))
             ->where('Cashier_PaidBills.Teller', $teller)
             ->whereNull('Cashier_PaidBills.Status')
+            ->whereRaw("Cashier_PaidBills.PaymentUsed LIKE '%Cash%'")
             ->select('Cashier_PaidBills.*', 'Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.OldAccountNo',
                 DB::raw("(SELECT TOP 1 BillNumber FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Cashier_PaidBills.ServicePeriod) AS BillNumber"))
             ->get();
