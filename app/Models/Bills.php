@@ -1308,6 +1308,7 @@ class Bills extends Model
 
     public static function getFivePercent($item) {
         return round((floatval($item->DistributionSystemCharge) + 
+                floatval($item->DistributionDemandCharge) +
                 floatval($item->SupplyRetailCustomerCharge) + 
                 floatval($item->MeteringRetailCustomerCharge) + 
                 floatval($item->LifelineRate) + 
@@ -1317,6 +1318,7 @@ class Bills extends Model
 
     public static function getTwoPercent($item) {
         return round((floatval($item->DistributionSystemCharge) + 
+                floatval($item->DistributionDemandCharge) +
                 floatval($item->SupplyRetailCustomerCharge) + 
                 floatval($item->MeteringRetailCustomerCharge) + 
                 floatval($item->OtherLifelineRateCostAdjustment) + 
