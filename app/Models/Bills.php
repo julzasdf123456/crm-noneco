@@ -1311,6 +1311,7 @@ class Bills extends Model
                 floatval($item->DistributionDemandCharge) +
                 floatval($item->SupplyRetailCustomerCharge) + 
                 floatval($item->MeteringRetailCustomerCharge) + 
+                // floatval($item->MeteringSystemCharge) + 
                 floatval($item->LifelineRate) + 
                 floatval($item->OtherLifelineRateCostAdjustment) + 
                 floatval($item->InterClassCrossSubsidyCharge)) * .05, 2);
@@ -1321,6 +1322,8 @@ class Bills extends Model
                 floatval($item->DistributionDemandCharge) +
                 floatval($item->SupplyRetailCustomerCharge) + 
                 floatval($item->MeteringRetailCustomerCharge) + 
+                // floatval($item->MeteringSystemCharge) + 
+                floatval($item->LifelineRate) + 
                 floatval($item->OtherLifelineRateCostAdjustment) + 
                 floatval($item->InterClassCrossSubsidyCharge)) * .02, 2);
     }
