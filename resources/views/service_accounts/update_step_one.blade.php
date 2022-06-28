@@ -139,6 +139,7 @@
                     {{-- STATUS --}}
                     <div class="form-group col-sm-12">
                         <div class="row">
+
                             <!-- Purok Field -->
                             <div class="col-lg-1 col-md-2">
                                 {!! Form::label('AccountType', 'Acct. Type:') !!}
@@ -310,6 +311,18 @@
                                 <div class="input-group">
                                     <input type="hidden" value="" name="Ewt2Percent">
                                     <input type="checkbox" value="Yes" name="Ewt2Percent" class="custom-checkbox" {{ $serviceAccount->Ewt2Percent=='Yes' ? 'checked' : '' }}>
+                                </div>
+                            </div>
+
+                            
+                            <!-- Accountstatus Field -->
+                            <div class="col-lg-1 col-md-2">
+                                {!! Form::label('AccountStatus', 'Status:') !!}
+                            </div>
+
+                            <div class="col-lg-3 col-md-2">
+                                <div class="input-group">
+                                    {!! Form::select('AccountStatus', ['ACTIVE' => 'ACTIVE', 'DISCONNECTED' => 'DISCONNECTED'], null, ['class' => 'form-control']) !!}
                                 </div>
                             </div>
                         </div> 
