@@ -109,7 +109,7 @@
                                     @if ($item->AccountStatus == 'ACTIVE')
                                         <td><i class="fas {{ $item->CurrentKwh != null ? 'fa-check-circle ico-tab text-success' : 'fa-exclamation-circle ico-tab text-danger' }}"></i><a href="{{ route('serviceAccounts.show', [$item->AccountId]) }}">{{ $item->OldAccountNo }}</a></td>
                                     @else
-                                        <td><i class="fas fa-info-circle ico-tab text-muted"></i><a href="{{ route('serviceAccounts.show', [$item->AccountId]) }}">{{ $item->OldAccountNo }}</a></td>
+                                        <td><i class="fas fa-info-circle ico-tab text-muted"></i><a href="{{ $item->AccountId != null ? route('serviceAccounts.show', [$item->AccountId]) : '' }}">{{ $item->OldAccountNo }}</a></td>
                                     @endif
                                     
                                     <td>{{ $item->SequenceCode }}</td>

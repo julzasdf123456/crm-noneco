@@ -531,6 +531,10 @@ class ReadingsController extends AppBaseController
         $readingReport = DB::table('Billing_Readings')
             ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
             ->where('Billing_Readings.ServicePeriod', $period)
+            // ->where(function ($query) use ($reading, $bapaName) {
+            //     $query->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')")
+            //             ->orWhereRaw("Billing_Readings.AccountNumber IS NULL AND (ReadingTimestamp BETWEEN '" . date('Y-m-d', strtotime($reading->ReadingTimestamp)) . "' AND '" . date('Y-m-d', strtotime($reading->ReadingTimestamp . ' +1 day')) . "')");
+            // })
             ->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')")
             ->select('Billing_Readings.*',
                 'Billing_ServiceAccounts.id AS AccountId',
@@ -593,7 +597,10 @@ class ReadingsController extends AppBaseController
             ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
             ->where('Billing_Readings.MeterReader', $meterReader->id)
             ->where('Billing_Readings.ServicePeriod', $period)
-            ->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE Town='" . $town . "' AND GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "')")
+            ->where(function ($query) use ($town, $day, $reading, $meterReader) {
+                $query->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE Town='" . $town . "' AND GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "')")
+                        ->orWhereRaw("Billing_Readings.AccountNumber IS NULL AND (ReadingTimestamp BETWEEN '" . date('Y-m-d', strtotime($reading->ReadingTimestamp)) . "' AND '" . date('Y-m-d', strtotime($reading->ReadingTimestamp . ' +1 day')) . "')");
+            })
             ->select('Billing_Readings.*',
                 'Billing_ServiceAccounts.id AS AccountId',
                 'Billing_ServiceAccounts.OldAccountNo',
