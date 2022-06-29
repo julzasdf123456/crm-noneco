@@ -34,6 +34,7 @@ class Users extends Model
 
 
     public $fillable = [
+        'id',
         'name',
         'email',
         'employee_id',

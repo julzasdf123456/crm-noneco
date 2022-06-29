@@ -150,6 +150,11 @@
             zoom: 10 // starting zoom
         });
 
+        map.on('load', () => {
+            loadMapAndAccounts()
+        })
+        
+
         function loadMapAndAccounts() {
             $.ajax({
                 url : "{{ route('readings.get-readings-from-meter-reader') }}",
@@ -175,21 +180,20 @@
                             } else {
                                 if (index == 0) {
                                     map.flyTo({
-                                        center: [parseFloat(result[index]['Longitude']), parseFloat(result[index]['Latitude'])],
-                                        zoom: 18,
-                                        bearing: 0,
-                                        speed: 1, // make the flying slow
-                                        curve: 1, // change the speed at which it zooms out
-                                        easing: (t) => t,
-                                        essential: true
-                                    });
-                                }
+                                            center: [parseFloat(result[index]['Longitude']), parseFloat(result[index]['Latitude'])],
+                                            zoom: 18,
+                                            bearing: 0,
+                                            speed: 1, // make the flying slow
+                                            curve: 1, // change the speed at which it zooms out
+                                            easing: (t) => t,
+                                            essential: true
+                                        });
 
-                                new mapboxgl.Marker({ color: 'red'})
-                                    .setLngLat([parseFloat(result[index]['Longitude']), parseFloat(result[index]['Latitude'])])
-                                    .addTo(map);
+                                    new mapboxgl.Marker({ color: 'red'})
+                                        .setLngLat([parseFloat(result[index]['Longitude']), parseFloat(result[index]['Latitude'])])
+                                        .addTo(map);                                  
+                                }          
                             }
-                            
                         })
                     }
                 },
@@ -208,10 +212,6 @@
                     "<td>" + sequence + "</td>" +
                 "</tr>"
         }
-
-        map.on('load', () => {
-            loadMapAndAccounts()
-        })
 
         // FETCH ACCOUNTS
         $('#view-btn').on('click', function() {

@@ -136,7 +136,19 @@
                                     <td>{{ $item->Notes }}</td>
                                     <td class="text-right">
                                         @if ($item->CurrentKwh == null && $item->AccountStatus == 'ACTIVE')
-                                            <a href="{{ route('bills.zero-readings-view', [$item->id]) }}"><i class="fas fa-pen"></i></a>
+                                            {{-- <a href="{{ route('bills.zero-readings-view', [$item->id]) }}"><i class="fas fa-pen"></i></a> --}}
+                                            <button class="btn btn-link text-primary btn-xs float-right" 
+                                                acctno="{{ $item->OldAccountNo }}" 
+                                                reading="{{ $item->KwhUsed }}" 
+                                                prevreading="{{ $item->PrevReading }}" 
+                                                fieldfindings="{{ $item->FieldStatus }}" 
+                                                remarks="{{ $item->Notes }}" 
+                                                meternumber="{{ $item->MeterNumber }}"
+                                                consumername="{{ $item->ServiceAccountName }}" 
+                                                multiplier="{{ $item->Multiplier }}" 
+                                                onclick="updateReading(this, '{{ $item->id }}', '{{ $item->AccountId }}')">
+                                                <i class="fas fa-pen"></i>
+                                            </button>
                                         @endif                                        
                                     </td>
                                 </tr>
@@ -150,4 +162,238 @@
             </div>
         </div>
     </div>
+
+{{-- Print Ledger History --}}
+<div class="modal fade" id="modal-update-reading" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h4><strong id="consumer-name"></strong></h4>
+                    <span class="text-muted">Account No: <strong id="acct-no"></strong></span>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        {{-- DETAILS --}}
+                        <div class="card">
+                            <div class="card-body table-responsive px-0">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td>Meter Number</td>
+                                        <th id="meter-number"></th>
+                                    </tr>
+                                    <tr>
+                                        <td>Field Findings</td>
+                                        <th id="field-findings"></th>
+                                    </tr>
+                                    <tr>
+                                        <td>Remarks</td>
+                                        <th id="remarks"></th>
+                                    </tr>
+                                    <tr>
+                                        <td>Multiplier</td>
+                                        <th id="multiplier"></th>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        {{-- PREV READINGS --}}
+                        <div class="card" style="height: 35vh;">
+                            <div class="card-header">
+                                <span class="card-title">Previous Months Reading</span>
+                            </div>
+                            <div class="card-body table-responsive px-0">
+                                <table class="table table-sm table-hover" id="prev-reading-tbl">
+                                    <thead>
+                                        <th>Billing Month</th>
+                                        <th>Reading</th>
+                                        <th>Meter Reader</th>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header bg-primary">
+                                <span>Perform Billing Here</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group row">
+                                    <label for="" class="col-sm-5">Previous Reading</label>
+                                    <input type="number" step="any" id="PreviousReading" class="form-control col-sm-7" placeholder="PreviousReading" readonly>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="" class="col-sm-5">Preset Reading</label>
+                                    <input type="number" step="any" id="PresentReading" class="form-control col-sm-7" placeholder="PresentReading">
+                                </div>
+                                <div class="form-group row">
+                                    <label for="" class="col-sm-5">Input Kwh Used</label>
+                                    <input type="number" step="any" id="KwhAdjusted" class="form-control col-sm-7" placeholder="Input Kwh Used">
+                                </div>
+                                <div class="form-group row">
+                                    <label for="" class="col-sm-5">Input Demand Used</label>
+                                    <input type="number" step="any" id="DemandAdjusted" class="form-control col-sm-7" placeholder="Input Demand">
+                                </div>
+                                <div class="form-group row">
+                                    <label for="" class="col-sm-5">Total Kwh Used (w/ Multiplier)</label>
+                                    <input id="TotalKwhused" class="form-control col-sm-7" placeholder="Total Kwh Used" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="bill-consumer"><i class="fas fa-check-circle ico-tab-mini"></i>Bill</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
+
+@push('page_scripts')
+    <script>
+        var prev = 0
+        var pres = 0
+        var kwhused = 0
+        var multiplier = 0
+        var acctid = ""
+        $(document).ready(function() {
+
+            $('#KwhAdjusted').keyup(function(e) {
+                computeKwh()
+            })
+            
+            $('#PresentReading').keyup(function(e) {
+                var dif = parseFloat(this.value) - prev
+                $('#KwhAdjusted').val(parseFloat(dif).toFixed(2)).change()
+                computeKwh()
+            })
+
+            $('#modal-update-reading').on('shown.bs.modal', function () {
+                $('#KwhAdjusted').focus();
+            })
+
+            $('#bill-consumer').on('click', function(e) {
+                transact(acctid, $('#PresentReading').val(), prev, $('#DemandAdjusted').val())
+            })
+        })
+
+        function computeKwh() {
+            kwhused = parseFloat($('#KwhAdjusted').val()).toFixed(2)
+            var totalKwh = kwhused * multiplier
+            $('#TotalKwhused').val(parseFloat(totalKwh).toFixed(2)).change()
+        }
+
+        function updateReading(el, readid, accountid, consumername) {
+            prev = 0
+            pres = 0
+            kwhused = 0
+            multiplier = 0
+            acctid = ""
+
+            // show modal 
+            $('#modal-update-reading').modal('show')
+            $('#KwhAdjusted').focus()
+
+            prev = parseFloat($(el).attr('prevreading'))
+            pres = parseFloat($(el).attr('reading'))
+            multiplier = parseFloat($(el).attr('multiplier'))
+            acctid = accountid
+
+            // set params
+            $('#consumer-name').text($(el).attr('consumername'))
+            $('#acct-no').text($(el).attr('acctno'))
+            $('#PresentReading').val($(el).attr('reading'))
+            $('#PreviousReading').val($(el).attr('prevreading'))
+            $('#meter-number').text($(el).attr('meternumber'))
+            $('#field-findings').text($(el).attr('fieldfindings'))
+            $('#remarks').text($(el).attr('remarks'))
+            $('#multiplier').text($(el).attr('multiplier'))
+            getPrevReadings(accountid)
+        }
+
+        function getPrevReadings(accountid) {
+            $('#prev-reading-tbl tbody tr').remove()
+            $.ajax({
+                url : "{{ route('readings.get-previous-readings') }}",
+                type : 'GET',
+                data : {
+                    AccountNumber : accountid
+                },
+                success : function(res) {
+                    $.each(res, function(index, element) {
+                        $('#prev-reading-tbl tbody').append(addRow(res[index]['ServicePeriod'], res[index]['KwhUsed'], res[index]['name']))
+                    })
+                },
+                error : function(err) {
+                    Swal.fire({
+                        title : 'Error fetching previous readings',
+                        icon : 'error'
+                    })
+                }
+            })
+        }   
+
+        function addRow(period, reading, meterreader) {
+            return "<tr>" + 
+                    "<td>" + period + "</td>" +
+                    "<th>" + reading + "</th>" +
+                    "<td>" + meterreader + "</td>" +
+                + "</tr>"
+        }
+
+        function transact(accountid, pres, prev, demand) {
+            $.ajax({
+                url : "{{ route('readings.create-manual-billing-ajax') }}",
+                type : 'GET',
+                data : {
+                    AccountNumber : accountid,
+                    KwhUsed : $('#TotalKwhused').val(),
+                    ServicePeriod : "{{ $period }}",
+                    PresentKwh : pres,
+                    PreviousKwh : prev,
+                    Demand : demand
+                },
+                success : function(res) {
+                    if (res=='ok') {
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Bill for this reading successfully created!',
+                            showConfirmButton: false,
+                        })
+                        location.reload()
+                    } else if (res=='amount negative') {
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'error',
+                            title: 'Amount invalid!',
+                            showConfirmButton: false,
+                        })
+                    } 
+                },
+                error : function(err) {
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'Error generating bill!',
+                        showConfirmButton: false,
+                        timer: 1800
+                    })
+                }
+            })
+        }
+    </script>
+@endpush

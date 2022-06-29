@@ -391,6 +391,8 @@ Route::get('/readings/mark-as-done', [App\Http\Controllers\ReadingsController::c
 Route::get('/readings/fetch-account', [App\Http\Controllers\ReadingsController::class, 'fetchAccount'])->name('readings.fetch-account');
 Route::get('/readings/view-full-report/{period}/{meterReader}/{day}/{town}', [App\Http\Controllers\ReadingsController::class, 'viewFullReport'])->name('readings.view-full-report');
 Route::get('/readings/view-full-report-bapa/{period}/{bapaName}', [App\Http\Controllers\ReadingsController::class, 'viewFullReportBapa'])->name('readings.view-full-report-bapa');
+Route::get('/readings/get-previous-readings', [App\Http\Controllers\ReadingsController::class, 'getPreviousReadings'])->name('readings.get-previous-readings');
+Route::get('/readings/create-manual-billing-ajax', [App\Http\Controllers\ReadingsController::class, 'createManualBillingAjax'])->name('readings.create-manual-billing-ajax');
 Route::resource('readings', App\Http\Controllers\ReadingsController::class);
 
 Route::get('/bills/unbilled-readings', [App\Http\Controllers\BillsController::class, 'unbilledReadings'])->name('bills.unbilled-readings');
