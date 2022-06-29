@@ -286,7 +286,17 @@
             })
 
             $('#bill-consumer').on('click', function(e) {
-                transact(acctid, $('#PresentReading').val(), prev, $('#DemandAdjusted').val())
+                if (jQuery.isEmptyObject($('#KwhAdjusted').val())) {
+                    Swal.fire({
+                            position: 'top-end',
+                            icon: 'error',
+                            title: 'Kwh invalid!',
+                            showConfirmButton: false,
+                        })
+                } else {
+                    transact(acctid, $('#PresentReading').val(), prev, $('#DemandAdjusted').val())
+                }
+                
             })
         })
 
