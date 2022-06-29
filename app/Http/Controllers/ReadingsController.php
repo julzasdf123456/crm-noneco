@@ -751,7 +751,6 @@ class ReadingsController extends AppBaseController
             ->where('AccountNumber', $request['AccountNumber'])
             ->select('Billing_Readings.*', 'users.name')
             ->orderByDesc('ServicePeriod')
-            ->offset(1)
             ->get();
 
         return response()->json($readings, 200);

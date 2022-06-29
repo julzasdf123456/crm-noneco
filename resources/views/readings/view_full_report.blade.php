@@ -344,7 +344,12 @@
                 },
                 success : function(res) {
                     $.each(res, function(index, element) {
-                        $('#prev-reading-tbl tbody').append(addRow(res[index]['ServicePeriod'], res[index]['KwhUsed'], res[index]['name']))
+                        if (index == 0) {
+
+                        } else {
+                            $('#prev-reading-tbl tbody').append(addRow(res[index]['ServicePeriod'], res[index]['KwhUsed'], res[index]['name']))
+                        }
+                        
                     })
                 },
                 error : function(err) {
