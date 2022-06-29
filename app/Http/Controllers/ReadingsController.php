@@ -750,8 +750,8 @@ class ReadingsController extends AppBaseController
             ->leftJoin('users', 'Billing_Readings.MeterReader', '=', 'users.id')
             ->where('AccountNumber', $request['AccountNumber'])
             ->select('Billing_Readings.*', 'users.name')
-            ->offset(1)
             ->orderByDesc('ServicePeriod')
+            ->offset(1)
             ->get();
 
         return response()->json($readings, 200);
