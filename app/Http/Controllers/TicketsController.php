@@ -82,6 +82,7 @@ class TicketsController extends AppBaseController
             // SAVE METER INFO
             $accountMeterInfo = DB::table('Billing_ServiceAccounts')
                 ->leftJoin('Billing_Meters', 'Billing_ServiceAccounts.id', '=', 'Billing_Meters.ServiceAccountId')
+                ->where('Billing_ServiceAccounts.id', $tickets->AccountNumber)
                 ->select('Billing_Meters.SerialNumber',
                     'Billing_Meters.Brand',
                     'Billing_ServiceAccounts.Latitude',

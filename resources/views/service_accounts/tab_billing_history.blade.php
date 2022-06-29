@@ -64,6 +64,7 @@
                         <th>Reading Timestamp</th>
                         <th>Meter Reader</th>
                         <th>Remarks</th>
+                        <th></th>
                     </thead>
                     <tbody>
                         @foreach ($readings as $item)
@@ -73,6 +74,9 @@
                                 <td>{{ date('F d, Y h:i:s A', strtotime($item->ReadingTimestamp)) }}</td>
                                 <td>{{ $item->name }}</td>
                                 <td>{{ $item->Notes }}</td>
+                                <td class="text-right">
+                                <a href="{{ route('bills.zero-readings-view', [$item->id]) }}"><i class="fas fa-pen"></i></a>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
