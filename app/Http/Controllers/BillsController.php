@@ -1323,6 +1323,7 @@ class BillsController extends AppBaseController
                 ->where('Billing_Bills.ServicePeriod', $servicePeriod)
                 ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
                 ->select('Billing_Bills.*')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
                 ->orderBy('Billing_Bills.BillNumber')
                 ->get();
         } else {
@@ -1341,6 +1342,7 @@ class BillsController extends AppBaseController
                     ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
                     ->whereBetween('Billing_Bills.BillNumber', [$billNumberStart, $getLast->BillNumber])
                     ->select('Billing_Bills.*')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
                     ->orderBy('Billing_Bills.BillNumber')
                     ->get();
             } else {
@@ -1349,6 +1351,7 @@ class BillsController extends AppBaseController
                     ->where('Billing_Bills.ServicePeriod', $servicePeriod)
                     ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
                     ->select('Billing_Bills.*')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
                     ->orderBy('Billing_Bills.BillNumber')
                     ->get();
             }           
