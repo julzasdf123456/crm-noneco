@@ -2,13 +2,14 @@
     use App\Models\User;
 @endphp
 
-<table class="table table-hover table-sm">
+<table class="table table-hover table-sm table-bordered">
     <thead>
         <th>Status</th>
         <th>Billing Month</th>
         <th>Disco/Reco Date</th>
         <th>Disco/Reco Time</th>
         <th>Disconnection Personnel</th>
+        <th class="text-right">Last Reading</th>
         <th>Remarks/Notes</th>
     </thead>
     <tbody>
@@ -23,6 +24,7 @@
                     <td>{{ date('F d, Y', strtotime($item->DateDisconnected)) }}</td>
                     <td>{{ date('h:i:s A', strtotime($item->TimeDisconnected)) }}</td>
                     <td>{{ $user != null ? $user->name : 'n/a' }}</td>
+                    <td class="text-right">{{ $item->BillId }}</td>
                     <td>{{ $item->Notes }}</td>
                 </tr>
             @endforeach

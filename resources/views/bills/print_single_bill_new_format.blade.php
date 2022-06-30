@@ -407,19 +407,25 @@ html {
                 <div class="col-sm-12">
                     <table class="table table-borderless table-sm">
                         <tr>
-                            <td>Additional Charges</td>
-                            <td class="text-right">+ {{ number_format($bills->AdditionalCharges, 2) }}</td>
-                        </tr>
-                        <tr>
-                            <td>Other Deductions</td>
-                            <td class="text-right">- {{ number_format($bills->Deductions, 2) }}</td>
+                            <td>Additional Charges - Termed Payments</td>
+                            <th class="text-right">+ {{ number_format($bills->AdditionalCharges, 2) }}</th>
+                            <td style="padding-left: 60px;">EWT 2%</td>
+                            <th class="text-right">- {{ $bills->Evat2Percent }}</th>
                         </tr>
                         <tr>
                             <td>Deposit/Pre-Payment Deductions</td>
                             <td class="text-right">- {{ number_format($bills->DeductedDeposit, 2) }}</td>
+                            <td style="padding-left: 60px;">EVAT 5%</td>
+                            <th class="text-right">- {{ $bills->Evat5Percent }}</th>
+                        </tr>
+                        <tr>                                                
+                            <td>Other Deductions</td>
+                            <th class="text-right">- {{ number_format($bills->Deductions, 2) }}</th>
                         </tr>
                         <tr>
-                            <td>Net Amount</td>
+                            <td>Amount Due</td>
+                            <td></td>
+                            <td></td>
                             <th class="text-right"><h4><strong>₱ {{ number_format($bills->NetAmount, 2) }}</strong></h4></th>
                         </tr>
                     </table>

@@ -283,7 +283,10 @@
             <div class="modal-body">
                 {{-- SEARCH --}}
                 <div class="row">                    
-                    <div class="form-group col-lg-8 offset-lg-1">
+                    <div class="form-group col-lg-4">
+                        <input class="form-control" id="old-account-no-main" autocomplete="off" data-inputmask="'alias': 'phonebe'" maxlength="12" value="{{ env('APP_AREA_CODE') }}" style="font-size: 1.5em; color: #b91400; font-weight: bold;">
+                    </div>                   
+                    <div class="form-group col-lg-7">
                         <input type="text" id="search-global" placeholder="Account Number, Account Name, or Meter Number" class="form-control" autofocus="true">
                     </div>
                     <div class="form-group col-lg-1">
@@ -405,6 +408,39 @@
 
         $('.select2').select2({
             theme: 'bootstrap4'
+        })
+
+        /**
+         *  MODAL SEARCH ACCOUNT
+         */
+        $('#modal-search-main').on('shown.bs.modal', function () {
+            $('#old-account-no-main').focus();
+        })
+
+        $("#old-account-no-main").inputmask({
+            mask: '99-99999-999',
+            placeholder: '',
+            showMaskOnHover: false,
+            showMaskOnFocus: false,
+            onBeforePaste: function (pastedValue, opts) {
+                var processedValue = pastedValue;
+
+                //do something with it
+
+                return processedValue;
+            }
+        });
+
+        $("#old-account-no-main").on('keyup', function(event) {
+            if (this.value.length > 7) {
+                performSearch(this.value)
+            }
+        })
+
+        $("#old-account-no-main").on('change', function(event) {
+            if (this.value.length > 7) {
+                performSearch(this.value)
+            }
         })
 
         /**

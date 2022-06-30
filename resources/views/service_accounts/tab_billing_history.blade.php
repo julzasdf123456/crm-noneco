@@ -6,7 +6,7 @@
     @if ($bills == null)
         <p class="center-text"><i>No billing history recorded</i></p>
     @else
-        <table class="table table-sm table-hover"">
+        <table class="table table-sm table-hover table-bordered">
             <thead>
                 <th>Bill Number</th>
                 <th>Billing Month</th>
@@ -57,7 +57,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <table class="table table-hover table-sm">
+                <table class="table table-hover table-sm table-bordered">
                     <thead>
                         <th>Billing Month</th>
                         <th>Reading</th>
