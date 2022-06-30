@@ -326,6 +326,8 @@ Route::get('/tickets/disconnection-assessments', [App\Http\Controllers\TicketsCo
 Route::get('/tickets/get-disconnection-results', [App\Http\Controllers\TicketsController::class, 'getDisconnectionResults'])->name('tickets.get-disconnection-results');
 Route::get('/tickets/disconnection-results-route', [App\Http\Controllers\TicketsController::class, 'disconnectionResultsRoute'])->name('tickets.disconnection-results-route');
 Route::get('/tickets/create-and-print-disconnection-tickets/{period}/{route}', [App\Http\Controllers\TicketsController::class, 'createAndPrintDisconnectionTickets'])->name('tickets.create-and-print-disconnection-tickets');
+Route::get('/tickets/ticket-tally', [App\Http\Controllers\TicketsController::class, 'ticketTally'])->name('tickets.ticket-tally');
+Route::get('/tickets/get-ticket-tally', [App\Http\Controllers\TicketsController::class, 'getTicketTally'])->name('tickets.get-ticket-tally');
 Route::resource('tickets', App\Http\Controllers\TicketsController::class);
 
 

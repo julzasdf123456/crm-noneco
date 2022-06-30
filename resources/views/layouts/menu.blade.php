@@ -392,6 +392,13 @@ use Illuminate\Support\Facades\Auth;
                     <i class="fas fa-file nav-icon text-danger"></i><p>Ticket Summary</p>
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a href="{{ route('tickets.ticket-tally') }}"
+                class="nav-link {{ Request::is('tickets.ticket-tally*') ? 'active' : '' }}">
+                    <i class="fas fa-list nav-icon text-danger"></i><p>Ticket Tally</p>
+                </a>
+            </li>
             
             <li class="nav-header">                
                 Settings and Others 

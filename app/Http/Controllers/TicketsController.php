@@ -1791,4 +1791,51 @@ class TicketsController extends AppBaseController
             'tickets' => $tickets
         ]);
     }
+
+    public function ticketTally() {
+        // TICKETS MATRIX
+        $parentTickets = DB::table('CRM_TicketsRepository')->whereNull('ParentTicket')->orderBy('Name')->get();
+
+        $towns = Towns::orderBy('Town')->get();
+        return view('/tickets/ticket_tally', [
+            'parentTickets' => $parentTickets,
+            'towns' => $towns,
+        ]);
+    }
+
+    public function getTicketTally(Request $request) {
+        $parentTickets = DB::table('CRM_TicketsRepository')->whereNull('ParentTicket')->orderBy('Name')->get();
+
+        $arr = [];
+        foreach($parentTickets as $item) {
+            array_push($arr, [
+                'id' => $item->id,
+                'Name' => $item->Name,
+                'ReceivedTotal' => 'Parent',
+                'NotExecutedTotal' => '',
+                'ExecutedTotal' => ''
+            ]);
+            $ticketCounts = DB::table('CRM_TicketsRepository')
+                ->where('Type', $request['Type'])
+                ->where('ParentTicket', $item->id)
+                ->select('id', 'Name',
+                    DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE Ticket=CRM_TicketsRepository.id AND Trash IS NULL AND (created_at BETWEEN '" . $request['From'] . "' AND '" . $request['To'] . "')) AS ReceivedTotal"),
+                    DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE Ticket=CRM_TicketsRepository.id AND Trash IS NULL AND Status != 'Executed' AND (created_at BETWEEN '" . $request['From'] . "' AND '" . $request['To'] . "')) AS NotExecutedTotal"),
+                    DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE Ticket=CRM_TicketsRepository.id AND Trash IS NULL AND Status = 'Executed' AND (created_at BETWEEN '" . $request['From'] . "' AND '" . $request['To'] . "')) AS ExecutedTotal")      
+                )
+                ->get();
+            
+            foreach($ticketCounts as $ticketCount) {
+                array_push($arr, [
+                    'id' => $ticketCount->id,
+                    'Name' => $ticketCount->Name,
+                    'ReceivedTotal' => $ticketCount->ReceivedTotal,
+                    'NotExecutedTotal' => $ticketCount->NotExecutedTotal,
+                    'ExecutedTotal' => $ticketCount->ExecutedTotal
+                ]);
+            }
+        }
+
+        return response()->json($arr, 200);
+    }
 }
