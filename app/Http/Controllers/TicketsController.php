@@ -428,21 +428,42 @@ class TicketsController extends AppBaseController
 
     public function getCreateAjax(Request $request) {
         if ($request->ajax()) {
-            if ($request['params'] == null) {
+            if ($request['params'] == null && $request['oldacctno'] == null) {
                 $serviceAccounts = DB::table('Billing_ServiceAccounts')
                             ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                            ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                            ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
                             ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
                             ->take(25)
                             ->get();
+            } elseif ($request['params'] == null && $request['oldacctno'] != null) {
+                $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                            ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                            // ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                            // ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                            ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldacctno'] . '%')
+                            ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                            ->get();
+            } else if ($request['params'] != null && $request['oldacctno'] == null) {
+                $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                    ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                    ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                    ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                    ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                    // ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldacctno'] . '%')
+                    ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                    ->get();
             } else {
                 $serviceAccounts = DB::table('Billing_ServiceAccounts')
                             ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                            ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                            ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
                             ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
                             ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                            ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
                             ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
                             ->get();
             }
@@ -451,7 +472,7 @@ class TicketsController extends AppBaseController
 
             foreach($serviceAccounts as $item) {
                 $output .= '<tr>' .
-                        '<td>' . $item->id . '</td>' .
+                        '<td>' . $item->OldAccountNo . '</td>' .
                         '<td>' . $item->ServiceAccountName . '</td>' .
                         '<td>' . $item->Barangay . ', ' . $item->Town . '</td>' .
                         '<td>' . 
