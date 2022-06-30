@@ -1224,7 +1224,7 @@ class BillsController extends AppBaseController
             ->first();
 
         $rate = Rates::where('ServicePeriod', $bills->ServicePeriod)
-            ->where('ConsumerType', $bills->ConsumerType)
+            ->where('ConsumerType', Bills::getAccountType($account))
             ->first();
 
         return view('/bills/print_single_bill_new_format', [

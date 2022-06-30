@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Models\ServiceAccounts;
 use App\Models\Towns;
 use App\Models\DiscoNoticeHistory;
+use App\Models\User;
 use App\Models\IDGenerator;
 use Flash;
 use Response;
@@ -164,9 +165,11 @@ class DiscoNoticeHistoryController extends AppBaseController
 
     public function generateNod() {
         $towns = Towns::orderBy('Town')->get();
+        $meterReaders = User::role('Meter Reader')->orderBy('name')->get();
 
         return view('/disco_notice_histories/generate_nod', [
-            'towns' => $towns
+            'towns' => $towns,
+            'meterReaders' => $meterReaders
         ]);
     }
 
@@ -180,9 +183,12 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->whereNotIn('Billing_Bills.id', DB::table('Disconnection_NoticeHistory')->where('ServicePeriod', $request['ServicePeriod'])->pluck('BillId'))
                 ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('ServicePeriod', $request['ServicePeriod'])->pluck('ObjectSourceId'))
                 ->where('Billing_Bills.ServicePeriod', $request['ServicePeriod'])
+                ->where('Billing_ServiceAccounts.MeterReader', $request['MeterReader'])
+                ->where('Billing_ServiceAccounts.GroupCode', $request['Day'])
                 ->where('Billing_Bills.DueDate', '<=', date('Y-m-d'))
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.Purok',
                     'CRM_Towns.Town',
                     'CRM_Barangays.Barangay',
@@ -199,9 +205,12 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('ServicePeriod', $request['ServicePeriod'])->pluck('ObjectSourceId'))
                 ->where('Billing_Bills.ServicePeriod', $request['ServicePeriod'])
                 ->where('Billing_Bills.DueDate', '<=', date('Y-m-d'))
+                ->where('Billing_ServiceAccounts.MeterReader', $request['MeterReader'])
+                ->where('Billing_ServiceAccounts.GroupCode', $request['Day'])
                 ->where('Billing_ServiceAccounts.Town', $request['Town'])
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.Purok',
                     'CRM_Towns.Town',
                     'CRM_Barangays.Barangay',
@@ -229,8 +238,11 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                 ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
                 ->where('Disconnection_NoticeHistory.ServicePeriod', $request['ServicePeriod'])
+                ->where('Billing_ServiceAccounts.MeterReader', $request['MeterReader'])
+                ->where('Billing_ServiceAccounts.GroupCode', $request['Day'])
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.Purok',
                     'CRM_Towns.Town',
                     'CRM_Barangays.Barangay',
@@ -248,8 +260,11 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
                 ->where('Disconnection_NoticeHistory.ServicePeriod', $request['ServicePeriod'])
                 ->where('Billing_ServiceAccounts.Town', $request['Town'])
+                ->where('Billing_ServiceAccounts.MeterReader', $request['MeterReader'])
+                ->where('Billing_ServiceAccounts.GroupCode', $request['Day'])
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.Purok',
                     'CRM_Towns.Town',
                     'CRM_Barangays.Barangay',
@@ -267,7 +282,7 @@ class DiscoNoticeHistoryController extends AppBaseController
             $output .= '
                 <tr id="' . $item->NoticeId . '">
                     <td>' . $item->BillNumber . '</td>
-                    <td>' . $item->AccountNumber . '</td>
+                    <td>' . $item->OldAccountNo . '</td>
                     <td>' . $item->ServiceAccountName . '</td>
                     <td>' . ServiceAccounts::getAddress($item) . '</td>
                     <td class="text-right">' . number_format($item->NetAmount, 2) . '</td>                    
@@ -282,10 +297,10 @@ class DiscoNoticeHistoryController extends AppBaseController
     }
 
     public function printReroute(Request $request) {
-        return response()->json(['area' => $request['Town'], 'period' => $request['ServicePeriod']], 200);
+        return response()->json(['area' => $request['Town'], 'period' => $request['ServicePeriod'], 'meterReader' => $request['MeterReader'], 'day' => $request['Day']], 200);
     }
 
-    public function printDisconnectionList($period, $area) {
+    public function printDisconnectionList($period, $area, $meterReader, $day) {
         if ($area == 'All') {
             // SELECT ALL FROM DISCO NOTICE HISTORY
             $discoList = DB::table('Disconnection_NoticeHistory')
@@ -294,6 +309,8 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                 ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
                 ->where('Disconnection_NoticeHistory.ServicePeriod', $period)
+                ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
+                ->where('Billing_ServiceAccounts.GroupCode', $day)
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.Purok',
@@ -322,6 +339,8 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
                 ->where('Disconnection_NoticeHistory.ServicePeriod', $period)
                 ->where('Billing_ServiceAccounts.Town', $area)
+                ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
+                ->where('Billing_ServiceAccounts.GroupCode', $day)
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.Purok',

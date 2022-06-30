@@ -41,8 +41,40 @@
                             <select id="towns" class="form-control">
                                 <option value="All">All</option>
                                 @foreach ($towns as $item)
-                                    <option value="{{ $item->id }}">{{ $item->Town }}</option>
+                                    <option value="{{ $item->id }}" {{ env('APP_AREA_CODE')==$item->id ? 'selected' : '' }}>{{ $item->Town }}</option>
                                 @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="MeterReader">Select Meter Reader</label>
+                            <select name="MeterReader" id="MeterReader" class="form-control">
+                                @if (count($meterReaders) > 0)
+                                    @foreach ($meterReaders as $item)
+                                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                    @endforeach
+                                @else
+                                    <option value="">No Meter Reader Found</option>
+                                @endif
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Day">Select Day</label>
+                            <select name="Day" id="Day" class="form-control">
+                                <option value="01">01</option>
+                                <option value="02">02</option>
+                                <option value="03">03</option>
+                                <option value="04">04</option>
+                                <option value="05">05</option>
+                                <option value="06">06</option>
+                                <option value="07">07</option>
+                                <option value="08">08</option>
+                                <option value="09">09</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
                             </select>
                         </div>
                     </div>
@@ -59,7 +91,7 @@
                         <span class="card-title">List (<i>press <strong>F3</strong> to search</i>)</span>
                     </div>
                     <div class="card-body table-responsive px-0">
-                        <table class="table table-sm table-hover" id="results-table">
+                        <table class="table table-sm table-hover table-bordered" id="results-table">
                             <thead>
                                 <th>Bill Number</th>
                                 <th>Account Number</th>
@@ -95,37 +127,42 @@
             })
 
             $('#print-list').on('click', function() {
-                if (jQuery.isEmptyObject(period) || jQuery.isEmptyObject(town)) {
-                    alert('Generate Preview First')
-                } else {
-                    $.ajax({
-                        url : '/disco_notice_histories/print-reroute',
-                        type : 'GET',
-                        data : {
-                            ServicePeriod : period,
-                            Town : town,
-                        },
-                        success : function(res) {
-                            window.location.href = "{{ url('/disco_notice_histories/print-disconnection-list') }}" + "/" + res['period'] + "/" + res['area']
-                        },
-                        error : function(err) {
-                            alert('An error occurred while trying to print the disconnection list')
-                        }
-                    })
-                }                
+                // if (jQuery.isEmptyObject(period) || jQuery.isEmptyObject(town)) {
+                //     alert('Generate Preview First')
+                // } else {
+                //     $.ajax({
+                //         url : '{{ route("discoNoticeHistories.print-reroute") }}',
+                //         type : 'GET',
+                //         data : {
+                //             ServicePeriod : period,
+                //             Town : town,
+                //             MeterReader : $('#MeterReader').val(),
+                //             Day : $('#Day').val()
+                //         },
+                //         success : function(res) {
+                //             window.location.href = "{{ url('/disco_notice_histories/print-disconnection-list') }}" + "/" + res['period'] + "/" + res['area']
+                //         },
+                //         error : function(err) {
+                //             alert('An error occurred while trying to print the disconnection list')
+                //         }
+                //     })
+                // }      
+                window.location.href = "{{ url('/disco_notice_histories/print-disconnection-list') }}" + "/" + $('#service-period').val() + "/" + $('#towns').val() + "/" + $('#MeterReader').val() + "/" + $('#Day').val()          
             })
         })
 
         function getList() {
+            $('#results-table tbody tr').remove()
             $.ajax({
-                url : '/disco_notice_histories/get-disco-list-preview',
+                url : '{{ route("discoNoticeHistories.get-disco-list-preview") }}',
                 type : 'GET',
                 data : {
                     ServicePeriod : period,
                     Town : town,
+                    MeterReader : $('#MeterReader').val(),
+                    Day : $('#Day').val()
                 },
                 success : function(res) {
-                    $('#results-table tbody tr').remove()
                     $('#results-table tbody').append(res)
                 },
                 error : function(err) {
