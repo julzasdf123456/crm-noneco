@@ -47,7 +47,7 @@
             <tbody>
                 @foreach ($serviceAccounts as $item)
                     <tr>
-                        <td>{{ $item->id }}</td>
+                        <td>{{ $item->OldAccountNo }}</td>
                         <td>{{ $item->ServiceAccountName }} {{ $item->AccountCount != null ? '(# ' . $item->AccountCount . ')' : '' }}</td>                
                         <td>{{ $item->Barangay }}, {{ $item->Town }}</td>
                         <td width="120">
