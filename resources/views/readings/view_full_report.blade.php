@@ -60,6 +60,16 @@
             <div class="card shadow-none" style="height: 70vh;">
                 <div class="card-header">
                     <span class="card-title"><i class="fas fa-list ico-tab"></i>Reading Full Report</span>
+                    <div class="card-tools">
+                        @if ($meterReader != null)
+                            <a href="{{ route('readings.print-old-format-adjusted', [$period, $day, $town, $meterReader->id]) }}" title="Print All Adjusted via Old Format Bill" style="margin-right: 10px;"><i class="fas fa-print text-warning"></i></a>
+                            <a href="{{ route('readings.print-new-format-adjusted', [$period, $day, $town, $meterReader->id]) }}" title="Print All Adjusted via New Format Bill" style="margin-right: 10px;"><i class="fas fa-print text-primary"></i></a>
+                        @else
+                            <a href="{{ route('readings.print-old-format-adjusted-bapa', [$period, $bapaName]) }}" title="Print All Adjusted via Old Format Bill" style="margin-right: 10px;"><i class="fas fa-print text-warning"></i></a>
+                            <a href="{{ route('readings.print-new-format-adjusted-bapa', [$period, $bapaName]) }}" title="Print All Adjusted via New Format Bill" style="margin-right: 10px;"><i class="fas fa-print text-primary"></i></a>
+                        @endif
+                        
+                    </div>
                 </div>
                 <div class="card-body table-responsive p-0">
                     <table class="table table-sm table-hover table-head-fixed text-nowrap table-bordered">

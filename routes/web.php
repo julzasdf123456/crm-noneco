@@ -399,6 +399,10 @@ Route::get('/readings/get-previous-readings', [App\Http\Controllers\ReadingsCont
 Route::get('/readings/create-manual-billing-ajax', [App\Http\Controllers\ReadingsController::class, 'createManualBillingAjax'])->name('readings.create-manual-billing-ajax');
 Route::get('/readings/check-if-account-has-bill', [App\Http\Controllers\ReadingsController::class, 'checkIfAccountHasBill'])->name('readings.check-if-account-has-bill');
 Route::post('/readings/create-bill-for-captured-reading', [App\Http\Controllers\ReadingsController::class, 'createBillForCapturedReading'])->name('readings.create-bill-for-captured-reading');
+Route::get('/readings/print-old-format-adjusted/{period}/{day}/{town}/{meterReader}', [App\Http\Controllers\ReadingsController::class, 'printOldFormatAdjusted'])->name('readings.print-old-format-adjusted');
+Route::get('/readings/print-new-format-adjusted/{period}/{day}/{town}/{meterReader}', [App\Http\Controllers\ReadingsController::class, 'printNewFormatAdjusted'])->name('readings.print-new-format-adjusted');
+Route::get('/readings/print-old-format-adjusted-bapa/{period}/{bapaName}', [App\Http\Controllers\ReadingsController::class, 'printOldFormatAdjustedBapa'])->name('readings.print-old-format-adjusted-bapa');
+Route::get('/readings/print-new-format-adjusted-bapa/{period}/{bapaName}', [App\Http\Controllers\ReadingsController::class, 'printNewFormatAdjustedBapa'])->name('readings.print-new-format-adjusted-bapa');
 Route::resource('readings', App\Http\Controllers\ReadingsController::class);
 
 Route::get('/bills/unbilled-readings', [App\Http\Controllers\BillsController::class, 'unbilledReadings'])->name('bills.unbilled-readings');

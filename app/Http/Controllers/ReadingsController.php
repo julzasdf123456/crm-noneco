@@ -675,6 +675,7 @@ class ReadingsController extends AppBaseController
             'summary' => $summary,
             'reading' => $reading,
             'readingReport' => $readingReport,
+            'town' => '-',
             'bapaName' => $bapaName,
         ]);
     }
@@ -741,6 +742,7 @@ class ReadingsController extends AppBaseController
             'summary' => $summary,
             'reading' => $reading,
             'readingReport' => $readingReport,
+            'town' => $town,
             'bapaName' => null,
         ]);
     }
@@ -967,5 +969,69 @@ class ReadingsController extends AppBaseController
         } else {
             return abort(403, 'Invalid Reading. Your inputted reading is less than the previous one.');
         }
+    }
+
+    public function printOldFormatAdjusted($period, $day, $town, $meterReader) {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->where('Billing_ServiceAccounts.Town', $town)
+            ->where('Billing_ServiceAccounts.GroupCode', $day)
+            ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
+            ->where('Billing_Bills.UserId', Auth::id())
+            ->select('Billing_Bills.*')
+            ->orderBy('Billing_Bills.BillNumber')
+            ->get();
+
+        return view('/bills/print_bulk_old_format', [
+            'bills' => $bills
+        ]);
+    }
+
+    public function printNewFormatAdjusted($period, $day, $town, $meterReader) {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->where('Billing_ServiceAccounts.Town', $town)
+            ->where('Billing_ServiceAccounts.GroupCode', $day)
+            ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
+            ->where('Billing_Bills.UserId', Auth::id())
+            ->select('Billing_Bills.*')
+            ->orderBy('Billing_Bills.BillNumber')
+            ->get();
+
+        return view('/bills/print_bulk_bill_new_format', [
+            'bills' => $bills
+        ]);
+    }
+
+    public function printOldFormatAdjustedBapa($period, $bapaName) {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+            ->where('Billing_Bills.UserId', Auth::id())
+            ->select('Billing_Bills.*')
+            ->orderBy('Billing_Bills.BillNumber')
+            ->get();
+
+        return view('/bills/print_bulk_old_format', [
+            'bills' => $bills
+        ]);
+    }
+
+    public function printNewFormatAdjustedBapa($period, $bapaName) {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+            ->where('Billing_Bills.UserId', Auth::id())
+            ->select('Billing_Bills.*')
+            ->orderBy('Billing_Bills.BillNumber')
+            ->get();
+
+        return view('/bills/print_bulk_bill_new_format', [
+            'bills' => $bills
+        ]);
     }
 }
