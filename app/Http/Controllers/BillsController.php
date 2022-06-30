@@ -692,6 +692,7 @@ class BillsController extends AppBaseController
                             'Billing_Bills.ServicePeriod')
                         ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_Bills.BillNumber', 'LIKE', '%' . $request['params'] . '%')
                         ->orderByDesc('Billing_Bills.created_at')
                         ->paginate(15);
