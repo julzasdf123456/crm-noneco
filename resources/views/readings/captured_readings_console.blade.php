@@ -96,7 +96,7 @@
 
                     <div class="form-group col-lg-3">
                         <label for="PreviousKwh">Previous Reading</label>
-                        <input type="text" name="PreviousKwh" id="PreviousKwh" value="{{ $prevReading != null ? $prevReading->KwhUsed : 0 }}"  class="form-control" {{ $prevReading != null ? 'readonly' : '' }} style="font-size: 1.6em;">
+                        <input type="text" name="PreviousKwh" id="PreviousKwh" value="{{ $prevReading != null ? ($prevReading->KwhUsed != null ? $prevReading->KwhUsed : '0') : '0' }}"  class="form-control" {{ $prevReading != null ? 'readonly' : '' }} style="font-size: 1.6em;">
                     </div>
                     
                     <div class="form-group col-lg-3">
