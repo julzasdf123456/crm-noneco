@@ -659,7 +659,7 @@ use Illuminate\Support\Facades\Auth;
 @endcanany
 
 {{-- DISCONNECTION --}}
-@canany(['Super Admin'])
+@canany(['Super Admin', 'billing re-bill'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-users-slash nav-icon text-primary"></i>
