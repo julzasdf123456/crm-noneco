@@ -1,4 +1,4 @@
-<table class="table table-hover table-borderless">
+<table class="table table-hover table-bordered table-sm p-0">
     <thead>
         <th>Billing Month</th>
         <th class="text-right">Total No. Readings</th>
@@ -11,8 +11,8 @@
                 <td class="text-right">{{ number_format($item->NoOfReadings) }}</td>
                 <td class="text-right">
                     <a href="{{ route('readings.view-full-report-bapa', [$item->ServicePeriod, urlencode($bapaName)]) }}" title="View Full Report" style="margin-right: 10px;"><i class="fas fa-file text-success"></i></a>
-                    {{-- <button class="btn btn-link text-warning" onclick="verifyBillNo('{{ $item->ServicePeriod }}')" style="margin-right: 5px; margin-bottom: 5px;" ><i class="fas fa-print text-warning"></i></button> --}}
-                    <a href="{{ route('bills.print-bulk-bill-old-format-bapa', [$item->ServicePeriod, urlencode($bapaName), 'All']) }}" style="margin-right: 10px;"><i class="fas fa-print text-warning"></i></a>
+                    <button class="btn btn-link btn-sm text-warning" onclick="verifyBillNo('{{ $item->ServicePeriod }}', '{{ urlencode($bapaName) }}')" style="margin-right: 5px; margin-bottom: 5px;" ><i class="fas fa-print text-warning"></i></button>
+                    {{-- <a href="{{ route('bills.print-bulk-bill-old-format-bapa', [$item->ServicePeriod, urlencode($bapaName), 'All']) }}" style="margin-right: 10px;"><i class="fas fa-print text-warning"></i></a> --}}
                     <a href="{{ route('bills.bapa-view-readings', [$item->ServicePeriod, urlencode($bapaName)]) }}"><i class="fas fa-eye"></i></a>
                 </td>
             </tr>
@@ -22,7 +22,7 @@
 
 {{-- Print Ledger History --}}
 <div class="modal fade" id="modal-print-bill" aria-hidden="true" style="display: none;" period="">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Print Bill</h4>
@@ -32,14 +32,16 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="form-group col-lg-6">
+                    <input type="hidden" id="period">
+                    <input type="hidden" id="bapaname">
+                    <div class="form-group col-lg-12">
                         <label for="FromBillNo">From Bill #</label>
                         <input type="text" id="FromBillNo" class="form-control">
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary"><i class="fas fa-print ico-tab-mini"></i>Print</button>
+                <button type="button" id="print-bill-bapa" class="btn btn-primary"><i class="fas fa-print ico-tab-mini"></i>Print</button>
             </div>
         </div>
     </div>
@@ -47,19 +49,27 @@
 
 @push('page_scripts')
     <script>
-        function verifyBillNo(period) {
+        var periodx = ''
+        var bapaname =''
+        function verifyBillNo(period, bapaName) {
+            periodx = period
+            bapaname = bapaName
             $('#modal-print-bill').modal('show')
-
-            $('#print-bill').on('click', function() {
-                if(jQuery.isEmptyObject($('#FromBillNo').val())) {
-                    // window.location.href  = "{{ url('/bills/print-bulk-bill-old-format-bapa') }}/{{ $item->ServicePeriod }}/{{ $bapaName }}/All"
-                    alert("{{ url('/bills/print-bulk-bill-old-format-bapa') }}/" + period + "/{{ urlencode($bapaName) }}/All")
-                } else {
-                    window.location.href  = "{{ url('/bills/print-bulk-bill-old-format-bapa') }}/" + period + "/{{ urlencode($bapaName) }}/" + $('#FromBillNo').val()
-                }            
-            })
         }
 
-        
+        $(document).ready(function() {
+            $('#modal-print-bill').on('shown.bs.modal', function () {
+                $('#period').val(periodx)
+                $('#bapaname').val(bapaname)
+            })
+
+            $('#print-bill-bapa').on('click', function() {
+                if(jQuery.isEmptyObject($('#FromBillNo').val())) {
+                    window.location.href  = "{{ url('/bills/print-bulk-bill-old-format-bapa') }}/" + periodx + "/" + bapaname + "/All"
+                } else {
+                    window.location.href  = "{{ url('/bills/print-bulk-bill-old-format-bapa') }}/" + periodx + "/" + bapaname + "/" + $('#FromBillNo').val()
+                }            
+            })
+        })
     </script>
 @endpush

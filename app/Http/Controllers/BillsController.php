@@ -1314,15 +1314,45 @@ class BillsController extends AppBaseController
         ]);
     }
 
-    public function printBulkBillOldFormatBapa($servicePeriod, $bapaName) {
+    public function printBulkBillOldFormatBapa($servicePeriod, $bapaName, $billNumberStart) {
         $bapaName = urldecode($bapaName);
-        $bills = DB::table('Billing_Bills')
-            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
-            ->where('Billing_Bills.ServicePeriod', $servicePeriod)
-            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
-            ->select('Billing_Bills.*')
-            ->orderBy('Billing_Bills.BillNumber')
-            ->get();
+        if ($billNumberStart == 'All') {
+            $bills = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                ->select('Billing_Bills.*')
+                ->orderBy('Billing_Bills.BillNumber')
+                ->get();
+        } else {
+            $getLast = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                ->select('Billing_Bills.*')
+                ->orderByDesc('Billing_Bills.BillNumber')
+                ->first();
+
+            if ($getLast != null) {
+                $bills = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                    ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                    ->whereBetween('Billing_Bills.BillNumber', [$billNumberStart, $getLast->BillNumber])
+                    ->select('Billing_Bills.*')
+                    ->orderBy('Billing_Bills.BillNumber')
+                    ->get();
+            } else {
+                $bills = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                    ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                    ->select('Billing_Bills.*')
+                    ->orderBy('Billing_Bills.BillNumber')
+                    ->get();
+            }           
+        }
+        
 
         return view('/bills/print_bulk_old_format', [
             'bills' => $bills

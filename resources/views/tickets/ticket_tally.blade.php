@@ -20,23 +20,6 @@
     {{-- FORM --}}
     <div class="col-lg-12">
         <div class="row">
-            {{-- TICKET --}}
-            <div class="form-group col-lg-2">
-                <label for="Ticket">Select Ticket</label>
-                <select class="custom-select select2"  id="Ticket">
-                    <option value="All">All</option>
-                    @foreach ($parentTickets as $items)
-                        <optgroup label="{{ $items->Name }}">
-                            @php
-                                $ticketsRep = TicketsRepository::where('ParentTicket', $items->id)->orderBy('Name')->get();
-                            @endphp
-                            @foreach ($ticketsRep as $item)
-                                <option value="{{ $item->id }}">{{ $item->Name }}</option>
-                            @endforeach
-                        </optgroup>
-                    @endforeach
-                </select>
-            </div>
 
             {{-- FROM --}}
             <div class="form-group col-lg-2">
@@ -83,7 +66,7 @@
             <div class="form-group col-lg-3">
                 <label style="opacity: 0; width: 100%;">Action</label>
                 <button class="btn btn-primary" id="filterBtn" title="Filter"><i class="fas fa-check"></i></button>
-                <button class="btn btn-warning" id="printBtn" title="Print"><i class="fas fa-print"></i></button>
+                {{-- <button class="btn btn-warning" id="printBtn" title="Print"><i class="fas fa-print"></i></button> --}}
             </div>
         </div>
     </div>
@@ -155,6 +138,7 @@
                     Type : type,
                     From : $('#From').val(),
                     To : $('#To').val(),
+                    Town : $('#Town').val()
                 },
                 success : function(res) {
                     $.each(res, function(index, element) {
@@ -176,12 +160,21 @@
                             "<th colspan='4'>" + name +  "</th>" + 
                         "</tr>"
             } else {
-                return "<tr>" +
-                    "<td style='padding-left: 50px;'>" + name +  "</td>" + 
-                    "<th class='text-info text-right'>" + (total=='0' ? '' : total) +  "</th>" + 
-                    "<th class='text-success text-right'>" + (executed=='0' ? '' : executed) +  "</th>" + 
-                    "<th class='text-danger text-right'>" + (unexecuted=='0' ? '' : unexecuted) +  "</th>" + 
-                "</tr>"
+                if (name == 'Total') {
+                    return "<tr>" +
+                            "<th>" + name +  "</th>" + 
+                            "<th class='text-info text-right'>" + (total=='0' ? '' : total) +  "</th>" + 
+                            "<th class='text-success text-right'>" + (executed=='0' ? '' : executed) +  "</th>" + 
+                            "<th class='text-danger text-right'>" + (unexecuted=='0' ? '' : unexecuted) +  "</th>" + 
+                        "</tr>"
+                } else {
+                    return "<tr>" +
+                        "<td style='padding-left: 50px;'>" + name +  "</td>" + 
+                        "<th class='text-info text-right'>" + (total=='0' ? '' : total) +  "</th>" + 
+                        "<th class='text-success text-right'>" + (executed=='0' ? '' : executed) +  "</th>" + 
+                        "<th class='text-danger text-right'>" + (unexecuted=='0' ? '' : unexecuted) +  "</th>" + 
+                    "</tr>"
+                }                
             }
             
         }
