@@ -441,6 +441,10 @@ html {
                             <tr>                                                
                                 <td>Other Deductions</td>
                                 <th class="text-right">- {{ number_format($item->Deductions, 2) }}</th>
+                                @if (Bills::getAccountTypeByType($item->ConsumerType) != 'RESIDENTIAL')
+                                <td>Surcharge</td>
+                                <th class="text-right">- {{ number_format(Bills::getFinalPenalty($item), 2) }}</th>                                    
+                                @endif
                             </tr>
                             <tr>
                                 <td>Amount Due</td>
