@@ -1664,4 +1664,5 @@ class BillsController extends AppBaseController
         
         return redirect(route('bills.unbilled-readings-console', $request['ServicePeriod']));
     }
+
 }

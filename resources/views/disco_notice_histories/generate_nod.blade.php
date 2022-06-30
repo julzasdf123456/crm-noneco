@@ -22,9 +22,13 @@
         <div class="row">
             {{-- Config --}}
             <div class="col-lg-4">
-                <div class="card">
+                {{-- METER READERS --}}
+                <div class="card" id="meter-reader-search">
                     <div class="card-header">
-                        <span class="card-title">Setup</span>
+                        <span class="card-title">Filter By Meter Reader</span>
+                        <div class="card-tools">
+                            <button class="btn btn-sm btn-primary" id="switch-to-routes">Switch To Routes</button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="form-group">
@@ -82,6 +86,44 @@
                         <button class="btn btn-primary" id="get-list-btn">Generate List</button>
                     </div>
                 </div>
+
+                {{-- ROUTE --}}
+                <div class="card d-none" id="route-search">
+                    <div class="card-header">
+                        <span class="card-title">Filter By Route</span>
+                        <div class="card-tools">
+                            <button class="btn btn-sm btn-danger" id="switch-to-meter-reader">Switch To Meter Reader</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="service-period">Service Period</label>
+                            <select id="service-period" class="form-control">
+                                @for ($i = 0; $i < count($months); $i++)
+                                    <option value="{{ $months[$i] }}">{{ date('F Y', strtotime($months[$i])) }}</option>
+                                @endfor
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="towns">Area</label>
+                            <select id="towns" class="form-control">
+                                <option value="All">All</option>
+                                @foreach ($towns as $item)
+                                    <option value="{{ $item->id }}" {{ env('APP_AREA_CODE')==$item->id ? 'selected' : '' }}>{{ $item->Town }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Route">Route</label>
+                            <input type="text" maxlength="5" class="form-control" id="Route" placeholder="Input Route">
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-danger" id="get-list-btn-route">Generate List</button>
+                    </div>
+                </div>
             </div>
 
             {{-- Table --}}
@@ -118,6 +160,7 @@
     <script>
         var period = ""
         var town = ""
+        var option = "meter-reader"
         $(document).ready(function() {
             $('#get-list-btn').on('click', function() {
                 period = $('#service-period').val()
@@ -126,28 +169,31 @@
                 getList()
             })
 
+            $('#get-list-btn-route').on('click', function() {
+                period = $('#service-period').val()
+                town = $('#towns').val()
+
+                getListRoute()
+            })
+
             $('#print-list').on('click', function() {
-                // if (jQuery.isEmptyObject(period) || jQuery.isEmptyObject(town)) {
-                //     alert('Generate Preview First')
-                // } else {
-                //     $.ajax({
-                //         url : '{{ route("discoNoticeHistories.print-reroute") }}',
-                //         type : 'GET',
-                //         data : {
-                //             ServicePeriod : period,
-                //             Town : town,
-                //             MeterReader : $('#MeterReader').val(),
-                //             Day : $('#Day').val()
-                //         },
-                //         success : function(res) {
-                //             window.location.href = "{{ url('/disco_notice_histories/print-disconnection-list') }}" + "/" + res['period'] + "/" + res['area']
-                //         },
-                //         error : function(err) {
-                //             alert('An error occurred while trying to print the disconnection list')
-                //         }
-                //     })
-                // }      
-                window.location.href = "{{ url('/disco_notice_histories/print-disconnection-list') }}" + "/" + $('#service-period').val() + "/" + $('#towns').val() + "/" + $('#MeterReader').val() + "/" + $('#Day').val()          
+                if (option = "meter-reader") {
+                    window.location.href = "{{ url('/disco_notice_histories/print-disconnection-list') }}" + "/" + $('#service-period').val() + "/" + $('#towns').val() + "/" + $('#MeterReader').val() + "/" + $('#Day').val() 
+                } else {
+                    window.location.href = "{{ url('/disco_notice_histories/print-disconnection-list-route') }}" + "/" + $('#service-period').val() + "/" + $('#towns').val() + "/" + $('#Route').val()
+                }                         
+            })
+
+            $('#switch-to-routes').on('click', function() {
+                $('#route-search').removeClass('d-none')
+                $('#meter-reader-search').addClass('d-none')
+                option = "route"
+            })
+
+            $('#switch-to-meter-reader').on('click', function() {
+                $('#route-search').addClass('d-none')
+                $('#meter-reader-search').removeClass('d-none')
+                option = "meter-reader"
             })
         })
 
@@ -161,6 +207,25 @@
                     Town : town,
                     MeterReader : $('#MeterReader').val(),
                     Day : $('#Day').val()
+                },
+                success : function(res) {
+                    $('#results-table tbody').append(res)
+                },
+                error : function(err) {
+                    alert('An error occurred while fetching the disconnection list')
+                }
+            })
+        }
+
+        function getListRoute() {
+            $('#results-table tbody tr').remove()
+            $.ajax({
+                url : '{{ route("discoNoticeHistories.get-disco-list-preview-route") }}',
+                type : 'GET',
+                data : {
+                    ServicePeriod : period,
+                    Town : town,
+                    Route : $('#Route').val()
                 },
                 success : function(res) {
                     $('#results-table tbody').append(res)

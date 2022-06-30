@@ -149,6 +149,12 @@
                                                 onclick="updateReading(this, '{{ $item->id }}', '{{ $item->AccountId }}')">
                                                 <i class="fas fa-pen"></i>
                                             </button>
+                                        @else
+                                            @if ($item->AccountNumber == null)
+                                            <button class="btn btn-link text-danger btn-xs float-right" onclick="mergeCapture('{{ $item->id }}', '{{ $item->KwhUsed }}', '{{ $item->FieldStatus }}', '{{ $item->Notes }}')">
+                                                <i class="fas fa-pen"></i>
+                                            </button>
+                                            @endif
                                         @endif                                        
                                     </td>
                                 </tr>
@@ -163,7 +169,53 @@
         </div>
     </div>
 
-{{-- Print Ledger History --}}
+{{-- MODAL SEARCH AND MERGE FOR CAPTURED --}}
+<div class="modal fade" id="modal-captured-reading" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Charge This Reading To a Consumer Account</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {{-- SEARCH --}}
+                <div class="row">                    
+                    <div class="form-group col-lg-4">
+                        <input class="form-control" id="old-account-captured" autocomplete="off" data-inputmask="'alias': 'phonebe'" maxlength="12" value="{{ env('APP_AREA_CODE') }}" style="font-size: 1.5em; color: #b91400; font-weight: bold;">
+                    </div>                   
+                    <div class="form-group col-lg-7">
+                        <input type="text" id="search-global-captured" placeholder="Account Number, Account Name, or Meter Number" class="form-control" autofocus="true">
+                    </div>
+                    <div class="form-group col-lg-1">
+                        <button id="search-consumer-global-captured" class="btn btn-primary"><i class="fas fa-search-dollar"></i></button>
+                    </div>
+                </div>
+
+                {{-- RESULTS --}}
+                <p class="text-muted"><i id="count">Results</i></p>
+                <table class="table table-sm table-hover" id="res-table-captured">
+                    <thead>
+                        <th>Account Number</th>
+                        <th>Account Name</th>
+                        <th>Address</th>
+                        <th>Status</th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+            {{-- <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="bill-consumer"><i class="fas fa-check-circle ico-tab-mini"></i>Bill</button>
+            </div> --}}
+        </div>
+    </div>
+</div>
+
+{{-- MODAL UPDATE READING FOR ZERO READINGS --}}
 <div class="modal fade" id="modal-update-reading" aria-hidden="true" style="display: none;">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -269,6 +321,11 @@
         var kwhused = 0
         var multiplier = 0
         var acctid = ""
+
+        // CAPTURED
+        var readid = ""
+        var remarks = ""
+        var fieldFindings = ""
         $(document).ready(function() {
 
             $('#KwhAdjusted').keyup(function(e) {
@@ -295,8 +352,38 @@
                         })
                 } else {
                     transact(acctid, $('#PresentReading').val(), prev, $('#DemandAdjusted').val())
+                }                
+            })
+
+            /** 
+             *  CAPTURED
+             */
+            $('#modal-captured-reading').on('shown.bs.modal', function () {
+                $('#old-account-captured').focus();
+            })
+
+            $("#old-account-captured").inputmask({
+                mask: '99-99999-999',
+                placeholder: '',
+                showMaskOnHover: false,
+                showMaskOnFocus: false,
+                onBeforePaste: function (pastedValue, opts) {
+                    var processedValue = pastedValue;
+
+                    return processedValue;
                 }
-                
+            });
+
+            $("#old-account-captured").on('keyup', function(event) {
+                if (this.value.length > 7) {
+                    performSearchCaptured(this.value)
+                }
+            })
+
+            $('#search-global-captured').on('keyup', function() {
+                if (this.value.length > 5) {
+                    performSearchCaptured(this.value)
+                }
             })
         })
 
@@ -406,6 +493,87 @@
                         title: 'Error generating bill!',
                         showConfirmButton: false,
                         timer: 1800
+                    })
+                }
+            })
+        }
+
+        /**
+         * CAPTURED READINGS
+         */
+        function mergeCapture(id, presreading, fieldstatus, remarksx) {
+            prev = 0
+            pres = 0
+            kwhused = 0
+            multiplier = 0
+            acctid = ""
+
+            readid = id
+            pres = presreading
+            fieldFindings = fieldstatus
+            remarks = remarksx
+            $('#modal-captured-reading').modal('show')
+        }
+
+        function performSearchCaptured(regex) {
+            $.ajax({
+                url : '{{ route("serviceAccounts.search-for-captured") }}',
+                type : 'GET',
+                data : {
+                    query : regex,
+                },
+                success : function(res) {
+                    try {
+                        if (jQuery.isEmptyObject(res)) {
+                            $('#res-table-captured tbody tr').remove()
+                        } else {
+                            $('#res-table-captured tbody tr').remove()
+                            $('#res-table-captured tbody').append(res)
+                        }   
+                    } catch (err) {
+                        $('#res-table-captured tbody tr').remove()
+                    }                                     
+                },
+                error : function(error) {
+                    $('#res-table-captured tbody tr').remove()
+                    // alert('Error fetching data')
+                    console.log(error)
+                }
+            })
+        }
+
+        function proceedBilling(id) {
+            // PERFORM CHECK
+            $.ajax({
+                url : "{{ route('readings.check-if-account-has-bill') }}",
+                type : 'GET',
+                data : {
+                    AccountNumber : id,
+                    ServicePeriod : '{{ $period }}',
+                },
+                success : function(res) {
+                    if (res == 'ok') {
+                        window.location = "{{ url('/readings/captured-readings-console') }}" + "/" + id + "/" + readid + "/{{ $day }}/{{ $bapaName != null ? $bapaName : 'mreader' }}"
+                    } else {
+                        Swal.fire({
+                            title: 'Bill Already Exists',
+                            text : 'This account already has a bill for this Billing month. Do you wish to proceed?',
+                            showDenyButton: true,
+                            confirmButtonText: 'Proceed',
+                            denyButtonText: `Cancel`,
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                Swal.fire('Saved!', '', 'success')
+                            } else if (result.isDenied) {
+                                Swal.fire('Changes are not saved', '', 'info')
+                            }
+                        })
+                    }
+                },
+                error : function(err) {
+                    Swal.fire({
+                        title : 'Error validating account',
+                        icon : 'error'
                     })
                 }
             })

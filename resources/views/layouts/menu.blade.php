@@ -577,12 +577,12 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-calendar-alt nav-icon text-primary"></i><p>Reading Schedules</p>
                 </a>
             </li>
-            <li class="nav-item">
+            {{-- <li class="nav-item">
                 <a href="{{ route('readings.captured-readings') }}"
                    class="nav-link {{ Request::is('readings.captured-readings*') ? 'active' : '' }}">                   
                    <i class="fas fa-circle nav-icon text-primary"></i><p>Captured Readings</p>
                 </a>
-            </li>
+            </li> --}}
             <li class="nav-item">
                 <a href="{{ route('readings.manual-reading') }}"
                    class="nav-link {{ Request::is('readings.manual-reading*') ? 'active' : '' }}">                   

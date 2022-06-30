@@ -1360,4 +1360,49 @@ class ServiceAccountsController extends AppBaseController
             'meters' => $meters
         ]);
     }
+
+    public function searchForCaptured(Request $request) {
+        $results = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['query'] . '%')
+            ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['query'] . '%')
+            ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['query'] . '%')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.Multiplier',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+            ->get();
+
+        $output = "";
+
+        if (count($results) > 0) {
+            foreach($results as $item) {
+                $output .= '
+                        <tr onclick=proceedBilling("' . $item->id . '")>
+                            <td>' . $item->OldAccountNo . '</td>
+                            <td>' . $item->ServiceAccountName . '</td>
+                            <td>' . ServiceAccounts::getAddress($item) . '</td>
+                            <td>' . $item->AccountStatus . '</td>
+                            <td>
+                                <button class="btn btn-link btn-sm text-primary" onclick=proceedBilling("' . $item->id . '")><i class="fas fa-forward"></i> Proceed Billing</button>
+                            </td>
+                        </tr>
+                    '; 
+            }
+
+            return response()->json($output, 200);
+        } else {
+            return response()->json([], 200);
+        }        
+    }
 }
