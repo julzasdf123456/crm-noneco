@@ -38,6 +38,11 @@
                         <label for="FromBillNo">From Bill #</label>
                         <input type="text" id="FromBillNo" class="form-control">
                     </div>
+
+                    <div class="form-group col-lg-12">
+                        <label for="Route">Route</label>
+                        <input type="text" maxlength="5" id="Route" class="form-control">
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -64,10 +69,14 @@
             })
 
             $('#print-bill-bapa').on('click', function() {
-                if(jQuery.isEmptyObject($('#FromBillNo').val())) {
-                    window.location.href  = "{{ url('/bills/print-bulk-bill-old-format-bapa') }}/" + periodx + "/" + bapaname + "/All"
+                if(jQuery.isEmptyObject($('#FromBillNo').val()) && jQuery.isEmptyObject($('#Route').val())) {
+                    window.location.href  = "{{ url('/bills/print-bulk-bill-old-format-bapa') }}/" + periodx + "/" + bapaname + "/All/All"
+                } else if (jQuery.isEmptyObject($('#FromBillNo').val()) && !jQuery.isEmptyObject($('#Route').val())) {
+                    window.location.href  = "{{ url('/bills/print-bulk-bill-old-format-bapa') }}/" + periodx + "/" + bapaname + "/All/" + $('#Route').val()
+                } else if (!jQuery.isEmptyObject($('#FromBillNo').val()) && jQuery.isEmptyObject($('#Route').val())) {
+                    window.location.href  = "{{ url('/bills/print-bulk-bill-old-format-bapa') }}/" + periodx + "/" + bapaname + "/" + $('#FromBillNo').val() + "/All"
                 } else {
-                    window.location.href  = "{{ url('/bills/print-bulk-bill-old-format-bapa') }}/" + periodx + "/" + bapaname + "/" + $('#FromBillNo').val()
+                    window.location.href  = "{{ url('/bills/print-bulk-bill-old-format-bapa') }}/" + periodx + "/" + bapaname + "/" + $('#FromBillNo').val() + "/" + $('#Route').val()
                 }            
             })
         })

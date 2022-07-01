@@ -1315,9 +1315,9 @@ class BillsController extends AppBaseController
         ]);
     }
 
-    public function printBulkBillOldFormatBapa($servicePeriod, $bapaName, $billNumberStart) {
+    public function printBulkBillOldFormatBapa($servicePeriod, $bapaName, $billNumberStart, $route) {
         $bapaName = urldecode($bapaName);
-        if ($billNumberStart == 'All') {
+        if ($billNumberStart == 'All' && $route == 'All') {
             $bills = DB::table('Billing_Bills')
                 ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                 ->where('Billing_Bills.ServicePeriod', $servicePeriod)
@@ -1326,12 +1326,22 @@ class BillsController extends AppBaseController
                 ->orderBy('Billing_ServiceAccounts.AreaCode')
                 ->orderBy('Billing_Bills.BillNumber')
                 ->get();
-        } else {
+        } elseif ($billNumberStart == 'All' && $route != 'All') {
+            $bills = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                ->where('Billing_ServiceAccounts.AreaCode', $route)
+                ->select('Billing_Bills.*')
+                ->orderBy('Billing_Bills.BillNumber')
+                ->get();
+        } elseif ($billNumberStart != 'All' && $route == 'All') {
             $getLast = DB::table('Billing_Bills')
                 ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                 ->where('Billing_Bills.ServicePeriod', $servicePeriod)
                 ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
                 ->select('Billing_Bills.*')
+                ->orderByDesc('Billing_ServiceAccounts.AreaCode')
                 ->orderByDesc('Billing_Bills.BillNumber')
                 ->first();
 
@@ -1354,7 +1364,40 @@ class BillsController extends AppBaseController
                     ->orderBy('Billing_ServiceAccounts.AreaCode')
                     ->orderBy('Billing_Bills.BillNumber')
                     ->get();
-            }           
+            } 
+        } else {
+            $getLast = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                ->where('Billing_ServiceAccounts.AreaCode', $route)
+                ->select('Billing_Bills.*')
+                ->orderByDesc('Billing_ServiceAccounts.AreaCode')
+                ->orderByDesc('Billing_Bills.BillNumber')
+                ->first();
+
+            if ($getLast != null) {
+                $bills = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                    ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                    ->where('Billing_ServiceAccounts.AreaCode', $route)
+                    ->whereBetween('Billing_Bills.BillNumber', [$billNumberStart, $getLast->BillNumber])
+                    ->select('Billing_Bills.*')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('Billing_Bills.BillNumber')
+                    ->get();
+            } else {
+                $bills = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                    ->where('Billing_ServiceAccounts.AreaCode', $route)
+                    ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                    ->select('Billing_Bills.*')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('Billing_Bills.BillNumber')
+                    ->get();
+            }     
         }
         
 
