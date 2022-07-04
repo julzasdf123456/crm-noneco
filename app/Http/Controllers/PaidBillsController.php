@@ -285,9 +285,9 @@ class PaidBillsController extends AppBaseController
                                 <td>' . $item->BillNumber . '</td>
                                 <td>' . date('F Y', strtotime($item->ServicePeriod)) . '</td>
                                 <td>' . date('F d, Y', strtotime($item->DueDate)) . '</td>
-                                <th>₱ ' . number_format($item->NetAmount, 2) . '</th>
+                                <th>₱ ' . number_format($item->NetAmount, 2) . ' + ' . Bills::getFinalPenalty($item) . '</th>
                                 <td class="text-right">
-                                    <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" amount="' . $item->NetAmount . '" ewt="' . $ewt2 . '" evat="' . $evat5 . '" class="btn btn-link text-muted" onclick=addToPayables("' . $item->id . '")><i class="fas fa-check-circle"></i></button>
+                                    <button id="' . $item->id . '" ischecked="false" additionalCharges="' . $item->AdditionalCharges . '" deductions="' . $item->Deductions . '" surcharge="' . Bills::getFinalPenalty($item) . '" amount="' . $item->NetAmount . '" ewt="' . $ewt2 . '" evat="' . $evat5 . '" class="btn btn-link text-muted" onclick=addToPayables("' . $item->id . '")><i class="fas fa-check-circle"></i></button>
                                 </td>
                             </tr>
                         '; 
