@@ -187,12 +187,12 @@
                                             curve: 1, // change the speed at which it zooms out
                                             easing: (t) => t,
                                             essential: true
-                                        });
-
-                                    new mapboxgl.Marker({ color: 'red'})
+                                        });                                                                      
+                                }  
+                                
+                                new mapboxgl.Marker({ color: 'red'})
                                         .setLngLat([parseFloat(result[index]['Longitude']), parseFloat(result[index]['Latitude'])])
-                                        .addTo(map);                                  
-                                }          
+                                        .addTo(map);
                             }
                         })
                     }
