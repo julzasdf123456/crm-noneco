@@ -10,6 +10,7 @@
                 <td><a href="{{ route('bills.bapa-view-readings', [$item->ServicePeriod, urlencode($bapaName)]) }}">{{ date('F Y', strtotime($item->ServicePeriod)) }}</a></td>
                 <td class="text-right">{{ number_format($item->NoOfReadings) }}</td>
                 <td class="text-right">
+                    <a href="{{ route('serviceAccounts.print-bapa-bills-list', [urlencode($bapaName), $item->ServicePeriod]) }}" title="Print Bills in List" style="margin-right: 10px;"><i class="fas fa-print text-success"></i></a>
                     <a href="{{ route('readings.view-full-report-bapa', [$item->ServicePeriod, urlencode($bapaName)]) }}" title="View Full Report" style="margin-right: 10px;"><i class="fas fa-file text-success"></i></a>
                     <button class="btn btn-link btn-sm text-warning" onclick="verifyBillNo('{{ $item->ServicePeriod }}', '{{ urlencode($bapaName) }}')" style="margin-right: 5px; margin-bottom: 5px;" ><i class="fas fa-print text-warning"></i></button>
                     {{-- <a href="{{ route('bills.print-bulk-bill-old-format-bapa', [$item->ServicePeriod, urlencode($bapaName), 'All']) }}" style="margin-right: 10px;"><i class="fas fa-print text-warning"></i></a> --}}

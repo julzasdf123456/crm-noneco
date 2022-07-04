@@ -213,6 +213,7 @@ Route::get('/service_accounts/relocation-form/{accountNo}/{scId}', [App\Http\Con
 Route::get('/service_accounts/print-ledger/{id}/{from}/{to}', [App\Http\Controllers\ServiceAccountsController::class,  'printLedger'])->name('serviceAccounts.print-ledger');
 Route::post('/service_accounts/store-relocation', [App\Http\Controllers\ServiceAccountsController::class,  'storeRelocation'])->name('serviceAccounts.store-relocation');
 Route::get('/service_accounts/search-for-captured', [App\Http\Controllers\ServiceAccountsController::class,  'searchForCaptured'])->name('serviceAccounts.search-for-captured');
+Route::get('/service_accounts/print-bapa-bills-list/{bapaName}/{period}', [App\Http\Controllers\ServiceAccountsController::class,  'printBapaBillsList'])->name('serviceAccounts.print-bapa-bills-list');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 
