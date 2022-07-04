@@ -145,9 +145,9 @@
     </table>
 </div>
 <script type="text/javascript">
-    // window.print();
+    window.print();
 
-    // window.setTimeout(function(){
-    //     window.history.go(-1)
-    // }, 800);
+    window.setTimeout(function(){
+        window.history.go(-1)
+    }, 800);
 </script>
