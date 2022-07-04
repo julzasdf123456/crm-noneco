@@ -316,8 +316,8 @@ p {
         @php
             $totalArr = 0.0;
             if ($arrears != null) {
-                foreach($arrears as $item) {
-                    $totalArr = $totalArr += floatval($item->NetAmount);
+                foreach($arrears as $itemx) {
+                    $totalArr = $totalArr += floatval($itemx->NetAmount);
                 }
             }
         @endphp

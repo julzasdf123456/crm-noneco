@@ -1,3 +1,1 @@
-php artisan route:cache
-
-php artisan serve
+php artisan serve --host 192.168.100.50
