@@ -115,20 +115,20 @@ class ServiceConnectionInspectionsController extends AppBaseController
         $subTotal = 0.0;
         $vatTotal = 0.0;
         $overAllTotal = 0.0;
-        foreach($paymentParticulars as $item) {
-            $transactions = new ServiceConnectionPayTransaction;
-            $transactions->id = IDGenerator::generateIDandRandString();
-            $transactions->ServiceConnectionId = $input['ServiceConnectionId'];
-            $transactions->Particular = $item->id;
-            $transactions->Amount = $item->DefaultAmount;
-            $transactions->Vat = floatval($item->DefaultAmount) * floatval($item->VatPercentage);
-            $transactions->Total = floatval($transactions->Vat) + floatval($transactions->Amount);
-            $transactions->save();
+        // foreach($paymentParticulars as $item) {
+        //     $transactions = new ServiceConnectionPayTransaction;
+        //     $transactions->id = IDGenerator::generateIDandRandString();
+        //     $transactions->ServiceConnectionId = $input['ServiceConnectionId'];
+        //     $transactions->Particular = $item->id;
+        //     $transactions->Amount = $item->DefaultAmount;
+        //     $transactions->Vat = floatval($item->DefaultAmount) * floatval($item->VatPercentage);
+        //     $transactions->Total = floatval($transactions->Vat) + floatval($transactions->Amount);
+        //     $transactions->save();
 
-            $subTotal = $subTotal + floatval($transactions->Amount);
-            $vatTotal = $vatTotal + floatval($transactions->Vat);
-            $overAllTotal = $overAllTotal + floatval($transactions->Total);
-        }
+        //     $subTotal = $subTotal + floatval($transactions->Amount);
+        //     $vatTotal = $vatTotal + floatval($transactions->Vat);
+        //     $overAllTotal = $overAllTotal + floatval($transactions->Total);
+        // }
         $totalTransactions = new ServiceConnectionTotalPayments;
         $totalTransactions->id = IDGenerator::generateIDandRandString();
         $totalTransactions->ServiceConnectionId = $input['ServiceConnectionId'];

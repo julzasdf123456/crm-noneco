@@ -177,7 +177,8 @@ class TransactionIndexController extends AppBaseController
 
     public function serviceConnectionCollection() {
         $applications = DB::table('CRM_ServiceConnections')
-            ->where('Status', 'Approved')
+            // ->where('Status', 'Approved')
+            ->whereIn('Status', ['Approved', 'For Inspection'])
             ->whereNull('ORNumber')
             ->whereNull('ORDate')
             ->get();
