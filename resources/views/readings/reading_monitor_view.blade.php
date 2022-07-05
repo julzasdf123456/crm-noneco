@@ -181,7 +181,7 @@
                                 if (index == 0) {
                                     map.flyTo({
                                             center: [parseFloat(result[index]['Longitude']), parseFloat(result[index]['Latitude'])],
-                                            zoom: 18,
+                                            zoom: 15,
                                             bearing: 0,
                                             speed: 1, // make the flying slow
                                             curve: 1, // change the speed at which it zooms out

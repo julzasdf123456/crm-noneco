@@ -640,6 +640,15 @@ use Illuminate\Support\Facades\Auth;
         </a>
         <ul class="nav nav-treeview">
             <li class="nav-header">                
+                Meter Reading 
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('readings.billed-and-unbilled-reports') }}"
+                   class="nav-link {{ Request::is('readings.billed-and-unbilled-reports*') ? 'active' : '' }}">                   
+                   <i class="fas fa-circle nav-icon text-primary"></i><p>Billed & Unbilled</p>
+                </a>
+            </li>
+            <li class="nav-header">                
                 CorPlan 
             </li>
             <li class="nav-item">
