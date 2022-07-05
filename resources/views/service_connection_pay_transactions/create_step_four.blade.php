@@ -26,12 +26,12 @@ $id = IDGenerator::generateID();
 
                 @include('adminlte-templates::common.errors')
 
-                <div class="callout callout-info">
+                {{-- <div class="callout callout-info">
                     Step <strong>4</strong> of 4 - <strong>Service Connection Payments</strong>
-                </div>
+                </div> --}}
 
                 <div class="invoice p-3 mb-3">
-                    <div class="row">
+                    {{-- <div class="row">
                         <div class="col-12">
                             <h4>
                                 <i class="fas fa-globe"></i>{{ env('APP_COMPANY') }}
@@ -39,42 +39,7 @@ $id = IDGenerator::generateID();
                             </h4>
                         </div>
                         <!-- /.col -->
-                    </div>
-
-                    <div class="row invoice-info">
-                        <div class="col-sm-4 invoice-col">
-                            Issued From
-                            <address>
-                                <strong>{{ env('APP_COMPANY_ABRV') }}</strong><br>
-                                Street, Barangay, Town, Province<br>
-                                Tin No Here: #########<br>
-                                Phone Here: ########<br>
-                                Email Here: ##########
-                            </address>
-                        </div>
-                        <!-- /.col -->
-                        <div class="col-sm-4 invoice-col">
-                            Issued To
-                            <address>
-                                <strong>{{ $serviceConnection->ServiceAccountName }}</strong><br>
-                                {{ ServiceConnections::getAddress($serviceConnection) }}<br>
-                                Phone: {{ $serviceConnection->ContactNumber }}<br>
-                                Building Type: {{ $serviceConnection->BuildingType }}<br>
-                                Date of Application: {{ date('F d, Y', strtotime($serviceConnection->DateOfApplication)) }}
-                            </address>
-                        </div>
-                        <!-- /.col -->
-                        <div class="col-sm-4 invoice-col">
-                            <b>Invoice # {{ $id }}</b><br>
-                            <br>
-                            {{-- <b>Order ID:</b> 4F3S8J<br>
-                            <b>Payment Due:</b> 2/22/2014<br> --}}
-                            <b >Account: </b><span id="scId">{{ $serviceConnection->id }}</span>
-                        </div>
-                        <!-- /.col -->
-                    </div>
-
-                    <div class="divider"></div>
+                    </div> --}}
 
                     <div class="row">
                         {{-- <div class="col-lg-6 col-md-6 col-sm-12">

@@ -52,6 +52,8 @@
                             <td class="text-right" >
                                 @if ($item->ConnectionApplicationType == 'Relocation')
                                     <a href="{{ route('serviceAccounts.relocation-form', [$item->AccountNumber, $item->id]) }}" title="Proceed relocating {{ $item->ServiceAccountName }}" ><i class="fas fa-arrow-circle-right text-success"></i></a>
+                                @elseif ($item->ConnectionApplicationType == 'Change Name')
+                                    <a href="{{ route('serviceAccounts.confirm-change-name', [$item->id]) }}" title="Proceed Change Name"><i class="fas fa-arrow-circle-right text-success"></i></a>
                                 @else
                                     <a href="{{ route('serviceAccounts.account-migration', [$item->id]) }}" title="Proceed activating {{ $item->ServiceAccountName }}" ><i class="fas fa-arrow-circle-right text-success"></i></a>
                                 @endif                                

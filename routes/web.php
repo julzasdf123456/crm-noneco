@@ -124,6 +124,10 @@ Route::get('/service_connections/print-service-connection-application/{id}', [Se
 Route::get('/service_connections/print-service-connection-contract/{id}', [ServiceConnectionsController::class, 'printServiceConnectionContract'])->name('serviceConnections.print-service-connection-contract');
 Route::get('/service_connections/relocation-search', [ServiceConnectionsController::class, 'relocationSearch'])->name('serviceConnections.relocation-search');
 Route::get('/service_connections/create-relocation/{id}', [ServiceConnectionsController::class, 'createRelocation'])->name('serviceConnections.create-relocation');
+Route::get('/service_connections/change-name-search', [ServiceConnectionsController::class, 'changeNameSearch'])->name('serviceConnections.change-name-search');
+Route::get('/service_connections/create-change-name/{id}', [ServiceConnectionsController::class, 'createChangeName'])->name('serviceConnections.create-change-name');
+Route::post('/service_connections/store-change-name', [ServiceConnectionsController::class, 'storeChangeName'])->name('serviceConnections.store-change-name');
+Route::get('/service_connections/approve-change-name/{id}', [ServiceConnectionsController::class, 'approveForChangeName'])->name('serviceConnections.approve-change-name');
 Route::resource('serviceConnections', App\Http\Controllers\ServiceConnectionsController::class);
 
 
@@ -214,6 +218,8 @@ Route::get('/service_accounts/print-ledger/{id}/{from}/{to}', [App\Http\Controll
 Route::post('/service_accounts/store-relocation', [App\Http\Controllers\ServiceAccountsController::class,  'storeRelocation'])->name('serviceAccounts.store-relocation');
 Route::get('/service_accounts/search-for-captured', [App\Http\Controllers\ServiceAccountsController::class,  'searchForCaptured'])->name('serviceAccounts.search-for-captured');
 Route::get('/service_accounts/print-bapa-bills-list/{bapaName}/{period}', [App\Http\Controllers\ServiceAccountsController::class,  'printBapaBillsList'])->name('serviceAccounts.print-bapa-bills-list');
+Route::get('/service_accounts/confirm-change-name/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'confirmChangeName'])->name('serviceAccounts.confirm-change-name');
+Route::post('/service_accounts/update-name', [App\Http\Controllers\ServiceAccountsController::class, 'updateName'])->name('serviceAccounts.update-name');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 

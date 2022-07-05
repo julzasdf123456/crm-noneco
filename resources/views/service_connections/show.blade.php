@@ -41,7 +41,12 @@ use Illuminate\Support\Facades\Auth;
                         </div>
 
                         <h3 title="Go to Membership Profile" class="profile-username text-center"><a href="{{ $serviceConnections->MemberConsumerId != null ? route('memberConsumers.show', [$serviceConnections->MemberConsumerId]) : '' }}">{{ $serviceConnections->ServiceAccountName }}</a></h3>
-                        <p class="text-muted text-center">{{ $serviceConnections->id }} ({{ $serviceConnections->AccountApplicationType }})</p>
+                        <p class="text-muted text-center">
+                            {{ $serviceConnections->id }} ({{ $serviceConnections->AccountApplicationType }}) 
+                            @if ($serviceConnections->ORNumber != null)
+                                <span class="badge badge-success">Paid</span>
+                            @endif
+                        </p>
 
                         <hr>
 
@@ -95,6 +100,16 @@ use Illuminate\Support\Facades\Auth;
                             <a href="{{ route('serviceConnections.print-service-connection-contract', [$serviceConnections->id]) }}" class="text-danger" title="Print Service Connection Contract" style="margin-left: 20px;">
                                 <i class="fas fa-print"></i>
                             </a>
+
+                            @if ($serviceConnections->ConnectionApplicationType == 'Change Name' && $serviceConnections->ORNumber != null)
+                                @if ($serviceConnections->Status == 'Approved For Change Name')
+                                    
+                                @else
+                                    <a href="{{ route('serviceConnections.approve-change-name', [$serviceConnections->id]) }}" class="text-success" title="Approve Change Name and Forward to Billing Analyst" style="margin-left: 20px;">
+                                        <i class="fas fa-check-circle"></i>
+                                    </a>
+                                @endif                                
+                            @endif
 
                             <a href="{{ route('serviceConnections.move-to-trash', [$serviceConnections->id]) }}" class="text-danger float-right" title="Move to trash">
                                 <i class="fas fa-trash"></i>

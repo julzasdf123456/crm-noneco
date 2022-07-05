@@ -6,14 +6,7 @@
         @else
             @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Service Connection Assessor'])) 
                 <a href="{{ route('serviceConnectionPayTransactions.create-step-four', [$serviceConnections->id]) }}" class="btn btn-primary btn-sm" title="Add Payment Transaction">
-                    <lord-icon
-                        src="https://cdn.lordicon.com/mecwbjnp.json"
-                        trigger="loop"
-                        delay="1500"
-                        stroke="100"
-                        colors="primary:#ffffff,secondary:#ffffff"
-                        style="width:25px;height:25px">
-                    </lord-icon>
+                    <i class="fas fa-plus ico-tab"></i>
                     Create Payment Invoice</a>
             @endif
         @endif
@@ -23,7 +16,7 @@
         <p class="badge bg-success" style="padding: 10px;"><i class="fas fa-check-circle ico-tab-mini"></i>Paid</p>
     @endif
     <div class="row">
-        <div class="col-md-12">
+        {{-- <div class="col-md-12">
             <div class="callout callout-info">
                 <p>Material Transactions</p>
             </div>
@@ -54,14 +47,14 @@
             </table>
         </div>
 
-        <div class="divider"></div>
+        <div class="divider"></div> --}}
 
         <div class="col-md-12">
-            <div class="callout callout-info">
+            {{-- <div class="callout callout-info">
                 <p>Particular Payments</p>
-            </div>
+            </div> --}}
 
-            <table id="particulars_table" class="table">
+            <table id="particulars_table" class="table table-hover table-sm table-bordered">
                 <thead>
                     <th>Particulars</th>
                     <th class="text-right">Amnt</th>
@@ -75,7 +68,7 @@
                                 <td>{{ $item->Particular }}</td>  
                                 <td class="text-right">{{ number_format($item->Amount, 2) }}</td>
                                 <td class="text-right">{{ number_format($item->Vat, 2) }}</td>  
-                                <td class="text-right">{{ number_format($item->Total, 2) }}</td>
+                                <th class="text-right">{{ number_format($item->Total, 2) }}</th>
                             </tr>
                         @endforeach
                     @endif
@@ -84,8 +77,6 @@
         </div>
     </div>
     
-    <div class="divider"></div>
-
     @if ($totalTransactions != null)
         <div class="col-md-12">
             <p>Sub Total: <strong>{{ number_format($totalTransactions->SubTotal, 2) }}</strong></p>
@@ -95,24 +86,10 @@
             <br>
             @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Service Connection Assessor'])) 
                 <a href="{{ route('serviceConnectionPayTransactions.create-step-four', [$serviceConnections->id]) }}" class="btn btn-sm btn-warning">
-                    <lord-icon
-                        src="https://cdn.lordicon.com/wloilxuq.json"
-                        trigger="loop"
-                        colors="primary:#343434,secondary:#343434"
-                        stroke="100"
-                        delay="2000"
-                        style="width:25px;height:25px">
-                    </lord-icon>
+                    <i class="fas fa-pen ico-tab"></i>
                     Update Payment</a>
                 <a href="" class="btn btn-sm btn-success">
-                    <lord-icon
-                        src="https://cdn.lordicon.com/nocovwne.json"
-                        trigger="loop"
-                        colors="primary:#ffffff,secondary:#ffffff"
-                        stroke="100"
-                        delay="2000"
-                        style="width:25px;height:25px">
-                    </lord-icon>
+                   <i class="fas fa-print ico-tab"></i>
                     Print Invoice</a>
             @endif
         </div>
@@ -120,14 +97,7 @@
         <p class="text-center"><i>No total transactions recorded!</i></p>
         @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Service Connection Assessor'])) 
             <a href="{{ route('serviceConnectionPayTransactions.create-step-four', [$serviceConnections->id]) }}" class="btn btn-sm btn-warning">
-                <lord-icon
-                    src="https://cdn.lordicon.com/wloilxuq.json"
-                    trigger="loop"
-                    colors="primary:#343434,secondary:#343434"
-                    stroke="100"
-                    delay="2000"
-                    style="width:25px;height:25px">
-                </lord-icon>
+                <i class="fas fa-pen ico-tab"></i>
                 Update Payment</a>
         @endif
     @endif

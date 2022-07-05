@@ -6,7 +6,52 @@
         <br>
         <div class="card shadow-none">
             <div class="card-header">
-                <span class="card-title text-primary"><strong>July 7, 2022 Update!</strong> <i class="text-muted">2:30 PM</i> <br> <i>What's new?</i></span>
+                <span class="card-title text-success"><strong>July 8, 2022 Update!</strong> <i class="text-muted">4:38 AM</i> <br> <i>What's new?</i></span>
+            </div>
+            <div class="card-body">
+                <h4><span class="text-muted"># </span> CRM Module</h4>
+                <ul>
+                    <li><strong>Change Name </strong> application is now available and can be accessed at
+                        <span class="text-primary"><a href="{{ route('serviceConnections.change-name-search') }}"><strong>Service Connections -> Change Name</strong></a></span></li>
+                    <li>Flow of change of name in this software is straight-forward:
+                        </strong>
+                        <ol>
+                            <li><strong>Apply for Change Name</strong> - files a new change name request</li>
+                            <li><strong>Pay at Teller</strong> - automatically queues at the teller</li>
+                            <li><strong>Assess the Requirements</strong></li>
+                            <li><strong>Confirm after Payment</strong> - if both payment and assessment of requirements are done, the user <strong>should confirm</strong>
+                                the change name request via <strong class="text-primary">Service Connections -> All Applications -> (<i>Search and View the application name</i>) 
+                                -> Look for the Green Check Icon ( <i class="fas fa-check-circle text-success"></i> ) at the bottom of the consumer info page</strong>
+                            </li>
+                            <li><strong>Automatically Proceeds to Billing Analyst for the Confirmation of Change Name Request</strong> - once confirmed, it will automatically be 
+                                queued at the Billing Analyst's <strong>Account Migration Menu</strong>
+                            </li>
+                        </ol>
+                    </li>
+                </ul>
+                <h4><span class="text-muted"># </span> Billing Analyst Module - Pending Accounts (Account Migration)</h4>
+                <ul>
+                    <li>All the confirmed <strong>Change Name</strong> applications is queued at <strong><a href="{{ route('serviceAccounts.pending-accounts') }}">
+                        Billing Inquiry -> Others -> Pending Accounts</a></strong></li>
+                    <li>Just like all normal energized and approved applications, <strong>Change Name</strong> request requires approval and confirmation
+                        from the billing analyst in order to successfully change the account name of the consumer.
+                    </li>
+                    <li>To confirm, just click on the <strong class="text-primary">blue button</strong> at the right side of the queue and
+                        it will redirect you to the confirmation page of the change name.
+                    </li>
+                </ul>
+                <h4><span class="text-muted"># </span> Bugs & Fixes</h4>
+                <ul>
+                    <li>Fixed bugs at Reading Monitor Map</li>
+                    <li>Allowed the changing of previous reading at the Manual Readings Menu</li>
+                    <li>Re-corrected the flow of Service Connection - Inspection - Payment</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card shadow-none">
+            <div class="card-header">
+                <span class="card-title text-muted"><strong>July 7, 2022 Update!</strong> <i class="text-muted">2:30 PM</i> <br> <i>Change Log</i></span>
             </div>
             <div class="card-body">
                 <h4><span class="text-muted"># </span> Billing Analyst Modules</h4>

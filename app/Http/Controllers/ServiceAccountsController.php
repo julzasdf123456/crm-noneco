@@ -487,11 +487,64 @@ class ServiceAccountsController extends AppBaseController
                                 $query->where('CRM_ServiceConnections.Trash', 'No')
                                     ->orWhereNull('CRM_ServiceConnections.Trash');
                             })  
-            ->where('Status', 'Energized')          
+            ->whereIn('Status', ['Energized', 'Approved For Change Name'])          
             ->orderBy('CRM_ServiceConnections.ServiceAccountName')
             ->get();
 
         return view('/service_accounts/pending_accounts', ['serviceConnections' => $serviceConnections]);
+    }
+
+    public function confirmChangeName($id) {
+        $serviceConnection = ServiceConnections::find($id);
+
+        if ($serviceConnection != null) {
+            if ($serviceConnection->AccountNumber != null) {
+                $serviceAccount = DB::table('Billing_ServiceAccounts')
+                    ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
+                    ->select('Billing_ServiceAccounts.id',
+                            'Billing_ServiceAccounts.ServiceAccountName',
+                            'Billing_ServiceAccounts.OldAccountNo',
+                            'Billing_ServiceAccounts.AccountCount',
+                            'Billing_ServiceAccounts.Purok',
+                            'Billing_ServiceAccounts.AccountType',
+                            'Billing_ServiceAccounts.AccountStatus',
+                            'Billing_ServiceAccounts.AreaCode',
+                            'Billing_ServiceAccounts.SequenceCode',
+                            'Billing_ServiceAccounts.ForDistribution',
+                            'Billing_ServiceAccounts.Organization',
+                            'Billing_ServiceAccounts.OrganizationParentAccount',
+                            'Billing_ServiceAccounts.Main',
+                            'Billing_ServiceAccounts.GroupCode',
+                            'Billing_ServiceAccounts.Multiplier',
+                            'Billing_ServiceAccounts.Coreloss',
+                            'Billing_ServiceAccounts.ConnectionDate',
+                            'Billing_ServiceAccounts.ServiceConnectionId',
+                            'Billing_ServiceAccounts.SeniorCitizen',
+                            'Billing_ServiceAccounts.Evat5Percent',
+                            'Billing_ServiceAccounts.Ewt2Percent',
+                            'Billing_ServiceAccounts.Contestable',
+                            'Billing_ServiceAccounts.NetMetered',
+                            'Billing_ServiceAccounts.AccountRetention',
+                            'Billing_ServiceAccounts.DurationInMonths',
+                            'Billing_ServiceAccounts.AccountExpiration',
+                            'CRM_Towns.Town',
+                            'CRM_Barangays.Barangay',
+                            'users.name as MeterReader')
+                    ->where('Billing_ServiceAccounts.id', $serviceConnection->AccountNumber)
+                    ->first();
+            } else {
+                $serviceAccount = null;
+            }
+
+            return view('/service_accounts/confirm_change_name', [
+                'serviceConnection' => $serviceConnection,
+                'serviceAccount' => $serviceAccount,
+            ]);
+        } else {
+            return abort(404, 'Service Connection Data Not Found');
+        }
     }
 
     public function accountMigration($id) {
@@ -1201,6 +1254,33 @@ class ServiceAccountsController extends AppBaseController
         } 
         
         return response()->json('ok', 200);
+    }
+
+    public function updateName(Request $request) {
+        $account = ServiceAccounts::find($request['id']);
+
+        if ($account != null) {
+            $acctNameHist = new AccountNameHistory;
+            $acctNameHist->id = IDGenerator::generateIDandRandString();
+            $acctNameHist->AccountNumber = $account->id;
+            $acctNameHist->OldAccountName = $account->ServiceAccountName;
+            $acctNameHist->Notes = $request['Notes'];
+            $acctNameHist->UserId = Auth::id();
+            $acctNameHist->save();
+
+            $account->ServiceAccountName = $request['NewName'];
+            $account->save();
+
+            $serviceConnection = ServiceConnections::find($request['ServiceConnectionId']);
+
+            // update service connection
+            if ($serviceConnection != null) {
+                $serviceConnection->Status = 'Closed';
+                $serviceConnection->save();
+            }
+        } 
+
+        return redirect(route('serviceAccounts.pending-accounts'));
     }
 
     public function relocationForm($accountNumber, $scId) {

@@ -179,6 +179,7 @@ class TransactionIndexController extends AppBaseController
         $applications = DB::table('CRM_ServiceConnections')
             // ->where('Status', 'Approved')
             ->whereIn('Status', ['Approved', 'For Inspection'])
+            ->whereNull("Trash")
             ->whereNull('ORNumber')
             ->whereNull('ORDate')
             ->get();
