@@ -264,9 +264,9 @@
     <!-- Main Footer -->
     <footer class="main-footer">
         <div class="float-right d-none d-sm-block">
-            <b>Version</b> 2.6.5
+            <b>Version</b> 3.7.1
         </div>
-        CRM &copy; @php echo date('Y') @endphp <strong class="badge badge-danger">Developer's Preview</strong>
+        {{ env('APP_COMPANY') }} | CRM &copy; @php echo date('Y') @endphp - <strong class="badge badge-primary">All Rights Reserved</strong>
     </footer>
 </div>
 
