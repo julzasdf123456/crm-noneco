@@ -60,13 +60,35 @@ class ServiceAccountsController extends AppBaseController
      */
     public function index(Request $request)
     {
-        if ($request['params'] == null) {
+        if ($request['params'] == null && $request['oldaccount'] == null) {
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
                         ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.Purok', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
                         ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
                         ->paginate(15);
+        } elseif ($request['params'] == null && $request['oldaccount'] != null) {
+            $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.Purok', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
+                        // ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                        // ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                        // ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
+                        ->where('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldaccount'] . '%')
+                        ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                        ->paginate(15);            
+        } elseif ($request['params'] != null && $request['oldaccount'] == null) {
+            $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.Purok', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
+                        ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
+                        // ->where('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldaccount'] . '%')
+                        ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                        ->paginate(15);            
         } else {
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
@@ -75,9 +97,10 @@ class ServiceAccountsController extends AppBaseController
                         ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldaccount'] . '%')
                         ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
                         ->paginate(15);
-        }     
+        }  
 
         return view('service_accounts.index', ['serviceAccounts' => $serviceAccounts]);
     }
@@ -1064,7 +1087,7 @@ class ServiceAccountsController extends AppBaseController
             foreach($results as $item) {
                 $output .= '
                         <tr onclick=goToAccount("' . $item->id . '")>
-                            <td>' . $item->id . '</td>
+                            <td>' . $item->OldAccountNo . '</td>
                             <td>' . $item->ServiceAccountName . '</td>
                             <td>' . ServiceAccounts::getAddress($item) . '</td>
                             <td>' . $item->AccountStatus . '</td>
@@ -1335,6 +1358,87 @@ class ServiceAccountsController extends AppBaseController
             'from' => $from,
             'to' => $to,
             'meters' => $meters
+        ]);
+    }
+
+    public function searchForCaptured(Request $request) {
+        $results = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['query'] . '%')
+            ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['query'] . '%')
+            ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['query'] . '%')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.Multiplier',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+            ->get();
+
+        $output = "";
+
+        if (count($results) > 0) {
+            foreach($results as $item) {
+                $output .= '
+                        <tr onclick=proceedBilling("' . $item->id . '")>
+                            <td>' . $item->OldAccountNo . '</td>
+                            <td>' . $item->ServiceAccountName . '</td>
+                            <td>' . ServiceAccounts::getAddress($item) . '</td>
+                            <td>' . $item->AccountStatus . '</td>
+                            <td>
+                                <button class="btn btn-link btn-sm text-primary" onclick=proceedBilling("' . $item->id . '")><i class="fas fa-forward"></i> Proceed Billing</button>
+                            </td>
+                        </tr>
+                    '; 
+            }
+
+            return response()->json($output, 200);
+        } else {
+            return response()->json([], 200);
+        }        
+    }
+
+    public function printBapaBillsList($bapaName, $period) {
+        $bapaName = urldecode($bapaName);
+        $readingReport = DB::table('Billing_Readings')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Readings.ServicePeriod', $period)
+            // ->where(function ($query) use ($reading, $bapaName) {
+            //     $query->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')")
+            //             ->orWhereRaw("Billing_Readings.AccountNumber IS NULL AND (ReadingTimestamp BETWEEN '" . date('Y-m-d', strtotime($reading->ReadingTimestamp)) . "' AND '" . date('Y-m-d', strtotime($reading->ReadingTimestamp . ' +1 day')) . "')");
+            // })
+            ->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')")
+            ->select('Billing_Readings.*',
+                'Billing_ServiceAccounts.id AS AccountId',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.SequenceCode',
+                'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.Multiplier',
+                DB::raw("(SELECT TOP 1 ReadingTimestamp FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReadingTimestamp"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReading"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS CurrentKwh"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "') AS PrevKwh"),
+                DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                DB::raw("(SELECT TOP 1 ORNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS ORNumber"),
+                )
+            ->orderBy('AccountStatus')
+            ->orderBy('CurrentKwh')
+            ->orderBy('FieldStatus')
+            ->get();
+
+        return view('/service_accounts/print_bapa_bills_list', [
+            'readingReport' => $readingReport,
+            'bapaName' => $bapaName,
+            'period' => $period
         ]);
     }
 }

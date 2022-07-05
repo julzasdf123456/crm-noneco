@@ -459,6 +459,120 @@ class ReadingsController extends AppBaseController
         }
     }
 
+    public function createManualBillingAjax(Request $request) {
+        $account = ServiceAccounts::find($request['AccountNumber']);
+
+        if (floatval($request['KwhUsed']) > -1) {
+            if (Bills::isHighVoltage(Bills::getAccountType($account))) {
+                // CREATE READING
+                $readings = Readings::where('AccountNumber', $account->id)
+                    ->where('ServicePeriod', $request['ServicePeriod'])
+                    ->first();
+
+                if ($readings != null) {
+                    $readings->AccountNumber = $account->id;
+                    $readings->KwhUsed = $request['PresentKwh'];
+                    $readings->DemandKwhUsed = $request['Demand'];
+                    // $readings->MeterReader = Auth::id();
+                    $readings->save();
+                } else {
+                    $readings = new Readings;
+                    $readings->id = IDGenerator::generateIDandRandString();
+                    $readings->AccountNumber = $account->id;
+                    $readings->ServicePeriod = $request['ServicePeriod'];
+                    $readings->ReadingTimestamp = date('Y-m-d H:i:s');
+                    $readings->KwhUsed = $request['PresentKwh'];
+                    $readings->DemandKwhUsed = $request['Demand'];
+                    $readings->MeterReader = Auth::id();
+                    $readings->save();
+                }
+                
+                $bills = Bills::where('AccountNumber', $account->id)
+                    ->where('ServicePeriod', $request['ServicePeriod'])
+                    ->first();
+                
+                if ($bills != null) {
+                    $bills = Bills::computeHighVoltageBill($account, 
+                        $bills->id, 
+                        $request['KwhUsed'], 
+                        $request['PreviousKwh'], 
+                        $request['PresentKwh'], 
+                        $request['ServicePeriod'], 
+                        date('Y-m-d', strtotime($readings->ReadingTimestamp)), 
+                        0, 
+                        0, 
+                        '',
+                        $request['Demand']);
+                } else {
+                    $bills = Bills::computeHighVoltageBill($account, 
+                        null, 
+                        $request['KwhUsed'], 
+                        $request['PreviousKwh'], 
+                        $request['PresentKwh'], 
+                        $request['ServicePeriod'], 
+                        date('Y-m-d', strtotime($readings->ReadingTimestamp)), 
+                        0, 
+                        0, 
+                        '',
+                        $request['Demand']);
+                }            
+            } else {
+                // CREATE READING
+                $readings = Readings::where('AccountNumber', $account->id)
+                    ->where('ServicePeriod', $request['ServicePeriod'])
+                    ->first();
+
+                if ($readings != null) {
+                    $readings->AccountNumber = $account->id;
+                    $readings->KwhUsed = $request['PresentKwh'];
+                    // $readings->MeterReader = Auth::id();
+                    $readings->save();
+                } else {
+                    $readings = new Readings;
+                    $readings->id = IDGenerator::generateIDandRandString();
+                    $readings->AccountNumber = $account->id;
+                    $readings->ServicePeriod = $request['ServicePeriod'];
+                    $readings->ReadingTimestamp = date('Y-m-d H:i:s');
+                    $readings->KwhUsed = $request['PresentKwh'];
+                    $readings->MeterReader = Auth::id();
+                    $readings->save();
+                }
+
+                $bills = Bills::where('AccountNumber', $account->id)
+                    ->where('ServicePeriod', $request['ServicePeriod'])
+                    ->first();
+                
+                if ($bills != null) {
+                    $bills = Bills::computeRegularBill($account, 
+                        $bills->id, 
+                        $request['KwhUsed'], 
+                        $request['PreviousKwh'], 
+                        $request['PresentKwh'], 
+                        $request['ServicePeriod'], 
+                        date('Y-m-d', strtotime($readings->ReadingTimestamp)), 
+                        0, 
+                        0, 
+                        '');
+                } else {
+                    $bills = Bills::computeRegularBill($account, 
+                        null, 
+                        $request['KwhUsed'], 
+                        $request['PreviousKwh'], 
+                        $request['PresentKwh'], 
+                        $request['ServicePeriod'], 
+                        date('Y-m-d', strtotime($readings->ReadingTimestamp)), 
+                        0, 
+                        0, 
+                        '');
+                }            
+            }
+
+            return response()->json('ok', 200);
+        } else {
+            return response()->json('amount negative', 200);
+        }
+    }
+
     public function capturedReadings(Request $request) {
         // $area = $request['Area'];
         // $groupCode = $request['GroupCode'];
@@ -542,6 +656,7 @@ class ReadingsController extends AppBaseController
                 'Billing_ServiceAccounts.ServiceAccountName',
                 'Billing_ServiceAccounts.SequenceCode',
                 'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.Multiplier',
                 DB::raw("(SELECT TOP 1 ReadingTimestamp FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReadingTimestamp"),
                 DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReading"),
                 DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS CurrentKwh"),
@@ -560,6 +675,7 @@ class ReadingsController extends AppBaseController
             'summary' => $summary,
             'reading' => $reading,
             'readingReport' => $readingReport,
+            'town' => '-',
             'bapaName' => $bapaName,
         ]);
     }
@@ -607,6 +723,7 @@ class ReadingsController extends AppBaseController
                 'Billing_ServiceAccounts.ServiceAccountName',
                 'Billing_ServiceAccounts.SequenceCode',
                 'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.Multiplier',
                 DB::raw("(SELECT TOP 1 ReadingTimestamp FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReadingTimestamp"),
                 DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReading"),
                 DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS CurrentKwh"),
@@ -625,7 +742,296 @@ class ReadingsController extends AppBaseController
             'summary' => $summary,
             'reading' => $reading,
             'readingReport' => $readingReport,
+            'town' => $town,
             'bapaName' => null,
+        ]);
+    }
+
+    public function getPreviousReadings(Request $request) {
+        $readings = DB::table('Billing_Readings')
+            ->leftJoin('users', 'Billing_Readings.MeterReader', '=', 'users.id')
+            ->where('AccountNumber', $request['AccountNumber'])
+            ->select('Billing_Readings.*', 'users.name')
+            ->orderByDesc('ServicePeriod')
+            ->get();
+
+        return response()->json($readings, 200);
+    }
+
+    public function checkIfAccountHasBill(Request $request) {
+        $bills = Bills::where('ServicePeriod', $request['ServicePeriod'])
+            ->where('AccountNumber', $request['AccountNumber'])
+            ->first();
+        
+        if ($bills != null) {
+            return response()->json('has bill', 200);
+        } else {
+            return response()->json('ok', 200);
+        }
+    }
+
+    public function capturedReadingsConsole($id, $readId, $day, $bapaName) {
+        $serviceAccounts = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.ForDistribution',
+                    'Billing_ServiceAccounts.Organization',
+                    'Billing_ServiceAccounts.OrganizationParentAccount',
+                    'Billing_ServiceAccounts.Main',
+                    'Billing_ServiceAccounts.GroupCode',
+                    'Billing_ServiceAccounts.Multiplier',
+                    'Billing_ServiceAccounts.Town as TownId',
+                    'Billing_ServiceAccounts.Coreloss',
+                    'Billing_ServiceAccounts.ConnectionDate',
+                    'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.SeniorCitizen',
+                    'Billing_ServiceAccounts.Evat5Percent',
+                    'Billing_ServiceAccounts.Ewt2Percent',
+                    'Billing_ServiceAccounts.Contestable',
+                    'Billing_ServiceAccounts.NetMetered',
+                    'Billing_ServiceAccounts.AccountRetention',
+                    'Billing_ServiceAccounts.DurationInMonths',
+                    'Billing_ServiceAccounts.AccountExpiration',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'users.name as MeterReader')
+            ->where('Billing_ServiceAccounts.id', $id)
+            ->first();
+
+        $meters = BillingMeters::where('ServiceAccountId', $id)
+            ->orderByDesc('created_at')
+            ->first();
+
+        $bills = DB::table('Billing_Bills')
+            ->where('Billing_Bills.AccountNumber', $id)
+            ->select('Billing_Bills.*',
+                DB::raw("(SELECT TOP 1 ORNumber FROM Cashier_PaidBills WHERE ObjectSourceId=Billing_Bills.id AND Status IS NULL) AS ORNumber"),
+                DB::raw("(SELECT TOP 1 ORDate FROM Cashier_PaidBills WHERE ObjectSourceId=Billing_Bills.id AND Status IS NULL) AS ORDate"),
+                DB::raw("(SELECT TOP 1 id FROM Cashier_PaidBills WHERE ObjectSourceId=Billing_Bills.id AND Status IS NULL) AS PaidBillId"))
+            ->orderByDesc('Billing_Bills.ServicePeriod')
+            ->get();
+
+        $reading = Readings::find($readId);
+
+        if ($serviceAccounts != null) {
+            $rate = Rates::where('ConsumerType', Bills::getAccountType($serviceAccounts))
+                ->where('AreaCode', $serviceAccounts->TownId)
+                ->orderByDesc('ServicePeriod')
+                ->first();
+
+            $prevReading = Readings::where('AccountNumber', $id)
+                ->where('ServicePeriod', date('Y-m-01', strtotime($reading->ServicePeriod . ' -1 month')))
+                ->orderByDesc('ServicePeriod')
+                ->first();
+
+            $latestBill = Bills::where('AccountNumber', $id)
+                ->orderByDesc('ServicePeriod')
+                ->first();
+
+            return view('/readings/captured_readings_console', [
+                'account' => $serviceAccounts,
+                'meter' => $meters,
+                'bills' => $bills,
+                'rate' => $rate,
+                'prevReading' => $prevReading,
+                'reading' => $reading,
+                'latestBill' => $latestBill,
+                'day' => $day,
+                'bapaName' => $bapaName
+            ]);
+        } else {
+            return abort(404, 'Account not found!');
+        }
+    }
+
+    public function createBillForCapturedReading(Request $request) {
+        $account = ServiceAccounts::find($request['AccountNumber']);
+
+        $readings = Readings::find($request['ReadingId']);
+
+        if (floatval($request['KwhUsed']) > -1) {
+            if (Bills::isHighVoltage(Bills::getAccountType($account))) {
+
+                if ($readings != null) {
+                    $readings->AccountNumber = $account->id;
+                    $readings->ReadingTimestamp = date('Y-m-d H:i:s');
+                    $readings->KwhUsed = $request['PresentKwh'];
+                    $readings->DemandKwhUsed = $request['Demand'];
+                    $readings->save();
+                } else {
+                    $readings = new Readings;
+                    $readings->id = IDGenerator::generateIDandRandString();
+                    $readings->AccountNumber = $account->id;
+                    $readings->ServicePeriod = $request['ServicePeriod'];
+                    $readings->ReadingTimestamp = date('Y-m-d H:i:s');
+                    $readings->KwhUsed = $request['PresentKwh'];
+                    $readings->DemandKwhUsed = $request['Demand'];
+                    $readings->MeterReader = Auth::id();
+                    $readings->save();
+                }
+                
+                $bills = Bills::where('AccountNumber', $account->id)
+                    ->where('ServicePeriod', $request['ServicePeriod'])
+                    ->first();
+                
+                if ($bills != null) {
+                    $bills = Bills::computeHighVoltageBill($account, 
+                        $bills->id, 
+                        $request['KwhUsed'], 
+                        $request['PreviousKwh'], 
+                        $request['PresentKwh'], 
+                        $request['ServicePeriod'], 
+                        $request['ReadingDate'], 
+                        0, 
+                        0, 
+                        $request['Is2307'],
+                        $request['Demand']);
+                } else {
+                    $bills = Bills::computeHighVoltageBill($account, 
+                        null, 
+                        $request['KwhUsed'], 
+                        $request['PreviousKwh'], 
+                        $request['PresentKwh'], 
+                        $request['ServicePeriod'], 
+                        $request['ReadingDate'], 
+                        0, 
+                        0, 
+                        $request['Is2307'],
+                        $request['Demand']);
+                }   
+                $bills->Notes = 'CAPTURED';
+                $bills->save();             
+            } else {
+                if ($readings != null) {
+                    $readings->AccountNumber = $account->id;
+                    $readings->ReadingTimestamp = date('Y-m-d H:i:s');
+                    $readings->KwhUsed = $request['PresentKwh'];
+                    $readings->save();
+                } else {
+                    $readings = new Readings;
+                    $readings->id = IDGenerator::generateIDandRandString();
+                    $readings->AccountNumber = $account->id;
+                    $readings->ServicePeriod = $request['ServicePeriod'];
+                    $readings->ReadingTimestamp = date('Y-m-d H:i:s');
+                    $readings->KwhUsed = $request['PresentKwh'];
+                    $readings->MeterReader = Auth::id();
+                    $readings->save();
+                }
+
+                $bills = Bills::where('AccountNumber', $account->id)
+                    ->where('ServicePeriod', $request['ServicePeriod'])
+                    ->first();
+                
+                if ($bills != null) {
+                    $bills = Bills::computeRegularBill($account, 
+                        $bills->id, 
+                        $request['KwhUsed'], 
+                        $request['PreviousKwh'], 
+                        $request['PresentKwh'], 
+                        $request['ServicePeriod'], 
+                        $request['ReadingDate'], 
+                        0, 
+                        0, 
+                        $request['Is2307']);
+                } else {
+                    $bills = Bills::computeRegularBill($account, 
+                        null, 
+                        $request['KwhUsed'], 
+                        $request['PreviousKwh'], 
+                        $request['PresentKwh'], 
+                        $request['ServicePeriod'], 
+                        $request['ReadingDate'], 
+                        0, 
+                        0, 
+                        $request['Is2307']);                    
+                }  
+                $bills->Notes = 'CAPTURED';
+                $bills->save();          
+            }
+
+            Flash::success('Billing and reading saved!.');
+
+            if ($request['BapaName'] == 'mreader') {
+                return redirect(route('readings.view-full-report', [$request['ServicePeriod'], $readings->MeterReader, $request['Day'], $account->Town]));
+            } else {
+                return redirect(route('readings.view-full-report-bapa', [$request['ServicePeriod'], $request['BapaName']]));
+            }            
+        } else {
+            return abort(403, 'Invalid Reading. Your inputted reading is less than the previous one.');
+        }
+    }
+
+    public function printOldFormatAdjusted($period, $day, $town, $meterReader) {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->where('Billing_ServiceAccounts.Town', $town)
+            ->where('Billing_ServiceAccounts.GroupCode', $day)
+            ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
+            ->where('Billing_Bills.UserId', Auth::id())
+            ->select('Billing_Bills.*')
+            ->orderBy('Billing_Bills.BillNumber')
+            ->get();
+
+        return view('/bills/print_bulk_old_format', [
+            'bills' => $bills
+        ]);
+    }
+
+    public function printNewFormatAdjusted($period, $day, $town, $meterReader) {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->where('Billing_ServiceAccounts.Town', $town)
+            ->where('Billing_ServiceAccounts.GroupCode', $day)
+            ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
+            ->where('Billing_Bills.UserId', Auth::id())
+            ->select('Billing_Bills.*')
+            ->orderBy('Billing_Bills.BillNumber')
+            ->get();
+
+        return view('/bills/print_bulk_bill_new_format', [
+            'bills' => $bills
+        ]);
+    }
+
+    public function printOldFormatAdjustedBapa($period, $bapaName) {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+            ->where('Billing_Bills.UserId', Auth::id())
+            ->select('Billing_Bills.*')
+            ->orderBy('Billing_Bills.BillNumber')
+            ->get();
+
+        return view('/bills/print_bulk_old_format', [
+            'bills' => $bills
+        ]);
+    }
+
+    public function printNewFormatAdjustedBapa($period, $bapaName) {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+            ->where('Billing_Bills.UserId', Auth::id())
+            ->select('Billing_Bills.*')
+            ->orderBy('Billing_Bills.BillNumber')
+            ->get();
+
+        return view('/bills/print_bulk_bill_new_format', [
+            'bills' => $bills
         ]);
     }
 }

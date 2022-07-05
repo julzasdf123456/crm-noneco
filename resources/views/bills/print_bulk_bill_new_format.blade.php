@@ -426,22 +426,42 @@ html {
 
                     <div class="col-lg-12">
                         <table class="table table-borderless table-sm">
-                            <tr>
-                                <td>Additional Charges</td>
-                                <td class="text-right">+ {{ number_format($item->AdditionalCharges, 2) }}</td>
-                            </tr>
-                            <tr>
-                                <td>Other Deductions</td>
-                                <td class="text-right">- {{ number_format($item->Deductions, 2) }}</td>
+                            <<tr>
+                                <td>Additional Charges - Termed Payments</td>
+                                <th class="text-right">+ {{ number_format($item->AdditionalCharges, 2) }}</th>
+                                <td style="padding-left: 60px;">EWT 2%</td>
+                                <th class="text-right">- {{ $item->Evat2Percent }}</th>
                             </tr>
                             <tr>
                                 <td>Deposit/Pre-Payment Deductions</td>
                                 <td class="text-right">- {{ number_format($item->DeductedDeposit, 2) }}</td>
+                                <td style="padding-left: 60px;">EVAT 5%</td>
+                                <th class="text-right">- {{ $item->Evat5Percent }}</th>
+                            </tr>
+                            <tr>                                                
+                                <td>Other Deductions</td>
+                                <th class="text-right">- {{ number_format($item->Deductions, 2) }}</th>
                             </tr>
                             <tr>
-                                <td>Net Amount</td>
+                                <td>Amount Due</td>
+                                <td></td>
+                                <td></td>
                                 <th class="text-right"><h4><strong>₱ {{ number_format($item->NetAmount, 2) }}</strong></h4></th>
                             </tr>
+                            @if (Bills::getAccountTypeByType($item->ConsumerType) != 'RESIDENTIAL')
+                            <tr>
+                                <td>Surcharge</td>
+                                <td></td>
+                                <td></td>
+                                <th class="text-right">+ {{ number_format(Bills::getFinalPenalty($item), 2) }}</th>                                    
+                            </tr>
+                            <tr>
+                                <td>Amount Due after Due Date</td>
+                                <td></td>
+                                <td></td>
+                                <th class="text-right"><h4><strong>₱ {{ number_format(floatval(Bills::getFinalPenalty($item)) + floatval($item->NetAmount), 2) }}</strong></h4></th>
+                            </tr>
+                            @endif
                         </table>
                     </div>
                 </div>            

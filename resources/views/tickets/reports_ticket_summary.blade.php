@@ -91,7 +91,7 @@
 
         {{-- TABLE --}}
         <div class="col-lg-12">
-            <table class="table table-hover table-sm" id="results-table">
+            <table class="table table-hover table-sm table-bordered" id="results-table">
                 <thead>
                     <th>Ticket No</th>
                     <th>Account No.</th>
@@ -117,7 +117,7 @@
             $('#filterBtn').on('click', function() {
                 $('#results-table tbody tr').remove()
                 $.ajax({
-                    url : '/tickets/get-ticket-summary-report',
+                    url : '{{ route("tickets.get-ticket-summary-report") }}',
                     type : 'GET',
                     data : {
                         TicketParam : $('#Ticket').val(),

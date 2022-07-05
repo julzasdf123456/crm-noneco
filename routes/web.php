@@ -212,6 +212,8 @@ Route::get('/service_accounts/change-name', [App\Http\Controllers\ServiceAccount
 Route::get('/service_accounts/relocation-form/{accountNo}/{scId}', [App\Http\Controllers\ServiceAccountsController::class,  'relocationForm'])->name('serviceAccounts.relocation-form');
 Route::get('/service_accounts/print-ledger/{id}/{from}/{to}', [App\Http\Controllers\ServiceAccountsController::class,  'printLedger'])->name('serviceAccounts.print-ledger');
 Route::post('/service_accounts/store-relocation', [App\Http\Controllers\ServiceAccountsController::class,  'storeRelocation'])->name('serviceAccounts.store-relocation');
+Route::get('/service_accounts/search-for-captured', [App\Http\Controllers\ServiceAccountsController::class,  'searchForCaptured'])->name('serviceAccounts.search-for-captured');
+Route::get('/service_accounts/print-bapa-bills-list/{bapaName}/{period}', [App\Http\Controllers\ServiceAccountsController::class,  'printBapaBillsList'])->name('serviceAccounts.print-bapa-bills-list');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 
@@ -326,6 +328,8 @@ Route::get('/tickets/disconnection-assessments', [App\Http\Controllers\TicketsCo
 Route::get('/tickets/get-disconnection-results', [App\Http\Controllers\TicketsController::class, 'getDisconnectionResults'])->name('tickets.get-disconnection-results');
 Route::get('/tickets/disconnection-results-route', [App\Http\Controllers\TicketsController::class, 'disconnectionResultsRoute'])->name('tickets.disconnection-results-route');
 Route::get('/tickets/create-and-print-disconnection-tickets/{period}/{route}', [App\Http\Controllers\TicketsController::class, 'createAndPrintDisconnectionTickets'])->name('tickets.create-and-print-disconnection-tickets');
+Route::get('/tickets/ticket-tally', [App\Http\Controllers\TicketsController::class, 'ticketTally'])->name('tickets.ticket-tally');
+Route::get('/tickets/get-ticket-tally', [App\Http\Controllers\TicketsController::class, 'getTicketTally'])->name('tickets.get-ticket-tally');
 Route::resource('tickets', App\Http\Controllers\TicketsController::class);
 
 
@@ -384,6 +388,7 @@ Route::get('/readings/reading-monitor-view/{servicePeriod}', [App\Http\Controlle
 Route::get('/readings/get-readings-from-meter-reader', [App\Http\Controllers\ReadingsController::class, 'getReadingsFromMeterReader'])->name('readings.get-readings-from-meter-reader');
 Route::get('/readings/manual-reading', [App\Http\Controllers\ReadingsController::class, 'manualReading'])->name('readings.manual-reading');
 Route::get('/readings/manual-reading-console/{id}', [App\Http\Controllers\ReadingsController::class, 'manualReadingConsole'])->name('readings.manual-reading-console');
+Route::get('/readings/captured-readings-console/{id}/{readId}/{day}/{bapaName}', [App\Http\Controllers\ReadingsController::class, 'capturedReadingsConsole'])->name('readings.captured-readings-console');
 Route::get('/readings/get-computed-bill', [App\Http\Controllers\ReadingsController::class, 'getComputedBill'])->name('readings.get-computed-bill');
 Route::post('/readings/create-manual-billing', [App\Http\Controllers\ReadingsController::class, 'createManualBilling'])->name('readings.create-manual-billing');
 Route::get('/readings/captured-readings', [App\Http\Controllers\ReadingsController::class, 'capturedReadings'])->name('readings.captured-readings');
@@ -391,6 +396,14 @@ Route::get('/readings/mark-as-done', [App\Http\Controllers\ReadingsController::c
 Route::get('/readings/fetch-account', [App\Http\Controllers\ReadingsController::class, 'fetchAccount'])->name('readings.fetch-account');
 Route::get('/readings/view-full-report/{period}/{meterReader}/{day}/{town}', [App\Http\Controllers\ReadingsController::class, 'viewFullReport'])->name('readings.view-full-report');
 Route::get('/readings/view-full-report-bapa/{period}/{bapaName}', [App\Http\Controllers\ReadingsController::class, 'viewFullReportBapa'])->name('readings.view-full-report-bapa');
+Route::get('/readings/get-previous-readings', [App\Http\Controllers\ReadingsController::class, 'getPreviousReadings'])->name('readings.get-previous-readings');
+Route::get('/readings/create-manual-billing-ajax', [App\Http\Controllers\ReadingsController::class, 'createManualBillingAjax'])->name('readings.create-manual-billing-ajax');
+Route::get('/readings/check-if-account-has-bill', [App\Http\Controllers\ReadingsController::class, 'checkIfAccountHasBill'])->name('readings.check-if-account-has-bill');
+Route::post('/readings/create-bill-for-captured-reading', [App\Http\Controllers\ReadingsController::class, 'createBillForCapturedReading'])->name('readings.create-bill-for-captured-reading');
+Route::get('/readings/print-old-format-adjusted/{period}/{day}/{town}/{meterReader}', [App\Http\Controllers\ReadingsController::class, 'printOldFormatAdjusted'])->name('readings.print-old-format-adjusted');
+Route::get('/readings/print-new-format-adjusted/{period}/{day}/{town}/{meterReader}', [App\Http\Controllers\ReadingsController::class, 'printNewFormatAdjusted'])->name('readings.print-new-format-adjusted');
+Route::get('/readings/print-old-format-adjusted-bapa/{period}/{bapaName}', [App\Http\Controllers\ReadingsController::class, 'printOldFormatAdjustedBapa'])->name('readings.print-old-format-adjusted-bapa');
+Route::get('/readings/print-new-format-adjusted-bapa/{period}/{bapaName}', [App\Http\Controllers\ReadingsController::class, 'printNewFormatAdjustedBapa'])->name('readings.print-new-format-adjusted-bapa');
 Route::resource('readings', App\Http\Controllers\ReadingsController::class);
 
 Route::get('/bills/unbilled-readings', [App\Http\Controllers\BillsController::class, 'unbilledReadings'])->name('bills.unbilled-readings');
@@ -427,7 +440,7 @@ Route::get('/bills/bulk-print-bill', [App\Http\Controllers\BillsController::clas
 Route::get('/bills/get-routes-from-town', [App\Http\Controllers\BillsController::class,  'getRoutesFromTown'])->name('bills.get-routes-from-town');
 Route::get('/bills/print-bulk-bill-new-format/{period}/{town}/{route}/{day}', [App\Http\Controllers\BillsController::class,  'printBulkBillNewFormat'])->name('bills.print-bulk-bill-new-format');
 Route::get('/bills/print-bulk-bill-old-format/{period}/{town}/{route}', [App\Http\Controllers\BillsController::class,  'printBulkBillOldFormat'])->name('bills.print-bulk-bill-old-format');
-Route::get('/bills/print-bulk-bill-old-format-bapa/{period}/{bapaName}/{from}', [App\Http\Controllers\BillsController::class,  'printBulkBillOldFormatBapa'])->name('bills.print-bulk-bill-old-format-bapa');
+Route::get('/bills/print-bulk-bill-old-format-bapa/{period}/{bapaName}/{from}/{route}', [App\Http\Controllers\BillsController::class,  'printBulkBillOldFormatBapa'])->name('bills.print-bulk-bill-old-format-bapa');
 Route::get('/bills/bapa-manual-billing', [App\Http\Controllers\BillsController::class,  'bapaManualBilling'])->name('bills.bapa-manual-billing');
 Route::get('/bills/search-bapa-for-billing', [App\Http\Controllers\BillsController::class,  'searchBapaForBilling'])->name('bills.search-bapa-for-billing');
 Route::get('/bills/bapa-manual-billing-console/{bapaName}', [App\Http\Controllers\BillsController::class,  'bapaManualBillingConsole'])->name('bills.bapa-manual-billing-console');
@@ -520,7 +533,9 @@ Route::resource('disconnectionHistories', App\Http\Controllers\DisconnectionHist
 Route::get('/disco_notice_histories/generate-nod', [App\Http\Controllers\DiscoNoticeHistoryController::class, 'generateNod'])->name('discoNoticeHistories.generate-nod');
 Route::get('/disco_notice_histories/get-disco-list-preview', [App\Http\Controllers\DiscoNoticeHistoryController::class, 'getDiscoListPreview'])->name('discoNoticeHistories.get-disco-list-preview');
 Route::get('/disco_notice_histories/print-reroute', [App\Http\Controllers\DiscoNoticeHistoryController::class, 'printReroute'])->name('discoNoticeHistories.print-reroute');
-Route::get('/disco_notice_histories/print-disconnection-list/{period}/{area}', [App\Http\Controllers\DiscoNoticeHistoryController::class, 'printDisconnectionList'])->name('discoNoticeHistories.print-disconnection-list');
+Route::get('/disco_notice_histories/get-disco-list-preview-route', [App\Http\Controllers\DiscoNoticeHistoryController::class, 'getDiscoListPreviewRoute'])->name('discoNoticeHistories.get-disco-list-preview-route');
+Route::get('/disco_notice_histories/print-disconnection-list/{period}/{area}/{meterReader}/{day}', [App\Http\Controllers\DiscoNoticeHistoryController::class, 'printDisconnectionList'])->name('discoNoticeHistories.print-disconnection-list');
+Route::get('/disco_notice_histories/print-disconnection-list-route/{period}/{area}/{route}', [App\Http\Controllers\DiscoNoticeHistoryController::class, 'printDisconnectionListRoute'])->name('discoNoticeHistories.print-disconnection-list-route');
 Route::resource('discoNoticeHistories', App\Http\Controllers\DiscoNoticeHistoryController::class);
 
 

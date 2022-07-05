@@ -124,6 +124,7 @@ class ORCancellationsController extends AppBaseController
             ->leftJoin('Cashier_ORCancellations', 'Cashier_PaidBills.id', '=', 'Cashier_ORCancellations.ObjectId')
             ->leftJoin('users', 'Cashier_PaidBills.FiledBy', '=', 'users.id')
             ->where('Cashier_PaidBills.Status', 'PENDING CANCEL')
+            ->where('Cashier_PaidBills.ORNumber', $id)
             ->select('Cashier_PaidBills.ORNumber',
                 'Cashier_PaidBills.ORDate',
                 'Billing_ServiceAccounts.ServiceAccountName',

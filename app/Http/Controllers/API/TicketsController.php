@@ -22,6 +22,7 @@ class TicketsController extends Controller {
 
     public function getDownloadableTickets(Request $request) {
         $tickets = Tickets::where('CrewAssigned', $request['CrewAssigned'])
+            ->whereNotNull('CrewAssigned')
             ->where('Status', 'Received')
             ->where(function ($query) {
                 $query->where('Trash', 'No')

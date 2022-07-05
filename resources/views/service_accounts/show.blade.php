@@ -63,7 +63,7 @@
                         </ul>
                     </div>
 
-                    <div class="card-body">
+                    <div class="card-body px-0">
                         <div class="tab-content">
                             <div class="tab-pane active" id="billing-hist">
                                 @include('service_accounts.tab_billing_history')

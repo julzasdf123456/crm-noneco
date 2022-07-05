@@ -169,7 +169,7 @@
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="fas fa-phone"></i></span>
                                             </div>
-                                            {!! Form::text('ContactNumber', null, ['class' => 'form-control','maxlength' => 100,'maxlength' => 100, 'placeholder' => 'Contact Number']) !!}
+                                            {!! Form::text('ContactNumber', "0", ['class' => 'form-control','maxlength' => 100,'maxlength' => 100, 'placeholder' => 'Contact Number']) !!}
                                         </div>
                                     </div>
                                 </div> 

@@ -392,6 +392,13 @@ use Illuminate\Support\Facades\Auth;
                     <i class="fas fa-file nav-icon text-danger"></i><p>Ticket Summary</p>
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a href="{{ route('tickets.ticket-tally') }}"
+                class="nav-link {{ Request::is('tickets.ticket-tally*') ? 'active' : '' }}">
+                    <i class="fas fa-list nav-icon text-danger"></i><p>Ticket Tally</p>
+                </a>
+            </li>
             
             <li class="nav-header">                
                 Settings and Others 
@@ -570,12 +577,12 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-calendar-alt nav-icon text-primary"></i><p>Reading Schedules</p>
                 </a>
             </li>
-            <li class="nav-item">
+            {{-- <li class="nav-item">
                 <a href="{{ route('readings.captured-readings') }}"
                    class="nav-link {{ Request::is('readings.captured-readings*') ? 'active' : '' }}">                   
                    <i class="fas fa-circle nav-icon text-primary"></i><p>Captured Readings</p>
                 </a>
-            </li>
+            </li> --}}
             <li class="nav-item">
                 <a href="{{ route('readings.manual-reading') }}"
                    class="nav-link {{ Request::is('readings.manual-reading*') ? 'active' : '' }}">                   
@@ -652,7 +659,7 @@ use Illuminate\Support\Facades\Auth;
 @endcanany
 
 {{-- DISCONNECTION --}}
-@canany(['Super Admin'])
+@canany(['Super Admin', 'billing re-bill'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-users-slash nav-icon text-primary"></i>

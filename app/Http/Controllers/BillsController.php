@@ -692,6 +692,7 @@ class BillsController extends AppBaseController
                             'Billing_Bills.ServicePeriod')
                         ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_Bills.BillNumber', 'LIKE', '%' . $request['params'] . '%')
                         ->orderByDesc('Billing_Bills.created_at')
                         ->paginate(15);
@@ -1224,7 +1225,7 @@ class BillsController extends AppBaseController
             ->first();
 
         $rate = Rates::where('ServicePeriod', $bills->ServicePeriod)
-            ->where('ConsumerType', $bills->ConsumerType)
+            ->where('ConsumerType', Bills::getAccountType($account))
             ->first();
 
         return view('/bills/print_single_bill_new_format', [
@@ -1314,15 +1315,91 @@ class BillsController extends AppBaseController
         ]);
     }
 
-    public function printBulkBillOldFormatBapa($servicePeriod, $bapaName) {
+    public function printBulkBillOldFormatBapa($servicePeriod, $bapaName, $billNumberStart, $route) {
         $bapaName = urldecode($bapaName);
-        $bills = DB::table('Billing_Bills')
-            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
-            ->where('Billing_Bills.ServicePeriod', $servicePeriod)
-            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
-            ->select('Billing_Bills.*')
-            ->orderBy('Billing_Bills.BillNumber')
-            ->get();
+        if ($billNumberStart == 'All' && $route == 'All') {
+            $bills = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                ->select('Billing_Bills.*')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
+                ->orderBy('Billing_Bills.BillNumber')
+                ->get();
+        } elseif ($billNumberStart == 'All' && $route != 'All') {
+            $bills = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                ->where('Billing_ServiceAccounts.AreaCode', $route)
+                ->select('Billing_Bills.*')
+                ->orderBy('Billing_Bills.BillNumber')
+                ->get();
+        } elseif ($billNumberStart != 'All' && $route == 'All') {
+            $getLast = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                ->select('Billing_Bills.*')
+                ->orderByDesc('Billing_ServiceAccounts.AreaCode')
+                ->orderByDesc('Billing_Bills.BillNumber')
+                ->first();
+
+            if ($getLast != null) {
+                $bills = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                    ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                    ->whereBetween('Billing_Bills.BillNumber', [$billNumberStart, $getLast->BillNumber])
+                    ->select('Billing_Bills.*')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('Billing_Bills.BillNumber')
+                    ->get();
+            } else {
+                $bills = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                    ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                    ->select('Billing_Bills.*')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('Billing_Bills.BillNumber')
+                    ->get();
+            } 
+        } else {
+            $getLast = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                ->where('Billing_ServiceAccounts.AreaCode', $route)
+                ->select('Billing_Bills.*')
+                ->orderByDesc('Billing_ServiceAccounts.AreaCode')
+                ->orderByDesc('Billing_Bills.BillNumber')
+                ->first();
+
+            if ($getLast != null) {
+                $bills = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                    ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                    ->where('Billing_ServiceAccounts.AreaCode', $route)
+                    ->whereBetween('Billing_Bills.BillNumber', [$billNumberStart, $getLast->BillNumber])
+                    ->select('Billing_Bills.*')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('Billing_Bills.BillNumber')
+                    ->get();
+            } else {
+                $bills = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+                    ->where('Billing_ServiceAccounts.AreaCode', $route)
+                    ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+                    ->select('Billing_Bills.*')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('Billing_Bills.BillNumber')
+                    ->get();
+            }     
+        }
+        
 
         return view('/bills/print_bulk_old_format', [
             'bills' => $bills
@@ -1633,4 +1710,5 @@ class BillsController extends AppBaseController
         
         return redirect(route('bills.unbilled-readings-console', $request['ServicePeriod']));
     }
+
 }

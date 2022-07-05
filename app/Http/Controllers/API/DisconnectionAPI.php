@@ -16,6 +16,100 @@ use App\Http\Requests\CreateReadingsRequest;
 class DisconnectionAPI extends Controller {
     public $successStatus = 200;
 
+    public function getDisconnectionListByMeterReader(Request $request) {        
+        $disconnectionList = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('Billing_Bills', 'Billing_ServiceAccounts.id', '=', 'Billing_Bills.AccountNumber')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->where('Billing_ServiceAccounts.MeterReader', $request['MeterReader'])
+            ->where('Billing_ServiceAccounts.GroupCode', $request['GroupCode'])
+            ->whereRaw('DATEDIFF(dd, Billing_Bills.DueDate, GETDATE()) > ?', [2])
+            ->where('Billing_ServiceAccounts.AccountStatus', 'ACTIVE')
+            ->where('Billing_Bills.ServicePeriod', $request['ServicePeriod'])
+            ->whereRaw("Billing_ServiceAccounts.id NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
+            ->select("Billing_Bills.AccountNumber",
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'CRM_Towns.Town',
+                'CRM_Barangays.Barangay',
+                'Billing_ServiceAccounts.Purok',
+                'Billing_ServiceAccounts.AccountType as ConsumerType',
+                'Billing_ServiceAccounts.AreaCode',
+                'Billing_ServiceAccounts.Latitude',
+                'Billing_ServiceAccounts.Longitude',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_Bills.MeterNumber',
+                'Billing_ServiceAccounts.SequenceCode',
+                DB::raw("'No' AS IsUploaded"))
+            ->get();
+
+        $arr = [];
+        foreach($disconnectionList as $item) {
+            array_push($arr, [
+                'AccountNumber' => $item->AccountNumber,
+                'ServiceAccountName' => $item->ServiceAccountName,
+                'Address' => ServiceAccounts::getAddress($item),
+                'ConsumerType' => $item->ConsumerType,
+                'AreaCode' => $item->AreaCode,
+                'Latitude' => $item->Latitude,
+                'Longitude' => $item->Longitude,
+                'SequenceCode' => $item->SequenceCode,
+                'OldAccountNo' => $item->OldAccountNo,
+                'MeterNumber' => $item->MeterNumber,
+                'ServicePeriod' => $request['ServicePeriod'],
+                'IsUploaded' => $item->IsUploaded,
+            ]);
+        }
+
+        return response()->json($arr, $this->successStatus);
+    }
+
+    public function getDisconnectionListByRoute(Request $request) {        
+        $disconnectionList = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('Billing_Bills', 'Billing_ServiceAccounts.id', '=', 'Billing_Bills.AccountNumber')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->where('Billing_ServiceAccounts.AreaCode', $request['Route'])
+            ->where('Billing_ServiceAccounts.Town', $request['Town'])
+            ->whereRaw('DATEDIFF(dd, Billing_Bills.DueDate, GETDATE()) > ?', [2])
+            ->where('Billing_ServiceAccounts.AccountStatus', 'ACTIVE')
+            ->where('Billing_Bills.ServicePeriod', $request['ServicePeriod'])
+            ->whereRaw("Billing_ServiceAccounts.id NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
+            ->select("Billing_Bills.AccountNumber",
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'CRM_Towns.Town',
+                'CRM_Barangays.Barangay',
+                'Billing_ServiceAccounts.Purok',
+                'Billing_ServiceAccounts.AccountType as ConsumerType',
+                'Billing_ServiceAccounts.AreaCode',
+                'Billing_ServiceAccounts.Latitude',
+                'Billing_ServiceAccounts.Longitude',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_Bills.MeterNumber',
+                'Billing_ServiceAccounts.SequenceCode',
+                DB::raw("'No' AS IsUploaded"))
+            ->get();
+
+        $arr = [];
+        foreach($disconnectionList as $item) {
+            array_push($arr, [
+                'AccountNumber' => $item->AccountNumber,
+                'ServiceAccountName' => $item->ServiceAccountName,
+                'Address' => ServiceAccounts::getAddress($item),
+                'ConsumerType' => $item->ConsumerType,
+                'AreaCode' => $item->AreaCode,
+                'Latitude' => $item->Latitude,
+                'Longitude' => $item->Longitude,
+                'OldAccountNo' => $item->OldAccountNo,
+                'MeterNumber' => $item->MeterNumber,
+                'SequenceCode' => $item->SequenceCode,
+                'ServicePeriod' => $request['ServicePeriod'],
+                'IsUploaded' => $item->IsUploaded,
+            ]);
+        }
+
+        return response()->json($arr, $this->successStatus);
+    }
+
     public function getDisconnectionList(Request $request) {
         $disconnectionList = DB::table('CRM_Tickets')
             ->leftJoin('Billing_ServiceAccounts', 'CRM_Tickets.AccountNumber', '=', 'Billing_ServiceAccounts.id')
@@ -81,6 +175,7 @@ class DisconnectionAPI extends Controller {
         $discoHist->UserId = $request['UserId'];
         $discoHist->DateDisconnected = $request['DateDisconnected'];
         $discoHist->TimeDisconnected = $request['TimeDisconnected'];
+        $discoHist->BillId = $request['LastReading'];
         $discoHist->save();
 
         // UPDATE TICKETS

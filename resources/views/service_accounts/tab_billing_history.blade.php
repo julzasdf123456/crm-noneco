@@ -6,7 +6,7 @@
     @if ($bills == null)
         <p class="center-text"><i>No billing history recorded</i></p>
     @else
-        <table class="table table-sm table-hover"">
+        <table class="table table-sm table-hover table-bordered">
             <thead>
                 <th>Bill Number</th>
                 <th>Billing Month</th>
@@ -57,13 +57,14 @@
                 </button>
             </div>
             <div class="modal-body">
-                <table class="table table-hover table-sm">
+                <table class="table table-hover table-sm table-bordered">
                     <thead>
                         <th>Billing Month</th>
                         <th>Reading</th>
                         <th>Reading Timestamp</th>
                         <th>Meter Reader</th>
                         <th>Remarks</th>
+                        <th></th>
                     </thead>
                     <tbody>
                         @foreach ($readings as $item)
@@ -73,6 +74,9 @@
                                 <td>{{ date('F d, Y h:i:s A', strtotime($item->ReadingTimestamp)) }}</td>
                                 <td>{{ $item->name }}</td>
                                 <td>{{ $item->Notes }}</td>
+                                <td class="text-right">
+                                <a href="{{ route('bills.zero-readings-view', [$item->id]) }}"><i class="fas fa-pen"></i></a>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

@@ -82,6 +82,7 @@ class TicketsController extends AppBaseController
             // SAVE METER INFO
             $accountMeterInfo = DB::table('Billing_ServiceAccounts')
                 ->leftJoin('Billing_Meters', 'Billing_ServiceAccounts.id', '=', 'Billing_Meters.ServiceAccountId')
+                ->where('Billing_ServiceAccounts.id', $tickets->AccountNumber)
                 ->select('Billing_Meters.SerialNumber',
                     'Billing_Meters.Brand',
                     'Billing_ServiceAccounts.Latitude',
@@ -427,21 +428,42 @@ class TicketsController extends AppBaseController
 
     public function getCreateAjax(Request $request) {
         if ($request->ajax()) {
-            if ($request['params'] == null) {
+            if ($request['params'] == null && $request['oldacctno'] == null) {
                 $serviceAccounts = DB::table('Billing_ServiceAccounts')
                             ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                            ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                            ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
                             ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
                             ->take(25)
                             ->get();
+            } elseif ($request['params'] == null && $request['oldacctno'] != null) {
+                $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                            ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                            // ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                            // ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                            ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldacctno'] . '%')
+                            ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                            ->get();
+            } else if ($request['params'] != null && $request['oldacctno'] == null) {
+                $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                    ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                    ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                    ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                    ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                    // ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldacctno'] . '%')
+                    ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                    ->get();
             } else {
                 $serviceAccounts = DB::table('Billing_ServiceAccounts')
                             ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                            ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                            ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
                             ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
                             ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                            ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
                             ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
                             ->get();
             }
@@ -450,7 +472,7 @@ class TicketsController extends AppBaseController
 
             foreach($serviceAccounts as $item) {
                 $output .= '<tr>' .
-                        '<td>' . $item->id . '</td>' .
+                        '<td>' . $item->OldAccountNo . '</td>' .
                         '<td>' . $item->ServiceAccountName . '</td>' .
                         '<td>' . $item->Barangay . ', ' . $item->Town . '</td>' .
                         '<td>' . 
@@ -1081,14 +1103,16 @@ class TicketsController extends AppBaseController
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
+                        ->select('Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.OldAccountNo', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
                         ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
                         ->paginate(15);
         } else {
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
+                        ->select('Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.OldAccountNo', 'Billing_ServiceAccounts.id', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
                         ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
                         ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
@@ -1109,7 +1133,8 @@ class TicketsController extends AppBaseController
                     'CRM_Barangays.Barangay', 
                     'Billing_ServiceAccounts.Town as TownId',
                     'Billing_ServiceAccounts.Barangay as BarangayId',
-                    'Billing_ServiceAccounts.Purok')
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.OldAccountNo')
                 ->where('Billing_ServiceAccounts.id', $accountNumber)
                 ->first();
         } else {
@@ -1765,5 +1790,78 @@ class TicketsController extends AppBaseController
         return view('/tickets/print_ticket_bulk', [
             'tickets' => $tickets
         ]);
+    }
+
+    public function ticketTally() {
+        // TICKETS MATRIX
+        $parentTickets = DB::table('CRM_TicketsRepository')->whereNull('ParentTicket')->orderBy('Name')->get();
+
+        $towns = Towns::orderBy('Town')->get();
+        return view('/tickets/ticket_tally', [
+            'parentTickets' => $parentTickets,
+            'towns' => $towns,
+        ]);
+    }
+
+    public function getTicketTally(Request $request) {
+        $parentTickets = DB::table('CRM_TicketsRepository')->whereNull('ParentTicket')->orderBy('Name')->get();
+
+        $arr = [];
+        $total = 0;
+        $totalExecuted = 0;
+        $totalUnexecuted = 0;
+        foreach($parentTickets as $item) {
+            array_push($arr, [
+                'id' => $item->id,
+                'Name' => $item->Name,
+                'ReceivedTotal' => 'Parent',
+                'NotExecutedTotal' => '',
+                'ExecutedTotal' => ''
+            ]);
+            if ($request['Town'] == 'All') {
+                $ticketCounts = DB::table('CRM_TicketsRepository')
+                    ->where('Type', $request['Type'])
+                    ->where('ParentTicket', $item->id)
+                    ->select('id', 'Name',
+                        DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE Ticket=CRM_TicketsRepository.id AND Trash IS NULL AND (created_at BETWEEN '" . $request['From'] . "' AND '" . $request['To'] . "')) AS ReceivedTotal"),
+                        DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE Ticket=CRM_TicketsRepository.id AND Trash IS NULL AND Status != 'Executed' AND (created_at BETWEEN '" . $request['From'] . "' AND '" . $request['To'] . "')) AS NotExecutedTotal"),
+                        DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE Ticket=CRM_TicketsRepository.id AND Trash IS NULL AND Status = 'Executed' AND (created_at BETWEEN '" . $request['From'] . "' AND '" . $request['To'] . "')) AS ExecutedTotal")      
+                    )
+                    ->get();
+            } else {
+                $ticketCounts = DB::table('CRM_TicketsRepository')
+                    ->where('Type', $request['Type'])
+                    ->where('ParentTicket', $item->id)
+                    ->select('id', 'Name',
+                        DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE Ticket=CRM_TicketsRepository.id AND Trash IS NULL AND Town='" . $request['Town'] . "' AND (created_at BETWEEN '" . $request['From'] . "' AND '" . $request['To'] . "')) AS ReceivedTotal"),
+                        DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE Ticket=CRM_TicketsRepository.id AND Trash IS NULL AND Town='" . $request['Town'] . "' AND Status != 'Executed' AND (created_at BETWEEN '" . $request['From'] . "' AND '" . $request['To'] . "')) AS NotExecutedTotal"),
+                        DB::raw("(SELECT COUNT(id) FROM CRM_Tickets WHERE Ticket=CRM_TicketsRepository.id AND Trash IS NULL AND Town='" . $request['Town'] . "' AND Status = 'Executed' AND (created_at BETWEEN '" . $request['From'] . "' AND '" . $request['To'] . "')) AS ExecutedTotal")      
+                    )
+                    ->get();
+            }            
+            
+            foreach($ticketCounts as $ticketCount) {
+                array_push($arr, [
+                    'id' => $ticketCount->id,
+                    'Name' => $ticketCount->Name,
+                    'ReceivedTotal' => $ticketCount->ReceivedTotal,
+                    'NotExecutedTotal' => $ticketCount->NotExecutedTotal,
+                    'ExecutedTotal' => $ticketCount->ExecutedTotal
+                ]);
+                $total += intval($ticketCount->ReceivedTotal);
+                $totalExecuted += intval($ticketCount->NotExecutedTotal);
+                $totalUnexecuted += intval($ticketCount->ExecutedTotal);
+            }
+        }
+
+        array_push($arr, [
+            'id' => '0',
+            'Name' => 'Total',
+            'ReceivedTotal' => $total,
+            'NotExecutedTotal' => $totalExecuted,
+            'ExecutedTotal' => $totalUnexecuted
+        ]);
+
+        return response()->json($arr, 200);
     }
 }

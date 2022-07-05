@@ -550,7 +550,7 @@ use App\Models\IDGenerator;
     </div> 
 </div>
 
-@canany(['Super Admin'])
+
 <div class="divider"></div>
 <br>
 
@@ -600,6 +600,5 @@ use App\Models\IDGenerator;
         })
     </script>
 @endpush
-@endcanany
 
 <p id="Def_Brgy" style="display: none;">{{ $cond=='new' ? $memberConsumer->BarangayId : $serviceConnections->Barangay }}</p>
