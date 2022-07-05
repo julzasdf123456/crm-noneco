@@ -15,6 +15,7 @@
                         <span class="text-primary"><strong>Meter Reading -> Reading Monitor -> Reading Monitoring Console -> View Report</strong></span></li>
                     <li>Billing analyst can now view and print all <strong>Billed</strong> and <strong>Unbilled Consumers</strong>. A new menu is created under
                         <span class="text-primary"><strong><a href="{{ route('readings.billed-and-unbilled-reports') }}">Reports -> Meter Reading -> Billed & Unbilled</a></strong></span></li>
+                    <li><strong>NOTE </strong> that these new report should be in printed in <strong>LANDSCAPE </strong>form.</li>
                 </ul>
             </div>
         </div>
