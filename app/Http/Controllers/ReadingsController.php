@@ -1064,6 +1064,7 @@ class ReadingsController extends AppBaseController
                 DB::raw("(SELECT TOP 1 ReadingTimestamp FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReadingTimestamp"),
                 DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReading"),
                 DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS CurrentKwh"),
                 )
             ->orderBy('AccountStatus')
             ->orderBy('FieldStatus')
@@ -1074,6 +1075,51 @@ class ReadingsController extends AppBaseController
             'day' => $day,
             'town' => $town,
             'status' => $status,
+            'meterReader' => $meterReader,
+            'readingReport' => $readingReport,
+        ]);
+    }
+
+    public function printOtherUnbilledList($period, $day, $town, $meterReader) {
+        $meterReader = User::find($meterReader);
+
+        $reading = DB::table('Billing_Readings')
+            ->whereNotNull('Billing_Readings.AccountNumber')
+            ->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "')")
+            ->where('Billing_Readings.ServicePeriod', $period)
+            ->where('Billing_Readings.MeterReader', $meterReader->id)
+            ->first();
+
+        $readingReport = DB::table('Billing_Readings')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Readings.MeterReader', $meterReader->id)
+            ->where('Billing_Readings.ServicePeriod', $period)
+            ->whereNotIn('Billing_Readings.FieldStatus', ['STUCK-UP', 'NO DISPLAY', 'NOT IN USE', 'CHANGE METER'])
+            ->where(function ($query) use ($town, $day, $reading, $meterReader) {
+                $query->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE Town='" . $town . "' AND GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "')")
+                        ->orWhereRaw("Billing_Readings.AccountNumber IS NULL AND (ReadingTimestamp BETWEEN '" . date('Y-m-d', strtotime($reading->ReadingTimestamp)) . "' AND '" . date('Y-m-d', strtotime($reading->ReadingTimestamp . ' +1 day')) . "')");
+            })
+            ->select('Billing_Readings.*',
+                'Billing_ServiceAccounts.id AS AccountId',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.SequenceCode',
+                'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.Multiplier',
+                DB::raw("(SELECT TOP 1 ReadingTimestamp FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReadingTimestamp"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReading"),
+                DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS CurrentKwh"),
+                )
+            ->orderBy('AccountStatus')
+            ->orderBy('FieldStatus')
+            ->get();
+
+        return view('/readings/print_unbilled_by_status', [
+            'period' => $period,
+            'day' => $day,
+            'town' => $town,
+            'status' => 'OTHER UNBILLED',
             'meterReader' => $meterReader,
             'readingReport' => $readingReport,
         ]);

@@ -104,8 +104,9 @@
             <th class="text-left" style="border-bottom: 1px solid #454455">Acct<br>Status</th>
             <th class="text-right" style="border-bottom: 1px solid #454455">Meter #</th>
             <th class="text-left" style="padding-left: 20px; border-bottom: 1px solid #454455">Reading<br>Datetime</th>
-            <th class="text-right" style="border-bottom: 1px solid #454455">Pres Read</th>
-            <th class="text-right" style="border-bottom: 1px solid #454455">Prev Read</th>
+            <th class="text-right" style="border-bottom: 1px solid #454455">Pres<br>Read</th>
+            <th class="text-right" style="border-bottom: 1px solid #454455">Prev<br>Read</th>
+            <th class="text-right" style="border-bottom: 1px solid #454455">Billed</th>
             <th class="text-right" style="border-bottom: 1px solid #454455">Field<br>Findings</th>
             <th class="text-right" style="border-bottom: 1px solid #454455">Remarks</th>
         </thead>
@@ -124,6 +125,7 @@
                     <td style="padding-left: 20px;">{{ date('Y-m-d h:i:s A', strtotime($item->ReadingTimestamp )) }}</td>
                     <td class="text-right">{{ $item->KwhUsed }}</td>
                     <td class="text-right">{{ $item->PrevReading }}</td>
+                    <td class="text-right">{{ $item->CurrentKwh != null ? 'Yes' : 'No' }}</td>
                     <td class="text-right">{{ $item->FieldStatus }}</td>
                     <td class="text-right">{{ $item->Notes }}</td>
                 </tr>
@@ -139,6 +141,7 @@
                 <td style="border-top: 1px solid #454455"></td>
                 <td style="border-top: 1px solid #454455" class="text-right"></td>
                 <td style="padding-left: 20px; border-top: 1px solid #454455"></td>
+                <td style="border-top: 1px solid #454455" class="text-right"></td>
                 <td style="border-top: 1px solid #454455" class="text-right"></td>
                 <td style="border-top: 1px solid #454455" class="text-right"></td>
                 <td style="border-top: 1px solid #454455" class="text-right"></td>

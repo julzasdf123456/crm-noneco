@@ -405,6 +405,7 @@ Route::get('/readings/print-new-format-adjusted/{period}/{day}/{town}/{meterRead
 Route::get('/readings/print-old-format-adjusted-bapa/{period}/{bapaName}', [App\Http\Controllers\ReadingsController::class, 'printOldFormatAdjustedBapa'])->name('readings.print-old-format-adjusted-bapa');
 Route::get('/readings/print-new-format-adjusted-bapa/{period}/{bapaName}', [App\Http\Controllers\ReadingsController::class, 'printNewFormatAdjustedBapa'])->name('readings.print-new-format-adjusted-bapa');
 Route::get('/readings/print-unbilled-by-status/{period}/{day}/{town}/{meterReader}/{status}', [App\Http\Controllers\ReadingsController::class, 'printUnbilledList'])->name('readings.print-unbilled-by-status');
+Route::get('/readings/print-other-unbilled-list/{period}/{day}/{town}/{meterReader}', [App\Http\Controllers\ReadingsController::class, 'printOtherUnbilledList'])->name('readings.print-other-unbilled-list');
 Route::get('/readings/billed-and-unbilled-reports', [App\Http\Controllers\ReadingsController::class, 'billAndUnbilledReport'])->name('readings.billed-and-unbilled-reports');
 Route::get('/readings/print-billed-unbilled/{type}/{meterReader}/{day}/{period}/{town}', [App\Http\Controllers\ReadingsController::class, 'printBilledUnbilled'])->name('readings.print-billed-unbilled');
 Route::resource('readings', App\Http\Controllers\ReadingsController::class);
