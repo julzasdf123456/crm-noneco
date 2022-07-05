@@ -47,7 +47,7 @@
     {{-- <link rel="stylesheet" href="https://twitter.com.us/api/v3/sunder/e-47Vfsk/twitter.min.css"> --}}
 
     {{-- SWEETALERT2 --}}
-    <link rel="stylesheet" href="{{ URL::asset('css/sweetalert2.min.css'); }} ">
+    <link rel="stylesheet" href="{{ URL::asset('css/sweetalert2.min.css'); }}">
 
     <style>
         :root {
@@ -219,7 +219,7 @@
             <li class="nav-item dropdown user-menu">
                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
                     {{-- <img src="https://boheco1.com/wp-content/uploads/2018/06/boheco-1-1024x1012.png" class="user-image img-circle elevation-2" alt="User Image"> --}}
-                    <img src="https://www.kindpng.com/picc/m/344-3445724_travel-logo-design-travel-agency-logo-hd-png.png"
+                    <img src="{{ URL::asset('imgs/noneco-official-logo.png'); }}"
                          class="user-image img-circle elevation-2" alt="User Image"> 
                     <span class="d-none d-md-inline">{{ Auth::check() ? Auth::user()->name : '' }}</span>
                 </a>
@@ -227,7 +227,7 @@
                     <!-- User image -->
                     <li class="user-header bg-primary">
                         {{-- <img src="https://boheco1.com/wp-content/uploads/2018/06/boheco-1-1024x1012.png" class="user-image img-circle elevation-2" alt="User Image"> --}}
-                        <img src="https://www.kindpng.com/picc/m/344-3445724_travel-logo-design-travel-agency-logo-hd-png.png"
+                        <img src="{{ URL::asset('imgs/noneco-official-logo.png'); }}"
                              class="img-circle elevation-2"
                              alt="User Image"> 
                         <p>
