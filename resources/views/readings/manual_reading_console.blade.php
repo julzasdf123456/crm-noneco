@@ -93,7 +93,7 @@
 
                     <div class="form-group col-lg-3">
                         <label for="PreviousKwh">Previous Reading</label>
-                        <input type="text" name="PreviousKwh" id="PreviousKwh" value="{{ $presentReading != null ? $presentReading->KwhUsed : 0 }}"  class="form-control" {{ $presentReading != null ? 'readonly' : '' }} style="font-size: 1.6em;">
+                        <input type="text" name="PreviousKwh" id="PreviousKwh" value="{{ $presentReading != null ? $presentReading->KwhUsed : 0 }}"  class="form-control" style="font-size: 1.6em;">
                     </div>
                     
                     <div class="form-group col-lg-3">
