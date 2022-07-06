@@ -94,6 +94,7 @@
             <th class="text-right">Prev Read</th>
             <th class="text-right">Current <br>Kwh Used</th>
             <th class="text-right">Previous <br>Kwh Used</th>
+            <th class="text-right">Amount Due</th>
             <th class="text-right">OR #</th>
             <th class="text-right">Meter #</th>
         </thead>
@@ -134,6 +135,7 @@
                         <td class="text-right"><i>No Bill</i></td>
                     @endif
                     <td class="text-right text-info">{{ $item->PrevKwh != null ? $item->PrevKwh : '0' }}</td>
+                    <td class="text-right">{{ $item->AmountDue != null ? number_format($item->AmountDue, 2) : '' }}</td>
                     <td class="text-right">{{ $item->ORNumber }}</td>
                     <td class="text-right">{{ $item->MeterNumber }}</td>
                 </tr>
