@@ -711,7 +711,7 @@ class ReadingsController extends AppBaseController
 
         $readingReport = DB::table('Billing_Readings')
             ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
-            ->where('Billing_Readings.MeterReader', $meterReader->id)
+            ->whereRaw("Billing_Readings.MeterReader = '" . $meterReader->id . "'")
             ->where('Billing_Readings.ServicePeriod', $period)
             ->where(function ($query) use ($town, $day, $reading, $meterReader) {
                 $query->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE Town='" . $town . "' AND GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "')")
