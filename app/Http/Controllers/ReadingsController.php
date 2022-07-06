@@ -1042,7 +1042,7 @@ class ReadingsController extends AppBaseController
             ->whereNotNull('Billing_Readings.AccountNumber')
             ->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "')")
             ->where('Billing_Readings.ServicePeriod', $period)
-            ->where('Billing_Readings.MeterReader', $meterReader->id)
+            ->whereRaw("Billing_Readings.MeterReader='" . $meterReader->id . "'")
             ->first();
 
         $readingReport = DB::table('Billing_Readings')
@@ -1087,7 +1087,7 @@ class ReadingsController extends AppBaseController
             ->whereNotNull('Billing_Readings.AccountNumber')
             ->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "')")
             ->where('Billing_Readings.ServicePeriod', $period)
-            ->where('Billing_Readings.MeterReader', $meterReader->id)
+            ->whereRaw("Billing_Readings.MeterReader='" . $meterReader->id . "'")
             ->first();
 
         $readingReport = DB::table('Billing_Readings')
@@ -1142,7 +1142,7 @@ class ReadingsController extends AppBaseController
                 if ($day == 'All') {
                     $readingReport = DB::table('Billing_Readings')
                         ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
-                        ->where('Billing_Readings.MeterReader', $meterReader->id)
+                        ->whereRaw("Billing_Readings.MeterReader='" . $meterReader->id . "'")
                         ->where('Billing_Readings.ServicePeriod', $period)    
                         ->where('Billing_ServiceAccounts.Town', $town)  
                         ->whereRaw("Billing_Readings.AccountNumber IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')")
@@ -1167,7 +1167,7 @@ class ReadingsController extends AppBaseController
                 } else {
                     $readingReport = DB::table('Billing_Readings')
                         ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
-                        ->where('Billing_Readings.MeterReader', $meterReader->id)
+                        ->whereRaw("Billing_Readings.MeterReader='" . $meterReader->id . "'")
                         ->where('Billing_Readings.ServicePeriod', $period)    
                         ->where('Billing_ServiceAccounts.Town', $town)  
                         ->where('Billing_ServiceAccounts.GroupCode', $day)
@@ -1198,13 +1198,13 @@ class ReadingsController extends AppBaseController
                         ->whereNotNull('Billing_Readings.AccountNumber')
                         ->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE MeterReader='" . $meterReader->id . "')")
                         ->where('Billing_Readings.ServicePeriod', $period)
-                        ->where('Billing_Readings.MeterReader', $meterReader->id)
+                        ->whereRaw("Billing_Readings.MeterReader='" . $meterReader->id . "'")
                         ->orderByDesc('ReadingTimestamp')
                         ->first();
 
                     $readingReport = DB::table('Billing_Readings')
                         ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
-                        ->where('Billing_Readings.MeterReader', $meterReader->id)
+                        ->whereRaw("Billing_Readings.MeterReader='" . $meterReader->id . "'")
                         ->where('Billing_Readings.ServicePeriod', $period)      
                         ->where(function ($query) use ($reading, $period, $town, $meterReader) {
                             $query->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE Town='" . $town . "' AND MeterReader='" . $meterReader->id . "')")
@@ -1233,14 +1233,14 @@ class ReadingsController extends AppBaseController
                         ->whereNotNull('Billing_Readings.AccountNumber')
                         ->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "')")
                         ->where('Billing_Readings.ServicePeriod', $period)
-                        ->where('Billing_Readings.MeterReader', $meterReader->id)
+                        ->whereRaw("Billing_Readings.MeterReader='" . $meterReader->id . "'")
                         ->orderByDesc('ReadingTimestamp')
                         ->first();
 
                     if ($reading != null) {
                         $readingReport = DB::table('Billing_Readings')
                             ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
-                            ->where('Billing_Readings.MeterReader', $meterReader->id)
+                            ->whereRaw("Billing_Readings.MeterReader='" . $meterReader->id . "'")
                             ->where('Billing_Readings.ServicePeriod', $period)    
                             ->where(function ($query) use ($reading, $period, $town, $day, $meterReader) {
                                 $query->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE Town='" . $town . "' AND GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "')")
