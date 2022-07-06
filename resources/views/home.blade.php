@@ -4,9 +4,32 @@
 <div class="row">
     <div class="col-lg-8 offset-lg-2 col-md-12">
         <br>
+        {{-- NEW --}}
+        <div class="card shadow-none">
+            <div class="card-header bg-danger">
+                <span class="card-title"><strong>July 9, 2022 Update!</strong> <i class="text-muted">3:11 PM</i> <br> <i>What's new?</i></span>
+            </div>
+            <div class="card-body">
+                <h4><span class="text-muted"># </span> Billing Analyst Module</h4>
+                <ul>
+                    <li>Billing analyst can now re-allow the downloading of BAPA Scheds. To do that, go to
+                        <span class="text-primary"><strong>BAPA -> BAPA Reading Sched -> (Select Billing Month)</strong></span>. 
+                        At the right side of the <strong>Downloaded Status</strong>, you can see a button named <span class="badge badge-warning">Re-allow Download</span>,
+                        which clears the "Downloaded" status to allow the BAPAs to redownload their sched.
+                    </li>
+                </ul>
+                <h4><span class="text-muted"># </span> Bugs & Fixes</h4>
+                <ul>
+                    <li>Fixed errors on Printing of Reading Monitor</li>
+                    <li>Fixed bugs on query</li>
+                    <li>Cleared database cache for further optimizations</li>
+                </ul>
+            </div>
+        </div>
+
         <div class="card shadow-none">
             <div class="card-header">
-                <span class="card-title text-success"><strong>July 8, 2022 Update!</strong> <i class="text-muted">4:38 AM</i> <br> <i>What's new?</i></span>
+                <span class="card-title text-muted"><strong>July 8, 2022 Update!</strong> <i class="text-muted">4:38 AM</i> <br> <i>Change Log</i></span>
             </div>
             <div class="card-body">
                 <h4><span class="text-muted"># </span> CRM Module</h4>
