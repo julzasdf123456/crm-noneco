@@ -977,8 +977,8 @@ class ReadingsController extends AppBaseController
             ->where('Billing_Bills.ServicePeriod', $period)
             ->where('Billing_ServiceAccounts.Town', $town)
             ->where('Billing_ServiceAccounts.GroupCode', $day)
-            ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
-            ->where('Billing_Bills.UserId', Auth::id())
+            ->whereRaw("Billing_ServiceAccounts.MeterReader='" . $meterReader . "'")
+            ->whereRaw("Billing_Bills.UserId ='". Auth::id() . "'")
             ->select('Billing_Bills.*')
             ->orderBy('Billing_Bills.BillNumber')
             ->get();
@@ -994,8 +994,8 @@ class ReadingsController extends AppBaseController
             ->where('Billing_Bills.ServicePeriod', $period)
             ->where('Billing_ServiceAccounts.Town', $town)
             ->where('Billing_ServiceAccounts.GroupCode', $day)
-            ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
-            ->where('Billing_Bills.UserId', Auth::id())
+            ->whereRaw("Billing_ServiceAccounts.MeterReader ='" . $meterReader . "'")
+            ->whereRaw("Billing_Bills.UserId ='". Auth::id() . "'")
             ->select('Billing_Bills.*')
             ->orderBy('Billing_Bills.BillNumber')
             ->get();
@@ -1010,7 +1010,7 @@ class ReadingsController extends AppBaseController
             ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
             ->where('Billing_Bills.ServicePeriod', $period)
             ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
-            ->where('Billing_Bills.UserId', Auth::id())
+            ->whereRaw("Billing_Bills.UserId ='". Auth::id() . "'")
             ->select('Billing_Bills.*')
             ->orderBy('Billing_Bills.BillNumber')
             ->get();
@@ -1025,7 +1025,7 @@ class ReadingsController extends AppBaseController
             ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
             ->where('Billing_Bills.ServicePeriod', $period)
             ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
-            ->where('Billing_Bills.UserId', Auth::id())
+            ->whereRaw("Billing_Bills.UserId ='". Auth::id() . "'")
             ->select('Billing_Bills.*')
             ->orderBy('Billing_Bills.BillNumber')
             ->get();
