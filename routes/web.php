@@ -605,6 +605,7 @@ Route::get('/b_a_p_a_reading_schedules/show-schedules/{period}', [App\Http\Contr
 Route::get('/b_a_p_a_reading_schedules/add-schedule', [App\Http\Controllers\BAPAReadingSchedulesController::class, 'addSchedule'])->name('bAPAReadingSchedules.add-schedule');
 Route::get('/b_a_p_a_reading_schedules/get-bapas', [App\Http\Controllers\BAPAReadingSchedulesController::class, 'getBapas'])->name('bAPAReadingSchedules.get-bapas');
 Route::get('/b_a_p_a_reading_schedules/remove-bapa-from-sched', [App\Http\Controllers\BAPAReadingSchedulesController::class, 'removeBapaFromSched'])->name('bAPAReadingSchedules.remove-bapa-from-sched');
+Route::get('/b_a_p_a_reading_schedules/remove-downloaded-status-from-bapa', [App\Http\Controllers\BAPAReadingSchedulesController::class, 'removeDownloadedStatusFromBapa'])->name('bAPAReadingSchedules.remove-downloaded-status-from-bapa');
 Route::resource('bAPAReadingSchedules', App\Http\Controllers\BAPAReadingSchedulesController::class);
 
 

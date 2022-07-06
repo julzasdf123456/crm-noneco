@@ -259,6 +259,9 @@ class BAPAReadingSchedulesController extends AppBaseController
         foreach($scheds as $item) {
             $output .= '<tr id="' . $item->id . '">
                             <td>' . $item->BAPAName . '</td>
+                            <td>' . $item->Status . '
+                                ' . ($item->Status!=null ? '<button onclick=removeStatus("' . $item->id . '") class="btn btn-xs btn-warning" style="margin-left: 20px;">Re-allow Download</button>' : '') . '
+                            </td>
                             <td class="text-right">
                                 <button class="btn btn-sm btn-link text-danger" onclick=removeBapaFromSched("' . $item->id . '")><i class="fas fa-trash"></i></button>
                             </td>
@@ -266,5 +269,17 @@ class BAPAReadingSchedulesController extends AppBaseController
         }
 
         return response()->json($output, 200);
+    }
+
+    public function removeDownloadedStatusFromBapa(Request $request) {
+        $schedId = $request['id'];
+        $sched = BAPAReadingSchedules::find($schedId);
+
+        if ($sched != null) {
+            $sched->Status = null;
+            $sched->save();
+        }
+
+        return response()->json($sched, 200);
     }
 }

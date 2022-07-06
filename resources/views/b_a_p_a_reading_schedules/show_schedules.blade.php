@@ -86,6 +86,25 @@
             })
         }
 
+        function removeStatus(id) {
+            $.ajax({
+                url : "{{ route('bAPAReadingSchedules.remove-downloaded-status-from-bapa') }}",
+                type : 'GET',
+                data : {
+                    id : id,
+                },
+                success : function(res) {
+                    location.reload()
+                },
+                error : function(err) {
+                    Swal.fire({
+                        title : 'Error cancelling status',
+                        icon : 'error'
+                    })
+                }
+            })
+        }
+
         function removeBapaFromSched(id) {
             if (confirm('Are you sure you want to remove this BAPA from this schedule?')) {
                 $.ajax({
