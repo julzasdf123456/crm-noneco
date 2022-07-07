@@ -122,6 +122,7 @@ class BillsController extends AppBaseController
                     'Billing_ServiceAccounts.DurationInMonths',
                     'Billing_ServiceAccounts.AccountExpiration',
                     'CRM_Towns.Town',
+                    'Billing_ServiceAccounts.Town as TownCode',
                     'CRM_Barangays.Barangay')
             ->where('Billing_ServiceAccounts.id', $bills->AccountNumber)
             ->first();
@@ -132,6 +133,7 @@ class BillsController extends AppBaseController
 
         $rate = Rates::where('ServicePeriod', $bills->ServicePeriod)
             ->where('ConsumerType', Bills::getAccountType($account))
+            ->where("AreaCode", $account->TownCode)
             ->first();
 
         if (empty($bills)) {
@@ -1216,6 +1218,7 @@ class BillsController extends AppBaseController
                     'Billing_ServiceAccounts.DurationInMonths',
                     'Billing_ServiceAccounts.AccountExpiration',
                     'CRM_Towns.Town',
+                    'Billing_ServiceAccounts.Town as TownCode',
                     'CRM_Barangays.Barangay')
             ->where('Billing_ServiceAccounts.id', $bills->AccountNumber)
             ->first();
@@ -1226,6 +1229,7 @@ class BillsController extends AppBaseController
 
         $rate = Rates::where('ServicePeriod', $bills->ServicePeriod)
             ->where('ConsumerType', Bills::getAccountType($account))
+            ->where('AreaCode', $account->TownCode)
             ->first();
 
         return view('/bills/print_single_bill_new_format', [
@@ -1267,6 +1271,7 @@ class BillsController extends AppBaseController
                     'Billing_ServiceAccounts.DurationInMonths',
                     'Billing_ServiceAccounts.AccountExpiration',
                     'CRM_Towns.Town',
+                    'Billing_ServiceAccounts.Town as TownCode',
                     'CRM_Barangays.Barangay')
             ->where('Billing_ServiceAccounts.id', $bills->AccountNumber)
             ->first();
@@ -1277,6 +1282,7 @@ class BillsController extends AppBaseController
 
         $rate = Rates::where('ServicePeriod', $bills->ServicePeriod)
             ->where('ConsumerType', Bills::getAccountType($account))
+            ->where('AreaCode', $account->TownCode)
             ->first();
 
         if ($account != null) {
