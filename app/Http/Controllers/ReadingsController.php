@@ -979,6 +979,7 @@ class ReadingsController extends AppBaseController
             ->where('Billing_ServiceAccounts.GroupCode', $day)
             ->whereRaw("Billing_ServiceAccounts.MeterReader='" . $meterReader . "'")
             ->whereRaw("Billing_Bills.UserId ='". Auth::id() . "'")
+            ->whereRaw("Billing_Bills.AccountNumber IN (SELECT AccountNumber FROM Billing_Readings WHERE FieldStatus IS NOT NULL AND ServicePeriod='" . $period . "' AND MeterReader='" . $meterReader . "' AND AccountNumber IS NOT NULL)")
             ->select('Billing_Bills.*')
             ->orderBy('Billing_Bills.BillNumber')
             ->get();
@@ -996,6 +997,7 @@ class ReadingsController extends AppBaseController
             ->where('Billing_ServiceAccounts.GroupCode', $day)
             ->whereRaw("Billing_ServiceAccounts.MeterReader ='" . $meterReader . "'")
             ->whereRaw("Billing_Bills.UserId ='". Auth::id() . "'")
+            ->whereRaw("Billing_Bills.AccountNumber IN (SELECT AccountNumber FROM Billing_Readings WHERE FieldStatus IS NOT NULL AND ServicePeriod='" . $period . "' AND MeterReader='" . $meterReader . "' AND AccountNumber IS NOT NULL)")
             ->select('Billing_Bills.*')
             ->orderBy('Billing_Bills.BillNumber')
             ->get();

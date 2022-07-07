@@ -14,7 +14,7 @@
             {{-- COLLECTIBLES --}}
             <div class="card" style="height: 60vh;">
                 <div class="card-header border-0">
-                    <span class="card-title">Uncollected Arrears</span>
+                    <span class="card-title">OCL</span>
                     <div class="card-tools">
                         <button class="btn btn-tool" title="Update Figure" data-toggle="modal" data-target="#modal-update-collectible"><i class="fas fa-pen"></i></button>
                         @if ($collectibles != null && count($checkLedger) < 1)
