@@ -74,7 +74,7 @@ class DCRSummaryTransactionsController extends AppBaseController
             ->where('Cashier_TransactionIndex.UserId', $request['Teller'])
             ->whereNull('Cashier_TransactionIndex.Status')
             ->select('Cashier_TransactionIndex.ORNumber',
-                'Cashier_TransactionIndex.Total',
+                'Cashier_TransactionDetails.Total',
                 'Cashier_TransactionIndex.AccountNumber',
                 'Cashier_TransactionIndex.PayeeName',
                 'Cashier_TransactionDetails.AccountCode',

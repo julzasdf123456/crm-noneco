@@ -242,7 +242,7 @@ $id = IDGenerator::generateID();
                         data: {
                             _token: $("#csrfMaterials").val(),
                             id: matIdValue,
-                            ServiceConnectionId: scId,
+                            ServiceConnectionId: "{{ $serviceConnection->id }}",
                             Material: materialId,
                             Quantity: qty,
                             Vat: vatValue.toFixed(2),
@@ -291,7 +291,7 @@ $id = IDGenerator::generateID();
                         data: {
                             _token: $("#csrfParticulars").val(),
                             id: particularPaymentIdValue,
-                            ServiceConnectionId: scId,
+                            ServiceConnectionId: "{{ $serviceConnection->id }}",
                             Particular: particularId,
                             Amount: parseFloat(amnt).toFixed(2),
                             Vat: vatValue.toFixed(2),

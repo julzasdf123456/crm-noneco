@@ -485,7 +485,7 @@ class Bills extends Model
                     $bill->MeteringSystemCharge;
 
         if ($account->AccountType == 'RESIDENTIAL' || $account->AccountType == 'RURAL RESIDENTIAL') {
-            if ($kwhUsed < 15) {
+            if ($kwhUsed <= 15) {
                 return -($deductibles * .5);
             } elseif ($kwhUsed >= 16 && $kwhUsed < 17) {
                 return -($deductibles * .4);
