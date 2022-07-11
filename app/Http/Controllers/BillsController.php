@@ -1232,11 +1232,18 @@ class BillsController extends AppBaseController
             ->where('AreaCode', $account->TownCode)
             ->first();
 
+        $arrears = DB::table('Billing_Bills')
+            ->where('AccountNumber', $account->id)
+            ->whereRaw("AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE AccountNumber='" . $account->id . "')")
+            ->whereRaw("ServicePeriod != '" . $bills->ServicePeriod . "'")
+            ->get();
+
         return view('/bills/print_single_bill_new_format', [
             'bills' => $bills,
             'account' => $account,
             'meters' => $meters,
             'rate' => $rate,
+            'arrears' => $arrears
         ]);
     }
 
@@ -1441,7 +1448,7 @@ class BillsController extends AppBaseController
             ->where('Billing_Bills.ServicePeriod', $period)
             ->where('Billing_ServiceAccounts.Town', $town)
             ->where('Billing_ServiceAccounts.AreaCode', $route)
-            ->where('Billing_Bills.UserId', Auth::id())
+            // ->where('Billing_Bills.UserId', Auth::id())
             ->where('Billing_Bills.BillingDate', $day)
             ->select('Billing_Bills.*')
             ->get();
