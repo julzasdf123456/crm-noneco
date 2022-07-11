@@ -6,8 +6,31 @@
         <br>
         {{-- NEW --}}
         <div class="card shadow-none">
-            <div class="card-header bg-danger">
-                <span class="card-title"><strong>July 9, 2022 Update!</strong> <i class="text-muted">3:11 PM</i> <br> <i>What's new?</i></span>
+            <div class="card-header bg-success">
+                <span class="card-title"><strong>July 11, 2022 Update!</strong> <i class="text-muted">3:42 PM</i> <br> <i>What's new?</i></span>
+            </div>
+            <div class="card-body">
+                <h4><span class="text-muted"># </span> Account Restrictions</h4>
+                <ul>
+                    <li>Restrictions for every account has been updated.</li>
+                </ul>
+                <h4><span class="text-muted"># </span> Major Update Coming This Weekend!</h4>
+                <ul>
+                    <li><strong class="text-primary">Additional Features</strong> will be added to the system during the weekend. All feature sets shall be posted 
+                    here.</li>
+                </ul>
+                <h4><span class="text-muted"># </span> Bugs & Fixes</h4>
+                <ul>
+                    <li>Optimized Performance</li>
+                    <li>Fixed minor bugs</li>
+                </ul>
+            </div>
+        </div>
+
+        {{-- OLD --}}
+        <div class="card shadow-none">
+            <div class="card-header">
+                <span class="card-title text-muted"><strong>July 9, 2022 Update!</strong> <i class="text-muted">3:11 PM</i> <br> <i>Change Log</i></span>
             </div>
             <div class="card-body">
                 <h4><span class="text-muted"># </span> Billing Analyst Module</h4>
