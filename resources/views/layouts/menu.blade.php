@@ -4,9 +4,9 @@ use Illuminate\Support\Facades\Auth;
 
 @endphp
 
-<li class="nav-header">CRM</li>
 <!-- MEMBERSHIP MENU -->
 @canany(['Super Admin', 'view membership'])
+    <li class="nav-header">CRM</li>
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-users nav-icon text-success"></i>
@@ -58,8 +58,8 @@ use Illuminate\Support\Facades\Auth;
 @endcanany
 
 
+<!-- SERVICE CONNECTION MENU -->
 @canany(['Super Admin', 'sc view'])
-    <!-- SERVICE CONNECTION MENU -->
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-plug nav-icon text-warning"></i>
@@ -147,7 +147,7 @@ use Illuminate\Support\Facades\Auth;
             </li>
             @endcanany
 
-            @canany(['Super Admin', 'sc view'])
+            @canany(['Super Admin', 'sc create'])
             <li class="nav-item">
                 <a href="#" class="nav-link">
                     <p>
@@ -226,7 +226,7 @@ use Illuminate\Support\Facades\Auth;
             @endcanany
 
             {{-- MATERIALS AND STRUCTURES --}}
-            @canany(['Super Admin'])
+            @canany(['Super Admin', 'sc create'])
             <li class="nav-item has-treeview">
                 <a href="#" class="nav-link">
                     {{-- <i class="fas fa-toolbox nav-icon"></i> --}}
@@ -289,7 +289,7 @@ use Illuminate\Support\Facades\Auth;
             </li>
             @endcanany
 
-            @canany(['Super Admin', 'sc view'])
+            {{-- @canany(['Super Admin', 'sc view'])
             <li class="nav-item">
                 <a href="#" class="nav-link">
                     <p>
@@ -307,7 +307,7 @@ use Illuminate\Support\Facades\Auth;
 
                 </ul>
             </li>
-            @endcanany
+            @endcanany --}}
             
             @canany(['Super Admin', 'sc delete'])
             <li class="nav-item">
@@ -322,7 +322,7 @@ use Illuminate\Support\Facades\Auth;
 @endcanany
 
 {{-- TICKETS --}}
-@canany(['Super Admin', 'tickets create'])
+@canany(['Super Admin', 'tickets view'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-ambulance nav-icon text-danger"></i>
@@ -345,6 +345,7 @@ use Illuminate\Support\Facades\Auth;
                     <i class="fas fa-clipboard-list nav-icon text-danger"></i><p>All Tickets</p>
                 </a>
             </li>
+            @canany(['Super Admin', 'tickets create'])
             <li class="nav-item has-treeview">
                 <a href="#" class="nav-link">
                     <i class="fas fa-plus-circle nav-icon text-danger"></i>
@@ -374,7 +375,8 @@ use Illuminate\Support\Facades\Auth;
                     </li>
                 </ul>
             </li>
-
+            @endcanany
+            @canany(['Super Admin', 'tickets edit'])
             <li class="nav-header">                
                 Assessments 
             </li>
@@ -390,7 +392,8 @@ use Illuminate\Support\Facades\Auth;
                     <i class="fas fa-circle nav-icon text-danger"></i><p>Crew Assigning</p>
                 </a>
             </li>
-
+            @endcanany
+            @canany(['Super Admin', 'tickets create', 'tickets edit'])
             <li class="nav-header">                
                 Reports
             </li>
@@ -407,7 +410,6 @@ use Illuminate\Support\Facades\Auth;
                     <i class="fas fa-list nav-icon text-danger"></i><p>Ticket Tally</p>
                 </a>
             </li>
-            
             <li class="nav-header">                
                 Settings and Others 
             </li>
@@ -423,6 +425,7 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-trash nav-icon text-danger"></i><p>Trash</p>
                 </a>
             </li>
+            @endcanany
         </ul>
     </li>
     
@@ -438,9 +441,9 @@ use Illuminate\Support\Facades\Auth;
     </li>    
 @endcanany --}}
 
-<li class="nav-header">BILLING</li>
 {{-- SERVICE ACCOUNTS --}}
 @canany(['Super Admin', 'billing re-bill'])
+    <li class="nav-header">BILLING</li>
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-file-invoice-dollar nav-icon text-primary"></i>
@@ -703,7 +706,7 @@ use Illuminate\Support\Facades\Auth;
 @endcanany
 
 <!-- TELLERING MENU -->
-@canany(['Super Admin', 'teller view'])
+@canany(['Super Admin', 'teller create'])
     <li class="nav-header">COLLECTION</li>
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
@@ -752,24 +755,32 @@ use Illuminate\Support\Facades\Auth;
             </li>
         </ul>
     </li>
+@endcanany
+@canany(['Super Admin', 'bapa adjust'])
     <li class="nav-item">
         <a href="{{ route('bAPAAdjustments.index') }}"
         class="nav-link {{ Request::is('bAPAAdjustments.index*') ? 'active' : '' }}">
         <i class="fas fa-users nav-icon text-info"></i><p>BAPA Adjustments</p>
         </a>
     </li>
+@endcanany
+@canany(['Super Admin', 'teller view'])
     <li class="nav-item">
         <a href="{{ route('transactionIndices.browse-ors') }}"
         class="nav-link {{ Request::is('transactionIndices.browse-ors*') ? 'active' : '' }}">
         <i class="fas fa-search nav-icon text-info"></i><p>Browse ORs</p>
         </a>
     </li>
+@endcanany
+@canany(['Super Admin', 'teller create'])
     <li class="nav-item">
         <a href="{{ route('transactionIndices.or-maintenance') }}"
         class="nav-link {{ Request::is('transactionIndices.or-maintenance*') ? 'active' : '' }}">
         <i class="fas fa-circle nav-icon text-info"></i><p>OR Maintenance</p>
         </a>
     </li>
+@endcanany
+@canany(['Super Admin', 'teller create', 'teller approve'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-ban nav-icon text-info"></i>
@@ -793,6 +804,8 @@ use Illuminate\Support\Facades\Auth;
             </li>
         </ul>
     </li>
+@endcanany
+@canany(['Super Admin', 'teller approve'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-check nav-icon text-info"></i>
@@ -810,6 +823,8 @@ use Illuminate\Support\Facades\Auth;
             </li>
         </ul>
     </li>
+@endcanany
+@canany(['Super Admin', 'teller create', 'teller approve'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-file nav-icon text-info"></i>
@@ -825,14 +840,18 @@ use Illuminate\Support\Facades\Auth;
                 <i class="fas fa-file-alt nav-icon text-info"></i><p>DCR Summary</p>
                 </a>
             </li>
+            @canany(['Super Admin', 'teller approve'])
             <li class="nav-item">
                 <a href="{{ route('dCRSummaryTransactions.sales-dcr-monitor') }}"
                 class="nav-link {{ Request::is('dCRSummaryTransactions.sales-dcr-monitor*') ? 'active' : '' }}">
                 <i class="fas fa-chart-area nav-icon text-info"></i><p>Sales Monitor</p>
                 </a>
             </li>
+            @endcanany
         </ul>
     </li>
+@endcanany
+@canany(['Super Admin', 'teller create'])
     <li class="nav-header">                
         Others
     </li>
@@ -842,6 +861,8 @@ use Illuminate\Support\Facades\Auth;
            <i class="fas fa-piggy-bank nav-icon text-info"></i><p>Pre-Payments/Deposits</p>
         </a>
     </li>
+@endcanany
+@canany(['Super Admin', 'teller create', 'teller approve'])
     <li class="nav-header">                
         Settings
     </li>
@@ -858,10 +879,9 @@ use Illuminate\Support\Facades\Auth;
         </a>
     </li>  
 @endcanany
-
-<li class="nav-header">MISCELLANEOUS</li>
 <!-- EXTRAS MENU -->
-@canany(['Super Admin', 'create membership', 'sc create'])
+@canany(['Super Admin', 'create membership', 'sc create', 'teller create', 'teller approve'])
+    <li class="nav-header">MISCELLANEOUS</li>
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-ellipsis-v nav-icon"></i>
@@ -910,9 +930,10 @@ use Illuminate\Support\Facades\Auth;
     </li>
 @endcanany
 
-<li class="nav-header">ADMINISTRATIVE</li>
+
 <!-- ADMIN MENU -->
 @can('Super Admin')
+    <li class="nav-header">ADMINISTRATIVE</li>
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-shield-alt nav-icon"></i>

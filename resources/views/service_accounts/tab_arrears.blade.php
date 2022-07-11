@@ -16,10 +16,12 @@
                 <div class="card-header border-0">
                     <span class="card-title">OCL</span>
                     <div class="card-tools">
-                        <button class="btn btn-tool" title="Update Figure" data-toggle="modal" data-target="#modal-update-collectible"><i class="fas fa-pen"></i></button>
-                        @if ($collectibles != null && count($checkLedger) < 1)
-                            <button class="btn btn-tool text-warning" title="Split into multiple months (termed payment)" data-toggle="modal" data-target="#modal-ledgerize"><i class="fas fa-clipboard-list"></i></button>
-                        @endif                        
+                        @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Data Administrator'])) 
+                            <button class="btn btn-tool" title="Update Figure" data-toggle="modal" data-target="#modal-update-collectible"><i class="fas fa-pen"></i></button>
+                            @if ($collectibles != null && count($checkLedger) < 1)
+                                <button class="btn btn-tool text-warning" title="Split into multiple months (termed payment)" data-toggle="modal" data-target="#modal-ledgerize"><i class="fas fa-clipboard-list"></i></button>
+                            @endif     
+                        @endif                    
                     </div>
                 </div>
                 <div class="card-body table-responsive">
@@ -74,12 +76,13 @@
                     <span class="card-title">Monthly Bill Arrears</span>
 
                     <div class="card-tools">
-                        @if (count($unmergedArrears) > 0)
-                            <a href="{{ route('serviceAccounts.merge-all-bill-arrears', [ $serviceAccounts->id]) }}" class="btn btn-xs btn-danger" title="Merge All Arrears"><i class="fas fa-stream ico-tab-mini"></i>Merge All</a>
-                        @else
-                            <a href="{{ route('serviceAccounts.unmerge-all-bill-arrears', [ $serviceAccounts->id]) }}" class="btn btn-xs btn-primary" title="Unmerge All Arrears"><i class="fas fa-folder-minus ico-tab-mini"></i>Unmerge All</a> 
+                        @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Data Administrator'])) 
+                            @if (count($unmergedArrears) > 0)
+                                <a href="{{ route('serviceAccounts.merge-all-bill-arrears', [ $serviceAccounts->id]) }}" class="btn btn-xs btn-danger" title="Merge All Arrears"><i class="fas fa-stream ico-tab-mini"></i>Merge All</a>
+                            @else
+                                <a href="{{ route('serviceAccounts.unmerge-all-bill-arrears', [ $serviceAccounts->id]) }}" class="btn btn-xs btn-primary" title="Unmerge All Arrears"><i class="fas fa-folder-minus ico-tab-mini"></i>Unmerge All</a> 
+                            @endif
                         @endif
-                        
                     </div>
                 </div>
                 <div class="card-body table-responsive px-0">
@@ -100,11 +103,13 @@
                                         <td>{{ number_format(str_replace(',', '', $item->NetAmount), 2) }}</td>
                                         <td>{{ number_format(Bills::getFinalPenalty($item), 2) }}</td>
                                         <td>
-                                            @if ($item->MergedToCollectible == 'Yes')
-                                                <a href="{{ route('serviceAccounts.unmerge-bill-arrear', [$item->id]) }}" class="btn btn-xs btn-link text-primary" title="Unmerge this arrear to collectibles"><i class="fas fa-folder-minus"></i></a>
-                                            @else
-                                                <a href="{{ route('serviceAccounts.merge-bill-arrear', [$item->id]) }}" class="btn btn-xs btn-link text-danger" title="Merge this arrear to collectibles"><i class="fas fa-stream"></i></a>
-                                            @endif                                            
+                                            @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Data Administrator'])) 
+                                                @if ($item->MergedToCollectible == 'Yes')
+                                                    <a href="{{ route('serviceAccounts.unmerge-bill-arrear', [$item->id]) }}" class="btn btn-xs btn-link text-primary" title="Unmerge this arrear to collectibles"><i class="fas fa-folder-minus"></i></a>
+                                                @else
+                                                    <a href="{{ route('serviceAccounts.merge-bill-arrear', [$item->id]) }}" class="btn btn-xs btn-link text-danger" title="Merge this arrear to collectibles"><i class="fas fa-stream"></i></a>
+                                                @endif    
+                                            @endif                                        
                                         </td>
                                     </tr>
                                 @endforeach

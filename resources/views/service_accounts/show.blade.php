@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Support\Facades\Auth;
+@endphp
+
 @extends('layouts.app')
 
 @section('content')
@@ -8,25 +12,27 @@
                     <h4>Service Account Management Console</h4>
                 </div>
                 <div class="col-sm-7">
-                    
-                    @if ($serviceAccounts->AccountStatus == 'APPREHENDED')
-                        
-                    @else
-                        @if ($serviceAccounts->AccountStatus == 'PULLOUT')
+                    @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Data Administrator'])) 
+                        @if ($serviceAccounts->AccountStatus == 'APPREHENDED')
                         
                         @else
-                            <button class="btn btn-xs btn-danger float-right" style="margin-right: 5px;" title="Tag this account as Pulled-out" data-toggle="modal" data-target="#modal-pullout"><i class="fas fa-times ico-tab-mini"></i> Pull-out</button>
-                        @endif
-
-                        <button class="btn btn-xs btn-danger float-right" style="margin-right: 5px;" title="Apprehend This Account" data-toggle="modal" data-target="#modal-apprehend"><i class="fas fa-exclamation-circle ico-tab-mini"></i> Apprehend</button>
-                        @if ($serviceAccounts->AccountStatus == 'DISCONNECTED')
+                            @if ($serviceAccounts->AccountStatus == 'PULLOUT')
                             
-                        @elseif ($serviceAccounts->AccountStatus == 'ACTIVE')
-                            <button class="btn btn-xs btn-danger float-right" style="margin-right: 5px;" title="Disconnect This Account" data-toggle="modal" data-target="#modal-disconnect"><i class="fas fa-unlink ico-tab-mini"></i> Disconnect</button>
-                        @endif
-                    @endif                   
+                            @else
+                                <button class="btn btn-xs btn-danger float-right" style="margin-right: 5px;" title="Tag this account as Pulled-out" data-toggle="modal" data-target="#modal-pullout"><i class="fas fa-times ico-tab-mini"></i> Pull-out</button>
+                            @endif
+
+                            <button class="btn btn-xs btn-danger float-right" style="margin-right: 5px;" title="Apprehend This Account" data-toggle="modal" data-target="#modal-apprehend"><i class="fas fa-exclamation-circle ico-tab-mini"></i> Apprehend</button>
+                            @if ($serviceAccounts->AccountStatus == 'DISCONNECTED')
+                                
+                            @elseif ($serviceAccounts->AccountStatus == 'ACTIVE')
+                                <button class="btn btn-xs btn-danger float-right" style="margin-right: 5px;" title="Disconnect This Account" data-toggle="modal" data-target="#modal-disconnect"><i class="fas fa-unlink ico-tab-mini"></i> Disconnect</button>
+                            @endif
+                        @endif                   
+                        
+                        <a href="{{ route('serviceAccounts.update-step-one', [$serviceAccounts->id]) }}" class="btn btn-xs btn-warning float-right" style="margin-right: 30px;" title="Update Consumer Info"><i class="fas fa-pen ico-tab-mini"></i> Update</a>
+                    @endif
                     
-                    <a href="{{ route('serviceAccounts.update-step-one', [$serviceAccounts->id]) }}" class="btn btn-xs btn-warning float-right" style="margin-right: 30px;" title="Update Consumer Info"><i class="fas fa-pen ico-tab-mini"></i> Update</a>
                 </div>
             </div>
         </div>

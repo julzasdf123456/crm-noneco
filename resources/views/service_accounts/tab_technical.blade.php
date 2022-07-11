@@ -3,11 +3,13 @@
         <span class="card-title">Active Meter Info</span>
 
         <div class="card-tools">
-            @if ($meters != null)
-                <a href="{{ route('billingMeters.edit', [$meters->id]) }}" class="btn btn-tool text-success" title="Update meter data"><i class="fas fa-pen"></i></a>
+            @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Data Administrator'])) 
+                @if ($meters != null)
+                    <a href="{{ route('billingMeters.edit', [$meters->id]) }}" class="btn btn-tool text-success" title="Update meter data"><i class="fas fa-pen"></i></a>
+                @endif
+                <a href="#" class="btn btn-tool text-primary" title="Change Meter"><i class="fas fa-random"></i></a>
+                <button class="btn btn-tool"  data-toggle="modal" data-target="#modal-meter-logs" title="Meter history"><i class="fas fa-history"></i></button>
             @endif
-            <a href="#" class="btn btn-tool text-primary" title="Change Meter"><i class="fas fa-random"></i></a>
-            <button class="btn btn-tool"  data-toggle="modal" data-target="#modal-meter-logs" title="Meter history"><i class="fas fa-history"></i></button>
         </div>
     </div>
     <div class="card-body table-responsive px-0">
@@ -50,11 +52,13 @@
         <span class="card-title">Active Transformer Info</span>
 
         <div class="card-tools">
-            @if ($transformer != null)
-            <a href="{{ route('billingTransformers.edit', [$transformer->id]) }}" class="btn btn-tool text-success" title="Update transformer data"><i class="fas fa-pen"></i></a>
+            @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Data Administrator']))
+                @if ($transformer != null)
+                <a href="{{ route('billingTransformers.edit', [$transformer->id]) }}" class="btn btn-tool text-success" title="Update transformer data"><i class="fas fa-pen"></i></a>
+                @endif
+                <a href="#" class="btn btn-tool text-primary" title="Change Transformer"><i class="fas fa-random"></i></a>
+                <a href="#" class="btn btn-tool" title="Transformer history"><i class="fas fa-history"></i></a>
             @endif
-            <a href="#" class="btn btn-tool text-primary" title="Change Transformer"><i class="fas fa-random"></i></a>
-            <a href="#" class="btn btn-tool" title="Transformer history"><i class="fas fa-history"></i></a>
         </div>
     </div>
     <div class="card-body table-responsive px-0">

@@ -114,14 +114,14 @@ class DCRSummaryTransactionsController extends AppBaseController
             ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
             ->where('Cashier_PaidBills.PostingDate', $request['Day'] != null ? $request['Day'] : date('Y-m-d'))
             ->where('Cashier_PaidBills.Teller', $request['Teller'])
-            ->where('Cashier_PaidBills.Status', 'CANCELLED')
+            ->whereIn('Cashier_PaidBills.Status', ['CANCELLED', 'PENDING CANCEL'])
             ->select('Cashier_PaidBills.*', 'Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.OldAccountNo')
             ->get();
 
         $nonPowerBillsCancelled = DB::table('Cashier_TransactionIndex')
             ->where('Cashier_TransactionIndex.ORDate', $request['Day'] != null ? $request['Day'] : date('Y-m-d'))
             ->where('Cashier_TransactionIndex.UserId', $request['Teller'])
-            ->where('Cashier_TransactionIndex.Status', 'CANCELLED')
+            ->whereIn('Cashier_TransactionIndex.Status', ['CANCELLED', 'PENDING CANCEL'])
             ->select('Cashier_TransactionIndex.ORNumber',
                 'Cashier_TransactionIndex.Total',
                 'Cashier_TransactionIndex.AccountNumber',

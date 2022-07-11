@@ -80,3 +80,24 @@ You can also check out our other paid products on [CodeCanyon](https://codecanyo
 
 ### KIOSK PRINTING IN CHROME
  --kiosk --kiosk-printing "http://localhost:8000"
+
+
+### Added Roles
+- Collection Head
+    - view membership
+    - sc view
+    - teller view
+    - tickets view
+    - billing view
+    - billing approve
+    - billing update
+    - teller approve
+    - bapa adjust
+
+### Added Permissions
+- billing view
+- billing approve
+- billing update
+- teller approve
+- bapa create
+- bapa adjust

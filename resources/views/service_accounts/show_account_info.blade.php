@@ -8,7 +8,9 @@
         </span>
 
         <div class="card-tools">
-            <button class="btn btn-tool" id="change-name" data-toggle="modal" data-target="#modal-change-name" title="Change Name"><i class="fas fa-pen"></i></button>
+            @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Data Administrator'])) 
+                <button class="btn btn-tool" id="change-name" data-toggle="modal" data-target="#modal-change-name" title="Change Name"><i class="fas fa-pen"></i></button>
+            @endif
             <button class="btn btn-tool" data-toggle="modal" data-target="#modal-change-name-history" title="Change Name History"><i class="fas fa-history"></i></button>
             <button class="btn btn-tool" data-toggle="modal" data-target="#modal-relocation-history" title="Location History (Relocations)"><i class="fas fa-map-marker-alt"></i></button>
         </div>

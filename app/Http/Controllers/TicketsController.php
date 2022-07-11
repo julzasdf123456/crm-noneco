@@ -56,7 +56,12 @@ class TicketsController extends AppBaseController
      */
     public function create()
     {
-        return view('tickets.create');
+        if(Auth::user()->hasAnyPermission(['tickets create', 'Super Admin'])) {
+            return view('tickets.create');
+        } else {
+            return abort(403, "You're not authorized to create a ticket.");
+        }
+        
     }
 
     /**
@@ -246,13 +251,17 @@ class TicketsController extends AppBaseController
             return redirect(route('tickets.index'));
         }
 
-        return view('tickets.edit', [
-            'tickets' => $tickets, 
-            'towns' => $towns,
-            'parentTickets' => $parentTickets,
-            'crew' => $crew,
-            'cond' => $cond,
-        ]);
+        if(Auth::user()->hasAnyPermission(['tickets create', 'ticket update', 'Super Admin'])) {
+            return view('tickets.edit', [
+                'tickets' => $tickets, 
+                'towns' => $towns,
+                'parentTickets' => $parentTickets,
+                'crew' => $crew,
+                'cond' => $cond,
+            ]);
+        } else {
+            return abort(403, "You're not authorized to update a ticket.");
+        }        
     }
 
     /**
@@ -298,30 +307,34 @@ class TicketsController extends AppBaseController
      */
     public function destroy($id)
     {
-        $tickets = $this->ticketsRepository->find($id);
+        if(Auth::user()->hasAnyPermission(['tickets create', 'Super Admin'])) {
+            $tickets = $this->ticketsRepository->find($id);
 
-        if (empty($tickets)) {
-            Flash::error('Tickets not found');
+            if (empty($tickets)) {
+                Flash::error('Tickets not found');
+
+                return redirect(route('tickets.index'));
+            }
+
+            $tickets->Trash = 'Yes';
+            $tickets->UserId = Auth::id();
+            $tickets->save();
+            // $this->ticketsRepository->delete($id);
+
+            // CREATE LOG
+            $ticketLog = new TicketLogs;
+            $ticketLog->id = IDGenerator::generateID();
+            $ticketLog->TicketId = $id;
+            $ticketLog->Log = "Ticket Moved to Trash";
+            $ticketLog->UserId = Auth::id();
+            $ticketLog->save();
+
+            Flash::success('Tickets deleted successfully.');
 
             return redirect(route('tickets.index'));
-        }
-
-        $tickets->Trash = 'Yes';
-        $tickets->UserId = Auth::id();
-        $tickets->save();
-        // $this->ticketsRepository->delete($id);
-
-        // CREATE LOG
-        $ticketLog = new TicketLogs;
-        $ticketLog->id = IDGenerator::generateID();
-        $ticketLog->TicketId = $id;
-        $ticketLog->Log = "Ticket Moved to Trash";
-        $ticketLog->UserId = Auth::id();
-        $ticketLog->save();
-
-        Flash::success('Tickets deleted successfully.');
-
-        return redirect(route('tickets.index'));
+        } else {
+            return abort(403, "You're not authorized to delete a ticket.");
+        }        
     }
 
     public function fetchTickets(Request $request) {
