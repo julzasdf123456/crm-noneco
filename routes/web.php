@@ -463,6 +463,8 @@ Route::get('/bills/approve-bill-cancellation-request/{id}', [App\Http\Controller
 Route::get('/bills/reject-bill-cancellation-request/{id}', [App\Http\Controllers\BillsController::class,  'rejectBillCancellationRequest'])->name('bills.reject-bill-cancellation-request');
 Route::get('/bills/change-meter-readings/{account}/{period}', [App\Http\Controllers\BillsController::class,  'changeMeterReadings'])->name('bills.change-meter-readings');
 Route::post('/bills/bill-change-meters', [App\Http\Controllers\BillsController::class,  'billChangeMeters'])->name('bills.bill-change-meters');
+Route::get('/bills/adjustment-reports', [App\Http\Controllers\BillsController::class,  'adjustmentReports'])->name('bills.adjustment-reports');
+Route::get('/bills/print-adjustment-report/{type}/{period}', [App\Http\Controllers\BillsController::class,  'printAdjustmentReport'])->name('bills.print-adjustment-report');
 Route::resource('bills', App\Http\Controllers\BillsController::class);
 
 
@@ -627,6 +629,8 @@ Route::resource('accountGLCodes', App\Http\Controllers\AccountGLCodesController:
 Route::resource('dCRSummaryTransactions', App\Http\Controllers\DCRSummaryTransactionsController::class);
 Route::get('/d_c_r_summary_transactions/sales-dcr-monitor', [App\Http\Controllers\DCRSummaryTransactionsController::class, 'salesDcrMonitor'])->name('dCRSummaryTransactions.sales-dcr-monitor');
 Route::get('/d_c_r_summary_transactions/print-dcr/{teller}/{day}', [App\Http\Controllers\DCRSummaryTransactionsController::class, 'printDcr'])->name('dCRSummaryTransactions.print-dcr');
+Route::get('/d_c_r_summary_transactions/dashboard', [App\Http\Controllers\DCRSummaryTransactionsController::class, 'collectionDashboard'])->name('dCRSummaryTransactions.dashboard');
+Route::get('/d_c_r_summary_transactions/get-collection-per-area', [App\Http\Controllers\DCRSummaryTransactionsController::class, 'dashboardGetCollectionPerArea'])->name('dCRSummaryTransactions.get-collection-per-area');
 
 
 Route::resource('banks', App\Http\Controllers\BanksController::class);

@@ -37,7 +37,7 @@ class ReadingSchedulesController extends AppBaseController
     public function index(Request $request)
     {
         // $readingSchedules = $this->readingSchedulesRepository->all();
-        $meterReaders = User::role('Meter Reader')->get();
+        $meterReaders = User::role('Meter Reader Inhouse')->get();
 
         return view('reading_schedules.index', [
             'meterReaders' => $meterReaders
@@ -216,7 +216,7 @@ class ReadingSchedulesController extends AppBaseController
     public function viewMeterReadingSchedsInPeriod($period) {
         // $readingSchedules = $this->readingSchedulesRepository->all();
         // $meterReaders = User::role('Meter Reader')->get();
-        $meterReaders = User::role('Meter Reader')
+        $meterReaders = User::role('Meter Reader Inhouse')
             ->select('*',
                 DB::raw("SUBSTRING((SELECT ', ' + GroupCode AS 'data()' FROM Billing_ReadingSchedules WHERE ServicePeriod='" . $period . "' AND MeterReader = users.id FOR XML PATH('')), 2 , 9999) As GroupCodes"))
             ->get();

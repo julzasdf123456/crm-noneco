@@ -179,7 +179,7 @@ class ReadingsController extends AppBaseController
     }
 
     public function readingMonitorView($servicePeriod) {
-        $meterReaders = User::role('Meter Reader')->orderBy('name')->get();
+        $meterReaders = User::role('Meter Reader Inhouse')->orderBy('name')->get();
         $towns = Towns::orderBy('id')->get();
 
         return view('/readings/reading_monitor_view', [

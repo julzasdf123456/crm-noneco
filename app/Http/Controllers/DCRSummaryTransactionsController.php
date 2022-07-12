@@ -9,6 +9,9 @@ use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Rates;
+use App\Models\Bills;
+use App\Models\PaidBills;
 use App\Models\User;
 use Flash;
 use Response;
@@ -515,5 +518,63 @@ class DCRSummaryTransactionsController extends AppBaseController
             'offices' => $offices,
             'officeSelect' => $request['Office'],
         ]);
+    }
+
+    public function collectionDashboard() {
+        return view('/d_c_r_summary_transactions/dashboard', [
+
+        ]);
+    }
+
+    public function dashboardGetCollectionPerArea(Request $request) {
+        $from = $request['From'];
+        $to = $request['To'];
+
+        $latestRate = Rates::orderByDesc('ServicePeriod')
+            ->first();
+
+        if ($from != null && $to != null) {
+            $data = DB::table('Cashier_PaidBills')
+                ->select(
+                    'OfficeTransacted',
+                    DB::raw("(SELECT SUM(CAST(KwhUsed AS DECIMAL)) FROM Cashier_PaidBills WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS KwhUsedTotal")
+                )
+                ->groupBy('OfficeTransacted')
+                ->orderBy('OfficeTransacted')
+                ->get();
+        } else {
+            $data = DB::table('Cashier_PaidBills')
+                ->select(
+                    'OfficeTransacted',
+                    DB::raw("(SELECT SUM(CAST(KwhUsed AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS KwhUsedTotal"),
+                    DB::raw("(SELECT COUNT(id) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS TotalConsumers"),
+                    DB::raw("(SELECT SUM(CAST(Surcharge AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS TotalSurcharges"),
+                    DB::raw("(SELECT SUM(CAST(Form2307TwoPercent AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS TotalEWT"),
+                    DB::raw("(SELECT SUM(CAST(Form2307FivePercent AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS TotalEVAT"),
+                    DB::raw("(SELECT SUM(CAST(AdditionalCharges AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS TotalOCL"),
+                    DB::raw("(SELECT SUM(CAST(Deductions AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS TotalDeductions"),
+                    DB::raw("(SELECT SUM(CAST(NetAmount AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS TotalAmount"),
+                )
+                ->groupBy('OfficeTransacted')
+                ->orderBy('OfficeTransacted')
+                ->get();
+        }
+
+        $output = "";
+        foreach($data as $item) {
+            $output .= "<tr>" .
+                            "<th>" . $item->OfficeTransacted . "</th>" .
+                            "<td class='text-right'>" . number_format($item->KwhUsedTotal, 2) . "</td>" .
+                            "<td class='text-right'>" . number_format($item->TotalConsumers) . "</td>" .
+                            "<td class='text-right text-info'>₱ " . number_format($item->TotalSurcharges, 2) . "</td>" .
+                            "<td class='text-right text-danger'>₱ " . number_format($item->TotalEWT, 2) . "</td>" .
+                            "<td class='text-right text-danger'>₱ " . number_format($item->TotalEVAT, 2) . "</td>" .
+                            "<td class='text-right text-info'>₱ " . number_format($item->TotalOCL, 2) . "</td>" .
+                            "<td class='text-right text-danger'>₱ " . number_format($item->TotalDeductions, 2) . "</td>" .
+                            "<th class='text-right text-success'>₱ " . number_format($item->TotalAmount, 2) . "</th>" .
+                        "</tr>";
+        }
+
+        return response()->json($output, 200);
     }
 }

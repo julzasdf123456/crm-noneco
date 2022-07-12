@@ -45,6 +45,21 @@
 
                 <div class="input-group mb-3">
                     <input type="text"
+                           name="remember_token"
+                           class="form-control @error('remember_token') is-invalid @enderror"
+                           value="{{ env('APP_LOCATION') }}"
+                           placeholder="Office"
+                           readonly>
+                    <div class="input-group-append">
+                        <div class="input-group-text"><span class="fas fa-user"></span></div>
+                    </div>
+                    @error('remember_token')
+                    <span class="error invalid-feedback">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="input-group mb-3">
+                    <input type="text"
                            name="name"
                            class="form-control @error('name') is-invalid @enderror"
                            value="{{ old('name') }}"

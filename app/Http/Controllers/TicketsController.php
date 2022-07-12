@@ -346,6 +346,7 @@ class TicketsController extends AppBaseController
                     ->leftJoin('CRM_Barangays', 'CRM_Tickets.Barangay', '=', 'CRM_Barangays.id')                    
                     ->leftJoin('CRM_Towns', 'CRM_Tickets.Town', '=', 'CRM_Towns.id')                
                     ->leftJoin('CRM_TicketsRepository', 'CRM_Tickets.Ticket', '=', 'CRM_TicketsRepository.id')
+                    ->leftJoin('Billing_ServiceAccounts', 'CRM_Tickets.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                     ->select('CRM_Tickets.id as id',
                                     'CRM_Tickets.AccountNumber',
                                     'CRM_Tickets.ConsumerName',
@@ -354,6 +355,7 @@ class TicketsController extends AppBaseController
                                     'CRM_Tickets.Sitio as Sitio', 
                                     'CRM_Tickets.created_at', 
                                     'CRM_Towns.Town as Town',
+                                    'Billing_ServiceAccounts.OldAccountNo',
                                     'CRM_Tickets.Office',  
                                     'CRM_Barangays.Barangay as Barangay')
                     ->where(function ($query) {
@@ -362,7 +364,8 @@ class TicketsController extends AppBaseController
                                     })
                     ->where('CRM_Tickets.id', 'LIKE', '%' . $query . '%')
                     ->orWhere('CRM_Tickets.ConsumerName', 'LIKE', '%' . $query . '%')
-                    ->orWhere('CRM_Tickets.AccountNumber', 'LIKE', '%' . $query . '%')                    
+                    ->orWhere('CRM_Tickets.AccountNumber', 'LIKE', '%' . $query . '%')   
+                    ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $query . '%')                  
                     ->orderBy('CRM_Tickets.ConsumerName')
                     ->get();
             } else {
@@ -370,6 +373,7 @@ class TicketsController extends AppBaseController
                     ->leftJoin('CRM_Barangays', 'CRM_Tickets.Barangay', '=', 'CRM_Barangays.id')                    
                     ->leftJoin('CRM_Towns', 'CRM_Tickets.Town', '=', 'CRM_Towns.id')                
                     ->leftJoin('CRM_TicketsRepository', 'CRM_Tickets.Ticket', '=', 'CRM_TicketsRepository.id')
+                    ->leftJoin('Billing_ServiceAccounts', 'CRM_Tickets.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                     ->select('CRM_Tickets.id as id',
                                     'CRM_Tickets.AccountNumber',
                                     'CRM_Tickets.ConsumerName',
@@ -378,6 +382,7 @@ class TicketsController extends AppBaseController
                                     'CRM_Tickets.Sitio as Sitio', 
                                     'CRM_Tickets.created_at', 
                                     'CRM_Towns.Town as Town',
+                                    'Billing_ServiceAccounts.OldAccountNo',
                                     'CRM_Tickets.Office',  
                                     'CRM_Barangays.Barangay as Barangay')
                     ->where(function ($query) {
@@ -402,7 +407,7 @@ class TicketsController extends AppBaseController
                                         <div class="col-md-6 col-lg-6">
                                             <div>
                                                 <h4>' .$row->ConsumerName . '</h4>
-                                                <p class="text-muted" style="margin-bottom: 0;">Acount Number: ' . $row->AccountNumber . '</p>
+                                                <p class="text-muted" style="margin-bottom: 0;">Acount Number: ' . ($row->OldAccountNo != null ? $row->OldAccountNo : '') . '</p>
                                                 <p class="text-muted" style="margin-bottom: 0;">' . $row->Barangay . ', ' . $row->Town  . '</p>
                                                 <a href="' . route('tickets.show', [$row->id]) . '" class="text-primary" style="margin-top: 5px; padding: 8px;" title="View"><i class="fas fa-eye"></i></a>
                                                 <a href="' . route('tickets.edit', [$row->id]) . '" class="text-warning" style="margin-top: 5px; padding: 8px;" title="Edit"><i class="fas fa-pen"></i></a>

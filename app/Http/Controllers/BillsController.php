@@ -1754,4 +1754,156 @@ class BillsController extends AppBaseController
         return redirect(route('bills.unbilled-readings-console', $request['ServicePeriod']));
     }
 
+    public function adjustmentReports(Request $request) {
+        $type = $request['Type'];
+        $period = $request['ServicePeriod'];
+
+        if ($type != null && $period != null) {
+            if ($type == 'All') {
+                $data = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('users', 'users.id', '=', 'Billing_Bills.UserId')
+                    ->where('Billing_Bills.BilledFrom', 'WEB')
+                    ->whereRaw("Billing_Bills.UserId='" . Auth::id() . "'")
+                    ->where('ServicePeriod', $period)
+                    ->select('Billing_Bills.*',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.Purok',
+                        'Billing_ServiceAccounts.AreaCode',
+                        'users.name',
+                        'CRM_Towns.Town', 
+                        'CRM_Barangays.Barangay')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('OldAccountNo')
+                    ->get();
+            } elseif ($type == 'Bill Adjustments') {
+                $data = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('users', 'users.id', '=', 'Billing_Bills.UserId')
+                    ->where('Billing_Bills.BilledFrom', 'WEB')
+                    ->whereRaw("Billing_Bills.UserId='" . Auth::id() . "'")
+                    ->where('ServicePeriod', $period)
+                    ->whereNotNull('AdjustmentType')
+                    ->select('Billing_Bills.*',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.Purok',
+                        'Billing_ServiceAccounts.AreaCode',
+                        'users.name',
+                        'CRM_Towns.Town', 
+                        'CRM_Barangays.Barangay')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('OldAccountNo')
+                    ->get();
+            } else {
+                $data = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('users', 'users.id', '=', 'Billing_Bills.UserId')
+                    ->where('Billing_Bills.BilledFrom', 'WEB')
+                    ->whereRaw("Billing_Bills.UserId='" . Auth::id() . "'")
+                    ->where('ServicePeriod', $period)
+                    ->whereNull('AdjustmentType')
+                    ->select('Billing_Bills.*',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.Purok',
+                        'Billing_ServiceAccounts.AreaCode',
+                        'users.name',
+                        'CRM_Towns.Town', 
+                        'CRM_Barangays.Barangay')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('OldAccountNo')
+                    ->get();
+            }
+        } else {
+            $data = [];
+        }
+
+        return view('/bills/adjustment_reports', [
+            'data' => $data
+        ]);
+    }
+
+    public function printAdjustmentReport($type, $period) {
+        if ($type != null && $period != null) {
+            if ($type == 'All') {
+                $data = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('users', 'users.id', '=', 'Billing_Bills.UserId')
+                    ->where('Billing_Bills.BilledFrom', 'WEB')
+                    ->whereRaw("Billing_Bills.UserId='" . Auth::id() . "'")
+                    ->where('ServicePeriod', $period)
+                    ->select('Billing_Bills.*',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.Purok',
+                        'Billing_ServiceAccounts.AreaCode',
+                        'users.name',
+                        'CRM_Towns.Town', 
+                        'CRM_Barangays.Barangay')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('OldAccountNo')
+                    ->get();
+            } elseif ($type == 'Bill Adjustments') {
+                $data = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('users', 'users.id', '=', 'Billing_Bills.UserId')
+                    ->where('Billing_Bills.BilledFrom', 'WEB')
+                    ->whereRaw("Billing_Bills.UserId='" . Auth::id() . "'")
+                    ->where('ServicePeriod', $period)
+                    ->whereNotNull('AdjustmentType')
+                    ->select('Billing_Bills.*',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.Purok',
+                        'Billing_ServiceAccounts.AreaCode',
+                        'users.name',
+                        'CRM_Towns.Town', 
+                        'CRM_Barangays.Barangay')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('OldAccountNo')
+                    ->get();
+            } else {
+                $data = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('users', 'users.id', '=', 'Billing_Bills.UserId')
+                    ->where('Billing_Bills.BilledFrom', 'WEB')
+                    ->whereRaw("Billing_Bills.UserId='" . Auth::id() . "'")
+                    ->where('ServicePeriod', $period)
+                    ->whereNull('AdjustmentType')
+                    ->select('Billing_Bills.*',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.Purok',
+                        'Billing_ServiceAccounts.AreaCode',
+                        'users.name',
+                        'CRM_Towns.Town', 
+                        'CRM_Barangays.Barangay')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('OldAccountNo')
+                    ->get();
+            }
+        } else {
+            $data = [];
+        }
+
+        return view('/bills/print_adjustment_report', [
+            'data' => $data,
+            'type' => $type,
+            'period' => $period
+        ]);
+    }
 }
