@@ -47,7 +47,7 @@ class PaidBillsController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+        $orAssignedLast = ORAssigning::whereRaw("UserId ='" . Auth::id() . "'")
             ->orderByDesc('created_at')
             ->first();
 
@@ -867,7 +867,7 @@ class PaidBillsController extends AppBaseController
         
         // SAVE OR
         $saveOR = ORAssigning::where('ORNumber', $request['ORNumber'])
-            ->where('UserId', Auth::id())
+            ->whereRaw("UserId='" . Auth::id() . "'")
             ->first();        
         if ($saveOR == null) {
             $saveOR = new ORAssigning;
@@ -1159,7 +1159,7 @@ class PaidBillsController extends AppBaseController
     public function bapaPaymentConsole($bapaName) {
         $bapaName = urldecode($bapaName);
 
-        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+        $orAssignedLast = ORAssigning::whereRaw("UserId='" . Auth::id() . "'")
             ->orderByDesc('created_at')
             ->first();
 
@@ -1787,7 +1787,7 @@ class PaidBillsController extends AppBaseController
 
     public function billsCollection() {
         // $paidBills = $this->paidBillsRepository->all();
-        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+        $orAssignedLast = ORAssigning::whereRaw("UserId='" . Auth::id() . "'")
             ->orderByDesc('created_at')
             ->first();
 

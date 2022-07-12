@@ -184,7 +184,7 @@ class TransactionIndexController extends AppBaseController
             ->whereNull('ORDate')
             ->get();
 
-        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+        $orAssignedLast = ORAssigning::whereRaw("UserId='" . Auth::id() . "'")
             ->orderByDesc('created_at')
             ->first();
 
@@ -360,7 +360,7 @@ class TransactionIndexController extends AppBaseController
 
         // SAVE OR
         $saveOR = ORAssigning::where('ORNumber', $transactionIndex->ORNumber)
-            ->where('UserId', Auth::id())
+            ->whereRaw("UserId='" . Auth::id() . "'")
             ->first();        
         if ($saveOR == null) {
             $saveOR = new ORAssigning;
@@ -393,7 +393,7 @@ class TransactionIndexController extends AppBaseController
     }
 
     public function uncollectedArrears() {
-        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+        $orAssignedLast = ORAssigning::whereRaw("UserId='" . Auth::id() . "'")
             ->orderByDesc('created_at')
             ->first();
 
@@ -529,7 +529,7 @@ class TransactionIndexController extends AppBaseController
 
         // SAVE OR
         $saveOR = ORAssigning::where('ORNumber', $transactionIndex->ORNumber)
-            ->where('UserId', Auth::id())
+            ->whereRaw("UserId='" . Auth::id() . "'")
             ->first();        
         if ($saveOR == null) {
             $saveOR = new ORAssigning;
@@ -549,7 +549,7 @@ class TransactionIndexController extends AppBaseController
         $account = ServiceAccounts::find($accountNo);
         $collectibles = Collectibles::where('AccountNumber', $accountNo)->first();
         $ledger = ArrearsLedgerDistribution::where('AccountNumber', $accountNo)->orderBy('ServicePeriod')->get();
-        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+        $orAssignedLast = ORAssigning::whereRaw("UserId='" . Auth::id() . "'")
             ->orderByDesc('created_at')
             ->first();
 
@@ -641,7 +641,7 @@ class TransactionIndexController extends AppBaseController
 
         // SAVE OR
         $saveOR = ORAssigning::where('ORNumber', $transactionIndex->ORNumber)
-            ->where('UserId', Auth::id())
+            ->whereRaw("UserId='" . Auth::id() . "'")
             ->first();        
         if ($saveOR == null) {
             $saveOR = new ORAssigning;
@@ -671,7 +671,7 @@ class TransactionIndexController extends AppBaseController
 
     public function otherPayments() {
         $payables = AccountPayables::all();
-        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+        $orAssignedLast = ORAssigning::whereRaw("UserId='" . Auth::id() . "'")
             ->orderByDesc('created_at')
             ->first();
         $transactionId = IDGenerator::generateID();
@@ -763,7 +763,7 @@ class TransactionIndexController extends AppBaseController
 
     public function reconnectionCollection() {
         $reconnectionPayable = AccountPayables::where('id', TransactionIndex::getReconnectionFeeId())->first();
-        $orAssignedLast = ORAssigning::where('UserId', Auth::id())
+        $orAssignedLast = ORAssigning::whereRaw("UserId='" . Auth::id() . "'")
             ->orderByDesc('created_at')
             ->first();
         return view('/transaction_indices/reconnection_collection', [
@@ -928,7 +928,7 @@ class TransactionIndexController extends AppBaseController
         // ADD OR LOG
         // SAVE OR
         $saveOR = ORAssigning::where('ORNumber', $request['ORNumber'])
-            ->where('UserId', Auth::id())
+            ->whereRaw("UserId='" . Auth::id() . "'")
             ->first();        
         if ($saveOR == null) {
             $saveOR = new ORAssigning;
@@ -1038,7 +1038,7 @@ class TransactionIndexController extends AppBaseController
             $paidBills = DB::table('Cashier_PaidBills')
                 ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                 ->where('Cashier_PaidBills.ORDate', $request['Date'])
-                ->where('Cashier_PaidBills.Teller', Auth::id())
+                ->whereRaw("Cashier_PaidBills.Teller='" . Auth::id() . "'")
                 ->whereNull('Status')
                 ->select('Cashier_PaidBills.*',
                         'Billing_ServiceAccounts.ServiceAccountName',
@@ -1047,14 +1047,14 @@ class TransactionIndexController extends AppBaseController
                 ->get();
 
             $nonPowerBills = TransactionIndex::where('ORDate', $request['Date'])
-                ->where('UserId', Auth::id())
+                ->whereRaw("UserId='" . Auth::id() . "'")
                 ->whereNull('Status')
                 ->get();
         } else {
             $paidBills = DB::table('Cashier_PaidBills')
                 ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                 ->where('Cashier_PaidBills.ORDate', date('Y-m-d'))
-                ->where('Cashier_PaidBills.Teller', Auth::id())
+                ->whereRaw("Cashier_PaidBills.Teller='" . Auth::id() . "'")
                 ->whereNull('Status')
                 ->select('Cashier_PaidBills.*',
                         'Billing_ServiceAccounts.ServiceAccountName',
@@ -1063,7 +1063,7 @@ class TransactionIndexController extends AppBaseController
                 ->get();
             
             $nonPowerBills = TransactionIndex::where('ORDate', date('Y-m-d'))
-                ->where('UserId', Auth::id())
+                ->whereRaw("UserId='" . Auth::id() . "'")
                 ->whereNull('Status')
                 ->get();
         }
