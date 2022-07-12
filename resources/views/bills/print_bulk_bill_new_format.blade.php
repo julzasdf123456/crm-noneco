@@ -1,479 +1,556 @@
 
 @php
 use App\Models\ServiceAccounts;
-use App\Models\MemberConsumers;
 use App\Models\Bills;
-use Illuminate\Support\Facades\DB;
 use App\Models\Rates;
-use App\Models\BillingMeters;
 @endphp
 
-<link rel="stylesheet" href="{{ URL::asset('adminlte.min.css') }}">
 
-@foreach ($bills as $item)
 <style>
-@media print {
-    @page {
-        /* size: landscape !important; */
+    html, body {
+        font-family: sans-serif;
+        font-stretch: condensed;
+        font-size: .85em;
     }
-
-    header {
-        display: none;
+    
+    th, td {
+        font-family: sans-serif;
+        font-stretch: condensed;
+        font-size: .68em;
     }
+    
+    @media print {
+        @page {
+            /* size: landscape !important; */
+        }
+    
+        header {
+            display: none;
+        }
+    
+        .divider {
+            width: 100%;
+            margin: 10px auto;
+            height: 1px;
+            background-color: #dedede;
+        }
+    
+        .left-indent {
+            margin-left: 30px;
+        }
+    
+        .text-right {
+            text-align: right;
+        }
+    
+        .text-center {
+            text-align: center;
+        }
+    
+        .print-area {
+            page-break-before: always;
+        }
 
+        .print-area:first-child {
+            page-break-after: auto;
+        }
+    
+        .u-bottom {
+            border-bottom: 1px solid #444555;
+            padding-bottom: 2px;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+    
+        .half {
+            display: inline-table; 
+            width: 49%;
+        }
+    
+        table, th, tr {
+            border-collapse: collapse;
+            border: 1px solid #444555;
+        }
+    
+        p {
+            margin: 0;
+            padding: 0;
+        }
+    }  
+    
     .left-indent {
-        margin-left: 30px;
+        padding-left: 15px;
+    }
+    
+    .left-indent-more {
+        padding-left: 40px;
+    }
+    
+    .text-right {
+        text-align: right;
+    }
+    
+    .text-left {
+        text-align: left;
+    }
+    
+    .text-center {
+        text-align: center;
+    }
+    
+    .divider {
+        width: 100%;
+        margin: 10px auto;
+        height: 1px;
+        background-color: #dedede;
+    } 
+    
+    .u-bottom {
+        border-bottom: 1px solid #444555;
+        padding-bottom: 2px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .half {
+        display: inline-table; 
+        width: 49%;
+    }
+    
+    table, th, tr, td {
+        border-collapse: collapse;
+        border: 1px solid #444555;
+    }
+    
+    .no-border-top-bottom {
+        border-bottom: 0px !important;
+        border-top: 0px !important;
+    }
+    
+    .border-bottom-only {
+        border-bottom: 1px solid #444555 !important;
+        border-top: 0px !important;
+    }
+    
+    p {
+        margin: 0;
+        padding: 0;
     }
 
-    #print-area {        
-        page-break-after: always;
+    .print-area {
+        page-break-before: always;
     }
 
-    #print-area:last-child {        
+    .print-area:last-child {
         page-break-after: auto;
     }
-}  
-
-html {
-    margin: 10px !important;
-}
-
-.left-indent {
-    margin-left: 50px;
-}
 </style>
 
-    <div id="print-area" class="content">
-        {{-- QUERY ALL DEPENDENCIES FIRST --}}
-        @php
-            $account = DB::table('Billing_ServiceAccounts')
-                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
-                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                ->select('Billing_ServiceAccounts.id',
-                        'Billing_ServiceAccounts.ServiceAccountName',
-                        'Billing_ServiceAccounts.OldAccountNo',
-                        'Billing_ServiceAccounts.AccountCount',
-                        'Billing_ServiceAccounts.Purok',
-                        'Billing_ServiceAccounts.AccountType',
-                        'Billing_ServiceAccounts.AccountStatus',
-                        'Billing_ServiceAccounts.AreaCode',
-                        'Billing_ServiceAccounts.SequenceCode',
-                        'Billing_ServiceAccounts.ForDistribution',
-                        'Billing_ServiceAccounts.Organization',
-                        'Billing_ServiceAccounts.Main',
-                        'Billing_ServiceAccounts.GroupCode',
-                        'Billing_ServiceAccounts.Multiplier',
-                        'Billing_ServiceAccounts.Coreloss',
-                        'Billing_ServiceAccounts.ConnectionDate',
-                        'Billing_ServiceAccounts.ServiceConnectionId',
-                        'Billing_ServiceAccounts.SeniorCitizen',
-                        'Billing_ServiceAccounts.Evat5Percent',
-                        'Billing_ServiceAccounts.Ewt2Percent',
-                        'Billing_ServiceAccounts.Contestable',
-                        'Billing_ServiceAccounts.NetMetered',
-                        'Billing_ServiceAccounts.AccountRetention',
-                        'Billing_ServiceAccounts.DurationInMonths',
-                        'Billing_ServiceAccounts.AccountExpiration',
-                        'CRM_Towns.Town',
-                        'CRM_Barangays.Barangay')
-                ->where('Billing_ServiceAccounts.id', $item->AccountNumber)
-                ->first();
+<script src="{{ URL::asset('js/jquery.min.css'); }}"></script>
+<script src="{{ URL::asset('js/barcodejs.js'); }}"></script>
 
-            $meters = BillingMeters::where('ServiceAccountId', $item->AccountNumber)
-                ->orderByDesc('created_at')
-                ->first();
+@foreach ($bills as $item)
+@php
+$rate = Rates::where('ServicePeriod', $item->ServicePeriod)
+    ->where('ConsumerType', Rates::filterConsumerType($item->ConsumerType))
+    ->first();
+@endphp
 
-            $rate = Rates::where('ServicePeriod', $item->ServicePeriod)
-                ->where('ConsumerType', Rates::filterConsumerType($item->ConsumerType))
-                ->first();
-        @endphp
-        <div class="row">
-            <div class="col-lg-12">
-                <p class="text-center"><strong>{{ env('APP_COMPANY') }}</strong></p>
-                <p class="text-center">{{ env('APP_ADDRESS') }}</p>
+<div id="print-area" style="float: none;">
+    <div style="display: inline-table; width: 100%">
+        <img src="{{ URL::asset('imgs/noneco-official-logo.png'); }}" width="60px;"> 
 
-                <br>
+        <p class="text-center"><strong>{{ strtoupper(env('APP_COMPANY')) }}</strong></p>
+        <p class="text-center">{{ env('APP_ADDRESS') }}  |  {{ env('APP_COMPANY_TIN') }}</p>
+        <p class="text-center">{{ env('APP_COMPANY_CONTACT') }}</p>
+        <p class="text-center">{{ env('APP_COMPANY_EMAIL') }}</p>
 
-                <h4 class="text-center">STATEMENT OF ACCOUNT</h4>
+        <h4 class="text-center">STATEMENT OF ACCOUNT</h4>
 
-                <br>
-
-                <table class="table table-borderless table-sm">
-                    <tr>
-                        <td>Account Number</td>
-                        <th class="text-right">{{ $account->OldAccountNo }}</th>
-                        <td class="left-pad">Prev. Reading</td>
-                        <th class="text-right">{{ $item->PreviousKwh }}</th>
-                        <td class="left-pad">Date From</td>
-                        <th class="text-right">{{ date('F d, Y', strtotime($item->ServiceDateFrom)) }}</th>
-                    </tr>
-                    <tr>
-                        <td>Consumer Name</td>
-                        <th class="text-right">{{ $account->ServiceAccountName }}</th>
-                        <td class="left-pad">Pres. Reading</td>
-                        <th class="text-right">{{ $item->PresentKwh }}</th>
-                        <td class="left-pad">Date To</td>
-                        <th class="text-right">{{ date('F d, Y', strtotime($item->ServiceDateTo)) }}</th>
-                    </tr>
-                    <tr>
-                        <td>Consumer Address</td>
-                        <th class="text-right">{{ ServiceAccounts::getAddress($account) }}</th>
-                        <td class="left-pad">Core Loss</td>
-                        <th class="text-right">{{ $item->Coreloss }}</th>
-                        <td class="left-pad">Due Date</td>
-                        <th class="text-right">{{ date('F d, Y', strtotime($item->DueDate)) }}</th>
-                    </tr>
-                    <tr>
-                        <td>Route/Area Code</td>
-                        <th class="text-right">{{ $account->AreaCode }}</th>
-                        <td class="left-pad">Demand</td>
-                        <th class="text-right">{{ $item->DemandPresentKwh }}</th>
-                        <td class="left-pad">Billing Month</td>
-                        <th class="text-right">{{ date('F Y', strtotime($item->ServicePeriod)) }}</th>
-                    </tr>
-                    <tr>
-                        <td>Meter Number</td>
-                        <th class="text-right">{{ $meters != null ? $meters->SerialNumber : '' }}</th>
-                        <td class="left-pad">Multiplier</td>
-                        <th class="text-right">{{ $item->Multiplier }}</th>
-                        <td class="left-pad">Bill Number</td>
-                        <th class="text-right">{{ $item->BillNumber }}</th>
-                    </tr>
-                    <tr>
-                        <td>Consumer Type</td>
-                        <th class="text-right">{{ $item->ConsumerType }}</th>
-                        <td class="left-pad">Form 2307</td>
-                        <th class="text-right">{{ $item->Form2307Amount != null ? number_format($item->Form2307Amount, 4) : 'none' }}</th>
-                        <td class="left-pad">Kwh Used</td>
-                        <th class="text-right">{{ $item->KwhUsed }}</th>
-                    </tr>
-                </table>
-
-                <div class="divider"></div>
-
-                <div class="row">
-                    <div class="col-lg-6 col-md-6">
-                        <table class="table-borderless table-sm table-hover">
-                            <thead>
-                                <th>CHARGES</th>
-                                <th></th>
-                                <th class="left-pad">RATE</th>
-                                <th class="left-pad">AMOUNT</th>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th>Generation and Transmission Charges</th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-                                <tr>                                                    
-                                    <td class="indent-td">Generation System</td>
-                                    <td class="indent-td">Per KW</td>
-                                    <td class="text-right">{{ $rate->GenerationSystemCharge }}</td>
-                                    <td class="text-right">{{ number_format($item->GenerationSystemCharge, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Transmission Delivery Charge</td>
-                                    <td class="indent-td">Per KW</td>
-                                    <td class="text-right">{{ $rate->TransmissionDeliveryChargeKW }}</td>
-                                    <td class="text-right">{{ number_format($item->TransmissionDeliveryChargeKW, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Transmission Delivery Charge</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->TransmissionDeliveryChargeKWH }}</td>
-                                    <td class="text-right">{{ number_format($item->TransmissionDeliveryChargeKWH, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">System Loss Charge</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->SystemLossCharge }}</td>
-                                    <td class="text-right">{{ number_format($item->SystemLossCharge, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Other Generation Rate Adj. (OGA)</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->OtherGenerationRateAdjustment }}</td>
-                                    <td class="text-right">{{ number_format($item->OtherGenerationRateAdjustment, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Other Transmission Cost Adj. (OTCA)</td>
-                                    <td class="indent-td">Per KW</td>
-                                    <td class="text-right">{{ $rate->OtherTransmissionCostAdjustmentKW }}</td>
-                                    <td class="text-right">{{ number_format($item->OtherTransmissionCostAdjustmentKW, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Other Transmission Cost Adj. (OTCA)</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->OtherTransmissionCostAdjustmentKWH }}</td>
-                                    <td class="text-right">{{ number_format($item->OtherTransmissionCostAdjustmentKWH, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Other System Loss Cost Adj. (OSLA)</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->OtherSystemLossCostAdjustment }}</td>
-                                    <td class="text-right">{{ number_format($item->OtherSystemLossCostAdjustment, 2) }}</td>
-                                </tr>
-
-                                <tr>
-                                    <th>Distribution, Metering, & Supply Charges</th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Distribution Demand  Charge</td>
-                                    <td class="indent-td">Per KW</td>
-                                    <td class="text-right">{{ $rate->DistributionDemandCharge }}</td>
-                                    <td class="text-right">{{ number_format($item->DistributionDemandCharge, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Distribution System Charge</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->DistributionSystemCharge }}</td>
-                                    <td class="text-right">{{ number_format($item->DistributionSystemCharge, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Supply Retail Customer Charge</td>
-                                    <td class="indent-td">Per cust/mo</td>
-                                    <td class="text-right">{{ $rate->SupplyRetailCustomerCharge }}</td>
-                                    <td class="text-right">{{ number_format($item->SupplyRetailCustomerCharge, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Supply System Charge</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->SupplySystemCharge }}</td>
-                                    <td class="text-right">{{ number_format($item->SupplySystemCharge, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Metering Retail Customer Charge</td>
-                                    <td class="indent-td">Per cust/mo</td>
-                                    <td class="text-right">{{ $rate->MeteringRetailCustomerCharge }}</td>
-                                    <td class="text-right">{{ number_format($item->MeteringRetailCustomerCharge, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Metering System Charge</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->MeteringSystemCharge }}</td>
-                                    <td class="text-right">{{ number_format($item->MeteringSystemCharge, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">RFSC</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->RFSC }}</td>
-                                    <td class="text-right">{{ number_format($item->RFSC, 2) }}</td>
-                                </tr>
-
-                                <tr>
-                                    <th>Pass Through Taxes</th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Franchise Tax</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->FranchiseTax }}</td>
-                                    <td class="text-right">{{ number_format($item->FranchiseTax, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Business Tax</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->BusinessTax }}</td>
-                                    <td class="text-right">{{ number_format($item->BusinessTax, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Real Property Tax (RPT)</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->RealPropertyTax }}</td>
-                                    <td class="text-right">{{ number_format($item->RealPropertyTax, 2) }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="col-lg-6 col-md-6">
-                        <table class="table-borderless table-hover table-sm">
-                            <thead>
-                                <th>CHARGES</th>
-                                <th></th>
-                                <th class="left-pad">RATE</th>
-                                <th class="left-pad">AMOUNT</th>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th>Other Charges</th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Lifeline Rate (Discount/Subsidy)</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->LifelineRate }}</td>
-                                    <td class="text-right">{{ number_format($item->LifelineRate, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Inter-Class Cross Subsidy Charge</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->InterClassCrossSubsidyCharge }}</td>
-                                    <td class="text-right">{{ number_format($item->InterClassCrossSubsidyCharge, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">PPA (Refund)</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->PPARefund }}</td>
-                                    <td class="text-right">{{ number_format($item->PPARefund, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Senior Citizen Subsidy</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->SeniorCitizenSubsidy }}</td>
-                                    <td class="text-right">{{ number_format($item->SeniorCitizenSubsidy, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Other Lifeline Rate Cost Adj. (OLRA)</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->OtherLifelineRateCostAdjustment }}</td>
-                                    <td class="text-right">{{ number_format($item->OtherLifelineRateCostAdjustment, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">SC Discount & Subsidy Adj.</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->SeniorCitizenDiscountAndSubsidyAdjustment }}</td>
-                                    <td class="text-right">{{ number_format($item->SeniorCitizenDiscountAndSubsidyAdjustment, 2) }}</td>
-                                </tr>
-
-                                <tr>
-                                    <th>Universal Charges</th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Missionary Electrification Charge</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->MissionaryElectrificationCharge }}</td>
-                                    <td class="text-right">{{ number_format($item->MissionaryElectrificationCharge, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Environmental Charge</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->EnvironmentalCharge }}</td>
-                                    <td class="text-right">{{ number_format($item->EnvironmentalCharge, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Stranded Contract Costs</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->StrandedContractCosts }}</td>
-                                    <td class="text-right">{{ number_format($item->StrandedContractCosts, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">NPC Stranded Debt</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->NPCStrandedDebt }}</td>
-                                    <td class="text-right">{{ number_format($item->NPCStrandedDebt, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Feed-in Tariff Allowance (FIT-All)</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->FeedInTariffAllowance }}</td>
-                                    <td class="text-right">{{ number_format($item->FeedInTariffAllowance, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Missionary Electrification - REDCI</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->MissionaryElectrificationREDCI }}</td>
-                                    <td class="text-right">{{ number_format($item->MissionaryElectrificationREDCI, 2) }}</td>
-                                </tr>
-
-                                <tr>
-                                    <th>VAT Charges</th>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Generation</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->GenerationVAT }}</td>
-                                    <td class="text-right">{{ number_format($item->GenerationVAT, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Transmission</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->TransmissionVAT }}</td>
-                                    <td class="text-right">{{ number_format($item->TransmissionVAT, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">System Loss</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->SystemLossVAT }}</td>
-                                    <td class="text-right">{{ number_format($item->SystemLossVAT, 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="indent-td">Distribution</td>
-                                    <td class="indent-td">Per KWH</td>
-                                    <td class="text-right">{{ $rate->DistributionVAT }}</td>
-                                    <td class="text-right">{{ number_format($item->DistributionVAT, 2) }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="divider"></div>
-
-                    <div class="col-lg-12">
-                        <table class="table table-borderless table-sm">
-                            <<tr>
-                                <td>Additional Charges - Termed Payments</td>
-                                <th class="text-right">+ {{ number_format($item->AdditionalCharges, 2) }}</th>
-                                <td style="padding-left: 60px;">EWT 2%</td>
-                                <th class="text-right">- {{ $item->Evat2Percent }}</th>
-                            </tr>
-                            <tr>
-                                <td>Deposit/Pre-Payment Deductions</td>
-                                <td class="text-right">- {{ number_format($item->DeductedDeposit, 2) }}</td>
-                                <td style="padding-left: 60px;">EVAT 5%</td>
-                                <th class="text-right">- {{ $item->Evat5Percent }}</th>
-                            </tr>
-                            <tr>                                                
-                                <td>Other Deductions</td>
-                                <th class="text-right">- {{ number_format($item->Deductions, 2) }}</th>
-                            </tr>
-                            <tr>
-                                <td>Amount Due</td>
-                                <td></td>
-                                <td></td>
-                                <th class="text-right"><h4><strong>₱ {{ number_format($item->NetAmount, 2) }}</strong></h4></th>
-                            </tr>
-                            @if (Bills::getAccountTypeByType($item->ConsumerType) != 'RESIDENTIAL')
-                            <tr>
-                                <td>Surcharge</td>
-                                <td></td>
-                                <td></td>
-                                <th class="text-right">+ {{ number_format(Bills::getFinalPenalty($item), 2) }}</th>                                    
-                            </tr>
-                            <tr>
-                                <td>Amount Due after Due Date</td>
-                                <td></td>
-                                <td></td>
-                                <th class="text-right"><h4><strong>₱ {{ number_format(floatval(Bills::getFinalPenalty($item)) + floatval($item->NetAmount), 2) }}</strong></h4></th>
-                            </tr>
-                            @endif
-                        </table>
-                    </div>
-                </div>            
-            </div>
-        </div>
+        <span>
+            BILLING MONTH: <span class="u-bottom" style="margin-right: 30px;">{{ strtoupper(date("F Y", strtotime($item->ServicePeriod))) }}</span>
+            DATE BILLED: <span class="u-bottom" style="margin-right: 30px;">{{ strtoupper(date("F d, Y", strtotime($item->BillingDate))) }}</span>
+            BILL NUMBER: <span class="u-bottom">{{ $item->BillNumber }}</span>
+        </span>
     </div>
+    <div style="width: 100%; height: 5px;"></div>
+    <div class="half" style="float: left;">
+        <table class="bordered" style="width: 100%;">
+            <tr>
+                <td class="text-center">ACCOUNT NUMBER</td>
+                <td class="text-center">METER NUMBER</td>
+                <td class="text-center">TYPE</td>
+                <td class="text-center">KWH MULT.</td>
+                <td class="text-center">DUE DATE</td>
+            </tr>
+            <tr>
+                <th class="text-center" id="acctno">{{ $item->OldAccountNo }}</th>
+                <th class="text-center">{{ $item->MeterNumber }}</th>
+                <th class="text-center">{{ substr($item->ConsumerType, 0, 1) }}</th>
+                <th class="text-center">{{ $item->Multiplier }}</th>
+                <th class="text-center">{{ date('M d, Y', strtotime($item->DueDate)) }}</th>
+            </tr>
+            <tr  class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left" colspan="5">NAME: <strong>{{ $item->ServiceAccountName }}</strong></td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left" colspan="5">ADDRESS: <strong>{{ ServiceAccounts::getAddress($item) }}</strong></td>
+            </tr>
+        </table>
+
+        <table class="bordered" style="width: 100%; margin-top: 2px;">
+            <tr>
+                <th class="text-center">ELECTRIC BILL CHARGES</th>
+                <th class="text-center">RATE</th>
+                <th class="text-center">AMOUNT</th>
+            </tr>
+            {{-- GENERATION CHARGES --}}
+            <tr class="no-border-top-bottom">
+                <th class="no-border-top-bottom text-left">I. GENERATION, TRANS., AND SYSTEM LOSS CHARGES</th>
+                <th class="no-border-top-bottom"></th>
+                <th class="no-border-top-bottom"></th>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Generation System Charge (Php/kWh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->GenerationSystemCharge }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->GenerationSystemCharge, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Transmission Delivery Charge (Php/kW)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->TransmissionDeliveryChargeKW }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->TransmissionDeliveryChargeKW, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Transmission Delivery Charge (Php/kWh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->TransmissionDeliveryChargeKWH }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->TransmissionDeliveryChargeKWH, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">System Loss Charge (Php/kWh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->SystemLossCharge }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->SystemLossCharge, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Other Gen. Rate Adjustment_OGA (Php/kWh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->OtherGenerationRateAdjustment }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->OtherGenerationRateAdjustment, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Other Trans. Cost Adjustment_OTCA (Php/kW)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->OtherTransmissionCostAdjustmentKW }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->OtherTransmissionCostAdjustmentKW, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Other Trans. Cost Adjustment_OTCA (Php/kWh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->OtherTransmissionCostAdjustmentKWH }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->OtherTransmissionCostAdjustmentKWH, 2) }}</td>
+            </tr>
+            <tr class="border-bottom-only">
+                <td class="border-bottom-only text-left left-indent">Other Sys/ Loss Cost Adjustment_OSLA (Php/kWh)</td>
+                <td class="border-bottom-only text-right">{{ $rate->OtherSystemLossCostAdjustment }}</td>
+                <td class="border-bottom-only text-right">{{ number_format($item->OtherSystemLossCostAdjustment, 2) }}</td>
+            </tr>
+            
+            {{-- DISTRIBUTION CHARGES --}}
+            <tr class="no-border-top-bottom">
+                <th class="no-border-top-bottom text-left">II. DISTRIBUTION, SUPPLY, & METERING REVENUES</th>
+                <th class="no-border-top-bottom"></th>
+                <th class="no-border-top-bottom"></th>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Distribution Demand  Charge (Php/kw)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->DistributionDemandCharge }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->DistributionDemandCharge, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Distribution System Charge (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->DistributionSystemCharge }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->DistributionSystemCharge, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Supply Retail Cust. Charge (Php/cust/mo)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->SupplyRetailCustomerCharge }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->SupplyRetailCustomerCharge, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Supply System Charge (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->SupplySystemCharge }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->SupplySystemCharge, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Metering Retail Cust. Charge (Php/cust/mo)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->MeteringRetailCustomerCharge }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->MeteringRetailCustomerCharge, 2) }}</td>
+            </tr>
+            <tr class="border-bottom-only">
+                <td class="border-bottom-only text-left left-indent">Metering System Charge (Php/kwh)</td>
+                <td class="border-bottom-only text-right">{{ $rate->MeteringSystemCharge }}</td>
+                <td class="border-bottom-only text-right">{{ number_format($item->MeteringSystemCharge, 2) }}</td>
+            </tr>
+
+            {{-- GOVERNMENT REVENUES --}}
+            <tr class="no-border-top-bottom">
+                <th class="no-border-top-bottom text-left">III. GOVERNMENT REVENUES (VAT)</th>
+                <th class="no-border-top-bottom"></th>
+                <th class="no-border-top-bottom"></th>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">VAT Rate: Generation (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->GenerationVAT }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->GenerationVAT, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">VAT Rate: Transmission (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->TransmissionVAT }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->TransmissionVAT, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">VAT Rate: System Loss (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->SystemLossVAT }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->SystemLossVAT, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">VAT Rate: Distribution & Others (%)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->DistributionVAT }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->DistributionVAT, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Franchise Tax (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->FranchiseTax }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->FranchiseTax, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Business Tax (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->BusinessTax }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->BusinessTax, 2) }}</td>
+            </tr>
+            <tr class="border-bottom-only">
+                <td class="border-bottom-only text-left left-indent" style="padding-bottom: 3px;">Real Property Tax (RPT) (Php/kwh)</td>
+                <td class="border-bottom-only text-right">{{ $rate->RealPropertyTax }}</td>
+                <td class="border-bottom-only text-right">{{ number_format($item->RealPropertyTax, 2) }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="half" style="float-right; margin-left: 5px;">
+        <table class="bordered" style="width: 100%;">
+            <tr>
+                <td class="text-center" colspan="2">PERIOD COVERED</td>
+                <td class="text-center" colspan="2">READING</td>
+                <td class="text-center" rowspan="2">KWH USED</td>
+                <td class="text-center" rowspan="2">TOTAL KWH</td>
+            </tr>
+            <tr>
+                <td class="text-center">FROM</td>
+                <td class="text-center">TO</td>
+                <td class="text-center">PRES</td>
+                <td class="text-center">PREV</td>
+            </tr>
+            <tr>
+                <th class="text-center">{{ date('m/d/Y', strtotime($item->ServiceDateFrom)) }}</th>
+                <th class="text-center">{{ date('m/d/Y', strtotime($item->ServiceDateTo)) }}</th>
+                <th class="text-center">{{ $item->PresentKwh }}</th>
+                <th class="text-center">{{ $item->PreviousKwh }}</th>
+                <th class="text-center">{{ $item->KwhUsed }}</th>
+                <th class="text-center">{{ floatval($item->KwhUsed) * floatval($item->Multiplier) }}</th>
+            </tr>
+            <tr>
+                <td colspan="6">DEMAND: <strong>{{ $item->DemandPresentKwh }}</strong></td>
+            </tr>
+        </table>
+
+        <table class="bordered" style="width: 100%; margin-top: 2px;">
+            <tr>
+                <th class="text-center">ELECTRIC BILL CHARGES</th>
+                <th class="text-center">RATE</th>
+                <th class="text-center">AMOUNT</th>
+            </tr>
+
+            {{-- OTHER CHARGES --}}
+            <tr class="no-border-top-bottom">
+                <th class="no-border-top-bottom text-left">IV. OTHER CHARGES</th>
+                <th class="no-border-top-bottom"></th>
+                <th class="no-border-top-bottom"></th>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Lifeline Rate (Discount)/Subsidy (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->LifelineRate }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->LifelineRate, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Senior Citizen Subsidy (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->SeniorCitizenSubsidy }}</td>
+                <td class="no-border-top-bottom text-right">{{ intval($item->SeniorCitizenSubsidy) < 0 ? '-' : number_format($item->SeniorCitizenSubsidy, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Other Lifeline Rate Cost Adj._OLRA (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->OtherLifelineRateCostAdjustment }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->OtherLifelineRateCostAdjustment, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Senior Cit. Discount & Subsidy Adj. (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->SeniorCitizenDiscountAndSubsidyAdjustment }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->SeniorCitizenDiscountAndSubsidyAdjustment, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Reinvestment Fund for Sust. CAPEX_RFSC (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->RFSC }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->RFSC, 2) }}</td>
+            </tr>
+            <tr class="border-bottom-only">
+                <td class="border-bottom-only text-left left-indent">Feed-in Tariff Allowance_FIT-All (Php/kwh)</td>
+                <td class="border-bottom-only text-right">{{ $rate->FeedInTariffAllowance }}</td>
+                <td class="border-bottom-only text-right">{{ number_format($item->FeedInTariffAllowance, 2) }}</td>
+            </tr>
+
+            {{-- UNVERISAL CHARGES --}}
+            <tr class="no-border-top-bottom">
+                <th class="no-border-top-bottom text-left">V. UNIVERSAL CHARGES</th>
+                <th class="no-border-top-bottom"></th>
+                <th class="no-border-top-bottom"></th>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Missionary Electrification Charge (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->MissionaryElectrificationCharge }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->MissionaryElectrificationCharge, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Environmental Charge (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->EnvironmentalCharge }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->EnvironmentalCharge, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">Stranded Contract Costs (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->StrandedContractCosts }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->StrandedContractCosts, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">NPC Stranded Debt (Php/kwh)</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->NPCStrandedDebt }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->NPCStrandedDebt, 2) }}</td>
+            </tr>
+            <tr class="border-bottom-only">
+                <td class="border-bottom-only text-left left-indent">Missionary Electrification - REDCI (Php/kwh)</td>
+                <td class="border-bottom-only text-right">{{ $rate->MissionaryElectrificationREDCI }}</td>
+                <td class="border-bottom-only text-right">{{ number_format($item->MissionaryElectrificationREDCI, 2) }}</td>
+            </tr>
+
+            {{-- ADJUSTMENTS & OTHER CHARGES --}}
+            <tr class="no-border-top-bottom">
+                <th class="no-border-top-bottom text-left">VI. ADJUSTMENTS & OTHER CHARGES</th>
+                <th class="no-border-top-bottom"></th>
+                <th class="no-border-top-bottom"></th>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">PPA Refund</td>
+                <td class="no-border-top-bottom text-right">{{ $rate->PPARefund }}</td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->PPARefund, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">2% EWT</td>
+                <td class="no-border-top-bottom text-right"></td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->Evat2Percent, 2) }}</td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent">5% EVAT</td>
+                <td class="no-border-top-bottom text-right"></td>
+                <td class="no-border-top-bottom text-right">{{ number_format($item->Evat5Percent, 2) }}</td>
+            </tr>
+            <tr class="border-bottom-only">
+                <td class="border-bottom-only text-left left-indent">Senior Citizen Discount</td>
+                <td class="border-bottom-only text-right"></td>
+                <td class="border-bottom-only text-right">{{ intval($item->SeniorCitizenSubsidy) < 0 ? number_format($item->SeniorCitizenSubsidy, 2) : '' }}</td>
+            </tr>
+
+            {{-- TOTAL --}}
+            <tr class="no-border-top-bottom">
+                <th class="no-border-top-bottom text-left left-indent">CURRENT AMOUNT DUE on/before</th>
+                <td class="no-border-top-bottom text-right"></td>
+                <th class="no-border-top-bottom text-right">{{ number_format($item->NetAmount, 2) }}</th>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left left-indent-more">Due Date: <strong>{{ date('M d, Y', strtotime($item->DueDate)) }}</strong></td>
+                <td class="no-border-top-bottom text-right"></td>
+                <td class="no-border-top-bottom text-right"></td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left" style="opacity: 0"> a</td>
+                <td class="no-border-top-bottom text-right"></td>
+                <td class="no-border-top-bottom text-right"></td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <th class="no-border-top-bottom text-left left-indent">Penalty Charges After</th>
+                <td class="no-border-top-bottom text-right"></td>
+                <th class="no-border-top-bottom text-right">{{ Bills::getAccountTypeByType($item->ConsumerType) != 'RESIDENTIAL' ? number_format(Bills::getFinalPenalty($item), 2) : '0' }}</th>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom text-left" style="opacity: 0"> a</td>
+                <td class="no-border-top-bottom text-right"></td>
+                <td class="no-border-top-bottom text-right"></td>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <th class="no-border-top-bottom text-left left-indent">TOTAL AMOUNT DUE After</th>
+                <td class="no-border-top-bottom text-right"></td>
+                <th class="no-border-top-bottom text-right">{{ Bills::getAccountTypeByType($item->ConsumerType) != 'RESIDENTIAL' ? number_format(floatval(Bills::getFinalPenalty($item)) + floatval($item->NetAmount), 2) : number_format($item->NetAmount, 2) }}</th>
+            </tr>
+        </table>
+    </div>
+    
+    <div style="width: 99%; margin-top: 5px; border-top: 1px dotted #444555">
+        <p><i>Reserved For Authorized Collection Agents</i></p>
+    </div>
+
+    <div class="half" style="float: left;">
+        <table class="bordered" style="width: 100%;">
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom">ACCOUNT NAME</td>
+                <th class="no-border-top-bottom text-left">{{ $item->ServiceAccountName }}</th>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom">ACCOUNT ADDRESS</td>
+                <th class="no-border-top-bottom text-left">{{ ServiceAccounts::getAddress($item) }}</th>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom">METER NO</td>
+                <th class="no-border-top-bottom text-left">{{ $item->MeterNumber }}</th>
+            </tr>
+        </table>
+    </div>
+
+    <div class="half" style="float-right; margin-left: 5px;">
+        <table class="bordered" style="width: 100%;">
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom">ACCOUNT NO</td>
+                <th class="no-border-top-bottom text-left">{{ $item->OldAccountNo }}</th>
+                <td class="no-border-top-bottom">AMOUNT DUE</td>
+                <th class="no-border-top-bottom text-right">{{ Bills::getAccountTypeByType($item->ConsumerType) != 'RESIDENTIAL' ? number_format(floatval(Bills::getFinalPenalty($item)) + floatval($item->NetAmount), 2) : number_format($item->NetAmount, 2) }}</th>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom">BILLING MO</td>
+                <th class="no-border-top-bottom text-left">{{ date('F Y', strtotime($item->ServicePeriod)) }}</th>
+                <td class="no-border-top-bottom">ARREARS</td>
+                <th class="no-border-top-bottom text-right">{{ $item->ArrearsCount }}</th>
+            </tr>
+            <tr class="no-border-top-bottom">
+                <td class="no-border-top-bottom">DATE BILLED</td>
+                <th class="no-border-top-bottom text-left">{{ date('M d, Y', strtotime($item->BillingDate)) }}</th>
+                <td class="no-border-top-bottom">DUE DATE</td>
+                <th class="no-border-top-bottom text-right">{{ date('M d, Y', strtotime($item->DueDate)) }}</th>
+            </tr>
+        </table>
+    </div>
+    
+    <div style="width: 100%; text-align: center;">
+        <svg id="barcode"></svg>
+    </div>
+    
+</div>
 @endforeach
 
 <script type="text/javascript">
 window.print();
 
-window.setTimeout(function(){
-    window.history.go(-1)
-}, 1000);
+// window.setTimeout(function(){
+//     window.history.go(-1)
+// }, 1000);
 </script>
