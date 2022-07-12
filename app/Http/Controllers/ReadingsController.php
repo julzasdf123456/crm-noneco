@@ -991,14 +991,44 @@ class ReadingsController extends AppBaseController
 
     public function printNewFormatAdjusted($period, $day, $town, $meterReader) {
         $bills = DB::table('Billing_Bills')
-            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')            
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
             ->where('Billing_Bills.ServicePeriod', $period)
             ->where('Billing_ServiceAccounts.Town', $town)
             ->where('Billing_ServiceAccounts.GroupCode', $day)
             ->whereRaw("Billing_ServiceAccounts.MeterReader ='" . $meterReader . "'")
             ->whereRaw("Billing_Bills.UserId ='". Auth::id() . "'")
             ->whereRaw("Billing_Bills.AccountNumber IN (SELECT AccountNumber FROM Billing_Readings WHERE FieldStatus IS NOT NULL AND ServicePeriod='" . $period . "' AND MeterReader='" . $meterReader . "' AND AccountNumber IS NOT NULL)")
-            ->select('Billing_Bills.*')
+            ->select('Billing_Bills.*',                
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.AccountCount',
+                'Billing_ServiceAccounts.Purok',
+                'Billing_ServiceAccounts.AccountType',
+                'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.AreaCode',
+                'Billing_ServiceAccounts.SequenceCode',
+                'Billing_ServiceAccounts.ForDistribution',
+                'Billing_ServiceAccounts.Organization',
+                'Billing_ServiceAccounts.Main',
+                'Billing_ServiceAccounts.GroupCode',
+                'Billing_ServiceAccounts.Multiplier',
+                'Billing_ServiceAccounts.Coreloss',
+                'Billing_ServiceAccounts.ConnectionDate',
+                'Billing_ServiceAccounts.ServiceConnectionId',
+                'Billing_ServiceAccounts.SeniorCitizen',
+                'Billing_ServiceAccounts.Evat5Percent',
+                'Billing_ServiceAccounts.Ewt2Percent',
+                'Billing_ServiceAccounts.Contestable',
+                'Billing_ServiceAccounts.NetMetered',
+                'Billing_ServiceAccounts.AccountRetention',
+                'Billing_ServiceAccounts.DurationInMonths',
+                'Billing_ServiceAccounts.AccountExpiration',
+                'CRM_Towns.Town',
+                'CRM_Barangays.Barangay',
+                DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_Bills.AccountNumber ORDER BY created_at DESC) AS MeterNumber"),
+                DB::raw("(SELECT COUNT(id) FROM Billing_Bills WHERE AccountNumber=Billing_Bills.AccountNumber AND ServicePeriod != Billing_Bills.ServicePeriod AND AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_Bills.AccountNumber)) AS ArrearsCount"))
             ->orderBy('Billing_Bills.BillNumber')
             ->get();
 
@@ -1024,11 +1054,41 @@ class ReadingsController extends AppBaseController
 
     public function printNewFormatAdjustedBapa($period, $bapaName) {
         $bills = DB::table('Billing_Bills')
-            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')    
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
             ->where('Billing_Bills.ServicePeriod', $period)
             ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
             ->whereRaw("Billing_Bills.UserId ='". Auth::id() . "'")
-            ->select('Billing_Bills.*')
+            ->select('Billing_Bills.*',                
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.AccountCount',
+                'Billing_ServiceAccounts.Purok',
+                'Billing_ServiceAccounts.AccountType',
+                'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.AreaCode',
+                'Billing_ServiceAccounts.SequenceCode',
+                'Billing_ServiceAccounts.ForDistribution',
+                'Billing_ServiceAccounts.Organization',
+                'Billing_ServiceAccounts.Main',
+                'Billing_ServiceAccounts.GroupCode',
+                'Billing_ServiceAccounts.Multiplier',
+                'Billing_ServiceAccounts.Coreloss',
+                'Billing_ServiceAccounts.ConnectionDate',
+                'Billing_ServiceAccounts.ServiceConnectionId',
+                'Billing_ServiceAccounts.SeniorCitizen',
+                'Billing_ServiceAccounts.Evat5Percent',
+                'Billing_ServiceAccounts.Ewt2Percent',
+                'Billing_ServiceAccounts.Contestable',
+                'Billing_ServiceAccounts.NetMetered',
+                'Billing_ServiceAccounts.AccountRetention',
+                'Billing_ServiceAccounts.DurationInMonths',
+                'Billing_ServiceAccounts.AccountExpiration',
+                'CRM_Towns.Town',
+                'CRM_Barangays.Barangay',
+                DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_Bills.AccountNumber ORDER BY created_at DESC) AS MeterNumber"),
+                DB::raw("(SELECT COUNT(id) FROM Billing_Bills WHERE AccountNumber=Billing_Bills.AccountNumber AND ServicePeriod != Billing_Bills.ServicePeriod AND AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_Bills.AccountNumber)) AS ArrearsCount"))
             ->orderBy('Billing_Bills.BillNumber')
             ->get();
 
