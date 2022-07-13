@@ -1548,8 +1548,8 @@ class ReadingsController extends AppBaseController
                     ->where('Billing_Readings.ServicePeriod', $period)      
                     ->where(function ($query) use ($period, $bapaName) {
                         $query->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')")
-                            ->whereRaw("Billing_Readings.AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')")
-                            ->orWhereRaw("Billing_Readings.AccountNumber IS NULL");
+                            ->whereRaw("Billing_Readings.AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')");
+                            // ->orWhereRaw("Billing_Readings.AccountNumber IS NULL");
                     })
                     ->select('Billing_Readings.*',
                         'Billing_ServiceAccounts.id AS AccountId',
@@ -1632,8 +1632,8 @@ class ReadingsController extends AppBaseController
                     ->where('Billing_Readings.ServicePeriod', $period)      
                     ->where(function ($query) use ($period, $bapaName) {
                         $query->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')")
-                            ->whereRaw("Billing_Readings.AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')")
-                            ->orWhereRaw("Billing_Readings.AccountNumber IS NULL");
+                            ->whereRaw("Billing_Readings.AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')");
+                            // ->orWhereRaw("Billing_Readings.AccountNumber IS NULL");
                     })
                     ->select('Billing_Readings.*',
                         'Billing_ServiceAccounts.id AS AccountId',
