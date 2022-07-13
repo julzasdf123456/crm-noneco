@@ -20,7 +20,7 @@
                     <label for="Period" class="col-sm-3">Set Billing Month</label>
                     <select id="Period" class="form-control col-sm-5 mx-sm-3">
                         @for ($i = 0; $i < count($months); $i++)
-                            <option value="{{ $months[$i] }}">{{ date('F Y', strtotime($months[$i])) }}</option>
+                            <option value="{{ $months[$i] }}" {{ $rate!=null && date('Y-m-d', strtotime($rate->ServicePeriod))==$months[$i] ? 'selected' : '' }}>{{ date('F Y', strtotime($months[$i])) }}</option>
                         @endfor
                     </select>
                     <button id="setBtn" class="btn btn-primary col-sm-3 mb-2"><i class="fas fa-check ico-tab-mini"></i>Set</button>

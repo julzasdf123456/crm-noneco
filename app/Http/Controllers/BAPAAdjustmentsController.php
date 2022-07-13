@@ -12,6 +12,7 @@ use App\Models\BAPAAdjustments;
 use App\Models\BAPAAdjustmentDetails;
 use App\Models\IDGenerator;
 use App\Models\Bills;
+use App\Models\Rates;
 use Illuminate\Support\Facades\DB;   
 use Illuminate\Support\Facades\Auth; 
 use Flash;
@@ -209,9 +210,12 @@ class BAPAAdjustmentsController extends AppBaseController
 
     public function adjustBapaPayments($bapaName) {
         $bapaName = urldecode($bapaName);
+        $rate = Rates::orderByDesc("ServicePeriod")
+            ->first();
 
         return view('/b_a_p_a_adjustments/adjust_payment', [
             'bapaName' => $bapaName,
+            'rate' => $rate,
         ]);
     }
 

@@ -33,7 +33,8 @@
                             <td class="text-muted text-center">Change <br> Meters</td>
                             <td class="text-muted text-center">No Display</td>
                             <td class="text-muted text-center">Not in <br> Use</td>
-                            <td class="text-muted text-center">Otder <br> Unbilled</td>
+                            <td class="text-muted text-center">Disco<br>/Active</td>
+                            <td class="text-muted text-center">Other <br> Unbilled</td>
                             <td class="text-muted text-center">Total <br> Billed</td>
                             <td class="text-muted text-center">Total <br> Readings</td>
                         </thead>
@@ -45,6 +46,7 @@
                                 <th class="text-center">{{ $summary != null ? $summary->ChangeMeter : '0' }}</th>
                                 <th class="text-center">{{ $summary != null ? $summary->NoDisplay : '0' }}</th>
                                 <th class="text-center">{{ $summary != null ? $summary->NotInUse : '0' }}</th>
+                                <th class="text-center">{{ $summary != null ? $summary->DiscoActive : '0' }}</th>
                                 <th class="text-center">{{ $summary != null ? $summary->OtherUnbilled : '0' }}</th>
                                 <th class="text-center text-primary">{{ $summary != null ? $summary->TotalBilled : '0' }}</th>
                                 <th class="text-center text-success">{{ $summary != null ? number_format(intval($summary->Total) + intval($summary->Captured)) : '0' }}</th>
@@ -67,6 +69,7 @@
                             <a class="btn btn-xs btn-default" href="{{ route('readings.print-unbilled-by-status', [$period, $day, $town, $meterReader->id, 'STUCK-UP']) }}" title="Print All Stuck Ups" style="margin-right: 2px;"><i class="fas fa-print"></i> Stuck Up</a>
                             <a class="btn btn-xs btn-default" href="{{ route('readings.print-unbilled-by-status', [$period, $day, $town, $meterReader->id, 'NO DISPLAY']) }}" title="Print All No Display" style="margin-right: 2px;"><i class="fas fa-print"></i> No Display</a>
                             <a class="btn btn-xs btn-default" href="{{ route('readings.print-unbilled-by-status', [$period, $day, $town, $meterReader->id, 'NOT IN USE']) }}" title="Print All Not in Use" style="margin-right: 2px;"><i class="fas fa-print"></i> Not in Use</a>
+                            <a class="btn btn-xs btn-default" href="{{ route('readings.print-disco-active', [$meterReader->id, $day, $period, $town]) }}" title="Print All Disco Active" style="margin-right: 2px;"><i class="fas fa-print"></i> Disco Active</a>
                             <a class="btn btn-xs btn-default" href="{{ route('readings.print-unbilled-by-status', [$period, $day, $town, $meterReader->id, 'CHANGE METER']) }}" title="Print All Change Meters" style="margin-right: 2px;"><i class="fas fa-print"></i> Change Meters</a>
                             <a class="btn btn-xs btn-default" href="{{ route('readings.print-other-unbilled-list', [$period, $day, $town, $meterReader->id]) }}" title="Print Others Unbilled" style="margin-right: 2px;"><i class="fas fa-print"></i> Others</a>
                         @else

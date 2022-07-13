@@ -35,7 +35,7 @@
                             @endpush
                         </div>
                         <div class="col">
-                            <button class="btn btn-sm btn-warning"><i class="fas fa-filter"></i>Filter</button>    
+                            <button id="filter-collection-per-day" class="btn btn-sm btn-warning"><i class="fas fa-filter"></i>Filter</button>    
                         </div>                        
                     </div>                    
                 </div>
@@ -45,13 +45,15 @@
                     <thead>
                         <th>Area</th>
                         <th class="text-right">kWh Sales</th>
-                        <th class="text-right">Total Consumers</th>
-                        <th class="text-right">Total Surcharges</th>
+                        <th class="text-right">Total<br>Consumers</th>
+                        <th class="text-right">Total<br>Surcharges</th>
                         <th class="text-right">Total 2%</th>
                         <th class="text-right">Total 5%</th>
                         <th class="text-right">Total OCL</th>
-                        <th class="text-right">Total Deductions</th>
-                        <th class="text-right">Overall Total</th>
+                        <th class="text-right">Total<br>Deductions</th>
+                        <th class="text-right">Power Bills<br>Total</th>
+                        <th class="text-right">Miscellaneous<br>Payments</th>
+                        <th class="text-right">Overall<br>Total</th>
                     </thead>
                     <tbody>
 
@@ -67,6 +69,10 @@
     <script>
         $(document).ready(function() {
             fetchCollectionPerArea(null, null)
+
+            $('#filter-collection-per-day').on('click', function() {
+                fetchCollectionPerArea($('#From').val(), $('#To').val())
+            })
         })
 
         function fetchCollectionPerArea(from, to) {

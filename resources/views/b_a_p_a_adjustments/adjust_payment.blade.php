@@ -38,7 +38,7 @@
                     <div class="col-lg-4">
                         <select name="ServicePeriod" id="ServicePeriod" class="form-control">
                             @for ($i = 0; $i < count($months); $i++)
-                                <option value="{{ $months[$i] }}">{{ date('F Y', strtotime($months[$i])) }}</option>
+                                <option value="{{ $months[$i] }}" {{ $rate!=null && date('Y-m-d', strtotime($rate->ServicePeriod))==$months[$i] ? 'selected' : '' }}>{{ date('F Y', strtotime($months[$i])) }}</option>
                             @endfor
                         </select>
                     </div>

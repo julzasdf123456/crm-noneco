@@ -1541,8 +1541,12 @@ class BillsController extends AppBaseController
     }
 
     public function bapaManualBillingConsole($bapaName) {
+        $latestRate = Rates::orderByDesc('ServicePeriod')
+            ->first();
+
         return view('/bills/bapa_manual_billing_console', [
             'bapaName' => $bapaName,
+            'rate' => $latestRate,
         ]);
     }
 

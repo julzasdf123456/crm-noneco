@@ -41,7 +41,7 @@
                         <label for="ServicePeriod">Billing Month</label>
                         <select name="ServicePeriod" id="ServicePeriod" class="form-control form-control-sm">
                             @for ($i = 0; $i < count($months); $i++)
-                                <option value="{{ $months[$i] }}" {{ $rate != null ? ($rate->ServicePeriod == $months[$i] ? 'selected' : '') : '' }}>{{ date('F Y', strtotime($months[$i])) }}</option>
+                                <option value="{{ $months[$i] }}" {{ $rate != null ? (date('Y-m-d', strtotime($rate->ServicePeriod)) == $months[$i] ? 'selected' : '') : '' }}>{{ date('F Y', strtotime($months[$i])) }}</option>
                             @endfor
                         </select>
                     </div>

@@ -73,6 +73,7 @@ class DCRSummaryTransactionsController extends AppBaseController
 
         $nonPowerBills = DB::table('Cashier_TransactionDetails')
             ->leftJoin('Cashier_TransactionIndex', 'Cashier_TransactionDetails.TransactionIndexId', '=', 'Cashier_TransactionIndex.id')
+            ->leftJoin('Billing_ServiceAccounts', 'Cashier_TransactionIndex.AccountNumber', '=', 'Billing_ServiceAccounts.id')
             ->where('Cashier_TransactionIndex.ORDate', $request['Day'] != null ? $request['Day'] : date('Y-m-d'))
             ->where('Cashier_TransactionIndex.UserId', $request['Teller'])
             ->whereNull('Cashier_TransactionIndex.Status')
@@ -80,9 +81,11 @@ class DCRSummaryTransactionsController extends AppBaseController
                 'Cashier_TransactionDetails.Total',
                 'Cashier_TransactionIndex.AccountNumber',
                 'Cashier_TransactionIndex.PayeeName',
+                'Cashier_TransactionDetails.Particular',
                 'Cashier_TransactionDetails.AccountCode',
                 'Cashier_TransactionIndex.CheckNo',
                 'Cashier_TransactionIndex.Bank',
+                'Billing_ServiceAccounts.OldAccountNo',
                 'Cashier_TransactionIndex.PayeeName')
             ->orderBy('Cashier_TransactionDetails.TransactionIndexId')
             ->get();
@@ -532,12 +535,21 @@ class DCRSummaryTransactionsController extends AppBaseController
 
         $latestRate = Rates::orderByDesc('ServicePeriod')
             ->first();
+        $period = ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01'));
 
         if ($from != null && $to != null) {
             $data = DB::table('Cashier_PaidBills')
                 ->select(
                     'OfficeTransacted',
-                    DB::raw("(SELECT SUM(CAST(KwhUsed AS DECIMAL)) FROM Cashier_PaidBills WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS KwhUsedTotal")
+                    DB::raw("(SELECT SUM(CAST(KwhUsed AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ORDate BETWEEN '" . $from . "' AND '" . $to . "') AS KwhUsedTotal"),
+                    DB::raw("(SELECT COUNT(id) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ORDate BETWEEN '" . $from . "' AND '" . $to . "') AS TotalConsumers"),
+                    DB::raw("(SELECT SUM(CAST(Surcharge AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ORDate BETWEEN '" . $from . "' AND '" . $to . "') AS TotalSurcharges"),
+                    DB::raw("(SELECT SUM(CAST(Form2307TwoPercent AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ORDate BETWEEN '" . $from . "' AND '" . $to . "') AS TotalEWT"),
+                    DB::raw("(SELECT SUM(CAST(Form2307FivePercent AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ORDate BETWEEN '" . $from . "' AND '" . $to . "') AS TotalEVAT"),
+                    DB::raw("(SELECT SUM(CAST(AdditionalCharges AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ORDate BETWEEN '" . $from . "' AND '" . $to . "') AS TotalOCL"),
+                    DB::raw("(SELECT SUM(CAST(Deductions AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ORDate BETWEEN '" . $from . "' AND '" . $to . "') AS TotalDeductions"),
+                    DB::raw("(SELECT SUM(CAST(NetAmount AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ORDate BETWEEN '" . $from . "' AND '" . $to . "') AS TotalAmount"),
+                    DB::raw("(SELECT SUM(CAST(Total AS DECIMAL)) FROM Cashier_TransactionIndex pb WHERE pb.TransactionNumber LIKE CONCAT(Cashier_PaidBills.OfficeTransacted, '%') AND Status IS NULL AND pb.ORDate BETWEEN '" . $from . "' AND '" . $to . "') AS TotalMisc"),
                 )
                 ->groupBy('OfficeTransacted')
                 ->orderBy('OfficeTransacted')
@@ -546,14 +558,15 @@ class DCRSummaryTransactionsController extends AppBaseController
             $data = DB::table('Cashier_PaidBills')
                 ->select(
                     'OfficeTransacted',
-                    DB::raw("(SELECT SUM(CAST(KwhUsed AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS KwhUsedTotal"),
-                    DB::raw("(SELECT COUNT(id) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS TotalConsumers"),
-                    DB::raw("(SELECT SUM(CAST(Surcharge AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS TotalSurcharges"),
-                    DB::raw("(SELECT SUM(CAST(Form2307TwoPercent AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS TotalEWT"),
-                    DB::raw("(SELECT SUM(CAST(Form2307FivePercent AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS TotalEVAT"),
-                    DB::raw("(SELECT SUM(CAST(AdditionalCharges AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS TotalOCL"),
-                    DB::raw("(SELECT SUM(CAST(Deductions AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS TotalDeductions"),
-                    DB::raw("(SELECT SUM(CAST(NetAmount AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND pb.ServicePeriod='" . ($latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01')) ."') AS TotalAmount"),
+                    DB::raw("(SELECT SUM(CAST(KwhUsed AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ServicePeriod='" . $period ."') AS KwhUsedTotal"),
+                    DB::raw("(SELECT COUNT(id) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ServicePeriod='" . $period ."') AS TotalConsumers"),
+                    DB::raw("(SELECT SUM(CAST(Surcharge AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ServicePeriod='" . $period ."') AS TotalSurcharges"),
+                    DB::raw("(SELECT SUM(CAST(Form2307TwoPercent AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ServicePeriod='" . $period ."') AS TotalEWT"),
+                    DB::raw("(SELECT SUM(CAST(Form2307FivePercent AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ServicePeriod='" . $period ."') AS TotalEVAT"),
+                    DB::raw("(SELECT SUM(CAST(AdditionalCharges AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ServicePeriod='" . $period ."') AS TotalOCL"),
+                    DB::raw("(SELECT SUM(CAST(Deductions AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ServicePeriod='" . $period ."') AS TotalDeductions"),
+                    DB::raw("(SELECT SUM(CAST(NetAmount AS DECIMAL)) FROM Cashier_PaidBills pb WHERE pb.OfficeTransacted=Cashier_PaidBills.OfficeTransacted AND Status IS NULL AND pb.ServicePeriod='" . $period ."') AS TotalAmount"),
+                    DB::raw("(SELECT SUM(CAST(Total AS DECIMAL)) FROM Cashier_TransactionIndex pb WHERE pb.TransactionNumber LIKE CONCAT(Cashier_PaidBills.OfficeTransacted, '%') AND Status IS NULL AND pb.ORDate BETWEEN '" . $period . "' AND '" . date('Y-m-d', strtotime($period . ' +1 month')) . "') AS TotalMisc"),
                 )
                 ->groupBy('OfficeTransacted')
                 ->orderBy('OfficeTransacted')
@@ -563,7 +576,7 @@ class DCRSummaryTransactionsController extends AppBaseController
         $output = "";
         foreach($data as $item) {
             $output .= "<tr>" .
-                            "<th>" . $item->OfficeTransacted . "</th>" .
+                            "<th><a href='" . route('dCRSummaryTransactions.collection-office-expand', [urlencode($item->OfficeTransacted)]) . "'><i class='fas fa-external-link-alt ico-tab'></i>" . $item->OfficeTransacted . "</a></th>" .
                             "<td class='text-right'>" . number_format($item->KwhUsedTotal, 2) . "</td>" .
                             "<td class='text-right'>" . number_format($item->TotalConsumers) . "</td>" .
                             "<td class='text-right text-info'>₱ " . number_format($item->TotalSurcharges, 2) . "</td>" .
@@ -572,9 +585,241 @@ class DCRSummaryTransactionsController extends AppBaseController
                             "<td class='text-right text-info'>₱ " . number_format($item->TotalOCL, 2) . "</td>" .
                             "<td class='text-right text-danger'>₱ " . number_format($item->TotalDeductions, 2) . "</td>" .
                             "<th class='text-right text-success'>₱ " . number_format($item->TotalAmount, 2) . "</th>" .
+                            "<th class='text-right text-info'>₱ " . number_format($item->TotalMisc, 2) . "</th>" .
+                            "<th class='text-right text-primary'>₱ " . number_format(floatval($item->TotalMisc) + floatval($item->TotalAmount), 2) . "</th>" .
                         "</tr>";
         }
 
         return response()->json($output, 200);
+    }
+
+    public function collectionOfficeEpand($office, Request $request) {
+        $office = urldecode($office);
+        $teller = $request['Teller'];
+        $from = $request['From'];
+        $to = $request['To'];
+
+        if ($from == null && $to == null) {
+            $from = date('Y-m-d', strtotime('today -1 months'));
+            $to = date('Y-m-d');
+        }
+
+        if ($teller=='All') {
+            $data = DB::table('Cashier_DCRSummaryTransactions')
+                ->whereBetween('Day', [$from, $to])
+                ->where(function ($query) {
+                    $query->where('Cashier_DCRSummaryTransactions.ReportDestination', 'COLLECTION')
+                        ->orWhere('Cashier_DCRSummaryTransactions.ReportDestination', 'BOTH');
+                })  
+                ->select('GLCode',
+                    DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
+                    DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
+                )
+                ->groupBy('GLCode')
+                ->orderBy('GLCode')
+                ->get();
+
+            $powerBills = DB::table('Cashier_PaidBills')
+                ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->whereBetween('Cashier_PaidBills.ORDate', [$from, $to])
+                ->whereNull('Cashier_PaidBills.Status')
+                ->whereRaw("Cashier_PaidBills.PaymentUsed LIKE '%Cash%'")
+                ->select('Cashier_PaidBills.*', 'Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.OldAccountNo')
+                ->get();
+
+            $nonPowerBills = DB::table('Cashier_TransactionDetails')
+                ->leftJoin('Cashier_TransactionIndex', 'Cashier_TransactionDetails.TransactionIndexId', '=', 'Cashier_TransactionIndex.id')
+                ->leftJoin('Billing_ServiceAccounts', 'Cashier_TransactionIndex.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->whereBetween('Cashier_TransactionIndex.ORDate', [$from, $to])
+                ->where('Cashier_TransactionIndex.PaymentUsed', 'Cash')
+                ->whereNull('Cashier_TransactionIndex.Status')
+                ->select('Cashier_TransactionIndex.ORNumber',
+                    'Cashier_TransactionDetails.Total',
+                    'Cashier_TransactionDetails.Particular',
+                    'Cashier_TransactionIndex.AccountNumber',
+                    'Cashier_TransactionIndex.PayeeName',
+                    'Cashier_TransactionDetails.AccountCode',
+                    'Cashier_TransactionIndex.CheckNo',
+                    'Cashier_TransactionIndex.Bank',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Cashier_TransactionIndex.PayeeName')
+                ->orderBy('Cashier_TransactionDetails.TransactionIndexId')
+                ->get();
+                
+            $checkPaymentPowerBills = DB::table('Cashier_PaidBillsDetails')
+                ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBillsDetails.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->whereBetween('Cashier_PaidBillsDetails.created_at', [$from, $to])
+                ->whereRaw("Cashier_PaidBillsDetails.PaymentUsed LIKE '%Check%'")
+                ->select('Cashier_PaidBillsDetails.ORNumber',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Cashier_PaidBillsDetails.Amount',
+                    'Cashier_PaidBillsDetails.CheckNo',
+                    'Cashier_PaidBillsDetails.Bank',
+                    DB::raw("'POWER BILL' AS Source"));
+
+            $checkPaymentsAll = DB::table("Cashier_TransactionPaymentDetails")
+                ->leftJoin('Cashier_TransactionIndex', 'Cashier_TransactionPaymentDetails.ORNumber', '=', 'Cashier_TransactionIndex.ORNumber')
+                ->whereBetween('Cashier_TransactionIndex.ORDate', [$from, $to])
+                ->whereRaw("Cashier_TransactionPaymentDetails.PaymentUsed LIKE '%Check%'")
+                ->select('Cashier_TransactionIndex.ORNumber',
+                    'Cashier_TransactionIndex.AccountNumber',
+                    'Cashier_TransactionIndex.PayeeName',
+                    'Cashier_TransactionPaymentDetails.Amount',
+                    'Cashier_TransactionPaymentDetails.CheckNo',
+                    'Cashier_TransactionPaymentDetails.Bank',
+                    DB::raw("'OTHERS' AS Source")
+                )
+                ->union($checkPaymentPowerBills)
+                ->get();
+
+            $cancelledPowerBills = DB::table('Cashier_PaidBills')
+                ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->whereBetween('Cashier_PaidBills.ORDate', [$from, $to])
+                ->whereIn('Cashier_PaidBills.Status', ['CANCELLED', 'PENDING CANCEL'])
+                ->select('Cashier_PaidBills.ORNumber',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Cashier_PaidBills.NetAmount',
+                    'Cashier_PaidBills.KwhUsed',
+                    'Cashier_PaidBills.Status',
+                    DB::raw("'POWER BILL' AS Source"));
+
+            $cancelledAllPayments = DB::table("Cashier_TransactionIndex")
+                ->whereBetween('Cashier_TransactionIndex.ORDate', [$from, $to])
+                ->whereIn('Cashier_TransactionIndex.Status', ['CANCELLED', 'PENDING CANCEL'])
+                ->select('Cashier_TransactionIndex.ORNumber',
+                    'Cashier_TransactionIndex.AccountNumber',
+                    'Cashier_TransactionIndex.PayeeName',
+                    'Cashier_TransactionIndex.Total',
+                    DB::raw("'' AS KwhUsed"),
+                    'Cashier_TransactionIndex.Status',
+                    DB::raw("'OTHERS' AS Source")
+                )
+                ->union($cancelledPowerBills)
+                ->get();
+        
+        } else {
+            $data = DB::table('Cashier_DCRSummaryTransactions')
+                ->whereBetween('Day', [$from, $to])
+                ->where('Teller', $teller)
+                ->where(function ($query) {
+                    $query->where('Cashier_DCRSummaryTransactions.ReportDestination', 'COLLECTION')
+                        ->orWhere('Cashier_DCRSummaryTransactions.ReportDestination', 'BOTH');
+                }) 
+                ->select('GLCode',
+                    DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
+                    DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
+                )
+                ->groupBy('GLCode')
+                ->orderBy('GLCode')
+                ->get();
+
+            $powerBills = DB::table('Cashier_PaidBills')
+                ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->whereBetween('Cashier_PaidBills.ORDate', [$from, $to])
+                ->where('Cashier_PaidBills.Teller', $teller)
+                ->whereNull('Cashier_PaidBills.Status')
+                ->whereRaw("Cashier_PaidBills.PaymentUsed LIKE '%Cash%'")
+                ->select('Cashier_PaidBills.*', 'Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.OldAccountNo')
+                ->get();
+
+            $nonPowerBills = DB::table('Cashier_TransactionDetails')
+                ->leftJoin('Cashier_TransactionIndex', 'Cashier_TransactionDetails.TransactionIndexId', '=', 'Cashier_TransactionIndex.id')
+                ->leftJoin('Billing_ServiceAccounts', 'Cashier_TransactionIndex.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->whereBetween('Cashier_TransactionIndex.ORDate', [$from, $to])
+                ->where('Cashier_TransactionIndex.UserId', $teller)
+                ->where('Cashier_TransactionIndex.PaymentUsed', 'Cash')
+                ->whereNull('Cashier_TransactionIndex.Status')
+                ->select('Cashier_TransactionIndex.ORNumber',
+                    'Cashier_TransactionDetails.Total',
+                    'Cashier_TransactionDetails.Particular',
+                    'Cashier_TransactionIndex.AccountNumber',
+                    'Cashier_TransactionIndex.PayeeName',
+                    'Cashier_TransactionDetails.AccountCode',
+                    'Cashier_TransactionIndex.CheckNo',
+                    'Cashier_TransactionIndex.Bank',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Cashier_TransactionIndex.PayeeName')
+                ->orderBy('Cashier_TransactionDetails.TransactionIndexId')
+                ->get();        
+        
+            $checkPaymentPowerBills = DB::table('Cashier_PaidBillsDetails')
+                ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBillsDetails.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->where('Cashier_PaidBillsDetails.UserId', $teller)
+                ->whereBetween('Cashier_PaidBillsDetails.created_at', [$from, $to])
+                ->whereRaw("Cashier_PaidBillsDetails.PaymentUsed LIKE '%Check%'")
+                ->select('Cashier_PaidBillsDetails.ORNumber',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Cashier_PaidBillsDetails.Amount',
+                    'Cashier_PaidBillsDetails.CheckNo',
+                    'Cashier_PaidBillsDetails.Bank',
+                    DB::raw("'POWER BILL' AS Source"));   
+
+            $checkPaymentsAll = DB::table("Cashier_TransactionPaymentDetails")
+                ->leftJoin('Cashier_TransactionIndex', 'Cashier_TransactionPaymentDetails.ORNumber', '=', 'Cashier_TransactionIndex.ORNumber')
+                ->whereBetween('Cashier_TransactionIndex.ORDate', [$from, $to])
+                ->whereRaw("Cashier_TransactionPaymentDetails.PaymentUsed LIKE '%Check%'")
+                ->where('Cashier_TransactionIndex.UserId', $teller)
+                ->select('Cashier_TransactionIndex.ORNumber',
+                    'Cashier_TransactionIndex.AccountNumber',
+                    'Cashier_TransactionIndex.PayeeName',
+                    'Cashier_TransactionPaymentDetails.Amount',
+                    'Cashier_TransactionPaymentDetails.CheckNo',
+                    'Cashier_TransactionPaymentDetails.Bank',
+                    DB::raw("'OTHERS' AS Source")
+                )
+                ->union($checkPaymentPowerBills)
+                ->get(); 
+
+            $cancelledPowerBills = DB::table('Cashier_PaidBills')
+                ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->whereBetween('Cashier_PaidBills.ORDate', [$from, $to])
+                ->whereIn('Cashier_PaidBills.Status', ['CANCELLED', 'PENDING CANCEL'])
+                ->where('Cashier_PaidBills.Teller', $teller)
+                ->select('Cashier_PaidBills.ORNumber',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Cashier_PaidBills.NetAmount',
+                    'Cashier_PaidBills.KwhUsed',
+                    'Cashier_PaidBills.Status',
+                    DB::raw("'POWER BILL' AS Source"));
+
+            $cancelledAllPayments = DB::table("Cashier_TransactionIndex")
+                ->whereBetween('Cashier_TransactionIndex.ORDate', [$from, $to])
+                ->whereIn('Cashier_TransactionIndex.Status', ['CANCELLED', 'PENDING CANCEL'])
+                ->where('Cashier_TransactionIndex.UserId', $teller)
+                ->select('Cashier_TransactionIndex.ORNumber',
+                    'Cashier_TransactionIndex.AccountNumber',
+                    'Cashier_TransactionIndex.PayeeName',
+                    'Cashier_TransactionIndex.Total',
+                    DB::raw("'' AS KwhUsed"),
+                    'Cashier_TransactionIndex.Status',
+                    DB::raw("'OTHERS' AS Source")
+                )
+                ->union($cancelledPowerBills)
+                ->get();
+        }
+
+        $fromT = date('Y-m-d', strtotime('today -2 months'));
+        $toT = date('Y-m-d');
+
+        $tellers = DB::table('Cashier_PaidBills')
+            ->leftJoin('users', 'Cashier_PaidBills.Teller', '=', 'users.id')
+            ->whereRaw("Cashier_PaidBills.ORDate BETWEEN '" . $fromT . "' AND '" . $toT . "'")
+            ->select('users.name', 'users.id')
+            ->groupBy('users.name', 'users.id')
+            ->orderBy('users.name')
+            ->get();
+
+        return view('/d_c_r_summary_transactions/collection_office_expand', [
+            'office' => $office,
+            'tellers' => $tellers,
+            'data' => $data,
+            'powerBills' => $powerBills,
+            'nonPowerBills' => $nonPowerBills,
+            'checkPayments' => $checkPaymentsAll
+        ]);
     }
 }

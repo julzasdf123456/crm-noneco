@@ -1,12 +1,18 @@
 <div class="card shadow-none" style="height: 70vh">
-    <div class="card-body table-responsive px-0">
-        <table class="table table-hover table-sm">
+    <div class="card-body table-responsive p-0">
+        <table class="table table-hover table-head-fixed text-nowrap table-sm">
             <thead>
                 <th>OR Number</th>
                 <th>OR Date</th>
                 <th>Account Number</th>
                 <th>Account Name</th>
                 <th>Billing Month</th>
+                <th class="text-right">KwhUsed</th>
+                <th class="text-right">Surcharges</th>
+                <th class="text-right">2% EWT</th>
+                <th class="text-right">5% EVAT</th>
+                <th class="text-right">OCL</th>
+                <th class="text-right">Deductions/<br>Discounts</th>
                 <th class="text-right">Amount Paid</th>
             </thead>
             <tbody>
@@ -22,23 +28,36 @@
                             <td>{{ $item->OldAccountNo }}</td>
                             <td>{{ $item->ServiceAccountName }}</td>
                             <td>{{ $item->ServicePeriod }}</td>
-                            <td class="text-right">{{ number_format($item->NetAmount, 2) }}</td>
+                            <td class="text-right">{{ number_format($item->KwhUsed, 2) }}</td>
+                            <td class="text-right text-danger">{{ number_format($item->Surcharge, 2) }}</td>
+                            <td class="text-right text-info">{{ number_format($item->Form2307TwoPercent, 2) }}</td>
+                            <td class="text-right text-info">{{ number_format($item->Form2307FivePercent, 2) }}</td>
+                            <td class="text-right">{{ number_format($item->AdditionalCharges, 2) }}</td>
+                            <td class="text-right text-info">{{ number_format($item->Deductions, 2) }}</td>
+                            <td class="text-right text-primary">{{ number_format($item->NetAmount, 2) }}</td>
                         </tr>   
                         @php
                             $total = $total + floatval($item->NetAmount);
                             $i++;
                         @endphp   
-                    @endforeach   
-                    <tr>
-                        <th>Total ({{ $i }} payments)</th> 
-                        <th></th>   
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th class="text-right">{{ number_format($total, 2) }}</th>
-                    </tr>         
+                    @endforeach    
                 @endif        
             </tbody>
+            <tfoot style="position: sticky; inset-block-end: 0; background-color: white;">                  
+                <tr>
+                    <th colspan="2">Total ({{ $i }} payments)</th> 
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>   
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th class="text-right text-primary">{{ number_format($total, 2) }}</th>
+                </tr>      
+            </tfoot>
         </table>
     </div>
 </div>

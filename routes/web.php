@@ -414,6 +414,9 @@ Route::get('/readings/print-unbilled-by-status/{period}/{day}/{town}/{meterReade
 Route::get('/readings/print-other-unbilled-list/{period}/{day}/{town}/{meterReader}', [App\Http\Controllers\ReadingsController::class, 'printOtherUnbilledList'])->name('readings.print-other-unbilled-list');
 Route::get('/readings/billed-and-unbilled-reports', [App\Http\Controllers\ReadingsController::class, 'billAndUnbilledReport'])->name('readings.billed-and-unbilled-reports');
 Route::get('/readings/print-billed-unbilled/{type}/{meterReader}/{day}/{period}/{town}', [App\Http\Controllers\ReadingsController::class, 'printBilledUnbilled'])->name('readings.print-billed-unbilled');
+Route::get('/readings/print-disco-active/{meterReader}/{day}/{period}/{town}', [App\Http\Controllers\ReadingsController::class, 'printDiscoActive'])->name('readings.print-disco-active');
+Route::get('/readings/billed-and-unbilled-reports-bapa', [App\Http\Controllers\ReadingsController::class, 'billAndUnbilledReportBapa'])->name('readings.billed-and-unbilled-reports-bapa');
+Route::get('/readings/print-billed-unbilled-bapa/{type}/{bapaName}/{period}/{town}', [App\Http\Controllers\ReadingsController::class, 'printBilledUnbilledBapa'])->name('readings.print-billed-unbilled-bapa');
 Route::resource('readings', App\Http\Controllers\ReadingsController::class);
 
 Route::get('/bills/unbilled-readings', [App\Http\Controllers\BillsController::class, 'unbilledReadings'])->name('bills.unbilled-readings');
@@ -631,6 +634,7 @@ Route::get('/d_c_r_summary_transactions/sales-dcr-monitor', [App\Http\Controller
 Route::get('/d_c_r_summary_transactions/print-dcr/{teller}/{day}', [App\Http\Controllers\DCRSummaryTransactionsController::class, 'printDcr'])->name('dCRSummaryTransactions.print-dcr');
 Route::get('/d_c_r_summary_transactions/dashboard', [App\Http\Controllers\DCRSummaryTransactionsController::class, 'collectionDashboard'])->name('dCRSummaryTransactions.dashboard');
 Route::get('/d_c_r_summary_transactions/get-collection-per-area', [App\Http\Controllers\DCRSummaryTransactionsController::class, 'dashboardGetCollectionPerArea'])->name('dCRSummaryTransactions.get-collection-per-area');
+Route::get('/d_c_r_summary_transactions/collection-office-expand/{office}', [App\Http\Controllers\DCRSummaryTransactionsController::class, 'collectionOfficeEpand'])->name('dCRSummaryTransactions.collection-office-expand');
 
 
 Route::resource('banks', App\Http\Controllers\BanksController::class);

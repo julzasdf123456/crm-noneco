@@ -1,14 +1,13 @@
 <div class="card shadow-none" style="height: 70vh">
-    <div class="card-body table-responsive px-0">
-        <table class="table table-hover table-sm">
+    <div class="card-body table-responsive p-0">
+        <table class="table table-hover table-head-fixed text-nowrap table-sm">
             <thead>
                 <th>OR Number</th>
                 <th>Account Number</th>
                 <th>Account Name</th>
                 <th>GL Code</th>
+                <th>Particulars</th>
                 <th class="text-right">Amount</th>
-                <th>Check No.</th>
-                <th>Bank</th>
             </thead>
             <tbody>
                 @if ($nonPowerBills != null)
@@ -24,30 +23,27 @@
                         @endphp
                         <tr>
                             <td>{{ $prevHolder==$prev ? '' : $item->ORNumber }}</td>
-                            <td>{{ $prevHolder==$prev ? '' : $item->AccountNumber }}</td>
+                            <td>{{ $prevHolder==$prev ? '' : ($item->OldAccountNo) }}</td>
                             <td>{{ $prevHolder==$prev ? '' : $item->PayeeName }}</td>
                             <td>{{ $item->AccountCode }}</td>
-                            <td class="text-right">{{ $item->Total != null ? number_format($item->Total, 2) : '0.0' }}</td>
-                            <td>{{ $item->CheckNo }}</td>
-                            <td>{{ $item->Bank }}</td>
+                            <td>{{ $item->Particular }}</td>
+                            <td class="text-right text-info">{{ $item->Total != null ? number_format($item->Total, 2) : '0.0' }}</td>
                         </tr>   
                         @php
                             $prev = $prevHolder;    
                             $total = $total + floatval($item->Total);
                             $i++;                
                         @endphp   
-                    @endforeach    
-                    <tr>
-                        <th>Total ({{ $i }} payments)</th> 
-                        <th></th>   
-                        <th></th>
-                        <th></th>
-                        <th class="text-right">{{ number_format($total, 2) }}</th>
-                        <th></th>
-                        <th></th>
-                    </tr>          
+                    @endforeach     
                 @endif        
             </tbody>
+            <tfoot style="position: sticky; inset-block-end: 0; background-color: white;">
+                <th colspan="2">Total ({{ $i }} payments)</th> 
+                <th></th>
+                <th></th>
+                <th></th>
+                <th class="text-right text-primary">{{ number_format($total, 2) }}</th>
+            </tfoot>
         </table>
     </div>
 </div>

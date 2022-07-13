@@ -554,7 +554,7 @@ class ServiceAccountsController extends AppBaseController
         $towns = Towns::where('id', $serviceConnection->Town)->pluck('Town', 'id');
         $barangays = Barangays::where('TownId', $serviceConnection->Town)->pluck('Barangay', 'id');
         $accountTypes = ServiceConnectionAccountTypes::all();
-        $meterReaders = User::role('Meter Reader')->get();
+        $meterReaders = User::role('Meter Reader Inhouse')->get();
 
         return view('/service_accounts/account_migration',
             [
@@ -640,7 +640,7 @@ class ServiceAccountsController extends AppBaseController
         $towns = Towns::where('id', $serviceAccount->Town)->pluck('Town', 'id');
         $barangays = Barangays::where('TownId', $serviceAccount->Town)->pluck('Barangay', 'id');
         $accountTypes = ServiceConnectionAccountTypes::all();
-        $meterReaders = User::role('Meter Reader')->get();
+        $meterReaders = User::role('Meter Reader Inhouse')->get();
         $bapa = DB::table('Billing_ServiceAccounts')
             ->select('OrganizationParentAccount')
             ->groupBy('OrganizationParentAccount')

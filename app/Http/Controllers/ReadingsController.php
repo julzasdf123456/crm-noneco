@@ -634,6 +634,7 @@ class ReadingsController extends AppBaseController
                     DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND FieldStatus='CHANGE METER' AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')) AS ChangeMeter"),
                     DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND FieldStatus='NOT IN USE' AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')) AS NotInUse"),
                     DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND FieldStatus='NO DISPLAY' AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')) AS NoDisplay"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND AccountNumber IS NOT NULL AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE AccountStatus='DISCONNECTED' AND OrganizationParentAccount='" . $bapaName . "') AND AccountNumber IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')) AS DiscoActive"),
                     DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND AccountNumber IS NOT NULL AND FieldStatus NOT IN ('STUCK-UP', 'CHANGE METER', 'NOT IN USE', 'NO DISPLAY') AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "') AND AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')) AS OtherUnbilled"),
                     DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND AccountNumber IS NOT NULL AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "') AND AccountNumber IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')) AS TotalBilled")
                 )
@@ -701,6 +702,7 @@ class ReadingsController extends AppBaseController
                     DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE MeterReader='" . $meterReader->id . "' AND ServicePeriod='" . $period . "' AND FieldStatus='CHANGE METER' AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE Town='" . $town . "' AND GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "')) AS ChangeMeter"),
                     DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE MeterReader='" . $meterReader->id . "' AND ServicePeriod='" . $period . "' AND FieldStatus='NOT IN USE' AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE Town='" . $town . "' AND GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "')) AS NotInUse"),
                     DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE MeterReader='" . $meterReader->id . "' AND ServicePeriod='" . $period . "' AND FieldStatus='NO DISPLAY' AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE Town='" . $town . "' AND GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "')) AS NoDisplay"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE MeterReader='" . $meterReader->id . "' AND ServicePeriod='" . $period . "' AND AccountNumber IS NOT NULL AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE AccountStatus='DISCONNECTED' AND Town='" . $town . "' AND GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "') AND AccountNumber IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')) AS DiscoActive"),
                     DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE MeterReader='" . $meterReader->id . "' AND ServicePeriod='" . $period . "' AND AccountNumber IS NOT NULL AND FieldStatus NOT IN ('STUCK-UP', 'CHANGE METER', 'NOT IN USE', 'NO DISPLAY') AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE Town='" . $town . "' AND GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "') AND AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')) AS OtherUnbilled"),
                     DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE MeterReader='" . $meterReader->id . "' AND ServicePeriod='" . $period . "' AND AccountNumber IS NOT NULL AND AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE Town='" . $town . "' AND GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "') AND AccountNumber IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')) AS TotalBilled")
                 )
@@ -1194,7 +1196,7 @@ class ReadingsController extends AppBaseController
         $period = $request['ServicePeriod'];
         $town = $request['Office'];
 
-        $meterReaders = User::role('Meter Reader')->orderBy('name')->get();
+        $meterReaders = User::role('Meter Reader Inhouse')->orderBy('name')->get();
 
         if ($type == null && $meterReader == null && $day == null && $period == null && $town == null) {
             $readingReport = [];
@@ -1485,5 +1487,222 @@ class ReadingsController extends AppBaseController
                 'type' => $type,
             ]);
         }  
+    }
+
+    public function billAndUnbilledReportBapa(Request $request) {
+        $type = $request['Type']; // billed, unbilled
+        $bapaName = $request['BAPAName'];
+        $period = $request['ServicePeriod'];
+        $town = $request['Office'];
+
+        if ($town == null) {
+            $bapas = DB::table('Billing_ServiceAccounts')
+                ->where('Town', env('APP_AREA_CODE'))
+                ->whereNotNull('OrganizationParentAccount')
+                ->select('OrganizationParentAccount')
+                ->groupBy('OrganizationParentAccount')
+                ->orderBy('OrganizationParentAccount')
+                ->get();
+        } else {
+            $bapas = DB::table('Billing_ServiceAccounts')
+                ->where('Town', $town)
+                ->whereNotNull('OrganizationParentAccount')
+                ->select('OrganizationParentAccount')
+                ->groupBy('OrganizationParentAccount')
+                ->orderBy('OrganizationParentAccount')
+                ->get();
+        }
+        
+
+        if ($type == null && $period == null && $town == null) {
+            $readingReport = [];
+        } else {
+            if ($type == 'Billed') {
+                $readingReport = DB::table('Billing_Readings')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->where('Billing_Readings.ServicePeriod', $period)    
+                    ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)  
+                    ->whereRaw("Billing_Readings.AccountNumber IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')")
+                    ->select('Billing_Readings.*',
+                        'Billing_ServiceAccounts.id AS AccountId',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.SequenceCode',
+                        'Billing_ServiceAccounts.AccountStatus',
+                        'Billing_ServiceAccounts.Multiplier',
+                        'Billing_ServiceAccounts.AreaCode',
+                        DB::raw("(SELECT TOP 1 ReadingTimestamp FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReadingTimestamp"),
+                        DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReading"),
+                        DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                        DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS CurrentKwh"),
+                        )
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('Billing_ServiceAccounts.SequenceCode')
+                    ->orderBy('AccountStatus')
+                    ->orderBy('FieldStatus')
+                ->get();
+            } else {
+                // UNBILLED
+                $readingReport = DB::table('Billing_Readings')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->where('Billing_Readings.ServicePeriod', $period)      
+                    ->where(function ($query) use ($period, $bapaName) {
+                        $query->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')")
+                            ->whereRaw("Billing_Readings.AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')")
+                            ->orWhereRaw("Billing_Readings.AccountNumber IS NULL");
+                    })
+                    ->select('Billing_Readings.*',
+                        'Billing_ServiceAccounts.id AS AccountId',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.SequenceCode',
+                        'Billing_ServiceAccounts.AccountStatus',
+                        'Billing_ServiceAccounts.Multiplier',
+                        'Billing_ServiceAccounts.AreaCode',
+                        DB::raw("(SELECT TOP 1 ReadingTimestamp FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReadingTimestamp"),
+                        DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReading"),
+                        DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                        DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS CurrentKwh"),
+                        )
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('AccountStatus')
+                    ->orderBy('FieldStatus')
+                ->get();      
+            }
+        }        
+
+        return view('/readings/reports_billed_unbilled_bapa', [
+            'bapas' => $bapas,
+            'readingReport' => $readingReport,
+        ]);
+    }
+
+    public function printBilledUnbilledBapa($type, $bapaName, $period, $town) {   
+        $bapaName = urldecode($bapaName);
+        if ($type == null && $bapaName==null && $period == null && $town == null) {
+            return abort(404, 'MISSING PARAMETERS');
+        } else {
+            if ($town == null) {
+                $bapas = DB::table('Billing_ServiceAccounts')
+                    ->where('Town', env('APP_AREA_CODE'))
+                    ->whereNotNull('OrganizationParentAccount')
+                    ->select('OrganizationParentAccount')
+                    ->groupBy('OrganizationParentAccount')
+                    ->orderBy('OrganizationParentAccount')
+                    ->get();
+            } else {
+                $bapas = DB::table('Billing_ServiceAccounts')
+                    ->where('Town', $town)
+                    ->whereNotNull('OrganizationParentAccount')
+                    ->select('OrganizationParentAccount')
+                    ->groupBy('OrganizationParentAccount')
+                    ->orderBy('OrganizationParentAccount')
+                    ->get();
+            }
+            
+    
+            if ($type == 'Billed') {
+                $readingReport = DB::table('Billing_Readings')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->where('Billing_Readings.ServicePeriod', $period)    
+                    ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)  
+                    ->whereRaw("Billing_Readings.AccountNumber IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')")
+                    ->select('Billing_Readings.*',
+                        'Billing_ServiceAccounts.id AS AccountId',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.SequenceCode',
+                        'Billing_ServiceAccounts.AccountStatus',
+                        'Billing_ServiceAccounts.Multiplier',
+                        'Billing_ServiceAccounts.AreaCode',
+                        DB::raw("(SELECT TOP 1 ReadingTimestamp FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReadingTimestamp"),
+                        DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReading"),
+                        DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                        DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS CurrentKwh"),
+                        )
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('Billing_ServiceAccounts.SequenceCode')
+                    ->orderBy('AccountStatus')
+                    ->orderBy('FieldStatus')
+                ->get();
+            } else {
+                // UNBILLED
+                $readingReport = DB::table('Billing_Readings')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->where('Billing_Readings.ServicePeriod', $period)      
+                    ->where(function ($query) use ($period, $bapaName) {
+                        $query->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE OrganizationParentAccount='" . $bapaName . "')")
+                            ->whereRaw("Billing_Readings.AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')")
+                            ->orWhereRaw("Billing_Readings.AccountNumber IS NULL");
+                    })
+                    ->select('Billing_Readings.*',
+                        'Billing_ServiceAccounts.id AS AccountId',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.SequenceCode',
+                        'Billing_ServiceAccounts.AccountStatus',
+                        'Billing_ServiceAccounts.Multiplier',
+                        'Billing_ServiceAccounts.AreaCode',
+                        DB::raw("(SELECT TOP 1 ReadingTimestamp FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReadingTimestamp"),
+                        DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReading"),
+                        DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                        DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS CurrentKwh"),
+                        )
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('AccountStatus')
+                    ->orderBy('FieldStatus')
+                ->get();      
+            }
+
+            return view('/readings/print_billed_unbilled_report_bapa', [
+                'bapaName' => $bapaName,
+                'readingReport' => $readingReport,
+                'town' => $town,
+                'period' => $period,
+                'type' => $type,
+            ]);
+        }  
+    }
+
+    public function printDiscoActive($meterReader, $day, $period, $town) {
+        $meterReader = User::find($meterReader);
+
+        $reading = DB::table('Billing_Readings')
+            ->whereNotNull('Billing_Readings.AccountNumber')
+            ->whereRaw("Billing_Readings.AccountNumber IN (SELECT id FROM Billing_ServiceAccounts WHERE GroupCode='" . $day . "' AND MeterReader='" . $meterReader->id . "')")
+            ->where('Billing_Readings.ServicePeriod', $period)
+            ->whereRaw("Billing_Readings.MeterReader='" . $meterReader->id . "'")
+            ->first();
+
+        $readingReport = DB::table('Billing_Readings')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->whereRaw("Billing_Readings.MeterReader = '" . $meterReader->id . "'")
+            ->where('Billing_Readings.ServicePeriod', $period)
+            ->whereRaw("Town='" . $town . "' AND GroupCode='" . $day . "' AND Billing_ServiceAccounts.MeterReader='" . $meterReader->id . "' AND Billing_ServiceAccounts.AccountStatus='DISCONNECTED'")
+            ->whereRaw("Billing_ServiceAccounts.id IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')")            
+            ->select('Billing_Readings.*',
+                'Billing_ServiceAccounts.id AS AccountId',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.SequenceCode',
+                'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.Multiplier',
+                DB::raw("(SELECT TOP 1 ReadingTimestamp FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReadingTimestamp"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReading"),
+                DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS CurrentKwh"),
+                DB::raw("(SELECT TOP 1 NetAmount FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS NetAmount"),
+                )
+            ->orderBy('AccountStatus')
+            ->orderBy('FieldStatus')
+            ->get();
+
+        return view('/readings/print_disco_active', [
+            'period' => $period,
+            'day' => $day,
+            'town' => $town,
+            'meterReader' => $meterReader,
+            'readingReport' => $readingReport,
+        ]);
     }
 }

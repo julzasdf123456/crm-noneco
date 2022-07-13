@@ -54,7 +54,7 @@
 
         {{-- RESULTS --}}
         <div class="col-lg-9">
-            <div class="card">
+            <div class="card" style="80vh">
                 <div class="card-header p-2">
                     <ul class="nav nav-pills">
                         <li class="nav-item"><a class="nav-link active" href="#dcr-summary" data-toggle="tab">
@@ -78,7 +78,7 @@
                             Cancelled ORs</a></li>
                     </ul>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     <div class="tab-content">
                         <div class="tab-pane active" id="dcr-summary">
                             @include('d_c_r_summary_transactions.dcr_summary')

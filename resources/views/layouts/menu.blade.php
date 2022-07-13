@@ -668,6 +668,12 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-circle nav-icon text-primary"></i><p>Billed & Unbilled</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('readings.billed-and-unbilled-reports-bapa') }}"
+                   class="nav-link {{ Request::is('readings.billed-and-unbilled-reports-bapa*') ? 'active' : '' }}">                   
+                   <i class="fas fa-circle nav-icon text-primary"></i><p>Billed & Unbilled BAPA</p>
+                </a>
+            </li>
             <li class="nav-header">                
                 CorPlan 
             </li>
