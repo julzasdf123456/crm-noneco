@@ -102,9 +102,9 @@
                         @include('d_c_r_summary_transactions.tab_check_admin_dcr')
                     </div>
 
-                    {{-- <div class="tab-pane" id="cancelled-ors">
-                        @include('d_c_r_summary_transactions.cancelled_ors')
-                    </div> --}}
+                    <div class="tab-pane" id="cancelled-ors">
+                        @include('d_c_r_summary_transactions.tab_cancelled_ors_admin_dcr')
+                    </div>
                 </div>                    
             </div>
         </div>

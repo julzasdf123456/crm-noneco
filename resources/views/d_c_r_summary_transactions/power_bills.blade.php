@@ -34,10 +34,10 @@
                             <td class="text-right text-info">{{ number_format($item->Form2307FivePercent, 2) }}</td>
                             <td class="text-right">{{ number_format($item->AdditionalCharges, 2) }}</td>
                             <td class="text-right text-info">{{ number_format($item->Deductions, 2) }}</td>
-                            <td class="text-right text-primary">{{ number_format($item->NetAmount, 2) }}</td>
+                            <td class="text-right text-primary">{{ number_format($item->CashPaid, 2) }}</td>
                         </tr>   
                         @php
-                            $total = $total + floatval($item->NetAmount);
+                            $total = $total + floatval($item->CashPaid);
                             $i++;
                         @endphp   
                     @endforeach    

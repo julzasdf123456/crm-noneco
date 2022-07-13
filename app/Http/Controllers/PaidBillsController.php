@@ -844,12 +844,21 @@ class PaidBillsController extends AppBaseController
         }  
 
         // SAVE PAIDBILL DETAILS
-        if ($request['PaymentUsed'] == 'Cash' | $request['PaymentUsed'] == 'Cash and Check') {
+        if ($request['PaymentUsed'] == 'Cash and Check') {
             $paidBillDetails = new PaidBillsDetails;
             $paidBillDetails->id = IDGenerator::generateIDandRandString();
             $paidBillDetails->AccountNumber = $request['AccountNumber'];
             $paidBillDetails->ORNumber = $request['ORNumber'];
             $paidBillDetails->Amount = $request['CashAmount'];
+            $paidBillDetails->PaymentUsed = 'Cash';
+            $paidBillDetails->UserId = Auth::id();
+            $paidBillDetails->save();
+        } elseif ($request['PaymentUsed'] == 'Cash') {
+            $paidBillDetails = new PaidBillsDetails;
+            $paidBillDetails->id = IDGenerator::generateIDandRandString();
+            $paidBillDetails->AccountNumber = $request['AccountNumber'];
+            $paidBillDetails->ORNumber = $request['ORNumber'];
+            $paidBillDetails->Amount = $bill->NetAmount;
             $paidBillDetails->PaymentUsed = 'Cash';
             $paidBillDetails->UserId = Auth::id();
             $paidBillDetails->save();

@@ -68,7 +68,10 @@ class DCRSummaryTransactionsController extends AppBaseController
             ->where('Cashier_PaidBills.Teller', $request['Teller'])
             ->whereNull('Cashier_PaidBills.Status')
             ->whereRaw("Cashier_PaidBills.PaymentUsed LIKE '%Cash%'")
-            ->select('Cashier_PaidBills.*', 'Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.OldAccountNo')
+            ->select('Cashier_PaidBills.*', 
+                DB::raw("(SELECT SUM(CAST(Amount AS DECIMAL(10,2))) FROM Cashier_PaidBillsDetails WHERE ORNumber=Cashier_PaidBills.ORNumber AND PaymentUsed='Cash') AS CashPaid"),            
+                'Billing_ServiceAccounts.ServiceAccountName', 
+                'Billing_ServiceAccounts.OldAccountNo')
             ->get();
 
         $nonPowerBills = DB::table('Cashier_TransactionDetails')
@@ -624,7 +627,10 @@ class DCRSummaryTransactionsController extends AppBaseController
                 ->whereBetween('Cashier_PaidBills.ORDate', [$from, $to])
                 ->whereNull('Cashier_PaidBills.Status')
                 ->whereRaw("Cashier_PaidBills.PaymentUsed LIKE '%Cash%'")
-                ->select('Cashier_PaidBills.*', 'Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.OldAccountNo')
+                ->select('Cashier_PaidBills.*', 
+                    DB::raw("(SELECT SUM(CAST(Amount AS DECIMAL(10,2))) FROM Cashier_PaidBillsDetails WHERE ORNumber=Cashier_PaidBills.ORNumber AND PaymentUsed='Cash') AS CashPaid"),
+                    'Billing_ServiceAccounts.ServiceAccountName', 
+                    'Billing_ServiceAccounts.OldAccountNo')
                 ->get();
 
             $nonPowerBills = DB::table('Cashier_TransactionDetails')
@@ -721,7 +727,10 @@ class DCRSummaryTransactionsController extends AppBaseController
                 ->where('Cashier_PaidBills.Teller', $teller)
                 ->whereNull('Cashier_PaidBills.Status')
                 ->whereRaw("Cashier_PaidBills.PaymentUsed LIKE '%Cash%'")
-                ->select('Cashier_PaidBills.*', 'Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.OldAccountNo')
+                ->select('Cashier_PaidBills.*', 
+                    DB::raw("(SELECT SUM(CAST(Amount AS DECIMAL(10,2))) FROM Cashier_PaidBillsDetails WHERE ORNumber=Cashier_PaidBills.ORNumber AND PaymentUsed='Cash') AS CashPaid"),
+                    'Billing_ServiceAccounts.ServiceAccountName', 
+                    'Billing_ServiceAccounts.OldAccountNo')
                 ->get();
 
             $nonPowerBills = DB::table('Cashier_TransactionDetails')
@@ -819,7 +828,8 @@ class DCRSummaryTransactionsController extends AppBaseController
             'data' => $data,
             'powerBills' => $powerBills,
             'nonPowerBills' => $nonPowerBills,
-            'checkPayments' => $checkPaymentsAll
+            'checkPayments' => $checkPaymentsAll,
+            'cancelledAllPayments' => $cancelledAllPayments,
         ]);
     }
 }
