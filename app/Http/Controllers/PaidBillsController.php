@@ -1176,9 +1176,9 @@ class PaidBillsController extends AppBaseController
 
         $accounts = DB::table('Billing_Bills')
             ->leftJoin('Billing_ServiceAccounts', 'Billing_ServiceAccounts.id', '=', 'Billing_Bills.AccountNumber')
-            ->whereRaw("Billing_Bills.ServicePeriod <= '" . $period . "'")
+            ->whereRaw("Billing_Bills.ServicePeriod = '" . $period . "'")
             ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
-            ->whereRaw("Billing_Bills.id NOT IN (SELECT ObjectSourceId FROM Cashier_PaidBills WHERE ObjectSourceId IS NOT NULL)")
+            ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod = '" . $period ."')")
             ->whereRaw("Billing_Bills.id NOT IN (SELECT BillId FROM Cashier_BAPAAdjustmentDetails WHERE BillId IS NOT NULL)")
             ->select('Billing_ServiceAccounts.id AS AccountNumber',
                 'Billing_ServiceAccounts.ServiceAccountName',
