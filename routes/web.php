@@ -643,6 +643,10 @@ Route::resource('banks', App\Http\Controllers\BanksController::class);
 Route::get('/b_a_p_a_adjustments/adjust-bapa/{bapaName}', [App\Http\Controllers\BAPAAdjustmentsController::class, 'adjustBapaPayments'])->name('bAPAAdjustments.adjust-bapa');
 Route::get('/b_a_p_a_adjustments/search-bapa', [App\Http\Controllers\BAPAAdjustmentsController::class, 'searchBapa'])->name('bAPAAdjustments.search-bapa');
 Route::get('/b_a_p_a_adjustments/save-bapa-adjustments', [App\Http\Controllers\BAPAAdjustmentsController::class, 'saveBapaAdjustments'])->name('bAPAAdjustments.save-bapa-adjustments');
+Route::get('/b_a_p_a_adjustments/search-bapa-monitor', [App\Http\Controllers\BAPAAdjustmentsController::class, 'searchBapaMonitor'])->name('bAPAAdjustments.search-bapa-monitor');
+Route::get('/b_a_p_a_adjustments/get-bapa-monitor-search-results', [App\Http\Controllers\BAPAAdjustmentsController::class, 'getBapaMonitorSearchResults'])->name('bAPAAdjustments.get-bapa-monitor-search-results');
+Route::get('/b_a_p_a_adjustments/bapa-collection-monitor-console/{bapaName}', [App\Http\Controllers\BAPAAdjustmentsController::class, 'bapaCollectionMonitorConsole'])->name('bAPAAdjustments.bapa-collection-monitor-console');
+Route::get('/b_a_p_a_adjustments/print-voucher/{representative}/{bapaName}/{period}/{discount}/{dateAdjusted}', [App\Http\Controllers\BAPAAdjustmentsController::class, 'printVoucher'])->name('bAPAAdjustments.print-voucher');
 Route::resource('bAPAAdjustments', App\Http\Controllers\BAPAAdjustmentsController::class);
 
 

@@ -13,6 +13,7 @@ use App\Models\BAPAAdjustmentDetails;
 use App\Models\IDGenerator;
 use App\Models\Bills;
 use App\Models\Rates;
+use App\Models\ServiceAccounts;
 use Illuminate\Support\Facades\DB;   
 use Illuminate\Support\Facades\Auth; 
 use Flash;
@@ -291,5 +292,138 @@ class BAPAAdjustmentsController extends AppBaseController
         }
 
         return response()->json('ok', 200);
+    }
+
+    public function searchBapaMonitor() {
+        $towns = Towns::all();
+
+        return view('/b_a_p_a_adjustments/search_bapa_monitor', [
+            'towns' => $towns,
+        ]);
+    }
+
+    public function getBapaMonitorSearchResults(Request $request) {
+        $param = $request['BAPA'];
+        $town = $request['Town'];
+
+        if ($town == 'All') {
+            $bapas = DB::table('Billing_ServiceAccounts AS sa')
+            ->where('sa.OrganizationParentAccount', 'LIKE', '%' . $param . '%')
+            ->select('sa.OrganizationParentAccount', 
+                'sa.Town',
+                DB::raw("COUNT(sa.id) AS NoOfAccounts"),
+                DB::raw("(SELECT SUBSTRING((SELECT ',' + AreaCode AS 'data()' FROM Billing_ServiceAccounts WHERE OrganizationParentAccount=sa.OrganizationParentAccount GROUP BY AreaCode FOR XML PATH('')), 2 , 9999)) As Result"))
+            ->groupBy('sa.OrganizationParentAccount', 
+                'sa.Town')
+            ->orderBy('sa.OrganizationParentAccount')
+            ->get();
+        } else {
+            $bapas = DB::table('Billing_ServiceAccounts AS sa')
+            ->where('sa.OrganizationParentAccount', 'LIKE', '%' . $param . '%')
+            ->where('sa.Town', $town)
+            ->select('sa.OrganizationParentAccount', 
+                'sa.Town',
+                DB::raw("COUNT(sa.id) AS NoOfAccounts"),
+                DB::raw("(SELECT SUBSTRING((SELECT ',' + AreaCode AS 'data()' FROM Billing_ServiceAccounts WHERE OrganizationParentAccount=sa.OrganizationParentAccount GROUP BY AreaCode FOR XML PATH('')), 2 , 9999)) As Result"))
+            ->groupBy('sa.OrganizationParentAccount', 
+                'sa.Town')
+            ->orderBy('sa.OrganizationParentAccount')
+            ->get();
+        }
+
+        $output = "";
+        foreach($bapas as $item) {
+            if (strlen($item->OrganizationParentAccount) > 1) {
+                $output .= '<tr>
+                                <td><a href="' . route('bAPAAdjustments.bapa-collection-monitor-console', [urlencode($item->OrganizationParentAccount)]) . '">' . $item->OrganizationParentAccount . '</a></td>
+                                <td>' . $item->Town . '</td>
+                                <td>' . number_format($item->NoOfAccounts) . '</td>
+                                <td>' . $item->Result . '</td>
+                            </tr>';
+            }            
+        }
+
+        return response()->json($output, 200);
+    }
+
+    public function bapaCollectionMonitorConsole($bapaName, Request $request) {
+        $bapaName = urldecode($bapaName);
+        $rate = Rates::orderByDesc('ServicePeriod')
+            ->first();
+
+        $routes = ServiceAccounts::where('OrganizationParentAccount', $bapaName)
+            ->select('AreaCode', 
+                DB::raw("COUNT(id) AS NoOfConsumers"))
+            ->groupBy('AreaCode')
+            ->get();
+
+        $period = $request['Period'];
+
+        if ($period != null) {
+            $bapaData = DB::table('Billing_ServiceAccounts')
+                ->where('OrganizationParentAccount', $bapaName)
+                ->select('*',
+                    DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS KwhUsed"),
+                    DB::raw("(SELECT TOP 1 NetAmount FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS NetAmount"),
+                    DB::raw("(SELECT TOP 1 DiscountAmount FROM Cashier_BAPAAdjustmentDetails WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS DiscountAmount"),
+                    DB::raw("(SELECT TOP 1 DiscountPercentage FROM Cashier_BAPAAdjustmentDetails WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS DiscountPercentage"),
+                    DB::raw("(SELECT TOP 1 ORNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS ORNumber"),
+                )
+                ->orderBy('OldAccountNo')
+                ->get();
+
+            $bapaAdjustmentData = BAPAAdjustmentDetails::where('BAPAName', $bapaName)
+                ->where("ServicePeriod", $period)
+                ->select('DiscountPercentage',
+                    DB::raw("CAST(created_at AS DATE) AS DateAdjusted"),
+                    DB::raw("COUNT(id) AS NoOfConsumers"),
+                    DB::raw("SUM(CAST(DiscountAmount AS DECIMAL(10,2))) AS DiscountTotal"))
+                ->groupBy('DiscountPercentage', DB::raw("CAST(created_at AS DATE)"))
+                ->get();
+        } else {
+            $bapaData = [];
+            $bapaAdjustmentData = [];
+        }
+
+        return view('/b_a_p_a_adjustments/bapa_collection_monitor_console', [
+            'bapaName' => $bapaName,
+            'rate' => $rate,
+            'routes' => $routes,
+            'bapaData' => $bapaData,
+            'bapaAdjustmentData' => $bapaAdjustmentData,
+        ]);
+    }
+
+    public function printVoucher($representative, $bapaName, $period, $discount, $dateAdjusted) {
+        $representative = urldecode($representative);
+        $bapaName = urldecode($bapaName);
+
+        $town = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+            ->groupBy('Billing_ServiceAccounts.OrganizationParentAccount', 'CRM_Towns.Town')
+            ->select('Billing_ServiceAccounts.OrganizationParentAccount', 'CRM_Towns.Town')
+            ->first();
+
+        $bapaAdjustmentData = BAPAAdjustmentDetails::where('BAPAName', $bapaName)
+            ->where("ServicePeriod", $period)
+            ->whereRaw("CAST(created_at AS DATE)='" . $dateAdjusted . "'")
+            ->where("DiscountPercentage", $discount)
+            ->select('DiscountPercentage',
+                DB::raw("CAST(created_at AS DATE) AS DateAdjusted"),
+                DB::raw("COUNT(id) AS NoOfConsumers"),
+                DB::raw("SUM(CAST(DiscountAmount AS DECIMAL(10,2))) AS DiscountTotal"))
+            ->groupBy('DiscountPercentage', DB::raw("CAST(created_at AS DATE)"))
+            ->first();
+
+        return view('/b_a_p_a_adjustments/print_voucher', [
+            'town' => $town,
+            'bapaName' => $bapaName,
+            'representative' => $representative,
+            'discount' => $discount,
+            'dateAdjusted' => $dateAdjusted,
+            'bapaAdjustmentData' => $bapaAdjustmentData,
+            'period' => $period,
+        ]);
     }
 }

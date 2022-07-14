@@ -1200,7 +1200,7 @@ class PaidBillsController extends AppBaseController
                 // DB::raw("(SELECT TOP 1 id FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Bills.ServicePeriod) AS BillId"),
                 // DB::raw("(SELECT TOP 1 NetAmount FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Bills.ServicePeriod) AS NetAmount"),
                 DB::raw("(SELECT TOP 1 ORNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Bills.ServicePeriod AND Status IS NULL) AS ORNumber"),)
-            ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+            ->orderBy('Billing_ServiceAccounts.OldAccountNo')
             ->get();
 
         return response()->json($accounts, 200);

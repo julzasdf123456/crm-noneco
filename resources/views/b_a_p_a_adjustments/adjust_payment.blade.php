@@ -417,7 +417,7 @@
                         allowEscapeKey : false
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            window.location.href = "{{ url(route('bAPAAdjustments.index')) }}"
+                            window.location.href = "{{ url('/b_a_p_a_adjustments/bapa-collection-monitor-console') }}" + "/" + encodeURI("{{ $bapaName }}") + "?Period=" + encodeURI($('#ServicePeriod').val())
                         }
                     })
                 },

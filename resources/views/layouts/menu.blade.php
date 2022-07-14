@@ -778,11 +778,28 @@ use Illuminate\Support\Facades\Auth;
     </li>
 @endcanany
 @canany(['Super Admin', 'bapa adjust'])
-    <li class="nav-item">
-        <a href="{{ route('bAPAAdjustments.index') }}"
-        class="nav-link {{ Request::is('bAPAAdjustments.index*') ? 'active' : '' }}">
-        <i class="fas fa-users nav-icon text-info"></i><p>BAPA Adjustments</p>
+    <li class="nav-item has-treeview">
+        <a href="#" class="nav-link">
+            <i class="fas fa-receipt nav-icon text-info"></i>
+            <p>
+                BAPA
+                <i class="fas fa-angle-left right"></i>
+            </p>
         </a>
+        <ul class="nav nav-treeview">
+            <li class="nav-item">
+                <a href="{{ route('bAPAAdjustments.search-bapa-monitor') }}"
+                class="nav-link {{ Request::is('bAPAAdjustments.search-bapa-monitor*') ? 'active' : '' }}">
+                <i class="fas fa-chart-line nav-icon text-info"></i><p>Collection Monitor</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('bAPAAdjustments.index') }}"
+                class="nav-link {{ Request::is('bAPAAdjustments.index*') ? 'active' : '' }}">
+                <i class="fas fa-users nav-icon text-info"></i><p>New BAPA Adjustments</p>
+                </a>
+            </li>
+        </ul>
     </li>
 @endcanany
 @canany(['Super Admin', 'teller view'])
