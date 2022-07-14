@@ -34,7 +34,7 @@ use Illuminate\Support\Facades\Auth;
         <div class="row">
             <div class="col-md-4 col-lg-4">
                 {{-- APPLICATON DETAILS --}}
-                <div class="card {{ $serviceConnections->LoadCategory == 'above 5kVa' ? 'card-danger' : 'card-primary' }} card-outline">
+                <div class="card {{ $serviceConnections->LoadCategory == 'above 5kVa' ? 'card-danger' : 'card-primary' }} card-outline shadow-none">
                     <div class="card-body box-profile">
                         <div class="text-center">
                             <img id="prof-img" class="profile-user-img img-fluid img-circle" src="" alt="User profile picture">
@@ -93,14 +93,6 @@ use Illuminate\Support\Facades\Auth;
                                 <i class="fas fa-pen"></i>
                             </a>
 
-                            <a href="{{ route('serviceConnections.print-service-connection-application', [$serviceConnections->id]) }}" title="Print Service Connection Application" style="margin-left: 20px;">
-                                <i class="fas fa-print"></i>
-                            </a>
-
-                            <a href="{{ route('serviceConnections.print-service-connection-contract', [$serviceConnections->id]) }}" class="text-danger" title="Print Service Connection Contract" style="margin-left: 20px;">
-                                <i class="fas fa-print"></i>
-                            </a>
-
                             @if ($serviceConnections->ConnectionApplicationType == 'Change Name' && $serviceConnections->ORNumber != null)
                                 @if ($serviceConnections->Status == 'Approved For Change Name')
                                     
@@ -116,6 +108,21 @@ use Illuminate\Support\Facades\Auth;
                             </a>                            
                         @endif
                         
+                    </div>
+                    <div class="card-footer">
+                        @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Service Connection Assessor'])) 
+                            <a class="btn btn-success btn-xs" href="{{ route('memberConsumers.print-membership-application', [$serviceConnections->MemberConsumerId]) }}" class="btn btn-link" title="Print Application Form">
+                                <i class="fas fa-print"> </i> Membership Form
+                            </a>
+
+                            <a class="btn btn-primary btn-xs" href="{{ route('serviceConnections.print-service-connection-application', [$serviceConnections->id]) }}" title="Print Service Connection Application">
+                                <i class="fas fa-print"> </i> Application Form
+                            </a>
+
+                            <a class="btn btn-danger btn-xs" href="{{ route('serviceConnections.print-service-connection-contract', [$serviceConnections->id]) }}" class="text-danger" title="Print Service Connection Contract">
+                                <i class="fas fa-print"> </i> Contract
+                            </a>                        
+                        @endif
                     </div>
                 </div> 
             </div>
