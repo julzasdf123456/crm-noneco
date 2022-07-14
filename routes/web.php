@@ -59,6 +59,7 @@ Route::get('/member_consumers/assess_checklists/{id}', [MemberConsumersControlle
 Route::get('/member_consumers/fetchmemberconsumer', [MemberConsumersController::class, 'fetchmemberconsumer'])->name('memberConsumers.fetch-member-consumers');
 Route::get('/member_consumers/capture-image/{id}', [MemberConsumersController::class, 'captureImage'])->name('memberConsumers.capture-image');
 Route::get('/member_consumers/print-membership-application/{id}', [MemberConsumersController::class, 'printMembershipApplication'])->name('memberConsumers.print-membership-application');
+Route::get('/member_consumers/print-certificate/{id}', [MemberConsumersController::class, 'printCertificate'])->name('memberConsumers.print-certificate');
 Route::resource('memberConsumers', MemberConsumersController::class);
 
 

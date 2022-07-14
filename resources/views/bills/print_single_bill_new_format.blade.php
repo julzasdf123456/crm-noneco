@@ -152,8 +152,6 @@ p {
         <h4 class="text-center">STATEMENT OF ACCOUNT</h4>
     </div>
 
-    
-
     <span>
         BILLING MONTH: <span class="u-bottom" style="margin-right: 30px;">{{ strtoupper(date("F Y", strtotime($bills->ServicePeriod))) }}</span>
         DATE BILLED: <span class="u-bottom" style="margin-right: 30px;">{{ strtoupper(date("F d, Y", strtotime($bills->BillingDate))) }}</span>

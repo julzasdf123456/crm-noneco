@@ -74,6 +74,7 @@ use App\Models\MemberConsumers;
                         @endif
 
                         <a href="{{ route('memberConsumers.print-membership-application', [$memberConsumers->ConsumerId]) }}" class="btn btn-link" title="Print Application Form"><i class="fas fa-print"></i></a>
+                        <a href="{{ route('memberConsumers.print-certificate', [$memberConsumers->ConsumerId]) }}" class="btn btn-link text-warning" title="Print Certificate"><i class="fas fa-print"></i></a>
                     </div>
                 </div>
             </div>
