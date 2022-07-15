@@ -69,7 +69,7 @@ class DCRSummaryTransactionsController extends AppBaseController
             ->whereNull('Cashier_PaidBills.Status')
             ->whereRaw("Cashier_PaidBills.PaymentUsed LIKE '%Cash%'")
             ->select('Cashier_PaidBills.*', 
-                DB::raw("(SELECT SUM(CAST(Amount AS DECIMAL(10,2))) FROM Cashier_PaidBillsDetails WHERE ORNumber=Cashier_PaidBills.ORNumber AND PaymentUsed='Cash') AS CashPaid"),            
+                DB::raw("(SELECT SUM(CAST(Amount AS DECIMAL(10,2))) FROM Cashier_PaidBillsDetails WHERE ORNumber=Cashier_PaidBills.ORNumber AND PaymentUsed='Cash' AND UserId='" . $request['Teller'] ."') AS CashPaid"),            
                 'Billing_ServiceAccounts.ServiceAccountName', 
                 'Billing_ServiceAccounts.OldAccountNo')
             ->get();
