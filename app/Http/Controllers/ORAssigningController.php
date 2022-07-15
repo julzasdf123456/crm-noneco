@@ -163,6 +163,7 @@ class ORAssigningController extends AppBaseController
     public function getLastOR() {
         $orAssignedLast = ORAssigning::where('UserId', Auth::id())
             ->orderByDesc('created_at')
+            ->orderByDesc(Auth::id())
             ->first();
 
         return response()->json($orAssignedLast, 200);
@@ -171,6 +172,7 @@ class ORAssigningController extends AppBaseController
     public function getNextOR() {
         $orAssignedLast = ORAssigning::where('UserId', Auth::id())
             ->orderByDesc('created_at')
+            ->orderByDesc(Auth::id())
             ->first();
 
         $orNext = intval($orAssignedLast->ORNumber) + 1;

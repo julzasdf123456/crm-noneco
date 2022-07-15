@@ -64,10 +64,10 @@ class DCRSummaryTransactionsController extends AppBaseController
 
         $powerBills = DB::table('Cashier_PaidBills')
             ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
-            ->where('Cashier_PaidBills.PostingDate', $request['Day'] != null ? $request['Day'] : date('Y-m-d'))
+            ->where('Cashier_PaidBills.ORDate', $request['Day'] != null ? $request['Day'] : date('Y-m-d'))
             ->where('Cashier_PaidBills.Teller', $request['Teller'])
             ->whereNull('Cashier_PaidBills.Status')
-            ->whereRaw("Cashier_PaidBills.PaymentUsed LIKE '%Cash%'")
+            // ->whereRaw("Cashier_PaidBills.PaymentUsed LIKE '%Cash%'")
             ->select('Cashier_PaidBills.*', 
                 DB::raw("(SELECT SUM(CAST(Amount AS DECIMAL(10,2))) FROM Cashier_PaidBillsDetails WHERE ORNumber=Cashier_PaidBills.ORNumber AND PaymentUsed='Cash' AND UserId='" . $request['Teller'] ."') AS CashPaid"),            
                 'Billing_ServiceAccounts.ServiceAccountName', 
