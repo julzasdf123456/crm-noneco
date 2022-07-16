@@ -44,12 +44,17 @@
                 @csrf
 
                 <div class="input-group mb-3">
-                    <input type="text"
-                           name="remember_token"
-                           class="form-control @error('remember_token') is-invalid @enderror"
-                           value="{{ env('APP_LOCATION') }}"
-                           placeholder="Office"
-                           readonly>
+                    <select name="remember_token" id="remember_token" class="form-control">
+                        <option value="CADIZ" {{ env("APP_LOCATION")=='CADIZ' ? 'selected' : '' }}>CADIZ</option>
+                        <option value="EB MAGALONA" {{ env("APP_LOCATION")=='EB MAGALONA' ? 'selected' : '' }}>EB MAGALONA</option>
+                        <option value="ESCALANTE" {{ env("APP_LOCATION")=='ESCALANTE' ? 'selected' : '' }}>ESCALANTE</option>
+                        <option value="MAIN" {{ env("APP_LOCATION")=='MAIN' ? 'selected' : '' }}>MAIN</option>
+                        <option value="MANAPLA" {{ env("APP_LOCATION")=='MANAPLA' ? 'selected' : '' }}>MANAPLA</option>
+                        <option value="SAGAY" {{ env("APP_LOCATION")=='SAGAY' ? 'selected' : '' }}>SAGAY</option>
+                        <option value="SAN CARLOS" {{ env("APP_LOCATION")=='SAN CARLOS' ? 'selected' : '' }}>SAN CARLOS</option>
+                        <option value="TOBOSO" {{ env("APP_LOCATION")=='TOBOSO' ? 'selected' : '' }}>TOBOSO</option>
+                        <option value="VICTORIAS" {{ env("APP_LOCATION")=='VICTORIAS' ? 'selected' : '' }}>VICTORIAS</option>
+                    </select>
                     <div class="input-group-append">
                         <div class="input-group-text"><span class="fas fa-user"></span></div>
                     </div>

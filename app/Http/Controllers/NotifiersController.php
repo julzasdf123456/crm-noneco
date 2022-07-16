@@ -159,7 +159,7 @@ class NotifiersController extends AppBaseController
     }
 
     public function getNotifications() {
-        $notifiers = Notifiers::where('To', Auth::id())
+        $notifiers = Notifiers::whereRaw("[To]='" . Auth::id() . "'")
             ->orderByDesc('created_at')
             ->limit(10)
             ->get();

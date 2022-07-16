@@ -22,7 +22,12 @@
                             $prevHolder = $item->ORNumber;
                         @endphp
                         <tr>
-                            <td>{{ $prevHolder==$prev ? '' : $item->ORNumber }}</td>
+                            <td>
+                                @if ($prevHolder!=$prev)
+                                    <a href="{{ route('transactionIndices.browse-ors-view', [$item->id, 'OTHER PAYMENTS']) }}">{{ $item->ORNumber }}</a>
+                                @else
+                                    
+                                @endif
                             <td>{{ $prevHolder==$prev ? '' : ($item->OldAccountNo) }}</td>
                             <td>{{ $prevHolder==$prev ? '' : $item->PayeeName }}</td>
                             <td>{{ $item->AccountCode }}</td>

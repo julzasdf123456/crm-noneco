@@ -50,6 +50,24 @@
                 </div>
                 {!! Form::close() !!}
             </div>
+
+            <div class="card shadow-none">
+                <div class="card-header">
+                    <span class="card-title">Collection Summary</span>
+                </div>
+                <div class="card-body table-responsive p-0">
+                    <table class="table table-sm table-hover">
+                        <tr>
+                            <td>Cash</td>
+                            <th class="text-right">{{ $summary != null ? number_format(floatval($summary->CashTotal) + floatval($summary->CashNpbTotal), 2) : "0" }}</th>
+                        </tr>
+                        <tr>
+                            <td>Check</td>
+                            <th class="text-right">{{ $summary != null ? number_format($summary->CheckTotal, 2) : "0" }}</th>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
 
         {{-- RESULTS --}}

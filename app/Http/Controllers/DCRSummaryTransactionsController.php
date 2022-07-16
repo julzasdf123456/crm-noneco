@@ -40,7 +40,7 @@ class DCRSummaryTransactionsController extends AppBaseController
             $data = DB::table('Cashier_DCRSummaryTransactions')
                 ->where('Day', $request['Day'])
                 ->where('Teller', $request['Teller'])
-                ->where('ReportDestination', 'COLLECTION')
+                ->whereIn('ReportDestination', ['COLLECTION', 'BOTH'])
                 ->select('GLCode',
                     DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
                     DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
@@ -52,7 +52,7 @@ class DCRSummaryTransactionsController extends AppBaseController
             $data = DB::table('Cashier_DCRSummaryTransactions')
                 ->where('Day', date('Y-m-d'))
                 ->where('Teller', $request['Teller'])
-                ->where('ReportDestination', 'COLLECTION')
+                ->whereIn('ReportDestination', ['COLLECTION', 'BOTH'])
                 ->select('GLCode',
                     DB::raw("(SELECT Notes FROM Cashier_AccountGLCodes WHERE AccountCode=Cashier_DCRSummaryTransactions.GLCode) AS Description"),
                     DB::raw("SUM(CAST(Amount AS DECIMAL(10,2))) AS Amount")
@@ -88,6 +88,7 @@ class DCRSummaryTransactionsController extends AppBaseController
                 'Cashier_TransactionDetails.AccountCode',
                 'Cashier_TransactionIndex.CheckNo',
                 'Cashier_TransactionIndex.Bank',
+                'Cashier_TransactionIndex.id',
                 'Billing_ServiceAccounts.OldAccountNo',
                 'Cashier_TransactionIndex.PayeeName')
             ->orderBy('Cashier_TransactionDetails.TransactionIndexId')
@@ -140,6 +141,14 @@ class DCRSummaryTransactionsController extends AppBaseController
                 'Cashier_TransactionIndex.PayeeName')
             ->get();
 
+        $summary = DB::table('Cashier_PaidBillsDetails')
+            ->select(
+                DB::raw("(SELECT SUM(CAST(Amount AS DECIMAL(10,2))) FROM Cashier_PaidBillsDetails WHERE PaymentUsed='Cash' AND UserId='" . $request['Teller'] ."' AND CAST(created_at AS DATE)='" . ($request['Day'] != null ? $request['Day'] : date('Y-m-d')) . "') AS CashTotal"),
+                DB::raw("(SELECT SUM(CAST(Amount AS DECIMAL(10,2))) FROM Cashier_PaidBillsDetails WHERE PaymentUsed='Check' AND UserId='" . $request['Teller'] ."' AND CAST(created_at AS DATE)='" . ($request['Day'] != null ? $request['Day'] : date('Y-m-d')) . "') AS CheckTotal"),
+                DB::raw("(SELECT SUM(CAST(td.Amount AS DECIMAL(10,2))) FROM Cashier_TransactionPaymentDetails td LEFT JOIN Cashier_TransactionIndex t ON t.ORNumber=td.ORNumber WHERE td.PaymentUsed='Cash' AND t.UserId='" . $request['Teller'] ."' AND t.ORDate='" . ($request['Day'] != null ? $request['Day'] : date('Y-m-d')) . "') AS CashNpbTotal"),
+            )
+            ->first();
+
         return view('d_c_r_summary_transactions.index', [
             'data' => $data,
             'day' => $request['Day'] != null ? $request['Day'] : date('Y-m-d'),
@@ -149,6 +158,7 @@ class DCRSummaryTransactionsController extends AppBaseController
             'nonPowerBillsCheck' => $nonPowerBillsCheck,
             'powerBillsCancelled' => $powerBillsCancelled,
             'nonPowerBillsCancelled' => $nonPowerBillsCancelled,
+            'summary' => $summary
         ]);
     }
 
