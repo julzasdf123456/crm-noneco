@@ -674,6 +674,12 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-circle nav-icon text-primary"></i><p>Billed & Unbilled BAPA</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('readings.efficiency-report') }}"
+                   class="nav-link {{ Request::is('readings.efficiency-report*') ? 'active' : '' }}">                   
+                   <i class="fas fa-chart-pie nav-icon text-primary"></i><p>Efficiency Report</p>
+                </a>
+            </li>
             <li class="nav-header">                
                 CorPlan 
             </li>

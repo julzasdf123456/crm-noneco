@@ -70,5 +70,11 @@ class MeterReaders extends Model
         'updated_at' => 'nullable'
     ];
 
-    
+    public static function getMeterAreaCodeScope($areaCode) {
+        if ($areaCode == '05') {
+            return ['05', '08'];
+        } else {
+            return [];
+        }
+    }
 }

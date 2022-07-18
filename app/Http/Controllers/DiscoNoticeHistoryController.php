@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Models\ServiceAccounts;
 use App\Models\Towns;
 use App\Models\DiscoNoticeHistory;
+use App\Models\MeterReaders;
 use App\Models\User;
 use App\Models\IDGenerator;
 use Flash;
@@ -165,7 +166,14 @@ class DiscoNoticeHistoryController extends AppBaseController
 
     public function generateNod() {
         $towns = Towns::orderBy('Town')->get();
-        $meterReaders = User::role('Meter Reader')->orderBy('name')->get();
+        $meterReaders = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
+            ->whereIn('Billing_ServiceAccounts.Town', MeterReaders::getMeterAreaCodeScope(env("APP_AREA_CODE")))
+            ->whereNotNull('MeterReader')
+            ->select('users.name', 'users.id')
+            ->groupBy('users.name', 'users.id')
+            ->orderBy('users.name')
+            ->get();
 
         return view('/disco_notice_histories/generate_nod', [
             'towns' => $towns,

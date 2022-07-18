@@ -419,6 +419,7 @@ Route::get('/readings/print-billed-unbilled/{type}/{meterReader}/{day}/{period}/
 Route::get('/readings/print-disco-active/{meterReader}/{day}/{period}/{town}', [App\Http\Controllers\ReadingsController::class, 'printDiscoActive'])->name('readings.print-disco-active');
 Route::get('/readings/billed-and-unbilled-reports-bapa', [App\Http\Controllers\ReadingsController::class, 'billAndUnbilledReportBapa'])->name('readings.billed-and-unbilled-reports-bapa');
 Route::get('/readings/print-billed-unbilled-bapa/{type}/{bapaName}/{period}/{town}', [App\Http\Controllers\ReadingsController::class, 'printBilledUnbilledBapa'])->name('readings.print-billed-unbilled-bapa');
+Route::get('/readings/efficiency-report', [App\Http\Controllers\ReadingsController::class, 'efficiencyReport'])->name('readings.efficiency-report');
 Route::resource('readings', App\Http\Controllers\ReadingsController::class);
 
 Route::get('/bills/unbilled-readings', [App\Http\Controllers\BillsController::class, 'unbilledReadings'])->name('bills.unbilled-readings');
