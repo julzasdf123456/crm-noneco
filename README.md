@@ -101,3 +101,9 @@ You can also check out our other paid products on [CodeCanyon](https://codecanyo
 - teller approve
 - bapa create
 - bapa adjust
+
+### NEW UPDATES
+- Billing Module
+    - Added Meter Reader Collection efficiency report
+- Minor fixes
+    - Filtered meter reader at generation of NoD
