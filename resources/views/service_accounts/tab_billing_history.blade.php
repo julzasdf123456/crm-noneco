@@ -8,15 +8,17 @@
     @else
         <table class="table table-sm table-hover table-bordered">
             <thead>
-                <th>Bill Number</th>
-                <th>Billing Month</th>
-                <th class="text-right">Prev. Read</th>
-                <th class="text-right">Pres. Read</th>
-                <th class="text-right">Kwh Used</th>
+                <th>Bill No.</th>
+                <th>Billing Mon.</th>
+                <th class="text-center">Prev.<br>Read</th>
+                <th class="text-center">Pres.<br>Read</th>
+                <th class="text-center">Kwh</th>
+                <th class="text-center" title="Multiplier">x*</th>
+                <th class="text-center">Total<br>Kwh</th>
                 {{-- <th class="text-right">Rate</th> --}}
-                <th class="text-right">Amount</th>
-                <th class="text-right">OR Number</th>
-                <th class="text-right">Payment Date</th>
+                <th class="text-center">Amount</th>
+                <th class="text-center">OR No.</th>
+                <th class="text-center">Payment<br>Date</th>
                 <th></th>
             </thead>
             <tbody>
@@ -26,6 +28,8 @@
                         <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
                         <td class="text-right">{{ $item->PreviousKwh }}</td>
                         <td class="text-right">{{ $item->PresentKwh }}</td>
+                        <th class="text-right text-info">{{ round(floatval($item->KwhUsed) / floatval($item->Multiplier)) }}</th>
+                        <th class="text-right text-warning">{{ $item->Multiplier }}</th>
                         <th class="text-right text-primary">{{ $item->KwhUsed }}</th>
                         {{-- <td class="text-right">{{ $item->EffectiveRate != null ? number_format($item->EffectiveRate, 4) : '0' }}</td> --}}
                         <th class="text-right text-danger">P {{ $item->NetAmount != null ? (is_numeric($item->NetAmount) ? number_format($item->NetAmount, 2) : '0') : '0' }}</th>

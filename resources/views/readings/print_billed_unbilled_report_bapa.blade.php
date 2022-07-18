@@ -122,7 +122,7 @@
                     <td>{{ $item->AccountStatus }}</td>
                     <td class="text-right">{{ $item->SequenceCode }}</td>
                     <td class="text-right">{{ $item->AreaCode }}</td>
-                    <td class="text-right">{{ $item->KwhUsed }}</td>
+                    <td class="text-right">{{ $item->Reading }}</td>
                     <td class="text-right">{{ $item->CurrentKwh }}</td>
                     <td style="padding-left: 20px;">{{ date('m/d/Y H:i:s', strtotime($item->ReadingTimestamp)) }}</td>
                     <td>{{ $item->FieldStatus }}</td>

@@ -221,6 +221,7 @@ Route::get('/service_accounts/search-for-captured', [App\Http\Controllers\Servic
 Route::get('/service_accounts/print-bapa-bills-list/{bapaName}/{period}', [App\Http\Controllers\ServiceAccountsController::class,  'printBapaBillsList'])->name('serviceAccounts.print-bapa-bills-list');
 Route::get('/service_accounts/confirm-change-name/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'confirmChangeName'])->name('serviceAccounts.confirm-change-name');
 Route::post('/service_accounts/update-name', [App\Http\Controllers\ServiceAccountsController::class, 'updateName'])->name('serviceAccounts.update-name');
+Route::get('/service_accounts/search-bapa-ajax', [App\Http\Controllers\ServiceAccountsController::class, 'searchBapaAjax'])->name('serviceAccounts.search-bapa-ajax');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 

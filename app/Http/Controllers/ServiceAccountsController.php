@@ -782,17 +782,56 @@ class ServiceAccountsController extends AppBaseController
     }
 
     public function bapa() {
-        $bapa = DB::table('Billing_ServiceAccounts')
-            ->select('OrganizationParentAccount',
-                DB::raw('COUNT(id) AS MembersTotal'),
-            )
-            ->groupBy('OrganizationParentAccount')
-            ->orderBy('OrganizationParentAccount')
-            ->get();
+        $towns = Towns::all();
 
         return view('/service_accounts/bapa', [
-            'bapa' => $bapa,
+            'towns' => $towns,
         ]);
+    }
+
+    public function searchBapaAjax(Request $request) {
+        $param = $request['BAPA'];
+        $town = $request['Town'];
+
+        if ($town == 'All') {
+            $bapas = DB::table('Billing_ServiceAccounts AS sa')
+            ->where('sa.OrganizationParentAccount', 'LIKE', '%' . $param . '%')
+            ->select('sa.OrganizationParentAccount', 
+                'sa.Town',
+                DB::raw("COUNT(sa.id) AS NoOfAccounts"),
+                DB::raw("(SELECT SUBSTRING((SELECT ',' + AreaCode AS 'data()' FROM Billing_ServiceAccounts WHERE OrganizationParentAccount=sa.OrganizationParentAccount GROUP BY AreaCode FOR XML PATH('')), 2 , 9999)) As Result"))
+            ->groupBy('sa.OrganizationParentAccount', 
+                'sa.Town')
+            ->orderBy('sa.OrganizationParentAccount')
+            ->get();
+        } else {
+            $bapas = DB::table('Billing_ServiceAccounts AS sa')
+            ->where('sa.OrganizationParentAccount', 'LIKE', '%' . $param . '%')
+            ->where('sa.Town', $town)
+            ->select('sa.OrganizationParentAccount', 
+                'sa.Town',
+                DB::raw("COUNT(sa.id) AS NoOfAccounts"),
+                DB::raw("(SELECT SUBSTRING((SELECT ',' + AreaCode AS 'data()' FROM Billing_ServiceAccounts WHERE OrganizationParentAccount=sa.OrganizationParentAccount GROUP BY AreaCode FOR XML PATH('')), 2 , 9999)) As Result"))
+            ->groupBy('sa.OrganizationParentAccount', 
+                'sa.Town')
+            ->orderBy('sa.OrganizationParentAccount')
+            ->get();
+        }
+
+        $output = "";
+        foreach($bapas as $item) {
+            if (strlen($item->OrganizationParentAccount) > 1) {
+                $output .= '<tr>
+                                <td><a href="' . route('serviceAccounts.bapa-view', [urlencode($item->OrganizationParentAccount)]) . '">' . $item->OrganizationParentAccount . '</a></td>
+                                <td>' . $item->Town . '</td>
+                                <td>' . number_format($item->NoOfAccounts) . '</td>
+                                <td>' . $item->Result . '</td>
+                            </tr>';
+            }
+            
+        }
+
+        return response()->json($output, 200);
     }
 
     public function createBapa() {

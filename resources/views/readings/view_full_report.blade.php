@@ -172,6 +172,12 @@
                                             <button class="btn btn-link text-danger btn-xs float-right" onclick="mergeCapture('{{ $item->id }}', '{{ $item->KwhUsed }}', '{{ $item->FieldStatus }}', '{{ $item->Notes }}')">
                                                 <i class="fas fa-pen"></i>
                                             </button>
+                                            @else
+                                                @if ($item->FieldStatus != null && ($item->FieldStatus=='CHANGE METER' | $item->FieldStatus=='RESET'))
+                                                <a href="{{ $item->BillId != null ? route('bills.adjust-bill', [$item->BillId]) : '' }}" class="btn btn-xs btn-link" title="Adjust Reading"><i class="fas fa-pen"></i></a>
+                                                @else
+                                                    
+                                                @endif
                                             @endif
                                         @endif                                        
                                     </td>

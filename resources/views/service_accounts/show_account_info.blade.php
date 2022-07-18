@@ -102,11 +102,14 @@
                     <th class="{{ $serviceAccounts->Ewt2Percent=='Yes' ? 'text-success' : 'text-muted' }}">{{ $serviceAccounts->Ewt2Percent=='Yes' ? 'Yes' : 'No' }}</th>
                 </tr>
                 <tr>
+                    <th>Multiplier</th>
+                    <th>{{ $meters != null ? $meters->Multiplier : "1" }}</th>
+                </tr>
+                <tr>
                     <th>Coreloss</th>
                     <th>{{ $serviceAccounts->Coreloss }}</th>
                 </tr>
-            </tbody>
-            
+            </tbody>            
         </table>
     </div>
 </div>
