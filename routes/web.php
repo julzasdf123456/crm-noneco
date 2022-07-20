@@ -471,6 +471,7 @@ Route::get('/bills/change-meter-readings/{account}/{period}', [App\Http\Controll
 Route::post('/bills/bill-change-meters', [App\Http\Controllers\BillsController::class,  'billChangeMeters'])->name('bills.bill-change-meters');
 Route::get('/bills/adjustment-reports', [App\Http\Controllers\BillsController::class,  'adjustmentReports'])->name('bills.adjustment-reports');
 Route::get('/bills/print-adjustment-report/{type}/{period}', [App\Http\Controllers\BillsController::class,  'printAdjustmentReport'])->name('bills.print-adjustment-report');
+Route::get('/bills/mark-as-paid', [App\Http\Controllers\BillsController::class, 'markAsPaid'])->name('bills.mark-as-paid');
 Route::resource('bills', App\Http\Controllers\BillsController::class);
 
 

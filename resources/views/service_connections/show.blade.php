@@ -110,14 +110,16 @@ use Illuminate\Support\Facades\Auth;
                         
                     </div>
                     <div class="card-footer">
-                        @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Service Connection Assessor'])) 
-                            <a class="btn btn-success btn-xs" href="{{ route('memberConsumers.print-membership-application', [$serviceConnections->MemberConsumerId]) }}" title="Print Application Form">
-                                <i class="fas fa-print"> </i> Membership Form
-                            </a>
-                            <a href="{{ route('memberConsumers.print-certificate', [$serviceConnections->MemberConsumerId]) }}" class="btn btn-xs btn-warning" title="Print Certificate"><i class="fas fa-print"></i>
-                                Certificate
-                            </a>
-
+                        @if (Auth::user()->hasAnyRole(['Administrator', 'Heads and Managers', 'Service Connection Assessor']))
+                            @if ($serviceConnections->MemberConsumerId != null)
+                                <a class="btn btn-success btn-xs" href="{{ route('memberConsumers.print-membership-application', [$serviceConnections->MemberConsumerId]) }}" title="Print Application Form">
+                                    <i class="fas fa-print"> </i> Membership Form
+                                </a>
+                                <a href="{{ route('memberConsumers.print-certificate', [$serviceConnections->MemberConsumerId]) }}" class="btn btn-xs btn-warning" title="Print Certificate"><i class="fas fa-print"></i>
+                                    Certificate
+                                </a>
+                            @endif 
+                            
                             <a class="btn btn-primary btn-xs" href="{{ route('serviceConnections.print-service-connection-application', [$serviceConnections->id]) }}" title="Print Service Connection Application">
                                 <i class="fas fa-print"> </i> Application Form
                             </a>

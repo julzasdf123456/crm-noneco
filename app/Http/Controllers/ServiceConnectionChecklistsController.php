@@ -188,32 +188,43 @@ class ServiceConnectionChecklistsController extends AppBaseController
             $reqSubmitted .= ServiceConnectionChecklistsRep::find($input)->Checklist . ', ';
         }
 
-        if (count($inputs) == count($checklistsRep)) {
-            // IF REQUIREMENTS ARE COMPLETE
+        // CREATE Timeframes
+        $timeFrame = new ServiceConnectionTimeframes;
+        $timeFrame->id = IDGenerator::generateID();
+        $timeFrame->ServiceConnectionId = $id;
+        $timeFrame->UserId = Auth::id();
+        $timeFrame->Status = 'Requirements Updated';
+        $timeFrame->Notes = 'Submitted: ' . $reqSubmitted;
+        $timeFrame->save();
 
-            // CREATE Timeframes
-            $timeFrame = new ServiceConnectionTimeframes;
-            $timeFrame->id = IDGenerator::generateID();
-            $timeFrame->ServiceConnectionId = $id;
-            $timeFrame->UserId = Auth::id();
-            $timeFrame->Status = 'Requirements Completed';
-            $timeFrame->save();
+        return redirect(route('serviceConnections.show', [$id]));
 
-            return redirect(route('serviceConnectionInspections.create-step-two', [$id]));
-        } else {
-            // IF REQUIREMENTS AIN'T COMPLETE
+        // if (count($inputs) == count($checklistsRep)) {
+        //     // IF REQUIREMENTS ARE COMPLETE
+
+        //     // CREATE Timeframes
+        //     $timeFrame = new ServiceConnectionTimeframes;
+        //     $timeFrame->id = IDGenerator::generateID();
+        //     $timeFrame->ServiceConnectionId = $id;
+        //     $timeFrame->UserId = Auth::id();
+        //     $timeFrame->Status = 'Requirements Completed';
+        //     $timeFrame->save();
+
+        //     return redirect(route('serviceConnectionInspections.create-step-two', [$id]));
+        // } else {
+        //     // IF REQUIREMENTS AIN'T COMPLETE
             
-            // CREATE Timeframes
-            $timeFrame = new ServiceConnectionTimeframes;
-            $timeFrame->id = IDGenerator::generateID();
-            $timeFrame->ServiceConnectionId = $id;
-            $timeFrame->UserId = Auth::id();
-            $timeFrame->Status = 'Incomplete Requirements';
-            $timeFrame->Notes = 'Only submitted ' . $reqSubmitted;
-            $timeFrame->save();
+        //     // CREATE Timeframes
+        //     $timeFrame = new ServiceConnectionTimeframes;
+        //     $timeFrame->id = IDGenerator::generateID();
+        //     $timeFrame->ServiceConnectionId = $id;
+        //     $timeFrame->UserId = Auth::id();
+        //     $timeFrame->Status = 'Incomplete Requirements';
+        //     $timeFrame->Notes = 'Only submitted ' . $reqSubmitted;
+        //     $timeFrame->save();
 
-            return redirect(route('serviceConnections.show', [$id]));
-        }
+        //     return redirect(route('serviceConnections.show', [$id]));
+        // }
     }
 
     public function saveFileAndComplyChecklist(Request $request) {

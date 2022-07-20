@@ -53,7 +53,7 @@
                     <input type="text"
                            name="username"
                            value="{{ old('username') }}"
-                           placeholder="Email"
+                           placeholder="Username"
                            class="form-control @error('username') is-invalid @enderror">
                     <div class="input-group-append">
                         <div class="input-group-text"><span class="fas fa-envelope"></span></div>

@@ -105,5 +105,6 @@ You can also check out our other paid products on [CodeCanyon](https://codecanyo
 ### NEW UPDATES
 - Billing Module
     - Added Meter Reader Collection efficiency report
+    - Added Application Adjustment (mark as paid)
 - Minor fixes
     - Filtered meter reader at generation of NoD

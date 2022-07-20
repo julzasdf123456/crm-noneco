@@ -118,8 +118,8 @@ class ServiceConnectionsController extends AppBaseController
 
         Flash::success('Service Connections saved successfully.');
 
-        // return redirect(route('serviceConnectionInspections.create-step-two', [$input['id']]));
-        return redirect(route('serviceConnections.assess-checklists', [$input['id']]));
+        return redirect(route('serviceConnectionInspections.create-step-two', [$input['id']]));
+        // return redirect(route('serviceConnections.assess-checklists', [$input['id']]));
     }
 
     /**

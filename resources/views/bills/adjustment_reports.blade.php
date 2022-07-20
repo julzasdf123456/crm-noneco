@@ -30,7 +30,9 @@
                             <label for="">Type</label>
                             <select id="Type" name="Type" class="form-control form-control-sm">
                                 <option value="All">All</option>
-                                <option value="Bill Adjustments" {{ isset($_GET['Type']) && "Bill Adjustments"==$_GET['Type'] ? 'selected' : '' }}>Bill Adjustments</option>
+                                <option value="Direct Adjustments" {{ isset($_GET['Type']) && "Direct Adjustments"==$_GET['Type'] ? 'selected' : '' }}>Direct Adjustments</option>
+                                <option value="DM CM" {{ isset($_GET['Type']) && "DM CM"==$_GET['Type'] ? 'selected' : '' }}>DM CM</option>
+                                <option value="Application" {{ isset($_GET['Type']) && "Application"==$_GET['Type'] ? 'selected' : '' }}>Application</option>
                                 <option value="Office Billing" {{ isset($_GET['Type']) && "Office Billing"==$_GET['Type'] ? 'selected' : '' }}>Office Billings</option>
                             </select>
                         </div>
@@ -101,7 +103,7 @@
         $(document).ready(function() {
             $('#print-btn').on('click', function(e) {
                 e.preventDefault()
-                window.location.href = "{{ url('bills/print-adjustment-report') }}" + "/" + $('#Type').val() + "/" + $('#ServicePeriod').val()
+                window.location.href = "{{ url('bills/print-adjustment-report') }}" + "/" + encodeURIComponent($('#Type').val()) + "/" + $('#ServicePeriod').val()
             })
         })
     </script>

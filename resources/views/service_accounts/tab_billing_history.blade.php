@@ -23,8 +23,13 @@
             </thead>
             <tbody>
                 @foreach ($bills as $item)
-                    <tr>
-                        <td><i class="fas {{ $item->ORDate != null ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger' }} ico-tab"></i><a href="{{ route('bills.show', [$item->id]) }}">{{ $item->BillNumber }}</a></td>
+                    <tr title="{{ $item->AdjustmentType=='Application' ? 'Application Adjustment' : '' }}">
+                        @if ($item->AdjustmentType=='Application')
+                            <td><i class="fas fa-info-circle text-info ico-tab"></i><a href="{{ route('bills.show', [$item->id]) }}">{{ $item->BillNumber }}</a></td>
+                        @else
+                            <td><i class="fas {{ $item->ORDate != null ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-danger' }} ico-tab"></i><a href="{{ route('bills.show', [$item->id]) }}">{{ $item->BillNumber }}</a></td>
+                        @endif
+                        
                         <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
                         <td class="text-right">{{ $item->PreviousKwh }}</td>
                         <td class="text-right">{{ $item->PresentKwh }}</td>
@@ -40,6 +45,7 @@
                                 @if ($item->ORDate == null)
                                     <a href="{{ route('bills.adjust-bill', [$item->id]) }}" class="btn btn-link btn-xs text-warning" title="Adjust Reading"><i class="fas fa-pen"></i></a>
                                     <button class="btn btn-link btn-xs text-danger" title="Cancel this Bill" onclick="requestCancel('{{ $item->id }}')"><i class="fas fa-ban"></i></button>
+                                    <button class="btn btn-link btn-xs text-info" title="Mark as Paid (Application Adjustment)" onclick="markAsPaid('{{ $item->id }}')"><i class="fas fa-check-circle"></i></button>
                                 @endif
                             @endif
                             <a href="{{ route('bills.print-single-bill-new-format', [$item->id]) }}" class="btn btn-xs btn-link" title="Print New Formatted Bill"><i class="fas fa-print"></i></a>
@@ -189,6 +195,40 @@
                         },
                         error : function(err) {
                             Swal.fire('Cancel Request Error', 'Contact support immediately', 'error')
+                        }
+                    })
+                }
+            })()
+        }
+
+        function markAsPaid(id) {
+            (async () => {
+                const { value: text } = await Swal.fire({
+                    input: 'textarea',
+                    inputLabel: 'Remarks/Notes',
+                    inputPlaceholder: 'Type your remarks here...',
+                    inputAttributes: {
+                        'aria-label': 'Type your remarks here'
+                    },
+                    title: 'Mark this bill as Paid?',
+                    text : 'Are you sure to make this an Application Adjustment?',
+                    showCancelButton: true
+                })
+
+                if (text) {
+                    $.ajax({
+                        url : '{{ route("bills.mark-as-paid") }}',
+                        type : 'GET',
+                        data : {
+                            id : id,
+                            Remarks : text
+                        },
+                        success : function(res) {
+                            Swal.fire('Application Adjustment Successful', 'Bill marked as paid!', 'success')
+                            location.reload()
+                        },
+                        error : function(err) {
+                            Swal.fire('Application Adjustment Error', 'Contact support immediately', 'error')
                         }
                     })
                 }

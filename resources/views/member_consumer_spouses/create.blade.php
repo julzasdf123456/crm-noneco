@@ -22,7 +22,7 @@
                     <div class="card-header">
                         <span>Since the applicant is married, you have the option to add a spouse.</span>
                         <div class="card-tools">
-                            <a href="{{ route('memberConsumers.assess-checklists', [$memberConsumer->Id]) }}" class="btn btn-info btn-sm">Skip</a>
+                            <a href="{{ route('serviceConnections.create_new', [$memberConsumer->Id]) }}" class="btn btn-info btn-sm">Skip</a>
                         </div>
                     </div>
 

@@ -17,6 +17,7 @@ use App\Models\Bills;
 use App\Models\BillsOriginal;
 use App\Models\BillingMeters;
 use App\Models\IDGenerator;
+use App\Models\PaidBills;
 use App\Models\Barangays;
 use App\Models\User;
 use App\Models\Towns;
@@ -1783,16 +1784,52 @@ class BillsController extends AppBaseController
                     ->orderBy('Billing_ServiceAccounts.AreaCode')
                     ->orderBy('OldAccountNo')
                     ->get();
-            } elseif ($type == 'Bill Adjustments') {
+            } elseif ($type == 'Direct Adjustments') {
                 $data = DB::table('Billing_Bills')
                     ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                     ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                     ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
                     ->leftJoin('users', 'users.id', '=', 'Billing_Bills.UserId')
-                    ->where('Billing_Bills.BilledFrom', 'WEB')
-                    ->whereRaw("Billing_Bills.UserId='" . Auth::id() . "'")
+                    ->whereRaw("AdjustmentType='Direct Adjustment'")
                     ->where('ServicePeriod', $period)
-                    ->whereNotNull('AdjustmentType')
+                    ->select('Billing_Bills.*',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.Purok',
+                        'Billing_ServiceAccounts.AreaCode',
+                        'users.name',
+                        'CRM_Towns.Town', 
+                        'CRM_Barangays.Barangay')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('OldAccountNo')
+                    ->get();
+            } elseif ($type == 'DM CM') {
+                $data = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('users', 'users.id', '=', 'Billing_Bills.UserId')
+                    ->whereRaw("AdjustmentType='DM/CM'")
+                    ->where('ServicePeriod', $period)
+                    ->select('Billing_Bills.*',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.Purok',
+                        'Billing_ServiceAccounts.AreaCode',
+                        'users.name',
+                        'CRM_Towns.Town', 
+                        'CRM_Barangays.Barangay')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('OldAccountNo')
+                    ->get();
+            } elseif ($type == 'Application') {
+                $data = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('users', 'users.id', '=', 'Billing_Bills.UserId')
+                    ->whereRaw("AdjustmentType='Application'")
+                    ->where('ServicePeriod', $period)
                     ->select('Billing_Bills.*',
                         'Billing_ServiceAccounts.OldAccountNo',
                         'Billing_ServiceAccounts.ServiceAccountName',
@@ -1836,6 +1873,7 @@ class BillsController extends AppBaseController
     }
 
     public function printAdjustmentReport($type, $period) {
+        $type = urldecode($type);
         if ($type != null && $period != null) {
             if ($type == 'All') {
                 $data = DB::table('Billing_Bills')
@@ -1857,16 +1895,52 @@ class BillsController extends AppBaseController
                     ->orderBy('Billing_ServiceAccounts.AreaCode')
                     ->orderBy('OldAccountNo')
                     ->get();
-            } elseif ($type == 'Bill Adjustments') {
+            } elseif ($type == 'Direct Adjustments') {
                 $data = DB::table('Billing_Bills')
                     ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                     ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                     ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
                     ->leftJoin('users', 'users.id', '=', 'Billing_Bills.UserId')
-                    ->where('Billing_Bills.BilledFrom', 'WEB')
-                    ->whereRaw("Billing_Bills.UserId='" . Auth::id() . "'")
+                    ->whereRaw("AdjustmentType='Direct Adjustment'")
                     ->where('ServicePeriod', $period)
-                    ->whereNotNull('AdjustmentType')
+                    ->select('Billing_Bills.*',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.Purok',
+                        'Billing_ServiceAccounts.AreaCode',
+                        'users.name',
+                        'CRM_Towns.Town', 
+                        'CRM_Barangays.Barangay')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('OldAccountNo')
+                    ->get();
+            } elseif ($type == 'DM CM') {
+                $data = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('users', 'users.id', '=', 'Billing_Bills.UserId')
+                    ->whereRaw("AdjustmentType='DM/CM'")
+                    ->where('ServicePeriod', $period)
+                    ->select('Billing_Bills.*',
+                        'Billing_ServiceAccounts.OldAccountNo',
+                        'Billing_ServiceAccounts.ServiceAccountName',
+                        'Billing_ServiceAccounts.Purok',
+                        'Billing_ServiceAccounts.AreaCode',
+                        'users.name',
+                        'CRM_Towns.Town', 
+                        'CRM_Barangays.Barangay')
+                    ->orderBy('Billing_ServiceAccounts.AreaCode')
+                    ->orderBy('OldAccountNo')
+                    ->get();
+            } elseif ($type == 'Application') {
+                $data = DB::table('Billing_Bills')
+                    ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('users', 'users.id', '=', 'Billing_Bills.UserId')
+                    ->whereRaw("AdjustmentType='Application'")
+                    ->where('ServicePeriod', $period)
                     ->select('Billing_Bills.*',
                         'Billing_ServiceAccounts.OldAccountNo',
                         'Billing_ServiceAccounts.ServiceAccountName',
@@ -1909,5 +1983,41 @@ class BillsController extends AppBaseController
             'type' => $type,
             'period' => $period
         ]);
+    }
+
+    public function markAsPaid(Request $request) {
+        $bill = Bills::find($request['id']);
+
+        if ($bill != null) {
+            $adjNumber = IDGenerator::generateID();
+
+            $bill->AdjustmentType='Application';
+            $bill->AdjustedBy = Auth::id();
+            $bill->DateAdjusted = date('Y-m-d');
+            $bill->AdjustmentNumber = $adjNumber;
+            $bill->save();
+
+            // mark as paid in paid bills
+            $paidBill = new PaidBills();
+            $paidBill->id = IDGenerator::generateIDandRandString();
+            $paidBill->BillNumber = $bill->BillNumber;
+            $paidBill->AccountNumber = $bill->AccountNumber;
+            $paidBill->ServicePeriod = $bill->ServicePeriod;
+            $paidBill->ORNumber = $adjNumber;
+            $paidBill->ORDate = date('Y-m-d');
+            $paidBill->KwhUsed = $bill->KwhUsed;
+            $paidBill->Teller = Auth::id();
+            $paidBill->OfficeTransacted = env('APP_LOCATION');
+            $paidBill->PostingDate = date('Y-m-d');
+            $paidBill->PostingTime = date('H:i:s');
+            $paidBill->NetAmount = $bill->NetAmount;
+            $paidBill->Source = 'APPLICATION ADJUSTMENT';
+            $paidBill->ObjectSourceId = $bill->id;
+            $paidBill->UserId = Auth::id();
+            $paidBill->Status = 'Application';
+            $paidBill->save();
+        }
+
+        return response()->json('ok', 200);
     }
 }

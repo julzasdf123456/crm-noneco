@@ -91,7 +91,9 @@ class MemberConsumersController extends AppBaseController
     public function store(CreateMemberConsumersRequest $request)
     {
         $input = $request->all();
-
+        $input['FirstName'] = strtoupper($input['FirstName']);
+        $input['MiddleName'] = strtoupper($input['MiddleName']);
+        $input['LastName'] = strtoupper($input['LastName']);
         $memberConsumers = $this->memberConsumersRepository->create($input);
 
         Flash::success('Member Consumers saved successfully.');
@@ -99,7 +101,8 @@ class MemberConsumersController extends AppBaseController
         if ($input['CivilStatus'] == 'Married') {
             return redirect(route('memberConsumerSpouses.create', [$input['Id']]));
         } else {
-            return redirect(route('memberConsumers.assess-checklists', [$input['Id']]));
+            // return redirect(route('memberConsumers.assess-checklists', [$input['Id']]));
+            return redirect(route('serviceConnections.create_new', [$memberConsumers->Id]));
         }
     }
 
