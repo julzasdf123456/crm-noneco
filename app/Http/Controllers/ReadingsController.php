@@ -1686,6 +1686,115 @@ class ReadingsController extends AppBaseController
         ]);
     }
 
+    public function printBapaReadingList() {
+        return view('/readings/print_bapa_reading_list', [
+            'towns' => Towns::all(),
+        ]);
+    }
+
+    public function searchPrintBapaReadingList(Request $request) {
+        $param = $request['BAPA'];
+        $town = $request['Town'];
+
+        if ($town == 'All') {
+            $bapas = DB::table('Billing_ServiceAccounts AS sa')
+            ->where('sa.OrganizationParentAccount', 'LIKE', '%' . $param . '%')
+            ->select('sa.OrganizationParentAccount', 
+                'sa.Town',
+                DB::raw("COUNT(sa.id) AS NoOfAccounts"),
+                DB::raw("(SELECT SUBSTRING((SELECT ',' + AreaCode AS 'data()' FROM Billing_ServiceAccounts WHERE OrganizationParentAccount=sa.OrganizationParentAccount GROUP BY AreaCode FOR XML PATH('')), 2 , 9999)) As Result"))
+            ->groupBy('sa.OrganizationParentAccount', 
+                'sa.Town')
+            ->orderBy('sa.OrganizationParentAccount')
+            ->get();
+        } else {
+            $bapas = DB::table('Billing_ServiceAccounts AS sa')
+            ->where('sa.OrganizationParentAccount', 'LIKE', '%' . $param . '%')
+            ->where('sa.Town', $town)
+            ->select('sa.OrganizationParentAccount', 
+                'sa.Town',
+                DB::raw("COUNT(sa.id) AS NoOfAccounts"),
+                DB::raw("(SELECT SUBSTRING((SELECT ',' + AreaCode AS 'data()' FROM Billing_ServiceAccounts WHERE OrganizationParentAccount=sa.OrganizationParentAccount GROUP BY AreaCode FOR XML PATH('')), 2 , 9999)) As Result"))
+            ->groupBy('sa.OrganizationParentAccount', 
+                'sa.Town')
+            ->orderBy('sa.OrganizationParentAccount')
+            ->get();
+        }
+
+        $output = "";
+        foreach($bapas as $item) {
+            if (strlen($item->OrganizationParentAccount) > 1) {
+                $output .= '<tr>
+                                <td><a href="' . route('serviceAccounts.bapa-view', [urlencode($item->OrganizationParentAccount)]) . '">' . $item->OrganizationParentAccount . '</a></td>
+                                <td style="width: 10%;">
+                                    <a href="' . route('readings.print-bapa-reading-list-to-paper', [urlencode($item->OrganizationParentAccount)]) . '" class="btn btn-warning btn-sm"><i class="fas fa-print ico-tab"></i>Print</a>
+                                </td>
+                                <td>' . $item->Town . '</td>
+                                <td>' . number_format($item->NoOfAccounts) . '</td>
+                                <td style="width: 30%;">' . $item->Result . '</td>
+                            </tr>';
+            }
+            
+        }
+
+        return response()->json($output, 200);
+    }
+
+    public function printBapaReadingListToPaper($bapaName) {
+        $bapaName = urldecode($bapaName);
+
+        $latestRate = Rates::orderByDesc('ServicePeriod')
+            ->first();
+
+        $period = $latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01');
+        $prevMonth = date('Y-m-01', strtotime($period . ' -1 month'));
+
+        $routes = ServiceAccounts::where('OrganizationParentAccount', $bapaName)
+            ->select('AreaCode')
+            ->groupBy('AreaCode')
+            ->orderBy('AreaCode')
+            ->get();
+
+        $accounts = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+            ->whereIn('Billing_ServiceAccounts.AccountStatus', ['ACTIVE', 'DISCONNECTED'])
+            ->whereRaw("Billing_ServiceAccounts.id NOT IN (SELECT AccountNumber FROM Billing_Readings WHERE ServicePeriod='" . $period . "' AND AccountNumber IS NOT NULL)")
+            ->where(function ($query) {
+                $query->where(function($queryX) {
+                        $queryX->where('Billing_ServiceAccounts.AccountExpiration', '>', date('Y-m-d'))
+                            ->where('Billing_ServiceAccounts.AccountRetention', 'Temporary');
+                    })
+                    ->orWhere('Billing_ServiceAccounts.AccountRetention', 'Permanent')
+                    ->orWhereNull('Billing_ServiceAccounts.AccountExpiration');
+            })
+            ->select('Billing_ServiceAccounts.id', 
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.Multiplier',
+                'Billing_ServiceAccounts.AccountType',
+                'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.AreaCode',
+                'Billing_ServiceAccounts.GroupCode',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'CRM_Towns.Town',
+                'CRM_Barangays.Barangay',
+                'Billing_ServiceAccounts.Purok',
+                DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE ServicePeriod='" . $prevMonth . "' AND AccountNumber=Billing_ServiceAccounts.id) AS PreviousKwhUsed"),
+            )
+            ->orderBy('Billing_ServiceAccounts.AreaCode')
+            ->orderBy('Billing_ServiceAccounts.OldAccountNo')
+            ->get();
+
+        return view('/readings/print_bapa_reading_list_to_paper', [
+            'latestRate' => $latestRate,
+            'accounts' => $accounts,
+            'bapaName' => $bapaName,
+            'routes' => $routes,
+        ]);
+    }
+
     public function efficiencyReport(Request $request) {
         $office = $request['Office'] != null ? $request['Office'] : env("APP_AREA_CODE");
         $latestRate = Rates::where('AreaCode', $office)

@@ -1561,4 +1561,14 @@ class ServiceAccountsController extends AppBaseController
             'period' => $period
         ]);
     }
+
+    public function renameBapa(Request $request) {
+        $oldBapaName = $request['OldBapaName'];
+        $newBapaName = $request['NewBapaName'];
+
+        $update = ServiceAccounts::where('OrganizationParentAccount', $oldBapaName)
+            ->update(['OrganizationParentAccount' => $newBapaName]);
+
+        return response()->json($newBapaName, 200);
+    }
 }

@@ -22,7 +22,7 @@
                 <div class="row">
                     <div class="form-group col-lg-6">
                         <label for="BAPAName">BAPA Name</label>
-                        <input type="text" id="BAPAName" class="form-control" placeholder="Input BAPA Name">
+                        <input type="text" id="BAPAName" class="form-control" placeholder="Input BAPA Name" maxlength="30">
                     </div>
                     <div class="form-group col-lg-6">
                         <label for="Town">Fetch Route From District</label>

@@ -222,6 +222,7 @@ Route::get('/service_accounts/print-bapa-bills-list/{bapaName}/{period}', [App\H
 Route::get('/service_accounts/confirm-change-name/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'confirmChangeName'])->name('serviceAccounts.confirm-change-name');
 Route::post('/service_accounts/update-name', [App\Http\Controllers\ServiceAccountsController::class, 'updateName'])->name('serviceAccounts.update-name');
 Route::get('/service_accounts/search-bapa-ajax', [App\Http\Controllers\ServiceAccountsController::class, 'searchBapaAjax'])->name('serviceAccounts.search-bapa-ajax');
+Route::get('/service_accounts/rename-bapa', [App\Http\Controllers\ServiceAccountsController::class, 'renameBapa'])->name('serviceAccounts.rename-bapa');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 
@@ -420,6 +421,9 @@ Route::get('/readings/print-disco-active/{meterReader}/{day}/{period}/{town}', [
 Route::get('/readings/billed-and-unbilled-reports-bapa', [App\Http\Controllers\ReadingsController::class, 'billAndUnbilledReportBapa'])->name('readings.billed-and-unbilled-reports-bapa');
 Route::get('/readings/print-billed-unbilled-bapa/{type}/{bapaName}/{period}/{town}', [App\Http\Controllers\ReadingsController::class, 'printBilledUnbilledBapa'])->name('readings.print-billed-unbilled-bapa');
 Route::get('/readings/efficiency-report', [App\Http\Controllers\ReadingsController::class, 'efficiencyReport'])->name('readings.efficiency-report');
+Route::get('/readings/print-bapa-reading-list', [App\Http\Controllers\ReadingsController::class, 'printBapaReadingList'])->name('readings.print-bapa-reading-list');
+Route::get('/readings/search-print-bapa-reading-list', [App\Http\Controllers\ReadingsController::class, 'searchPrintBapaReadingList'])->name('readings.search-print-bapa-reading-list');
+Route::get('/readings/print-bapa-reading-list-to-paper/{bapaName}', [App\Http\Controllers\ReadingsController::class, 'printBapaReadingListToPaper'])->name('readings.print-bapa-reading-list-to-paper');
 Route::resource('readings', App\Http\Controllers\ReadingsController::class);
 
 Route::get('/bills/unbilled-readings', [App\Http\Controllers\BillsController::class, 'unbilledReadings'])->name('bills.unbilled-readings');
@@ -546,7 +550,11 @@ Route::get('/paid_bills/get-ors-from-range', [App\Http\Controllers\PaidBillsCont
 Route::get('/paid_bills/add-denomination', [App\Http\Controllers\PaidBillsController::class, 'addDenomination'])->name('paidBills.add-denomination');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);
 
-
+Route::get('/disconnection_histories/generate-turn-off-list', [App\Http\Controllers\DisconnectionHistoryController::class, 'generateTurnOffList'])->name('disconnectionHistories.generate-turn-off-list');
+Route::get('/disconnection_histories/get-turn-off-list-preview', [App\Http\Controllers\DisconnectionHistoryController::class, 'getTurnOffListPreview'])->name('disconnectionHistories.get-turn-off-list-preview');
+Route::get('/disconnection_histories/get-turn-off-list-preview-route', [App\Http\Controllers\DisconnectionHistoryController::class, 'getTurnOffListPreviewRoute'])->name('disconnectionHistories.get-turn-off-list-preview-route');
+Route::get('/disconnection_histories/print-turn-off-list/{period}/{area}/{meterReader}/{day}', [App\Http\Controllers\DisconnectionHistoryController::class, 'printTurnOffList'])->name('disconnectionHistories.print-turn-off-list');
+Route::get('/disconnection_histories/print-turn-off-list-route/{period}/{area}/{route}', [App\Http\Controllers\DisconnectionHistoryController::class, 'printTurnOffListRoute'])->name('disconnectionHistories.print-turn-off-list-route');
 Route::resource('disconnectionHistories', App\Http\Controllers\DisconnectionHistoryController::class);
 
 Route::get('/disco_notice_histories/generate-nod', [App\Http\Controllers\DiscoNoticeHistoryController::class, 'generateNod'])->name('discoNoticeHistories.generate-nod');

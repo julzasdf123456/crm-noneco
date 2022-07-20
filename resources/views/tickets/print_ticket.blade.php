@@ -143,35 +143,40 @@
 
 <div class="content px-3">
     <p class="center-text"><strong>{{ env('APP_COMPANY') }}</strong></p>
-    <p class="center-text">({{ env('APP_COMPANY_ABRV') }})</p>
     <p class="center-text">{{ env('APP_ADDRESS') }}</p>
-
-    <br>
     
     <p class="center-text"><strong>SERVICE REQUEST FORM</strong></p>
-
-    <br>
-
-    <p>Ticket No: <u>{{ $tickets->id }}</u></p>
-    <p>Date Filed: <u>{{ date('F d, Y', strtotime($tickets->created_at)) }}</u></p>
-    <p>Time Filed: <u>{{ date('h:i A', strtotime($tickets->created_at)) }}</u></p>
 
     <div class="divider"></div>
 
     <div class="row">
-        <div class="col-3">
-            <p>Member Consumer:</p>
-            <p>Address:</p>
-            <p>Account Number:</p>
-            <p>Meter Number:</p>
+        <div class="col-sm-4">
+            <p>Ticket No: <u>{{ $tickets->id }}</u></p>
+            <p>Date Filed: <u>{{ date('F d, Y', strtotime($tickets->created_at)) }}</u></p>
+            <p>Time Filed: <u>{{ date('h:i A', strtotime($tickets->created_at)) }}</u></p>
         </div>
 
-        <div class="col-7">
-            <p><u>{{ $tickets->ConsumerName }}</u></p>
-            <p><u>{{ Tickets::getAddress($tickets) }}</u></p>
-            <p><u>{{ $tickets->AccountNumber }}</u></p>
-            <p><u>n/a</u></p>
+        <div class="col-sm-8">
+            <table>
+                <tr>
+                    <th style="width: 40%;">Member Consumer:</th>
+                    <td>{{ $tickets->ConsumerName }}</td>
+                </tr>
+                <tr>
+                    <th>Address:</th>
+                    <td>{{ Tickets::getAddress($tickets) }}</td>
+                </tr>
+                <tr>
+                    <th>Account Number:</th>
+                    <td>{{ $account != null ? $account->OldAccountNo : '-' }}</td>
+                </tr>
+                <tr>
+                    <th>Meter Number:</th>
+                    <td>{{ $tickets->CurrentMeterNo }}</td>
+                </tr>
+            </table>
         </div>
+        
     </div>
 
     <div class="divider"></div>
@@ -180,28 +185,57 @@
         @php
             $parent = TicketsRepository::where('id', $tickets->ParentTicket)->first();
         @endphp
-        <table>
-            <tr>
-                <th>Request/Complain: </th>
-                <td>{{ $parent != null ? $parent->Name . ' - ' : '' }}{{ $tickets->Ticket }}</td>
-            </tr>
-            <tr>
-                <th>Reason: </th>
-                <td>{{ $tickets->Reason }}</td>
-            </tr>
-            <tr>
-                <th>Notes: </th>
-                <td>{{ $tickets->Notes }}</td>
-            </tr>
-            <tr>
-                <th>Action Taken: </th>
-                <td></td>
-            </tr>
-            <tr>
-                <th style="color: transparent;">Action</th>
-                <td></td>
-            </tr>
-        </table>
+        <div class="col-sm-6">
+            <p><strong>Complain Details</strong></p>
+            <table>
+                <tr>
+                    <th>Request/Complain: </th>
+                    <td>{{ $parent != null ? $parent->Name . ' - ' : '' }}{{ $tickets->Ticket }}</td>
+                </tr>
+                <tr>
+                    <th>Reason: </th>
+                    <td>{{ $tickets->Reason }}</td>
+                </tr>
+                <tr>
+                    <th>Notes: </th>
+                    <td>{{ $tickets->Notes }}</td>
+                </tr>
+                <tr>
+                    <th>Action Taken: </th>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th style="color: transparent;">Action</th>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="col-sm-6">
+            <p><strong>Change Meter Details</strong></p>
+            <table>
+                <tr>
+                    <th>Pull Out Reading</th>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th style="width: 45%">New Meter Number</th>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>New Meter Brand</th>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>New Meter Kwh Start</th>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Remarks</th>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
     </div>
     <br>
     <p style="margin-bottom: 5px !important;"><i>Assessment</i></p>
@@ -245,7 +279,6 @@
     <br>
 
     <p class="center-text"><strong>{{ env('APP_COMPANY') }}</strong></p>
-    <p class="center-text">({{ env('APP_COMPANY_ABRV') }})</p>
     <p class="center-text">{{ env('APP_ADDRESS') }}</p>
 
     <br>

@@ -507,6 +507,14 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-circle nav-icon text-primary"></i><p>Manual Billing</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('readings.print-bapa-reading-list') }}"
+                   class="nav-link {{ Request::is('readings.print-bapa-reading-list*') ? 'active' : '' }}">                   
+                   <i class="fas fa-print nav-icon text-primary"></i><p>Print Reading List
+                        <span class="right badge badge-danger">New</span>
+                   </p>
+                </a>
+            </li>
         </ul>
     </li>
 @endcanany
@@ -720,6 +728,14 @@ use Illuminate\Support\Facades\Auth;
                 <a href="{{ route('discoNoticeHistories.generate-nod') }}"
                    class="nav-link {{ Request::is('discoNoticeHistories.generate-nod*') ? 'active' : '' }}">
                     <i class="fas fa-file nav-icon text-primary"></i><p>Generate NoD</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('disconnectionHistories.generate-turn-off-list') }}"
+                   class="nav-link {{ Request::is('disconnectionHistories.generate-turn-off-list*') ? 'active' : '' }}">
+                    <i class="fas fa-ban nav-icon text-primary"></i><p>Turn-Off List 
+                        <span class="right badge badge-danger">New</span>
+                    </p>
                 </a>
             </li>
         </ul>

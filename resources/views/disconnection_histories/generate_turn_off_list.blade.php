@@ -12,7 +12,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h4>Generate Notice of Disconnection List</h4>
+                    <h4>Generate Turn Off List</h4>
                 </div>
             </div>
         </div>
@@ -97,8 +97,8 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group">
-                            <label for="service-period">Service Period</label>
-                            <select id="service-period" class="form-control">
+                            <label for="service-period-route">Service Period</label>
+                            <select id="service-period-route" class="form-control">
                                 @for ($i = 0; $i < count($months); $i++)
                                     <option value="{{ $months[$i] }}">{{ date('F Y', strtotime($months[$i])) }}</option>
                                 @endfor
@@ -106,8 +106,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="towns">Area</label>
-                            <select id="towns" class="form-control">
+                            <label for="towns-route">Area</label>
+                            <select id="towns-route" class="form-control">
                                 <option value="All">All</option>
                                 @foreach ($towns as $item)
                                     <option value="{{ $item->id }}" {{ env('APP_AREA_CODE')==$item->id ? 'selected' : '' }}>{{ $item->Town }}</option>
@@ -140,7 +140,7 @@
                                 <th>Account Name</th>
                                 <th>Address</th>
                                 <th class="text-right">Amount Due</th>
-                                <th></th>
+                                <th>Due Date</th>
                             </thead>
                             <tbody>
 
@@ -148,7 +148,7 @@
                         </table>
                     </div>
                     <div class="card-footer">
-                        <button id="print-list" class="btn btn-success"><i class="fas fa-print ico-tab"></i>Print List</button>
+                        <button id="print-list" class="btn btn-danger"><i class="fas fa-print ico-tab"></i>Print Turn Off List</button>
                     </div>
                 </div>                
             </div>
@@ -178,9 +178,9 @@
 
             $('#print-list').on('click', function() {
                 if (option == "meter-reader") {
-                    window.location.href = "{{ url('/disco_notice_histories/print-disconnection-list') }}" + "/" + $('#service-period').val() + "/" + $('#towns').val() + "/" + $('#MeterReader').val() + "/" + $('#Day').val() 
+                    window.location.href = "{{ url('/disconnection_histories/print-turn-off-list') }}" + "/" + $('#service-period').val() + "/" + $('#towns').val() + "/" + $('#MeterReader').val() + "/" + $('#Day').val() 
                 } else {
-                    window.location.href = "{{ url('/disco_notice_histories/print-disconnection-list-route') }}" + "/" + $('#service-period').val() + "/" + $('#towns').val() + "/" + $('#Route').val()
+                    window.location.href = "{{ url('/disconnection_histories/print-turn-off-list-route') }}" + "/" + $('#service-period-route').val() + "/" + $('#towns-route').val() + "/" + $('#Route').val()
                 }                         
             })
 
@@ -200,7 +200,7 @@
         function getList() {
             $('#results-table tbody tr').remove()
             $.ajax({
-                url : '{{ route("discoNoticeHistories.get-disco-list-preview") }}',
+                url : '{{ route("disconnectionHistories.get-turn-off-list-preview") }}',
                 type : 'GET',
                 data : {
                     ServicePeriod : period,
@@ -220,11 +220,11 @@
         function getListRoute() {
             $('#results-table tbody tr').remove()
             $.ajax({
-                url : '{{ route("discoNoticeHistories.get-disco-list-preview-route") }}',
+                url : '{{ route("disconnectionHistories.get-turn-off-list-preview-route") }}',
                 type : 'GET',
                 data : {
-                    ServicePeriod : period,
-                    Town : town,
+                    ServicePeriod : $('#service-period-route').val(),
+                    Town : $('#towns-route').val(),
                     Route : $('#Route').val()
                 },
                 success : function(res) {

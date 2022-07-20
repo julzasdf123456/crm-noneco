@@ -17,6 +17,7 @@ use App\Models\TicketLogs;
 use App\Models\IDGenerator;
 use App\Models\Readings;
 use App\Models\ServiceAccounts;
+use App\Models\BillingMeters;
 use App\Models\DisconnectionHistory;
 use App\Exports\TicketSummaryReportDownloadExport;
 use Illuminate\Support\Facades\Auth;
@@ -94,10 +95,14 @@ class TicketsController extends AppBaseController
                     'Billing_ServiceAccounts.Longitude')
                 ->orderByDesc('Billing_Meters.created_at')
                 ->first();
+
+            $meterInfo = BillingMeters::where('ServiceAccountId', $tickets->AccountNumber)
+                ->orderByDesc('created_at')
+                ->first();
             
             if ($accountMeterInfo != null) {
-                $tickets->CurrentMeterBrand = $accountMeterInfo->Brand;
-                $tickets->CurrentMeterNo = $accountMeterInfo->SerialNumber;
+                $tickets->CurrentMeterBrand = $meterInfo != null ? $meterInfo->Brand : '-';
+                $tickets->CurrentMeterNo = $meterInfo != null ? $meterInfo->SerialNumber : '-';
                 $tickets->GeoLocation = $accountMeterInfo->Latitude != null ? ($accountMeterInfo->Latitude . ',' . $accountMeterInfo->Longitude) : null;
                 $tickets->save();
             }
@@ -584,6 +589,7 @@ class TicketsController extends AppBaseController
                     'CRM_Tickets.Notes',
                     'CRM_Tickets.Status',
                     'CRM_Tickets.DateTimeDownloaded',
+                    'CRM_Tickets.CurrentMeterNo',
                     'CRM_Tickets.DateTimeLinemanArrived',
                     'CRM_Tickets.DateTimeLinemanExecuted',
                     'CRM_Tickets.UserId',
@@ -593,6 +599,12 @@ class TicketsController extends AppBaseController
                     'CRM_Tickets.Trash')
                 ->first();
 
+        if ($tickets->AccountNumber != null) {
+            $account = ServiceAccounts::find($tickets->AccountNumber);
+        } else {
+            $account = null;
+        }
+
         if (empty($tickets)) {
             Flash::error('Tickets not found');
 
@@ -600,7 +612,8 @@ class TicketsController extends AppBaseController
         }
 
         return view('/tickets/print_ticket', [
-            'tickets' => $tickets
+            'tickets' => $tickets,
+            'account' => $account
         ]);
     }
 

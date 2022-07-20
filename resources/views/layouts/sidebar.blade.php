@@ -10,9 +10,9 @@
     <div class="sidebar">
         <div class="form-inline">
             <div class="input-group" data-widget="sidebar-search">
-                <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
+                <input class="form-control form-control-sidebar form-control-sm" type="search" placeholder="Search Menu" aria-label="Search">
                 <div class="input-group-append">
-                    <button class="btn btn-sidebar">
+                    <button class="btn btn-sm btn-sidebar">
                     <i class="fas fa-search fa-fw"></i>
                     </button>
                 </div>

@@ -189,7 +189,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                 ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
                 ->whereRaw("Billing_Bills.id NOT IN (SELECT BillId FROM Disconnection_NoticeHistory WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
-                ->whereRaw("Billing_Bills.id NOT IN (SELECT ObjectSourceId FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
                 ->where('Billing_Bills.ServicePeriod', $request['ServicePeriod'])
                 ->where('Billing_ServiceAccounts.MeterReader', $request['MeterReader'])
                 ->where('Billing_ServiceAccounts.GroupCode', $request['Day'])
@@ -210,7 +210,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                 ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
                 ->whereRaw("Billing_Bills.id NOT IN (SELECT BillId FROM Disconnection_NoticeHistory WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
-                ->whereRaw("Billing_Bills.id NOT IN (SELECT ObjectSourceId FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
                 ->where('Billing_Bills.ServicePeriod', $request['ServicePeriod'])
                 ->where('Billing_Bills.DueDate', '<=', date('Y-m-d'))
                 ->where('Billing_ServiceAccounts.MeterReader', $request['MeterReader'])
@@ -311,8 +311,8 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                 ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                 ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                ->whereNotIn('Billing_Bills.id', DB::table('Disconnection_NoticeHistory')->where('ServicePeriod', $request['ServicePeriod'])->pluck('BillId'))
-                ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('ServicePeriod', $request['ServicePeriod'])->pluck('ObjectSourceId'))
+                ->whereRaw("Billing_Bills.id NOT IN (SELECT BillId FROM Disconnection_NoticeHistory WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
                 ->where('Billing_Bills.ServicePeriod', $request['ServicePeriod'])
                 ->where('Billing_ServiceAccounts.AreaCode', $request['Route'])
                 ->where('Billing_Bills.DueDate', '<=', date('Y-m-d'))
@@ -331,8 +331,8 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                 ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                 ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                ->whereNotIn('Billing_Bills.id', DB::table('Disconnection_NoticeHistory')->where('ServicePeriod', $request['ServicePeriod'])->pluck('BillId'))
-                ->whereNotIn('Billing_Bills.id', DB::table('Cashier_PaidBills')->where('ServicePeriod', $request['ServicePeriod'])->pluck('ObjectSourceId'))
+                ->whereRaw("Billing_Bills.id NOT IN (SELECT BillId FROM Disconnection_NoticeHistory WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
                 ->where('Billing_Bills.ServicePeriod', $request['ServicePeriod'])
                 ->where('Billing_Bills.DueDate', '<=', date('Y-m-d'))
                 ->where('Billing_ServiceAccounts.AreaCode', $request['Route'])
@@ -454,6 +454,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                     'Billing_Bills.KwhUsed',
                     'Billing_Bills.ConsumerType',
                     'Disconnection_NoticeHistory.id as NoticeId')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
                 ->orderBy('Billing_ServiceAccounts.SequenceCode')
                 ->get();
         } else {
@@ -484,6 +485,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                     'Billing_Bills.KwhUsed',
                     'Billing_Bills.ConsumerType',
                     'Disconnection_NoticeHistory.id as NoticeId')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
                 ->orderBy('Billing_ServiceAccounts.SequenceCode')
                 ->get();
         }
@@ -520,6 +522,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                     'Billing_Bills.KwhUsed',
                     'Billing_Bills.ConsumerType',
                     'Disconnection_NoticeHistory.id as NoticeId')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
                 ->orderBy('Billing_ServiceAccounts.SequenceCode')
                 ->get();
         } else {
@@ -549,6 +552,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                     'Billing_Bills.KwhUsed',
                     'Billing_Bills.ConsumerType',
                     'Disconnection_NoticeHistory.id as NoticeId')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
                 ->orderBy('Billing_ServiceAccounts.SequenceCode')
                 ->get();
         }

@@ -7,6 +7,13 @@ use App\Http\Requests\UpdateDisconnectionHistoryRequest;
 use App\Repositories\DisconnectionHistoryRepository;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Http\Request;
+use App\Models\Towns;
+use App\Models\ServiceAccounts;
+use App\Models\MeterReaders;
+use App\Models\User;
+use App\Models\Users;
+use App\Models\IDGenerator;
+use Illuminate\Support\Facades\DB;
 use Flash;
 use Response;
 
@@ -153,5 +160,348 @@ class DisconnectionHistoryController extends AppBaseController
         Flash::success('Disconnection History deleted successfully.');
 
         return redirect(route('disconnectionHistories.index'));
+    }
+
+    public function generateTurnOffList() {
+        $towns = Towns::orderBy('Town')->get();
+        $meterReaders = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
+            ->whereIn('Billing_ServiceAccounts.Town', MeterReaders::getMeterAreaCodeScope(env("APP_AREA_CODE")))
+            ->whereNotNull('MeterReader')
+            ->select('users.name', 'users.id')
+            ->groupBy('users.name', 'users.id')
+            ->orderBy('users.name')
+            ->get();
+
+        return view('/disconnection_histories/generate_turn_off_list', [
+            'towns' => $towns,
+            'meterReaders' => $meterReaders
+        ]);
+    }
+
+    public function getTurnOffListPreview(Request $request) {
+        // QUERY UNPAID WITH DUE PAYMENTS
+        if ($request['Town'] == 'All') {
+            $list = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
+                ->where('Billing_Bills.ServicePeriod', $request['ServicePeriod'])
+                ->where('Billing_ServiceAccounts.MeterReader', $request['MeterReader'])
+                ->where('Billing_ServiceAccounts.GroupCode', $request['Day'])
+                ->where('Billing_Bills.DueDate', '<', date('Y-m-d'))
+                ->select('Billing_ServiceAccounts.id as AccountNumber',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.Purok',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_Bills.NetAmount',
+                    'Billing_Bills.BillNumber',
+                    'Billing_Bills.DueDate',
+                    'Billing_Bills.id')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
+                ->orderBy('Billing_ServiceAccounts.SequenceCode')
+                ->get();
+        } else {
+            $list = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
+                ->where('Billing_Bills.ServicePeriod', $request['ServicePeriod'])
+                ->where('Billing_Bills.DueDate', '<', date('Y-m-d'))
+                ->where('Billing_ServiceAccounts.MeterReader', $request['MeterReader'])
+                ->where('Billing_ServiceAccounts.GroupCode', $request['Day'])
+                ->where('Billing_ServiceAccounts.Town', $request['Town'])
+                ->select('Billing_ServiceAccounts.id as AccountNumber',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.Purok',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_Bills.NetAmount',
+                    'Billing_Bills.BillNumber',
+                    'Billing_Bills.DueDate',
+                    'Billing_Bills.id')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
+                ->orderBy('Billing_ServiceAccounts.SequenceCode')
+                ->get();
+        }       
+
+        $output = "";
+
+        foreach($list as $item) {
+            $output .= '
+                <tr>
+                    <td>' . $item->BillNumber . '</td>
+                    <td>' . $item->OldAccountNo . '</td>
+                    <td>' . $item->ServiceAccountName . '</td>
+                    <td>' . ServiceAccounts::getAddress($item) . '</td>
+                    <td class="text-right">' . number_format($item->NetAmount, 2) . '</td> 
+                    <td>' . date('M d, Y', strtotime($item->DueDate)) . '</td>
+                </tr>
+            ';
+        }
+
+        return response()->json($output, 200);
+    }
+
+    public function getTurnOffListPreviewRoute(Request $request) {
+        // QUERY UNPAID WITH DUE PAYMENTS
+        if ($request['Town'] == 'All') {
+            $list = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
+                ->where('Billing_Bills.ServicePeriod', $request['ServicePeriod'])
+                ->where('Billing_ServiceAccounts.AreaCode', $request['Route'])
+                ->where('Billing_Bills.DueDate', '<', date('Y-m-d'))
+                ->select('Billing_ServiceAccounts.id as AccountNumber',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.Purok',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_Bills.NetAmount',
+                    'Billing_Bills.BillNumber',
+                    'Billing_Bills.DueDate',
+                    'Billing_Bills.id')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
+                ->orderBy('Billing_ServiceAccounts.SequenceCode')
+                ->get();
+        } else {
+            $list = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
+                ->where('Billing_Bills.ServicePeriod', $request['ServicePeriod'])
+                ->where('Billing_Bills.DueDate', '<', date('Y-m-d'))
+                ->where('Billing_ServiceAccounts.AreaCode', $request['Route'])
+                ->where('Billing_ServiceAccounts.Town', $request['Town'])
+                ->select('Billing_ServiceAccounts.id as AccountNumber',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.Purok',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_Bills.NetAmount',
+                    'Billing_Bills.BillNumber',
+                    'Billing_Bills.DueDate',
+                    'Billing_Bills.id')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
+                ->orderBy('Billing_ServiceAccounts.SequenceCode')
+                ->get();
+        }       
+
+        $output = "";
+
+        foreach($list as $item) {
+            $output .= '
+                <tr>
+                    <td>' . $item->BillNumber . '</td>
+                    <td>' . $item->OldAccountNo . '</td>
+                    <td>' . $item->ServiceAccountName . '</td>
+                    <td>' . ServiceAccounts::getAddress($item) . '</td>
+                    <td class="text-right">' . number_format($item->NetAmount, 2) . '</td> 
+                    <td>' . date('M d, Y', strtotime($item->DueDate)) . '</td>
+                </tr>
+            ';
+        }
+
+        return response()->json($output, 200);
+    }
+
+    public function printTurnOffList($period, $area, $meterReader, $day) {
+        // QUERY UNPAID WITH DUE PAYMENTS
+        $meterReaderDetails = Users::find($meterReader);
+        if ($area == 'All') {
+            $routes = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "')")
+                ->where('Billing_Bills.ServicePeriod', $period)
+                ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
+                ->where('Billing_ServiceAccounts.GroupCode', $day)
+                ->where('Billing_Bills.DueDate', '<', date('Y-m-d'))
+                ->select('Billing_ServiceAccounts.AreaCode')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
+                ->groupBy('Billing_ServiceAccounts.AreaCode')
+                ->get();
+
+            $list = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "')")
+                ->where('Billing_Bills.ServicePeriod', $period)
+                ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
+                ->where('Billing_ServiceAccounts.GroupCode', $day)
+                ->where('Billing_Bills.DueDate', '<', date('Y-m-d'))
+                ->select('Billing_ServiceAccounts.id as AccountNumber',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.Purok',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_Bills.NetAmount',
+                    'Billing_Bills.BillNumber',
+                    'Billing_Bills.DueDate',
+                    'Billing_Bills.PresentKwh',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                    'Billing_Bills.id')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
+                ->orderBy('Billing_ServiceAccounts.SequenceCode')
+                ->get();
+        } else {
+            $routes = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "')")
+                ->where('Billing_Bills.ServicePeriod', $period)
+                ->where('Billing_Bills.DueDate', '<', date('Y-m-d'))
+                ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
+                ->where('Billing_ServiceAccounts.GroupCode', $day)
+                ->where('Billing_ServiceAccounts.Town', $area)
+                ->select('Billing_ServiceAccounts.AreaCode')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
+                ->groupBy('Billing_ServiceAccounts.AreaCode')
+                ->get();
+
+            $list = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "')")
+                ->where('Billing_Bills.ServicePeriod', $period)
+                ->where('Billing_Bills.DueDate', '<', date('Y-m-d'))
+                ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
+                ->where('Billing_ServiceAccounts.GroupCode', $day)
+                ->where('Billing_ServiceAccounts.Town', $area)
+                ->select('Billing_ServiceAccounts.id as AccountNumber',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.Purok',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_Bills.NetAmount',
+                    'Billing_Bills.BillNumber',
+                    'Billing_Bills.PresentKwh',
+                    'Billing_Bills.DueDate',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                    'Billing_Bills.id')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
+                ->orderBy('Billing_ServiceAccounts.SequenceCode')
+                ->get();
+        }       
+
+        return view('/disconnection_histories/print_turn_off_list', [
+            'list' => $list,
+            'routes' => $routes,
+            'period' => $period,
+            'meterReader' => $meterReaderDetails,
+            'day' => $day
+        ]);
+    }
+
+    public function printTurnOffListRoute($period, $area, $route) {
+        // QUERY UNPAID WITH DUE PAYMENTS
+        if ($area == 'All') {
+            $routes = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "')")
+                ->where('Billing_Bills.ServicePeriod', $period)
+                ->where('Billing_ServiceAccounts.AreaCode', $route)
+                ->where('Billing_Bills.DueDate', '<', date('Y-m-d'))
+                ->select('Billing_ServiceAccounts.AreaCode')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
+                ->groupBy('Billing_ServiceAccounts.AreaCode')
+                ->get();
+
+            $list = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "')")
+                ->where('Billing_Bills.ServicePeriod', $period)
+                ->where('Billing_ServiceAccounts.AreaCode', $route)
+                ->where('Billing_Bills.DueDate', '<', date('Y-m-d'))
+                ->select('Billing_ServiceAccounts.id as AccountNumber',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.Purok',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_Bills.NetAmount',
+                    'Billing_Bills.BillNumber',
+                    'Billing_Bills.DueDate',
+                    'Billing_Bills.PresentKwh',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                    'Billing_Bills.id')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
+                ->orderBy('Billing_ServiceAccounts.SequenceCode')
+                ->get();
+        } else {
+            $routes = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "')")
+                ->where('Billing_Bills.ServicePeriod', $period)
+                ->where('Billing_Bills.DueDate', '<', date('Y-m-d'))
+                ->where('Billing_ServiceAccounts.AreaCode', $route)
+                ->where('Billing_ServiceAccounts.Town', $area)
+                ->select('Billing_ServiceAccounts.AreaCode')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
+                ->groupBy('Billing_ServiceAccounts.AreaCode')
+                ->get();
+
+            $list = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "')")
+                ->where('Billing_Bills.ServicePeriod', $period)
+                ->where('Billing_Bills.DueDate', '<', date('Y-m-d'))
+                ->where('Billing_ServiceAccounts.AreaCode', $route)
+                ->where('Billing_ServiceAccounts.Town', $area)
+                ->select('Billing_ServiceAccounts.id as AccountNumber',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.Purok',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_Bills.NetAmount',
+                    'Billing_Bills.BillNumber',
+                    'Billing_Bills.PresentKwh',
+                    'Billing_Bills.DueDate',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                    'Billing_Bills.id')
+                ->orderBy('Billing_ServiceAccounts.AreaCode')
+                ->orderBy('Billing_ServiceAccounts.SequenceCode')
+                ->get();
+        }       
+
+        return view('/disconnection_histories/print_turn_off_list_route', [
+            'list' => $list,
+            'routes' => $routes,
+            'period' => $period,
+            'route' => $route,
+        ]);
     }
 }

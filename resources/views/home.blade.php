@@ -6,54 +6,34 @@
         <br>
         {{-- NEW --}}
         <div class="card shadow-none">
-            <div class="card-header bg-danger">
-                <span class="card-title"><strong>July 18, 2022 BIG Update 😎!</strong> <i class="text-muted">12:00 AM</i> <br> <i>What's new?</i></span>
+            <div class="card-header bg-success">
+                <span class="card-title"><strong>July 20, 2022 Update 😀!</strong> <i class="text-muted">12:00 AM</i> <br> <i>What's new?</i></span>
             </div>
             <div class="card-body">
-                <h4><span class="text-muted"># </span> Collection Admin Module</h4>
+                <h4><span class="text-muted"># </span> Main Menu</h4>
                 <ul>
-                    <li><strong>Collection Dashboard</strong> - Hoooray! <a href="{{ route('dCRSummaryTransactions.dashboard') }}">Collection Dashboard</a> is 
-                    now available under <strong class="text-primary">Collection -> Dashboard</strong>. This feature enables the admin and supervisor users 
-                    to view the collection data and analytics close to real-time, and can be filtered by day, town, and many others. <strong class="text-warning">NOTE </strong>
-                    that this dashboard and all other dashboards are constantly being populated with new features over time, expect a lot of changes to happen 
-                    in the near future.</li>
-                </ul>
-                <h4><span class="text-muted"># </span> Collection Supervisor Module</h4>
-                <ul>
-                    <li>
-                        <strong>BAPA Collection Monitor</strong> - Collection supervisor can now monitor the BAPA collection under 
-                            <strong class="text-primary">Collection -> BAPA -> Collection Monitor</strong>. This module offers the following features:
-                        <ol>
-                            <li>Discount Monitoring</li>
-                            <li>Payment Analytics</li>
-                            <li>Printing of Voucer</li>
-                        </ol>
-                    </li>
-                    <li><strong>BAPA Adjustment</strong> menu is also moved under the <strong>BAPA</strong> Menu (stated above), under new
-                    name, <strong class="text-primary">New BAPA Adjustments</strong>.</li>
-                    <li><strong>BAPA Adjustment Console</strong> now redirects to <strong>BAPA Collection Monitor</strong> after saving (in case any of you
-                    are confused 😀).</li>
-                </ul>
-                <h4><span class="text-muted"># </span> Teller Module</h4>
-                <ul>
-                    <li><strong class="text-primary">WEB TELLERING</strong> is now offically out of support, meaning, support and updates will no 
-                        longer be available. <strong>JAVA Tellering</strong> should be implemented from now on. Updates on the JAVA Tellering 
-                        is currently supported. (Current Version: JAVA Tellering 1.256D LTS)</li>
-                    <li>In <strong>JAVA Tellering</strong>, summary of Cash and Check payments is added in the latest update, and can be found Under <strong class="text-primary">
-                        DCR -> DCR Summary</strong>.</li>
+                    <li><strong class="text-primary">Menu Search</strong> is now added, it's right above all the menus on the left menu bar.</li>
                 </ul>
                 <h4><span class="text-muted"># </span> Billing Module</h4>
                 <ul>
-                    <li><strong>New Bill Printing Form</strong> - the final new template for the printed bill (with barcode) is now available!</li>
-                    <li>Printing of Billed and Unbilled is now available as well under <strong class="text-primary">Billing -> Reports -> Meter Reading</strong>.</li>
+                    <li><strong>Application Adjustment</strong> - billing analyst can now mark bills as paid through application adjustment.
+                        This feature can be found when browsing the consumer file. A button is added in the bills tab (this button -> <i class="fas fa-check-circle text-info"></i> )
+                    Application Adjusment reports can also be printed in the <strong>Reports</strong> menu under Billing.</li>
+                    <li><strong>BAPA Renaming</strong> is now possible, which can be accessed in <strong class="text-primary">BAPA -> All BAPA -> Select the BAPA and View</strong></li>
+                    <li><strong>BAPA Reading List</strong> printing is also added under BAPA menu.</li>
+                </ul>
+                <h4><span class="text-muted"># </span> Disconnection Module</h4>
+                <ul>
+                    <li><strong>Turn Off List</strong> can now also be printed due to the lack of mobile phones in some areas. It can be found Under <strong>Disconnection</strong> menu</li>
+                </ul>
+                <h4><span class="text-muted"># </span> Tickets Module</h4>
+                <ul>
+                    <li>MSDs can now update the accomplishment timelines even after execution of tickets.</li>
                 </ul>
                 <h4><span class="text-muted"># </span>Minor Adjustments and Bugs Fixes</h4>
                 <ul>
-                    <li>Added <strong>Multiplier Display</strong> in account info area of the Consumer File</li>
-                    <li>Fixed <strong>Multiplier * Kwh Display</strong> in Consumer File</li>
-                    <li>Fixed <strong>Billed and Unbilled Reports</strong> inconsistent data query</li>
-                    <li>Fixed <strong>Printing Problems, OR Number - User Account relationship</strong> in JAVA Tellering</li>
-                    <li>Major Bug Fixes on the UI</li>
+                    <li>Filtered Meter Reader at generation of NoD</li>
+                    <li>Fixed unsorted notice of disconnections</li>
                 </ul>
             </div>
         </div>

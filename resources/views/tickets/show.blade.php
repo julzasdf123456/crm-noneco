@@ -71,16 +71,10 @@
                                         <span class="info-box-text text-center {{ $tickets->DateTimeDownloaded==null ? 'text-muted' : 'text-white' }}">Sent to Lineman</span>
                                         <span class="info-box-number text-center {{ $tickets->DateTimeDownloaded==null ? 'text-muted' : 'text-white' }} mb-0">
                                             @if ($tickets->DateTimeDownloaded==null)
-                                                @if ($tickets->Status!="Executed")
-                                                    <button class="btn btn-link btn-sm" data-toggle="modal" data-target="#modal-lineman-sent" data-id="{{ $tickets->id }}"><i class="fas fa-pen"></i></button>
-                                                @else
-                                                    -
-                                                @endif
+                                                <button class="btn btn-link btn-sm" data-toggle="modal" data-target="#modal-lineman-sent" data-id="{{ $tickets->id }}"><i class="fas fa-pen"></i></button>
                                             @else
                                                 {{ date('F d, Y h:i:s A', strtotime($tickets->DateTimeDownloaded)) }}
-                                                @if ($tickets->Status!="Executed")
-                                                    <button class="btn btn-link btn-sm text-white" data-toggle="modal" data-target="#modal-lineman-sent" data-id="{{ $tickets->id }}"><i class="fas fa-pen"></i></button>
-                                                @endif                                                
+                                                <button class="btn btn-link btn-sm text-white" data-toggle="modal" data-target="#modal-lineman-sent" data-id="{{ $tickets->id }}"><i class="fas fa-pen"></i></button>                                              
                                             @endif                                            
                                         </span>
                                     </div>
@@ -93,16 +87,10 @@
                                         <span class="info-box-text text-center {{ $tickets->DateTimeLinemanArrived==null ? 'text-muted' : 'text-white' }}">Lineman Site Arrival</span>
                                         <span class="info-box-number text-center {{ $tickets->DateTimeLinemanArrived==null ? 'text-muted' : 'text-white' }} mb-0">
                                             @if ($tickets->DateTimeLinemanArrived==null)
-                                                @if ($tickets->Status!="Executed")
-                                                    <button class="btn btn-link btn-sm" data-toggle="modal" data-target="#modal-lineman-arrived" data-id="{{ $tickets->id }}"><i class="fas fa-pen"></i></button>
-                                                @else
-                                                    -
-                                                @endif                                                
+                                                <button class="btn btn-link btn-sm" data-toggle="modal" data-target="#modal-lineman-arrived" data-id="{{ $tickets->id }}"><i class="fas fa-pen"></i></button>                                              
                                             @else                                            
                                                 {{ date('F d, Y h:i:s A', strtotime($tickets->DateTimeLinemanArrived)) }}
-                                                @if ($tickets->Status!="Executed")
-                                                    <button class="btn btn-link btn-sm text-white" data-toggle="modal" data-target="#modal-lineman-arrived" data-id="{{ $tickets->id }}"><i class="fas fa-pen"></i></button>
-                                                @endif 
+                                                <button class="btn btn-link btn-sm text-white" data-toggle="modal" data-target="#modal-lineman-arrived" data-id="{{ $tickets->id }}"><i class="fas fa-pen"></i></button>
                                             @endif 
                                         </span>
                                     </div>
@@ -115,16 +103,10 @@
                                         <span class="info-box-text text-center {{ $tickets->DateTimeLinemanExecuted==null ? 'text-muted' : 'text-white' }}">Execution</span>
                                         <span class="info-box-number text-center {{ $tickets->DateTimeLinemanExecuted==null ? 'text-muted' : 'text-white' }} mb-0">
                                             @if ($tickets->DateTimeLinemanExecuted==null)
-                                                @if ($tickets->Status!="Executed")
-                                                    <button class="btn btn-link btn-sm" data-toggle="modal" data-target="#modal-execution" data-id="{{ $tickets->id }}"><i class="fas fa-pen"></i></button>
-                                                @else
-                                                    -
-                                                @endif                                                
+                                                <button class="btn btn-link btn-sm" data-toggle="modal" data-target="#modal-execution" data-id="{{ $tickets->id }}"><i class="fas fa-pen"></i></button>                                               
                                             @else
                                                 {{ date('F d, Y h:i:s A', strtotime($tickets->DateTimeLinemanExecuted)) }}
-                                                @if ($tickets->Status!="Executed")
-                                                    <button class="btn btn-link btn-sm text-white" data-toggle="modal" data-target="#modal-execution" data-id="{{ $tickets->id }}"><i class="fas fa-pen"></i></button>
-                                                @endif                                                
+                                                <button class="btn btn-link btn-sm text-white" data-toggle="modal" data-target="#modal-execution" data-id="{{ $tickets->id }}"><i class="fas fa-pen"></i></button>                                             
                                             @endif 
                                         </span>
                                     </div>

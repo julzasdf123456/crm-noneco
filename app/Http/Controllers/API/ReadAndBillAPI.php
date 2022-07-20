@@ -416,6 +416,8 @@ class ReadAndBillAPI extends Controller {
                 DB::raw("(SELECT SUM(TRY_CAST(NetAmount AS DECIMAL(10, 2))) FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND MergedToCollectible IS NULL AND id NOT IN (SELECT ObjectSourceId FROM Cashier_PaidBills WHERE AccountNumber=Billing_Bills.id)) AS ArrearsTotal"),
                 DB::raw("'0' AS ArrearsTotal"),
                 DB::raw("'" . date('Y-m-d', strtotime($period)) . "' AS ServicePeriod"))
+            ->orderBy('Billing_ServiceAccounts.AreaCode')
+            ->orderBy('Billing_ServiceAccounts.OldAccountNo')
             ->get();
 
             

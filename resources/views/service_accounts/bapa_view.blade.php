@@ -6,7 +6,9 @@
         <div class="row mb-2">
             <div class="col-sm-12">
                 <span>
-                    <h4 style="display: inline; margin-right: 15px;"><?= $bapaName ?></h4>
+                    <h4 style="display: inline; margin-right: 15px;"><?= $bapaName ?> 
+                        <button class="btn btn-sm btn-link text-primary" style="margin-left: 10px;" id="rename-bapa" title="Rename BAPA"><i class="fas fa-pen"></i></button>
+                    </h4>
                 </span>
             </div>
         </div>
@@ -121,6 +123,10 @@
 @push('page_scripts')
     <script>
         $(document).ready(function() {
+            $('#rename-bapa').on('click', function() {
+                renameBapa()
+            }) 
+
             $('#search').keyup(function() {
                 var letterCount = this.value.length;
 
@@ -209,6 +215,39 @@
                     alert('An error occurred while adding the account to this BAPA')
                 }
             })
+        }
+
+        function renameBapa() {
+            (async () => {
+                const { value: text } = await Swal.fire({
+                    input: 'text',
+                    inputPlaceholder: 'New BAPA Name',
+                    inputAttributes: {
+                        'maxlength' : 30,
+                    },
+                    title: 'Rename This BAPA',
+                    text : 'Are you sure to rename this BAPA? You might update the BAPA Reading App the next time this BAPA is going to be read.',
+                    showCancelButton: true
+                })
+
+                if (text) {
+                    $.ajax({
+                        url : '{{ route("serviceAccounts.rename-bapa") }}',
+                        type : 'GET',
+                        data : {
+                            OldBapaName : "{{ $bapaName }}",
+                            NewBapaName : text
+                        },
+                        success : function(res) {
+                            Swal.fire('Sucess', 'BAPA renaming successful!', 'success')
+                            window.location.href = "{{ url('/service_accounts/bapa-view') }}" + "/" + encodeURIComponent(text)
+                        },
+                        error : function(err) {
+                            Swal.fire('Oops!', 'An error occurred while renaming this BAPA. Contact support immediately', 'error')
+                        }
+                    })
+                }
+            })()
         }
     </script>
 @endpush

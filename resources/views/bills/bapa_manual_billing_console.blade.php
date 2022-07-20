@@ -46,8 +46,9 @@
             <div class="card-body table-responsive px-0">
                 <table class="table table-sm table-hover" id="previous-table">
                     <thead>
+                        <th>Acct. No</th>
                         <th>Acct. Name</th>
-                        <th>Previous Reading</th>
+                        {{-- <th>Previous<br>Reading</th> --}}
                     </thead>
                     <tbody>
 
@@ -189,6 +190,10 @@
                 previewBill()
             })
 
+            $('#kwhUsed').keyup(function() {
+                previewBill()
+            })
+
             $('#readAndBillBtn').on('click', function() {
                 readAndBill()
             })
@@ -220,7 +225,7 @@
                         readingList = res
                         
                         $.each(res, function(index, element) {
-                            $('#previous-table tbody').append(addRowToPrevTable(res[index]['id'], res[index]['ServiceAccountName'], res[index]['KwhUsed'], res[index]['AccountStatus']))
+                            $('#previous-table tbody').append(addRowToPrevTable(res[index]['id'], res[index]['ServiceAccountName'], res[index]['KwhUsed'], res[index]['AccountStatus'], res[index]['OldAccountNo']))
                         })
 
                         toBill = readingList.length
@@ -241,16 +246,18 @@
             })
         }
 
-        function addRowToPrevTable(accountNo, accountName, kwhUsed, status) {
+        function addRowToPrevTable(accountNo, accountName, kwhUsed, status, oldAccountNo) {
             if (status == 'ACTIVE') {
                 return '<tr id="' + accountNo + '" onclick=selectConsumer("' + accountNo + '")>' +
+                            '<td>' + oldAccountNo + '</td>' +
                             '<td>' + accountName + '</td>' +
-                            '<td>' + kwhUsed + '</td>' +
+                            // '<td>' + kwhUsed + '</td>' +
                         '</tr>'
             } else {
                 return '<tr class="text-danger" id="' + accountNo + '" onclick=selectConsumer("' + accountNo + '")>' +
+                            '<th>' + oldAccountNo + '</th>' +
                             '<th>' + accountName + '</th>' +
-                            '<th>' + kwhUsed + '</th>' +
+                            // '<th>' + kwhUsed + '</th>' +
                         '</tr>'
             }            
         }
@@ -356,7 +363,8 @@
                         icon: 'error',
                     })
             } else {
-                if (getKwhUsed() < 0) {
+                var kwhConsumed = parseFloat($('#kwhUsed').val()).toFixed(2)
+                if (kwhConsumed < 0) {
                     Swal.fire({
                             title: 'Invalid Reading',
                             text: 'Kwh used should not be less than Zero',
