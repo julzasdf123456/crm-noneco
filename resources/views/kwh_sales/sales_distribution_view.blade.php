@@ -27,7 +27,7 @@
                         Consolidated ERC</a></li>
                 </ul>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 <div class="tab-content">
                     <div class="tab-pane active" id="overall">
                         @include('kwh_sales.attach_over_all_sales_draft')
