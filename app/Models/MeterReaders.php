@@ -75,8 +75,10 @@ class MeterReaders extends Model
             return ['05', '08'];
         } else if ($areaCode == '07') {
             return ['07', '09'];
+        } else if ($areaCode == '04') {
+            return ['04', '03'];
         } else {
-            return [];
+            return [$areaCode];
         }
     }
 
@@ -85,8 +87,10 @@ class MeterReaders extends Model
             return "('05', '08')";
         } else if ($areaCode == '07') {
             return "('05', '08')";
+        } else if ($areaCode == '04') {
+            return "('04', '03')";
         } else {
-            return "";
+            return '(' . $areaCode . ')';
         }
     }
 }
