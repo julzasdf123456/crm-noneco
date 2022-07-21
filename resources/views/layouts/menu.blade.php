@@ -442,7 +442,7 @@ use Illuminate\Support\Facades\Auth;
 @endcanany --}}
 
 {{-- SERVICE ACCOUNTS --}}
-@canany(['Super Admin', 'billing re-bill', 'add bapa'])
+@canany(['Super Admin', 'billing re-bill'])
     <li class="nav-header">BILLING</li>
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
@@ -480,7 +480,6 @@ use Illuminate\Support\Facades\Auth;
     </li>
 
     {{-- BAKA --}}
-    @canany(['Super Admin', 'billing re-bill', 'add bapa'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-layer-group nav-icon text-primary"></i>
@@ -518,7 +517,6 @@ use Illuminate\Support\Facades\Auth;
             </li>
         </ul>
     </li>
-    @endcanany
 @endcanany
 
 {{-- BILLS --}}
