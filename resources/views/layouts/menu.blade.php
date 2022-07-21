@@ -444,6 +444,14 @@ use Illuminate\Support\Facades\Auth;
 {{-- SERVICE ACCOUNTS --}}
 @canany(['Super Admin', 'billing re-bill'])
     <li class="nav-header">BILLING</li>
+    <li class="nav-item">
+        <a href="{{ route('bills.dashboard') }}"
+           class="nav-link {{ Request::is('bills.dashboard*') ? 'active' : '' }}">                   
+           <i class="fas fa-chart-line nav-icon text-primary"></i><p>Dashboard
+            <span class="right badge badge-danger">New</span>
+           </p>
+        </a>
+    </li>
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-file-invoice-dollar nav-icon text-primary"></i>

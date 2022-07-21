@@ -476,6 +476,8 @@ Route::post('/bills/bill-change-meters', [App\Http\Controllers\BillsController::
 Route::get('/bills/adjustment-reports', [App\Http\Controllers\BillsController::class,  'adjustmentReports'])->name('bills.adjustment-reports');
 Route::get('/bills/print-adjustment-report/{type}/{period}', [App\Http\Controllers\BillsController::class,  'printAdjustmentReport'])->name('bills.print-adjustment-report');
 Route::get('/bills/mark-as-paid', [App\Http\Controllers\BillsController::class, 'markAsPaid'])->name('bills.mark-as-paid');
+Route::get('/bills/dashboard', [App\Http\Controllers\BillsController::class, 'dashboard'])->name('bills.dashboard');
+Route::get('/bills/dashboard-reading-monitor', [App\Http\Controllers\BillsController::class, 'dashboardReadingMonitor'])->name('bills.dashboard-reading-monitor');
 Route::resource('bills', App\Http\Controllers\BillsController::class);
 
 
