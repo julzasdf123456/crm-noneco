@@ -16,6 +16,7 @@ use App\Models\Rates;
 use App\Models\Bills;
 use App\Models\BillsOriginal;
 use App\Models\BillingMeters;
+use App\Models\MeterReaders;
 use App\Models\IDGenerator;
 use App\Models\PaidBills;
 use App\Models\Barangays;
@@ -2019,5 +2020,63 @@ class BillsController extends AppBaseController
         }
 
         return response()->json('ok', 200);
+    }
+
+    public function dashboard() {
+        return view('/bills/dashboard', [
+
+        ]);
+    }
+
+    public function dashboardReadingMonitor(Request $request) {
+        $latestRate = Rates::orderByDesc('ServicePeriod')
+            ->first();
+
+        $period = $request['Period'] != null ? $request['Period'] : ($latestRate != null ? date('Y-m-d', strtotime($latestRate->ServicePeriod)) : date('Y-m-01'));
+        $day = $request['Day'] != null ? $request['Day'] : 'All';
+
+        if ($day == 'All') {
+            $data = DB::table('Billing_ServiceAccounts')
+                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
+                ->whereIn("Billing_ServiceAccounts.Town", MeterReaders::getMeterAreaCodeScope(env('APP_AREA_CODE')))
+                ->whereNotNull('Billing_ServiceAccounts.MeterReader')
+                ->select('users.name', 'users.id',
+                    DB::raw("(SELECT COUNT(r.id) FROM Billing_Readings r LEFT JOIN Billing_ServiceAccounts sa ON sa.id=r.AccountNumber WHERE sa.MeterReader=users.id AND r.ServicePeriod='" . $period . "' AND r.AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')) AS TotalUnbilledBasedFromReadings"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_ServiceAccounts WHERE MeterReader=users.id AND id NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='". $period ."')) AS AllUnbilled"),
+                    DB::raw("(SELECT COUNT(r.id) FROM Billing_Readings r LEFT JOIN Billing_ServiceAccounts sa ON sa.id=r.AccountNumber WHERE r.AccountNumber IS NOT NULL AND sa.MeterReader=users.id AND r.ServicePeriod='" . $period . "') AS TotalReading"),
+                    DB::raw("(SELECT COUNT(b.id) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalBills")
+                )
+                ->groupBy('users.name', 'users.id')
+                ->orderBy('users.name')
+                ->get();
+        } else {
+            $data = DB::table('Billing_ServiceAccounts')
+                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
+                ->whereIn("Billing_ServiceAccounts.Town", MeterReaders::getMeterAreaCodeScope(env('APP_AREA_CODE')))
+                ->where('Billing_ServiceAccounts.GroupCode', $day)
+                ->whereNotNull('Billing_ServiceAccounts.MeterReader')
+                ->select('users.name', 'users.id',
+                    DB::raw("(SELECT COUNT(r.id) FROM Billing_Readings r LEFT JOIN Billing_ServiceAccounts sa ON sa.id=r.AccountNumber WHERE sa.MeterReader=users.id AND sa.GroupCode='" . $day . "' AND r.ServicePeriod='" . $period . "' AND r.AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')) AS TotalUnbilledBasedFromReadings"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_ServiceAccounts WHERE MeterReader=users.id AND GroupCode='" . $day . "' AND id NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='". $period ."')) AS AllUnbilled"),
+                    DB::raw("(SELECT COUNT(r.id) FROM Billing_Readings r LEFT JOIN Billing_ServiceAccounts sa ON sa.id=r.AccountNumber WHERE r.AccountNumber IS NOT NULL AND sa.GroupCode='" . $day . "' AND sa.MeterReader=users.id AND r.ServicePeriod='" . $period . "') AS TotalReading"),
+                    DB::raw("(SELECT COUNT(b.id) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE sa.GroupCode='" . $day . "' AND sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalBills")
+                )
+                ->groupBy('users.name', 'users.id')
+                ->orderBy('users.name')
+                ->get();
+        }
+
+        $output = "";
+        foreach($data as $item) {
+            $output .= "<tr>
+                            <th>" . $item->name . "</th>
+                            <td class='text-right'>" . number_format($item->TotalUnbilledBasedFromReadings) . "</td>
+                            <td class='text-right'>" . number_format($item->AllUnbilled) . "</td>
+                            <th class='text-right'>" . number_format($item->TotalReading) . "</th>
+                            <th class='text-right'>" . number_format($item->TotalBills) . "</th>
+                        </tr>";
+        }
+
+        return response()->json($output, 200);
     }
 }

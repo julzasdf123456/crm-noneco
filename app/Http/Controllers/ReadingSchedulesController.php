@@ -218,7 +218,7 @@ class ReadingSchedulesController extends AppBaseController
         // $meterReaders = User::role('Meter Reader')->get();
         $meterReaders = User::role('Meter Reader Inhouse')
             ->select('*',
-                DB::raw("SUBSTRING((SELECT ', ' + GroupCode AS 'data()' FROM Billing_ReadingSchedules WHERE ServicePeriod='" . $period . "' AND MeterReader = users.id FOR XML PATH('')), 2 , 9999) As GroupCodes"))
+                DB::raw("SUBSTRING((SELECT ', ' + GroupCode AS 'data()' FROM Billing_ReadingSchedules WHERE AreaCode='" . env('APP_AREA_CODE') . "' ServicePeriod='" . $period . "' AND MeterReader = users.id FOR XML PATH('')), 2 , 9999) As GroupCodes"))
             ->get();
 
         return view('reading_schedules.index', [

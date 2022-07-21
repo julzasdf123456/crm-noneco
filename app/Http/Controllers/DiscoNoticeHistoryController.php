@@ -248,6 +248,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->where('Disconnection_NoticeHistory.ServicePeriod', $request['ServicePeriod'])
                 ->where('Billing_ServiceAccounts.MeterReader', $request['MeterReader'])
                 ->where('Billing_ServiceAccounts.GroupCode', $request['Day'])
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.OldAccountNo',
@@ -270,6 +271,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->where('Billing_ServiceAccounts.Town', $request['Town'])
                 ->where('Billing_ServiceAccounts.MeterReader', $request['MeterReader'])
                 ->where('Billing_ServiceAccounts.GroupCode', $request['Day'])
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.OldAccountNo',
@@ -368,6 +370,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
                 ->where('Disconnection_NoticeHistory.ServicePeriod', $request['ServicePeriod'])
                 ->where('Billing_ServiceAccounts.AreaCode', $request['Route'])
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.OldAccountNo',
@@ -389,6 +392,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->where('Disconnection_NoticeHistory.ServicePeriod', $request['ServicePeriod'])
                 ->where('Billing_ServiceAccounts.Town', $request['Town'])
                 ->where('Billing_ServiceAccounts.AreaCode', $request['Route'])
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $request['ServicePeriod'] . "')")
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.OldAccountNo',
@@ -437,6 +441,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->where('Disconnection_NoticeHistory.ServicePeriod', $period)
                 ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
                 ->where('Billing_ServiceAccounts.GroupCode', $day)
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "')")
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.Purok',
@@ -468,6 +473,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->where('Billing_ServiceAccounts.Town', $area)
                 ->where('Billing_ServiceAccounts.MeterReader', $meterReader)
                 ->where('Billing_ServiceAccounts.GroupCode', $day)
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "')")
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.Purok',
@@ -505,6 +511,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
                 ->where('Disconnection_NoticeHistory.ServicePeriod', $period)
                 ->where('Billing_ServiceAccounts.AreaCode', $route)
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "')")
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.Purok',
@@ -535,6 +542,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->where('Disconnection_NoticeHistory.ServicePeriod', $period)
                 ->where('Billing_ServiceAccounts.Town', $area)
                 ->where('Billing_ServiceAccounts.AreaCode', $route)
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "')")
                 ->select('Billing_ServiceAccounts.id as AccountNumber',
                     'Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.Purok',

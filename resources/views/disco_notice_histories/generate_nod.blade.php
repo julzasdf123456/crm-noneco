@@ -97,8 +97,8 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group">
-                            <label for="service-period">Service Period</label>
-                            <select id="service-period" class="form-control">
+                            <label for="service-period-route">Service Period</label>
+                            <select id="service-period-route" class="form-control">
                                 @for ($i = 0; $i < count($months); $i++)
                                     <option value="{{ $months[$i] }}">{{ date('F Y', strtotime($months[$i])) }}</option>
                                 @endfor
@@ -106,8 +106,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="towns">Area</label>
-                            <select id="towns" class="form-control">
+                            <label for="towns-route">Area</label>
+                            <select id="towns-route" class="form-control">
                                 <option value="All">All</option>
                                 @foreach ($towns as $item)
                                     <option value="{{ $item->id }}" {{ env('APP_AREA_CODE')==$item->id ? 'selected' : '' }}>{{ $item->Town }}</option>
@@ -170,8 +170,8 @@
             })
 
             $('#get-list-btn-route').on('click', function() {
-                period = $('#service-period').val()
-                town = $('#towns').val()
+                period = $('#service-period-route').val()
+                town = $('#towns-route').val()
 
                 getListRoute()
             })
@@ -180,7 +180,7 @@
                 if (option == "meter-reader") {
                     window.location.href = "{{ url('/disco_notice_histories/print-disconnection-list') }}" + "/" + $('#service-period').val() + "/" + $('#towns').val() + "/" + $('#MeterReader').val() + "/" + $('#Day').val() 
                 } else {
-                    window.location.href = "{{ url('/disco_notice_histories/print-disconnection-list-route') }}" + "/" + $('#service-period').val() + "/" + $('#towns').val() + "/" + $('#Route').val()
+                    window.location.href = "{{ url('/disco_notice_histories/print-disconnection-list-route') }}" + "/" + $('#service-period-route').val() + "/" + $('#towns-route').val() + "/" + $('#Route').val()
                 }                         
             })
 

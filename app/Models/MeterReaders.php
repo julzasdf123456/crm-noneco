@@ -73,8 +73,20 @@ class MeterReaders extends Model
     public static function getMeterAreaCodeScope($areaCode) {
         if ($areaCode == '05') {
             return ['05', '08'];
+        } else if ($areaCode == '07') {
+            return ['07', '09'];
         } else {
             return [];
+        }
+    }
+
+    public static function getMeterAreaCodeScopeSql($areaCode) {
+        if ($areaCode == '05') {
+            return "('05', '08')";
+        } else if ($areaCode == '07') {
+            return "('05', '08')";
+        } else {
+            return "";
         }
     }
 }
