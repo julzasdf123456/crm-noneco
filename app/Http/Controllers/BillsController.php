@@ -2061,7 +2061,7 @@ class BillsController extends AppBaseController
                     DB::raw("(SELECT COUNT(r.id) FROM Billing_Readings r LEFT JOIN Billing_ServiceAccounts sa ON sa.id=r.AccountNumber WHERE r.AccountNumber IS NOT NULL AND sa.MeterReader=users.id AND r.ServicePeriod='" . $period . "') AS TotalReading"),
                     DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE AccountNumber IS NULL AND ServicePeriod='" . $period . "' AND MeterReader=CAST(users.id AS varchar)) AS Captured"),
                     DB::raw("(SELECT COUNT(b.id) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalBills"),
-                    DB::raw("(SELECT SUM(CAST(KwhUsed AS DECIMAL(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalKwh")
+                    DB::raw("(SELECT SUM(CAST(KwhUsed AS DECIMAL(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE b.KwhUsed IS NOT NULL AND ISNUMERIC(b.KwhUsed)=1 AND sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalKwh")
                 )
                 ->groupBy('users.name', 'users.id')
                 ->orderBy('users.name')
@@ -2079,7 +2079,7 @@ class BillsController extends AppBaseController
                     DB::raw("(SELECT COUNT(r.id) FROM Billing_Readings r LEFT JOIN Billing_ServiceAccounts sa ON sa.id=r.AccountNumber WHERE r.AccountNumber IS NOT NULL AND sa.GroupCode='" . $day . "' AND sa.MeterReader=users.id AND r.ServicePeriod='" . $period . "') AS TotalReading"),
                     DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE AccountNumber IS NULL AND ServicePeriod='" . $period . "' AND MeterReader=CAST(users.id AS varchar) AND CAST(ReadingTimestamp AS DATE)=(SELECT TOP 1 ScheduledDate FROM Billing_ReadingSchedules WHERE MeterReader=users.id AND ServicePeriod='" . $period . "' AND GroupCode='" . $day ."')) AS Captured"),
                     DB::raw("(SELECT COUNT(b.id) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE sa.GroupCode='" . $day . "' AND sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalBills"),
-                    DB::raw("(SELECT SUM(CAST(KwhUsed AS DECIMAL(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE sa.GroupCode='" . $day . "' AND sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalKwh")
+                    DB::raw("(SELECT SUM(CAST(KwhUsed AS DECIMAL(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE b.KwhUsed IS NOT NULL AND ISNUMERIC(b.KwhUsed)=1 AND sa.GroupCode='" . $day . "' AND sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalKwh")
                 )
                 ->groupBy('users.name', 'users.id')
                 ->orderBy('users.name')
