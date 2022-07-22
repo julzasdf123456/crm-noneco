@@ -105,3 +105,5 @@ You can also check out our other paid products on [CodeCanyon](https://codecanyo
 ### NEW UPDATES
 - Billing Module
     - Added Meter Reader Collection efficiency report
+    - Billing and Reading Dashboard
+    - 
