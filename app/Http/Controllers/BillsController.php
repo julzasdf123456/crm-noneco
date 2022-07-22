@@ -2042,7 +2042,7 @@ class BillsController extends AppBaseController
                 ->whereNotNull('Billing_ServiceAccounts.MeterReader')
                 ->select('users.name', 'users.id',
                     DB::raw("(SELECT COUNT(r.id) FROM Billing_Readings r LEFT JOIN Billing_ServiceAccounts sa ON sa.id=r.AccountNumber WHERE sa.MeterReader=users.id AND r.ServicePeriod='" . $period . "' AND r.AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')) AS TotalUnbilledBasedFromReadings"),
-                    DB::raw("(SELECT COUNT(id) FROM Billing_ServiceAccounts WHERE MeterReader=users.id AND id NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='". $period ."')) AS AllUnbilled"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_ServiceAccounts WHERE MeterReader=CAST(users.id AS varchar) AND id NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='". $period ."')) AS AllUnbilled"),
                     DB::raw("(SELECT COUNT(r.id) FROM Billing_Readings r LEFT JOIN Billing_ServiceAccounts sa ON sa.id=r.AccountNumber WHERE r.AccountNumber IS NOT NULL AND sa.MeterReader=users.id AND r.ServicePeriod='" . $period . "') AS TotalReading"),
                     DB::raw("(SELECT COUNT(b.id) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalBills")
                 )
@@ -2057,7 +2057,7 @@ class BillsController extends AppBaseController
                 ->whereNotNull('Billing_ServiceAccounts.MeterReader')
                 ->select('users.name', 'users.id',
                     DB::raw("(SELECT COUNT(r.id) FROM Billing_Readings r LEFT JOIN Billing_ServiceAccounts sa ON sa.id=r.AccountNumber WHERE sa.MeterReader=users.id AND sa.GroupCode='" . $day . "' AND r.ServicePeriod='" . $period . "' AND r.AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')) AS TotalUnbilledBasedFromReadings"),
-                    DB::raw("(SELECT COUNT(id) FROM Billing_ServiceAccounts WHERE MeterReader=users.id AND GroupCode='" . $day . "' AND id NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='". $period ."')) AS AllUnbilled"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_ServiceAccounts WHERE MeterReader=CAST(users.id AS varchar) AND GroupCode='" . $day . "' AND id NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='". $period ."')) AS AllUnbilled"),
                     DB::raw("(SELECT COUNT(r.id) FROM Billing_Readings r LEFT JOIN Billing_ServiceAccounts sa ON sa.id=r.AccountNumber WHERE r.AccountNumber IS NOT NULL AND sa.GroupCode='" . $day . "' AND sa.MeterReader=users.id AND r.ServicePeriod='" . $period . "') AS TotalReading"),
                     DB::raw("(SELECT COUNT(b.id) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE sa.GroupCode='" . $day . "' AND sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalBills")
                 )
