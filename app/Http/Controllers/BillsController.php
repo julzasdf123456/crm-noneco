@@ -2030,8 +2030,8 @@ class BillsController extends AppBaseController
                 ->whereIn("Billing_ServiceAccounts.Town", MeterReaders::getMeterAreaCodeScope(env('APP_AREA_CODE')))
                 ->whereNotNull('Billing_ServiceAccounts.MeterReader')
                 ->select('users.name', 'users.id',
-                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE CAST(ReadingTimestamp AS DATE)='" . date('Y-m-d') . "') AS TotalReading"),
-                    DB::raw("(SELECT COUNT(id) FROM Billing_Bills WHERE BillingDate='" . date('Y-m-d') . "') AS TotalBills"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE CAST(ReadingTimestamp AS DATE)='" . date('Y-m-d') . "' AND MeterReader=CAST(users.id AS varchar)) AS TotalReading"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Bills WHERE BillingDate='" . date('Y-m-d') . "'  AND UserId=CAST(users.id AS varchar)) AS TotalBills"),
                 )
                 ->groupBy('users.name', 'users.id')
                 ->orderBy('users.name')
