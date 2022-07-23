@@ -759,7 +759,7 @@ use Illuminate\Support\Facades\Auth;
         <i class="fas fa-chart-line nav-icon text-info"></i><p>Dashboard</p>
         </a>
     </li>
-    <li class="nav-item has-treeview">
+    {{-- <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-credit-card nav-icon text-info"></i>
             <p>
@@ -805,9 +805,9 @@ use Illuminate\Support\Facades\Auth;
                 </a>
             </li>
         </ul>
-    </li>
+    </li> --}}
 @endcanany
-@canany(['Super Admin', 'bapa adjust'])
+@canany(['Super Admin', 'bapa adjust', 'billing re-bill'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-receipt nav-icon text-info"></i>
@@ -840,15 +840,23 @@ use Illuminate\Support\Facades\Auth;
         </a>
     </li>
 @endcanany
-@canany(['Super Admin', 'teller create'])
+{{-- @canany(['Super Admin', 'teller create'])
     <li class="nav-item">
         <a href="{{ route('transactionIndices.or-maintenance') }}"
         class="nav-link {{ Request::is('transactionIndices.or-maintenance*') ? 'active' : '' }}">
         <i class="fas fa-circle nav-icon text-info"></i><p>OR Maintenance</p>
         </a>
     </li>
-@endcanany
+@endcanany --}}
 @canany(['Super Admin', 'teller create', 'teller approve'])
+    <li class="nav-item">
+        <a href="{{ route('paidBills.third-party-collection') }}"
+        class="nav-link {{ Request::is('paidBills.third-party-collection*') ? 'active' : '' }}">
+        <i class="fas fa-sign-out-alt nav-icon text-info"></i><p>Third-party Collection
+            <span class="right badge badge-danger">New</span>
+        </p>
+        </a>
+    </li>
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-ban nav-icon text-info"></i>

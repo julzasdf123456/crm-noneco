@@ -106,4 +106,6 @@ You can also check out our other paid products on [CodeCanyon](https://codecanyo
 - Billing Module
     - Added Meter Reader Collection efficiency report
     - Billing and Reading Dashboard
-    - 
+    - BAPA Change Due Date *
+- Tellering & Cashiering
+    - Third party collection *

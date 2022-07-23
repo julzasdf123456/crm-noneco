@@ -550,6 +550,10 @@ Route::get('/paid_bills/fetch-account-by-old-account-number', [App\Http\Controll
 Route::get('/paid_bills/print-bapa-payments/{dcrNum}', [App\Http\Controllers\PaidBillsController::class, 'printBapaPayments'])->name('paidBills.print-bapa-payments');
 Route::get('/paid_bills/get-ors-from-range', [App\Http\Controllers\PaidBillsController::class, 'getORsFromRange'])->name('paidBills.get-ors-from-range');
 Route::get('/paid_bills/add-denomination', [App\Http\Controllers\PaidBillsController::class, 'addDenomination'])->name('paidBills.add-denomination');
+Route::get('/paid_bills/third-party-collection', [App\Http\Controllers\PaidBillsController::class, 'thirdPartyCollection'])->name('paidBills.third-party-collection');
+Route::get('/paid_bills/upload-third-party-collection', [App\Http\Controllers\PaidBillsController::class, 'uploadThirdPartyCollection'])->name('paidBills.upload-third-party-collection');
+Route::post('/paid_bills/validate-tpc-upload', [App\Http\Controllers\PaidBillsController::class, 'validateTpcUpload'])->name('paidBills.validate-tpc-upload');
+Route::get('/paid_bills/tcp-upload-validator/{seriesNo}', [App\Http\Controllers\PaidBillsController::class, 'tcpUploadValidator'])->name('paidBills.tcp-upload-validator');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);
 
 Route::get('/disconnection_histories/generate-turn-off-list', [App\Http\Controllers\DisconnectionHistoryController::class, 'generateTurnOffList'])->name('disconnectionHistories.generate-turn-off-list');
