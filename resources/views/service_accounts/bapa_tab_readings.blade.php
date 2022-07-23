@@ -14,7 +14,7 @@
                     <a href="{{ route('serviceAccounts.print-bapa-bills-list', [urlencode($bapaName), $item->ServicePeriod]) }}" title="Print Bills in List" style="margin-right: 6px;"><i class="fas fa-print text-success"></i></a>
                     <button class="btn btn-link text-warning" title="Print Using Old Format (Green pre-printed)" onclick="verifyBillNo('{{ $item->ServicePeriod }}', '{{ urlencode($bapaName) }}')" ><i class="fas fa-print text-warning"></i></button>
                     {{-- <a href="{{ route('bills.print-bulk-bill-old-format-bapa', [$item->ServicePeriod, urlencode($bapaName), 'All']) }}" style="margin-right: 10px;"><i class="fas fa-print text-warning"></i></a> --}}
-                    <button class="btn btn-link text-danger" title="Adjust Due Date" onclick="adjustDueDate('{{ $item->ServicePeriod }}', '{{ urlencode($bapaName) }}')" style="margin-right: 5px;" ><i class="fas fa-edit text-danger"></i></button>
+                    <button class="btn btn-link text-danger" title="Adjust Due Date" onclick="adjustDueDate('{{ $item->ServicePeriod }}', '{{ $bapaName }}')" style="margin-right: 5px;" ><i class="fas fa-edit text-danger"></i></button>
                     <a title="View Reading" href="{{ route('bills.bapa-view-readings', [$item->ServicePeriod, urlencode($bapaName)]) }}"><i class="fas fa-eye"></i></a>
                 </td>
             </tr>
@@ -69,18 +69,32 @@
                     <input type="hidden" id="period">
                     <input type="hidden" id="bapaname">
                     <div class="form-group col-lg-12">
-                        <label for="FromBillNo">From Bill #</label>
-                        <input type="text" id="FromBillNo" class="form-control">
+                        <label for="NewDueDate">New Due Date</label>
+                        <input type="text" id="NewDueDate" class="form-control">
+                        @push('page_scripts')
+                            <script type="text/javascript">
+                                $('#NewDueDate').datetimepicker({
+                                    format: 'YYYY-MM-DD',
+                                    useCurrent: true,
+                                    sideBySide: true
+                                })
+                            </script>
+                        @endpush
                     </div>
 
                     <div class="form-group col-lg-12">
-                        <label for="Route">Route</label>
-                        <input type="text" maxlength="5" id="Route" class="form-control">
+                        <label for="RouteDueDate">Route</label>
+                        <select name="RouteDueDate" id="RouteDueDate" class="form-control">
+                            <option value="All">All</option>
+                            @foreach ($routes as $item)
+                                <option value="{{ $item->AreaCode }}">{{ $item->AreaCode }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" id="print-bill-bapa" class="btn btn-primary"><i class="fas fa-print ico-tab-mini"></i>Print</button>
+                <button type="button" id="change-due-date" class="btn btn-danger"><i class="fas fa-pen ico-tab-mini"></i>Change Due Date</button>
             </div>
         </div>
     </div>
@@ -118,6 +132,42 @@
                 } else {
                     window.location.href  = "{{ url('/bills/print-bulk-bill-old-format-bapa') }}/" + periodx + "/" + bapaname + "/" + $('#FromBillNo').val() + "/" + $('#Route').val()
                 }            
+            })
+
+            $('#change-due-date').on('click', function() {
+                if(jQuery.isEmptyObject($('#NewDueDate').val())) {
+                    Swal.fire({
+                        title : 'Due date should never be empty!',
+                        icon : 'warning'
+                    })
+                } else {
+                    $.ajax({
+                        url : "{{ route('bills.change-bapa-duedate') }}",
+                        type : 'GET',
+                        data : {
+                            Period : periodx,
+                            BAPAName : bapaname,
+                            Route : $('#RouteDueDate').val(),
+                            NewDueDate : $('#NewDueDate').val()
+                        },
+                        success : function(res) {
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'Due date updated!',
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                            location.reload()
+                        },
+                        error : function(err) {
+                            Swal.fire({
+                                title : 'An error occurred while changing the due date!',
+                                error : 'warning'
+                            })
+                        }
+                    })
+                }
             })
         })
     </script>

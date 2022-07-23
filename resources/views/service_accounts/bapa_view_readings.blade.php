@@ -20,14 +20,15 @@
             <div class="card-header border-0">
                 <span class="card-title">Readings and Bills ({{ count($readings) }})</span>
             </div>
-            <div class="card-body table-responsive px-0">
-                <table class="table table-sm table-hover">
+            <div class="card-body table-responsive p-0">
+                <table class="table table-sm table-hover table-head-fixed text-nowrap table-bordered">
                     <thead>
                         <th>Account No</th>
                         <th>Account Name</th>
                         <th>Account Status</th>
                         <th class="text-right">Kwh Used</th>
                         <th class="text-right">Bill Number</th>
+                        <th>Due Date</th>
                         <th class="text-right">Net Amount</th>
                     </thead>
                     <tbody>
@@ -37,11 +38,12 @@
                         @endphp
                         @foreach ($readings as $item)
                             <tr>
-                                <td><a href="{{ route('serviceAccounts.show', [$item->AccountNumber]) }}">{{ $item->AccountNumber }}</a></td>
+                                <td><a href="{{ route('serviceAccounts.show', [$item->AccountNumber]) }}">{{ $item->OldAccountNo }}</a></td>
                                 <td>{{ $item->ServiceAccountName }}</td>
                                 <th class="{{ $item->AccountStatus=='DISCONNECTED' ? 'text-danger' : 'text-success' }}">{{ $item->AccountStatus }}</th>
                                 <td class="text-right">{{ number_format($item->KwhUsed) }}</td>
-                                <td class="text-right">{{ $item->BillNumber==null ? '-' : $item->BillNumber }}</td>
+                                <td class="text-right"><a href="{{ $item->BillNumber==null ? '' : route('bills.show', [$item->BillId]) }}">{{ $item->BillNumber==null ? '-' : $item->BillNumber }}</a></td>
+                                <td>{{ $item->DueDate != null ? date('F d, Y', strtotime($item->DueDate)) : '-' }}</td>
                                 <td class="text-right">{{ $item->NetAmount==null ? '-' : number_format($item->NetAmount, 2) }}</td>
                             </tr>
                             @php
