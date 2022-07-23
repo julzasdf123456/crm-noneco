@@ -581,7 +581,8 @@ use Illuminate\Support\Facades\Auth;
             </li>
         </ul>
     </li>
-
+@endcanany
+@canany(['Super Admin', 'billing re-bill'])
     {{-- METER READING --}}
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">

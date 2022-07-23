@@ -1939,14 +1939,31 @@ class PaidBillsController extends AppBaseController
                 DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod) AS KwhUsed"),
                 DB::raw("(SELECT TOP 1 BillNumber FROM Billing_Bills WHERE AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod) AS BillNumber"),
                 DB::raw("(SELECT TOP 1 NetAmount FROM Billing_Bills WHERE AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod) AS BillAmount"),
-                DB::raw("(SELECT COUNT(p.id) FROM Cashier_PaidBills p WHERE p.AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod) AS Duplicates")
+                DB::raw("(SELECT COUNT(p.id) FROM Cashier_PaidBills p WHERE p.AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod AND Status IS NULL) AS Duplicates")
             )
             ->orderBy('OldAccountNo')
             ->get();
 
         return view('/paid_bills/tcp_upload_validator', [
-            'paidBills' => $paidBills
+            'paidBills' => $paidBills,
+            'seriesNo' => $seriesNo
         ]);
+    }
+
+    public function depositDoublePayments($seriesNo) {
+        $paidBills = DB::table('Cashier_PaidBills')
+            ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Cashier_PaidBills.Notes', $seriesNo)
+            ->where('Cashier_PaidBills.Status', 'PENDING POST')
+            ->whereRaw("Cashier_PaidBills.AccountNumber IN (SELECT AccountNumber FROM Cashier_PaidBills p WHERE p.AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod AND Status IS NULL)")
+            ->select('Cashier_PaidBills.*',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.ServiceAccountName',
+            )
+            ->orderBy('OldAccountNo')
+            ->get();
+
+        dd($paidBills);
     }
 }
 

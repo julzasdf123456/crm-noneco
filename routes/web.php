@@ -554,6 +554,7 @@ Route::get('/paid_bills/third-party-collection', [App\Http\Controllers\PaidBills
 Route::get('/paid_bills/upload-third-party-collection', [App\Http\Controllers\PaidBillsController::class, 'uploadThirdPartyCollection'])->name('paidBills.upload-third-party-collection');
 Route::post('/paid_bills/validate-tpc-upload', [App\Http\Controllers\PaidBillsController::class, 'validateTpcUpload'])->name('paidBills.validate-tpc-upload');
 Route::get('/paid_bills/tcp-upload-validator/{seriesNo}', [App\Http\Controllers\PaidBillsController::class, 'tcpUploadValidator'])->name('paidBills.tcp-upload-validator');
+Route::get('/paid_bills/deposit-double-payments/{seriesNo}', [App\Http\Controllers\PaidBillsController::class, 'depositDoublePayments'])->name('paidBills.deposit-double-payments');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);
 
 Route::get('/disconnection_histories/generate-turn-off-list', [App\Http\Controllers\DisconnectionHistoryController::class, 'generateTurnOffList'])->name('disconnectionHistories.generate-turn-off-list');
