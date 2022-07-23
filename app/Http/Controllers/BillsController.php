@@ -1453,7 +1453,7 @@ class BillsController extends AppBaseController
             ->where('Billing_Bills.ServicePeriod', $period)
             ->where('Billing_ServiceAccounts.Town', $town)
             ->where('Billing_ServiceAccounts.AreaCode', $route)
-            ->where('Billing_Bills.UserId', Auth::id())
+            ->whereRaw("Billing_Bills.UserId='" . Auth::id() ."'")
             ->where('Billing_Bills.BillingDate', $day)
             ->select('Billing_Bills.*',                
                 'Billing_ServiceAccounts.ServiceAccountName',
