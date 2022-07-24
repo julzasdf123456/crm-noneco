@@ -11,8 +11,7 @@
         <div class="row mb-2">
             <div class="col-sm-12">
                 <span>
-                    <h4 style="display: inline; margin-right: 15px;">Relocation Form</h4>
-                    <i class="text-muted">Energized/executed relocation requests.</i>
+                    <h4 style="display: inline; margin-right: 15px;">Relocation Wizzard</h4>
                 </span>
             </div>
         </div>
@@ -69,24 +68,29 @@
             <div class="card-body">
                 <div class="row">
                     <input type="hidden" name="AccountNumber" value="{{ $account != null ? $account->id : '' }}">
-                    <input type="hidden" name="ServiceConnectionId" value="{{ $serviceConnection!=null ? $serviceConnection->id : '' }}">
 
-                    <!-- Purok Field -->
+                    <!-- Town Field -->
                     <div class="col-md-4">
-                        {!! Form::label('Purok', 'Purok:') !!}
-                        {!! Form::text('Purok', $serviceConnection!=null ? $serviceConnection->Sitio : '', ['class' => 'form-control','maxlength' => 600,'maxlength' => 600]) !!}
+                        {!! Form::label('Town', 'Town:') !!}
+                        {!! Form::select('Town', $town, $account!=null ? $account->TownId : '', ['class' => 'form-control']) !!}
                     </div>
 
                     <!-- Barangay Field -->
                     <div class="col-md-4">
                         {!! Form::label('Barangay', 'Barangay:') !!}
-                        {!! Form::select('Barangay', $barangays, $serviceConnection!=null ? $serviceConnection->Barangay : '', ['class' => 'form-control', 'id' => 'BarangaySA']) !!}
+                        {!! Form::select('Barangay', [], null, ['class' => 'form-control']) !!}
                     </div>
 
-                    <!-- Town Field -->
+                    <!-- Purok Field -->
                     <div class="col-md-4">
-                        {!! Form::label('Town', 'Town:') !!}
-                        {!! Form::select('Town', $town, $serviceConnection!=null ? $serviceConnection->Town : '', ['class' => 'form-control', 'id' => 'TownSA']) !!}
+                        {!! Form::label('Purok', 'Purok:') !!}
+                        {!! Form::text('Purok', $account!=null ? $account->Purok : '', ['class' => 'form-control','maxlength' => 600,'maxlength' => 600]) !!}
+                    </div>
+
+                    <!-- Account No Field -->
+                    <div class="col-md-4">
+                        {!! Form::label('OldAccountNo', 'New Account No:') !!}
+                        {!! Form::text('OldAccountNo', $account != null ? $account->OldAccountNo : '', ['class' => 'form-control', 'maxlength' => 12]) !!}
                     </div>
 
                     <!-- Route Field -->
@@ -107,7 +111,7 @@
                         <select class="custom-select select2"  name="MeterReader">
                             <option value="">n/a</option>
                             @foreach ($meterReaders as $items)
-                                <option value="{{ $items->id }}">{{ $items->name }}</option>
+                                <option value="{{ $items->id }}" {{ $account->MeterReader!=null && $account->MeterReader==$items->id ? 'selected' : '' }}>{{ $items->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -143,4 +147,5 @@
         </div>
     </div>
 </div>
+<p id="Def_Brgy" style="display: none;">{{ $account->BarangayId != null ? $account->BarangayId : '' }}</p>
 @endsection

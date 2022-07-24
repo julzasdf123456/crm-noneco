@@ -233,6 +233,8 @@ Route::post('/service_accounts/store-transformer-manual', [App\Http\Controllers\
 Route::get('/service_accounts/change-meter-manual', [App\Http\Controllers\ServiceAccountsController::class, 'changeMeterManual'])->name('serviceAccounts.change-meter-manual');
 Route::get('/service_accounts/change-meter-manual-console/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'changeMeterManualConsole'])->name('serviceAccounts.change-meter-manual-console');
 Route::post('/service_accounts/store-change-meter-manual', [App\Http\Controllers\ServiceAccountsController::class, 'storeChangeMeterManual'])->name('serviceAccounts.store-change-meter-manual');
+Route::get('/service_accounts/relocation-manual', [App\Http\Controllers\ServiceAccountsController::class, 'relocationManual'])->name('serviceAccounts.relocation-manual');
+Route::get('/service_accounts/relocation-form-manual/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'relocationFormManual'])->name('serviceAccounts.relocation-form-manual');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 

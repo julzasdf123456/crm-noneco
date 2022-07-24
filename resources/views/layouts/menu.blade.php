@@ -499,6 +499,14 @@ use Illuminate\Support\Facades\Auth;
                    </p>                   
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('serviceAccounts.relocation-manual') }}"
+                   class="nav-link {{ Request::is('serviceAccounts.relocation-manual*') ? 'active' : '' }}">                   
+                   <i class="fas fa-map-marked-alt nav-icon text-primary"></i><p>Relocation
+                    <span class="right badge badge-danger">New</span>
+                   </p>                   
+                </a>
+            </li>
         </ul>
     </li>
 

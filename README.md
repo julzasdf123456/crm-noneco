@@ -109,6 +109,7 @@ You can also check out our other paid products on [CodeCanyon](https://codecanyo
     - BAPA Change Due Date
     - Manual Adding of Accounts
     - Manual Change Meter
+    - Manual Relocation
 - Tellering & Cashiering
     - Third party collection *
     - OR Re-Printing

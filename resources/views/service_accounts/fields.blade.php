@@ -209,6 +209,7 @@
         <div class="col-lg-3 col-md-2">
             <div class="input-group">
                 <select class="custom-select select2"  name="MeterReader">
+                    <option value="">n/a</option>
                     @foreach ($meterReaders as $items)
                         <option value="{{ $items->id }}">{{ $items->name }}</option>
                     @endforeach

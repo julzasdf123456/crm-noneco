@@ -1396,7 +1396,7 @@ class ServiceAccountsController extends AppBaseController
         $serviceConnection = ServiceConnections::find($scId);
         $towns = Towns::where('id', $serviceConnection->Town)->pluck('Town', 'id');
         $barangays = Barangays::where('TownId', $serviceConnection->Town)->pluck('Barangay', 'id');        
-        $meterReaders = User::role('Meter Reader')->get();
+        $meterReaders = User::role('Meter Reader Inhouse')->get();
 
         return view('/service_accounts/relocation_form', [
             'account' => $account,
@@ -1445,7 +1445,12 @@ class ServiceAccountsController extends AppBaseController
 
         Flash::success('Account relocated successfully.');
 
-        return redirect(route('serviceAccounts.pending-accounts'));
+        if ($serviceConnection != null) {
+            return redirect(route('serviceAccounts.pending-accounts'));
+        } else {
+            return redirect(route('serviceAccounts.show', [$account->id]));
+        }
+       
     }
 
     public function printLedger($id, $from, $to) {
@@ -1938,5 +1943,140 @@ class ServiceAccountsController extends AppBaseController
         }
 
         return redirect(route('serviceAccounts.show', [$sa->id]));
+    }
+
+    public function relocationManual(Request $request) {
+        if ($request['params'] == null && $request['oldaccount'] == null) {
+            $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.id', 
+                            'Billing_ServiceAccounts.ServiceAccountName',
+                            'Billing_ServiceAccounts.Purok',
+                            'Billing_ServiceAccounts.OldAccountNo',   
+                            'Billing_ServiceAccounts.AccountCount',  
+                            'CRM_Towns.Town', 
+                            'CRM_Barangays.Barangay',
+                            'Billing_ServiceAccounts.AccountStatus',
+                            DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber")
+                        )
+                        ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                        ->paginate(18);
+        } elseif ($request['params'] == null && $request['oldaccount'] != null) {
+            $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.id', 
+                            'Billing_ServiceAccounts.ServiceAccountName',
+                            'Billing_ServiceAccounts.Purok',
+                            'Billing_ServiceAccounts.OldAccountNo',   
+                            'Billing_ServiceAccounts.AccountCount',  
+                            'CRM_Towns.Town', 
+                            'CRM_Barangays.Barangay',
+                            'Billing_ServiceAccounts.AccountStatus',
+                            DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber")
+                        )
+                        // ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                        // ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                        // ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
+                        ->where('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldaccount'] . '%')
+                        ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                        ->paginate(18);            
+        } elseif ($request['params'] != null && $request['oldaccount'] == null) {
+            $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.id', 
+                            'Billing_ServiceAccounts.ServiceAccountName',
+                            'Billing_ServiceAccounts.Purok',
+                            'Billing_ServiceAccounts.OldAccountNo',   
+                            'Billing_ServiceAccounts.AccountCount',  
+                            'CRM_Towns.Town', 
+                            'CRM_Barangays.Barangay',
+                            'Billing_ServiceAccounts.AccountStatus',
+                            DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber")
+                        )
+                        ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhereRaw("Billing_ServiceAccounts.id IN (SELECT ServiceAccountId FROM Billing_Meters WHERE SerialNumber LIKE '%" . $request['params'] . "%')")
+                        // ->where('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldaccount'] . '%')
+                        ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                        ->paginate(18);            
+        } else {
+            $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.id', 
+                            'Billing_ServiceAccounts.ServiceAccountName',
+                            'Billing_ServiceAccounts.Purok',
+                            'Billing_ServiceAccounts.OldAccountNo',   
+                            'Billing_ServiceAccounts.AccountCount',  
+                            'CRM_Towns.Town', 
+                            'CRM_Barangays.Barangay',
+                            'Billing_ServiceAccounts.AccountStatus',
+                            DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber")
+                        )
+                        ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldaccount'] . '%')
+                        ->orWhereRaw("Billing_ServiceAccounts.id IN (SELECT ServiceAccountId FROM Billing_Meters WHERE SerialNumber LIKE '%" . $request['params'] . "%')")
+                        ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                        ->paginate(18);
+        }  
+
+        return view('/service_accounts/relocation_manual', [
+            'serviceAccounts' => $serviceAccounts
+        ]);
+    }
+
+    public function relocationFormManual($id) {
+        $account = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.AccountCount',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.ForDistribution',
+                    'Billing_ServiceAccounts.Organization',
+                    'Billing_ServiceAccounts.Main',
+                    'Billing_ServiceAccounts.GroupCode',
+                    'Billing_ServiceAccounts.Multiplier',
+                    'Billing_ServiceAccounts.Coreloss',
+                    'Billing_ServiceAccounts.ConnectionDate',
+                    'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.SeniorCitizen',
+                    'Billing_ServiceAccounts.Evat5Percent',
+                    'Billing_ServiceAccounts.Ewt2Percent',
+                    'Billing_ServiceAccounts.Contestable',
+                    'Billing_ServiceAccounts.NetMetered',
+                    'Billing_ServiceAccounts.MeterReader',
+                    'Billing_ServiceAccounts.AccountRetention',
+                    'Billing_ServiceAccounts.DurationInMonths',
+                    'Billing_ServiceAccounts.AccountExpiration',
+                    'Billing_ServiceAccounts.Town as TownId',
+                    'Billing_ServiceAccounts.Barangay as BarangayId',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay')
+            ->where('Billing_ServiceAccounts.id', $id)
+            ->first();
+
+        $towns = Towns::pluck('Town', 'id');
+        $barangays = Barangays::where('TownId', $account->BarangayId)->pluck('Barangay', 'id');        
+        $meterReaders = User::role('Meter Reader Inhouse')->get();
+
+        return view('/service_accounts/relocation_form_manual', [
+            'account' => $account,
+            'town' => $towns,
+            'barangays' => $barangays,
+            'meterReaders' => $meterReaders,
+        ]);
     }
 }
