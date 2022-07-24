@@ -1527,9 +1527,10 @@ class ServiceAccountsController extends AppBaseController
         $results = DB::table('Billing_ServiceAccounts')
             ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-            ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['query'] . '%')
-            ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['query'] . '%')
-            ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['query'] . '%')
+            ->whereRaw("Billing_ServiceAccounts.ServiceAccountName LIKE '%" . $request['query'] . "%' 
+                OR Billing_ServiceAccounts.id LIKE '%" . $request['query'] . "%' 
+                OR Billing_ServiceAccounts.OldAccountNo LIKE '%" . $request['query'] . "%'
+                OR Billing_ServiceAccounts.id IN (SELECT ServiceAccountId FROM Billing_Meters WHERE SerialNumber LIKE '%" . $request['query'] . "%')")
             ->select('Billing_ServiceAccounts.id',
                     'Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.OldAccountNo',
@@ -1541,7 +1542,8 @@ class ServiceAccountsController extends AppBaseController
                     'Billing_ServiceAccounts.Multiplier',
                     'Billing_ServiceAccounts.SequenceCode',
                     'CRM_Towns.Town',
-                    'CRM_Barangays.Barangay')
+                    'CRM_Barangays.Barangay',
+                    DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"))
             ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
             ->get();
 
@@ -1554,6 +1556,7 @@ class ServiceAccountsController extends AppBaseController
                             <td>' . $item->OldAccountNo . '</td>
                             <td>' . $item->ServiceAccountName . '</td>
                             <td>' . ServiceAccounts::getAddress($item) . '</td>
+                            <td>' . $item->MeterNumber . '</td>
                             <td>' . $item->AccountStatus . '</td>
                             <td>
                                 <button class="btn btn-link btn-sm text-primary" onclick=proceedBilling("' . $item->id . '")><i class="fas fa-forward"></i> Proceed Billing</button>
