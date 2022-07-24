@@ -620,6 +620,7 @@ class DCRSummaryTransactionsController extends AppBaseController
         if ($teller=='All') {
             $data = DB::table('Cashier_DCRSummaryTransactions')
                 ->whereBetween('Day', [$from, $to])
+                ->where('Office', $office)
                 ->where(function ($query) {
                     $query->where('Cashier_DCRSummaryTransactions.ReportDestination', 'COLLECTION')
                         ->orWhere('Cashier_DCRSummaryTransactions.ReportDestination', 'BOTH');
@@ -636,7 +637,7 @@ class DCRSummaryTransactionsController extends AppBaseController
                 ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                 ->whereBetween('Cashier_PaidBills.ORDate', [$from, $to])
                 ->whereNull('Cashier_PaidBills.Status')
-                ->whereRaw("Cashier_PaidBills.PaymentUsed LIKE '%Cash%'")
+                ->whereRaw("Cashier_PaidBills.PaymentUsed LIKE '%Cash%' AND Cashier_PaidBills.OfficeTransacted='" . $office . "'")
                 ->select('Cashier_PaidBills.*', 
                     DB::raw("(SELECT SUM(CAST(Amount AS DECIMAL(10,2))) FROM Cashier_PaidBillsDetails WHERE ORNumber=Cashier_PaidBills.ORNumber AND PaymentUsed='Cash') AS CashPaid"),
                     'Billing_ServiceAccounts.ServiceAccountName', 
@@ -647,12 +648,14 @@ class DCRSummaryTransactionsController extends AppBaseController
                 ->leftJoin('Cashier_TransactionIndex', 'Cashier_TransactionDetails.TransactionIndexId', '=', 'Cashier_TransactionIndex.id')
                 ->leftJoin('Billing_ServiceAccounts', 'Cashier_TransactionIndex.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                 ->whereBetween('Cashier_TransactionIndex.ORDate', [$from, $to])
-                ->where('Cashier_TransactionIndex.PaymentUsed', 'Cash')
+                ->where('Cashier_TransactionIndex.PaymentUsed', 'Cash')                
+                ->whereRaw("Cashier_TransactionIndex.TransactionNumber LIKE '" . $office . "%'")
                 ->whereNull('Cashier_TransactionIndex.Status')
                 ->select('Cashier_TransactionIndex.ORNumber',
                     'Cashier_TransactionDetails.Total',
                     'Cashier_TransactionDetails.Particular',
                     'Cashier_TransactionIndex.AccountNumber',
+                    'Cashier_TransactionIndex.id',
                     'Cashier_TransactionIndex.PayeeName',
                     'Cashier_TransactionDetails.AccountCode',
                     'Cashier_TransactionIndex.CheckNo',
@@ -664,8 +667,9 @@ class DCRSummaryTransactionsController extends AppBaseController
                 
             $checkPaymentPowerBills = DB::table('Cashier_PaidBillsDetails')
                 ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBillsDetails.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->leftJoin('Cashier_PaidBills', 'Cashier_PaidBillsDetails.ORNumber', '=', 'Cashier_PaidBills.ORNumber')
                 ->whereBetween('Cashier_PaidBillsDetails.created_at', [$from, $to])
-                ->whereRaw("Cashier_PaidBillsDetails.PaymentUsed LIKE '%Check%'")
+                ->whereRaw("Cashier_PaidBillsDetails.PaymentUsed LIKE '%Check%' AND Cashier_PaidBills.OfficeTransacted='" . $office . "'")
                 ->select('Cashier_PaidBillsDetails.ORNumber',
                     'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.ServiceAccountName',
@@ -678,6 +682,7 @@ class DCRSummaryTransactionsController extends AppBaseController
                 ->leftJoin('Cashier_TransactionIndex', 'Cashier_TransactionPaymentDetails.ORNumber', '=', 'Cashier_TransactionIndex.ORNumber')
                 ->whereBetween('Cashier_TransactionIndex.ORDate', [$from, $to])
                 ->whereRaw("Cashier_TransactionPaymentDetails.PaymentUsed LIKE '%Check%'")
+                ->whereRaw("Cashier_TransactionIndex.TransactionNumber LIKE '" . $office . "%'")
                 ->select('Cashier_TransactionIndex.ORNumber',
                     'Cashier_TransactionIndex.AccountNumber',
                     'Cashier_TransactionIndex.PayeeName',
@@ -693,6 +698,7 @@ class DCRSummaryTransactionsController extends AppBaseController
                 ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                 ->whereBetween('Cashier_PaidBills.ORDate', [$from, $to])
                 ->whereIn('Cashier_PaidBills.Status', ['CANCELLED', 'PENDING CANCEL'])
+                ->whereRaw("Cashier_PaidBills.OfficeTransacted='" . $office . "'")
                 ->select('Cashier_PaidBills.ORNumber',
                     'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.ServiceAccountName',
@@ -704,6 +710,7 @@ class DCRSummaryTransactionsController extends AppBaseController
             $cancelledAllPayments = DB::table("Cashier_TransactionIndex")
                 ->whereBetween('Cashier_TransactionIndex.ORDate', [$from, $to])
                 ->whereIn('Cashier_TransactionIndex.Status', ['CANCELLED', 'PENDING CANCEL'])
+                ->whereRaw("Cashier_TransactionIndex.TransactionNumber LIKE '" . $office . "%'")
                 ->select('Cashier_TransactionIndex.ORNumber',
                     'Cashier_TransactionIndex.AccountNumber',
                     'Cashier_TransactionIndex.PayeeName',
@@ -719,6 +726,7 @@ class DCRSummaryTransactionsController extends AppBaseController
             $data = DB::table('Cashier_DCRSummaryTransactions')
                 ->whereBetween('Day', [$from, $to])
                 ->where('Teller', $teller)
+                ->where('Office', $office)
                 ->where(function ($query) {
                     $query->where('Cashier_DCRSummaryTransactions.ReportDestination', 'COLLECTION')
                         ->orWhere('Cashier_DCRSummaryTransactions.ReportDestination', 'BOTH');
@@ -736,7 +744,7 @@ class DCRSummaryTransactionsController extends AppBaseController
                 ->whereBetween('Cashier_PaidBills.ORDate', [$from, $to])
                 ->where('Cashier_PaidBills.Teller', $teller)
                 ->whereNull('Cashier_PaidBills.Status')
-                ->whereRaw("Cashier_PaidBills.PaymentUsed LIKE '%Cash%'")
+                ->whereRaw("Cashier_PaidBills.PaymentUsed LIKE '%Cash%' AND Cashier_PaidBills.OfficeTransacted='" . $office . "'")
                 ->select('Cashier_PaidBills.*', 
                     DB::raw("(SELECT SUM(CAST(Amount AS DECIMAL(10,2))) FROM Cashier_PaidBillsDetails WHERE ORNumber=Cashier_PaidBills.ORNumber AND PaymentUsed='Cash') AS CashPaid"),
                     'Billing_ServiceAccounts.ServiceAccountName', 
@@ -749,12 +757,14 @@ class DCRSummaryTransactionsController extends AppBaseController
                 ->whereBetween('Cashier_TransactionIndex.ORDate', [$from, $to])
                 ->where('Cashier_TransactionIndex.UserId', $teller)
                 ->where('Cashier_TransactionIndex.PaymentUsed', 'Cash')
+                ->whereRaw("Cashier_TransactionIndex.TransactionNumber LIKE '" . $office . "%'")
                 ->whereNull('Cashier_TransactionIndex.Status')
                 ->select('Cashier_TransactionIndex.ORNumber',
                     'Cashier_TransactionDetails.Total',
                     'Cashier_TransactionDetails.Particular',
                     'Cashier_TransactionIndex.AccountNumber',
                     'Cashier_TransactionIndex.PayeeName',
+                    'Cashier_TransactionIndex.id',
                     'Cashier_TransactionDetails.AccountCode',
                     'Cashier_TransactionIndex.CheckNo',
                     'Cashier_TransactionIndex.Bank',
@@ -765,9 +775,10 @@ class DCRSummaryTransactionsController extends AppBaseController
         
             $checkPaymentPowerBills = DB::table('Cashier_PaidBillsDetails')
                 ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBillsDetails.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->leftJoin('Cashier_PaidBills', 'Cashier_PaidBillsDetails.ORNumber', '=', 'Cashier_PaidBills.ORNumber')
                 ->where('Cashier_PaidBillsDetails.UserId', $teller)
                 ->whereBetween('Cashier_PaidBillsDetails.created_at', [$from, $to])
-                ->whereRaw("Cashier_PaidBillsDetails.PaymentUsed LIKE '%Check%'")
+                ->whereRaw("Cashier_PaidBillsDetails.PaymentUsed LIKE '%Check%' AND Cashier_PaidBills.OfficeTransacted='" . $office . "'")
                 ->select('Cashier_PaidBillsDetails.ORNumber',
                     'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.ServiceAccountName',
@@ -780,6 +791,7 @@ class DCRSummaryTransactionsController extends AppBaseController
                 ->leftJoin('Cashier_TransactionIndex', 'Cashier_TransactionPaymentDetails.ORNumber', '=', 'Cashier_TransactionIndex.ORNumber')
                 ->whereBetween('Cashier_TransactionIndex.ORDate', [$from, $to])
                 ->whereRaw("Cashier_TransactionPaymentDetails.PaymentUsed LIKE '%Check%'")
+                ->whereRaw("Cashier_TransactionIndex.TransactionNumber LIKE '" . $office . "%'")
                 ->where('Cashier_TransactionIndex.UserId', $teller)
                 ->select('Cashier_TransactionIndex.ORNumber',
                     'Cashier_TransactionIndex.AccountNumber',
@@ -796,7 +808,8 @@ class DCRSummaryTransactionsController extends AppBaseController
                 ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                 ->whereBetween('Cashier_PaidBills.ORDate', [$from, $to])
                 ->whereIn('Cashier_PaidBills.Status', ['CANCELLED', 'PENDING CANCEL'])
-                ->where('Cashier_PaidBills.Teller', $teller)
+                ->where('Cashier_PaidBills.Teller', $teller)                
+                ->whereRaw("Cashier_PaidBills.OfficeTransacted='" . $office . "'")
                 ->select('Cashier_PaidBills.ORNumber',
                     'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.ServiceAccountName',
@@ -809,6 +822,7 @@ class DCRSummaryTransactionsController extends AppBaseController
                 ->whereBetween('Cashier_TransactionIndex.ORDate', [$from, $to])
                 ->whereIn('Cashier_TransactionIndex.Status', ['CANCELLED', 'PENDING CANCEL'])
                 ->where('Cashier_TransactionIndex.UserId', $teller)
+                ->whereRaw("Cashier_TransactionIndex.TransactionNumber LIKE '" . $office . "%'")
                 ->select('Cashier_TransactionIndex.ORNumber',
                     'Cashier_TransactionIndex.AccountNumber',
                     'Cashier_TransactionIndex.PayeeName',

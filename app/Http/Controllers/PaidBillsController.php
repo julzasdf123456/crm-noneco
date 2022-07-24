@@ -24,6 +24,8 @@ use App\Models\DCRSummaryTransactions;
 use App\Models\ArrearsLedgerDistribution;
 use App\Models\BAPAAdjustmentDetails;
 use App\Models\Denominations;
+use App\Imports\ThirdPartyPaidBills;
+use Maatwebsite\Excel\Facades\Excel;
 use Flash;
 use Response;
 
@@ -1187,7 +1189,7 @@ class PaidBillsController extends AppBaseController
             ->leftJoin('Billing_ServiceAccounts', 'Billing_ServiceAccounts.id', '=', 'Billing_Bills.AccountNumber')
             ->whereRaw("Billing_Bills.ServicePeriod = '" . $period . "'")
             ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
-            ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod = '" . $period ."')")
+            ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod = '" . $period ."' AND Status IS NULL)")
             ->whereRaw("Billing_Bills.id NOT IN (SELECT BillId FROM Cashier_BAPAAdjustmentDetails WHERE BillId IS NOT NULL)")
             ->select('Billing_ServiceAccounts.id AS AccountNumber',
                 'Billing_ServiceAccounts.ServiceAccountName',
@@ -1895,6 +1897,73 @@ class PaidBillsController extends AppBaseController
         }
 
         return response()->json($denominations, 200);
+    }
+
+    public function thirdPartyCollection() {
+        return view('/paid_bills/third_party_collection', [
+
+        ]);
+    }
+
+    public function uploadThirdPartyCollection() {
+        return view('/paid_bills/upload_third_party_collection', [
+
+        ]);
+    }
+
+    public function validateTpcUpload(Request $request) {
+        if ($request->file('file') != null) {
+            $file = $request->file('file');
+            $userId = Auth::id();
+            $seriesNo = IDGenerator::generateID();
+
+            // IMPORT
+            $tpc = new ThirdPartyPaidBills($userId, $seriesNo);
+            Excel::import($tpc, $file);
+
+            return redirect(route('paidBills.tcp-upload-validator', [$seriesNo]));
+        } else {
+            return abort(404, "No file imported!");
+        }
+    }
+
+    public function tcpUploadValidator($seriesNo) {
+        // QUERY IMPORTED
+        $paidBills = DB::table('Cashier_PaidBills')
+            ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Cashier_PaidBills.Notes', $seriesNo)
+            ->where('Cashier_PaidBills.Status', 'PENDING POST')
+            ->select('Cashier_PaidBills.*',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod) AS KwhUsed"),
+                DB::raw("(SELECT TOP 1 BillNumber FROM Billing_Bills WHERE AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod) AS BillNumber"),
+                DB::raw("(SELECT TOP 1 NetAmount FROM Billing_Bills WHERE AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod) AS BillAmount"),
+                DB::raw("(SELECT COUNT(p.id) FROM Cashier_PaidBills p WHERE p.AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod AND Status IS NULL) AS Duplicates")
+            )
+            ->orderBy('OldAccountNo')
+            ->get();
+
+        return view('/paid_bills/tcp_upload_validator', [
+            'paidBills' => $paidBills,
+            'seriesNo' => $seriesNo
+        ]);
+    }
+
+    public function depositDoublePayments($seriesNo) {
+        $paidBills = DB::table('Cashier_PaidBills')
+            ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Cashier_PaidBills.Notes', $seriesNo)
+            ->where('Cashier_PaidBills.Status', 'PENDING POST')
+            ->whereRaw("Cashier_PaidBills.AccountNumber IN (SELECT AccountNumber FROM Cashier_PaidBills p WHERE p.AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod AND Status IS NULL)")
+            ->select('Cashier_PaidBills.*',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.ServiceAccountName',
+            )
+            ->orderBy('OldAccountNo')
+            ->get();
+
+        dd($paidBills);
     }
 }
 

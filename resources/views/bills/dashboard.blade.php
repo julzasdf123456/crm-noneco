@@ -8,57 +8,115 @@
 @extends('layouts.app')
 
 @section('content')
-<p style="padding-top: 8px;"><i class="fas fa-chart-line ico-tab"></i>Billing Dashboard</p>
 <div class="row">
-    <div class="col-lg-6">
-        <div class="card" style="height: 50vh;">
+    {{-- CONFIG --}}
+    <div class="col-lg-5">
+        <p style="padding-top: 8px;"><i class="fas fa-chart-line ico-tab"></i>Billing Dashboard</p>
+    </div>
+    <div class="col-lg-7" style="padding-top: 5px;">
+        <div class="form-group float-right">
+            <select id="service-period" class="form-control form-control-sm">
+                @for ($i = 0; $i < count($months); $i++)
+                    <option value="{{ $months[$i] }}">{{ date('F Y', strtotime($months[$i])) }}</option>
+                @endfor
+            </select>
+        </div>
+
+        <div class="float-right">
+            <p style="margin-top: 2px; margin-right: 5px;"><strong>Billing Month</strong></p>
+        </div>
+
+        <div class="form-group float-right" style="margin-right: 10px;">
+            <select id="day-reading-monitor" class="form-control form-control-sm">
+                <option value="All">All</option>
+                <option value="01">01</option>
+                <option value="02">02</option>
+                <option value="03">03</option>
+                <option value="04">04</option>
+                <option value="05">05</option>
+                <option value="06">06</option>
+                <option value="07">07</option>
+                <option value="08">08</option>
+                <option value="09">09</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+            </select>
+        </div> 
+        <div class="float-right">
+            <p style="margin-top: 2px; margin-right: 5px;"><strong>Day</strong></p>
+        </div>
+    </div>
+
+    {{-- TABLES --}}
+    <div class="col-lg-7">
+        <div class="card" style="height: 45vh;">
             <div class="card-header">
-                <span class="card-title">Reading Monitor</span>
-
-                <div class="card-tools">
-                    <div class="row">
-                        <div class="form-group col-6">
-                            <select id="service-period" class="form-control form-control-sm">
-                                @for ($i = 0; $i < count($months); $i++)
-                                    <option value="{{ $months[$i] }}">{{ date('F Y', strtotime($months[$i])) }}</option>
-                                @endfor
-                            </select>
-                        </div>
-
-                        <div class="form-group col-6">
-                            <select id="day-reading-monitor" class="form-control form-control-sm">
-                                <option value="All">All</option>
-                                <option value="01">01</option>
-                                <option value="02">02</option>
-                                <option value="03">03</option>
-                                <option value="04">04</option>
-                                <option value="05">05</option>
-                                <option value="06">06</option>
-                                <option value="07">07</option>
-                                <option value="08">08</option>
-                                <option value="09">09</option>
-                                <option value="10">10</option>
-                                <option value="11">11</option>
-                                <option value="12">12</option>
-                            </select>
-                        </div>
-                    </div>                    
-                </div>
+                <span class="card-title">Meter Reading Monitor (Meter Readers)</span>
             </div>
-            <div class="card-body p-0">
+            <div class="card-body table-responsive p-0">
                 <table class="table table-sm table-bordered table-hover" id="reading-monitor-table">
                     <thead>
-                        <th>Meter Reader</th>
-                        <th>Unbilled Based <br> From Readings</th>
-                        <th>All Unbilled</th>
-                        <th>Total Reading</th>
-                        <th>Total Billed</th>
+                        <th class='text-center'>Meter Reader</th>
+                        <th class='text-center'>Unbilled Based <br> From Readings</th>
+                        <th class='text-center'>All Unbilled</th>
+                        <th class='text-center'>Total Reading</th>
+                        <th class='text-center'>Captured</th>
+                        <th class='text-center'>Total Billed</th>
+                        <th class='text-center'>Total Kwh</th>
                     </thead>
                     <tbody></tbody>
                 </table>
             </div>
             <div class="card-footer">
                 <p><strong class="text-danger">NOTE: </strong>These figures doesn't include the office billings performed by Data Ads.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card card-outline card-success" style="height: 45vh;">
+            <div class="card-header">
+                <span class="card-title">Today's Reading (<i>F5 to Refresh</i>)</span>
+                <div class="card-tools">
+                    <a href="{{ route('readings.reading-monitor-view', [date('Y-m-d', strtotime($latestRate->ServicePeriod))]) }}" title="Go to Reading Monitor"><i class="fas fa-share"></i></a>
+                </div>
+            </div>
+            <div class="card-body table-responsive p-0">
+                <table class="table table-sm table-bordered table-hover">
+                    <thead>
+                        <th class="text-center">Meter Reader</th>
+                        <th class="text-center">Total Readings</th>
+                        <th class="text-center">Total Bills</th>
+                        <th class="text-center">Total Unbilled</th>
+                    </thead>
+                    <tbody>
+                        @php
+                            $totalReadingsToday = 0;
+                            $totalBillsToday = 0;
+                            $totalUnbilledToday = 0;
+                        @endphp
+                        @foreach ($todaysReading as $item)
+                            <tr>
+                                <th>{{ $item->name }}</th>
+                                <th class="text-right">{{ number_format($item->TotalReading) }}</th>
+                                <th class="text-right">{{ number_format($item->TotalBills) }}</th>
+                                <th class="text-right">{{ number_format(floatval($item->TotalReading) - floatval($item->TotalBills)) }}</th>
+                            </tr>
+                            @php
+                                $totalReadingsToday += floatval($item->TotalReading);
+                                $totalBillsToday += floatval($item->TotalBills);
+                                $totalUnbilledToday += (floatval($item->TotalReading) - floatval($item->TotalBills));
+                            @endphp
+                        @endforeach
+                        <tr>
+                            <th>Total</th>
+                            <th class="text-right">{{ number_format($totalReadingsToday) }}</th>
+                            <th class="text-right">{{ number_format($totalBillsToday) }}</th>
+                            <th class="text-right">{{ number_format($totalUnbilledToday) }}</th>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

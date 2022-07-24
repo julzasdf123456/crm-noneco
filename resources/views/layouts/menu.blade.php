@@ -464,7 +464,7 @@ use Illuminate\Support\Facades\Auth;
             <li class="nav-item">
                 <a href="{{ route('serviceAccounts.index') }}"
                    class="nav-link {{ Request::is('serviceAccounts*') ? 'active' : '' }}">                   
-                   <i class="fas fa-user-circle nav-icon text-primary"></i><p>Active Accounts</p>
+                   <i class="fas fa-user-circle nav-icon text-primary"></i><p>All Accounts</p>
                 </a>
             </li>
             <li class="nav-item">
@@ -483,7 +483,30 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-user-alt-slash nav-icon text-primary"></i><p>Pending Accounts</p>
                 </a>
             </li>
-            
+            <li class="nav-item">
+                <a href="{{ route('serviceAccounts.manual-account-migration-one') }}"
+                   class="nav-link {{ Request::is('serviceAccounts.manual-account-migration-one*') ? 'active' : '' }}">                   
+                   <i class="fas fa-user-plus nav-icon text-primary"></i><p>Add New Account
+                    <span class="right badge badge-danger">New</span>
+                   </p>                   
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('serviceAccounts.change-meter-manual') }}"
+                   class="nav-link {{ Request::is('serviceAccounts.change-meter-manual*') ? 'active' : '' }}">                   
+                   <i class="fas fa-random nav-icon text-primary"></i><p>Change Meter
+                    <span class="right badge badge-danger">New</span>
+                   </p>                   
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('serviceAccounts.relocation-manual') }}"
+                   class="nav-link {{ Request::is('serviceAccounts.relocation-manual*') ? 'active' : '' }}">                   
+                   <i class="fas fa-map-marked-alt nav-icon text-primary"></i><p>Relocation
+                    <span class="right badge badge-danger">New</span>
+                   </p>                   
+                </a>
+            </li>
         </ul>
     </li>
 
@@ -581,7 +604,8 @@ use Illuminate\Support\Facades\Auth;
             </li>
         </ul>
     </li>
-
+@endcanany
+@canany(['Super Admin', 'billing re-bill'])
     {{-- METER READING --}}
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
@@ -759,7 +783,7 @@ use Illuminate\Support\Facades\Auth;
         <i class="fas fa-chart-line nav-icon text-info"></i><p>Dashboard</p>
         </a>
     </li>
-    <li class="nav-item has-treeview">
+    {{-- <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-credit-card nav-icon text-info"></i>
             <p>
@@ -805,9 +829,9 @@ use Illuminate\Support\Facades\Auth;
                 </a>
             </li>
         </ul>
-    </li>
+    </li> --}}
 @endcanany
-@canany(['Super Admin', 'bapa adjust'])
+@canany(['Super Admin', 'bapa adjust', 'billing re-bill'])
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-receipt nav-icon text-info"></i>
@@ -840,15 +864,23 @@ use Illuminate\Support\Facades\Auth;
         </a>
     </li>
 @endcanany
-@canany(['Super Admin', 'teller create'])
+{{-- @canany(['Super Admin', 'teller create'])
     <li class="nav-item">
         <a href="{{ route('transactionIndices.or-maintenance') }}"
         class="nav-link {{ Request::is('transactionIndices.or-maintenance*') ? 'active' : '' }}">
         <i class="fas fa-circle nav-icon text-info"></i><p>OR Maintenance</p>
         </a>
     </li>
-@endcanany
+@endcanany --}}
 @canany(['Super Admin', 'teller create', 'teller approve'])
+    <li class="nav-item">
+        <a href="{{ route('paidBills.third-party-collection') }}"
+        class="nav-link {{ Request::is('paidBills.third-party-collection*') ? 'active' : '' }}">
+        <i class="fas fa-sign-out-alt nav-icon text-info"></i><p>Third-party Collection
+            <span class="right badge badge-danger">New</span>
+        </p>
+        </a>
+    </li>
     <li class="nav-item has-treeview">
         <a href="#" class="nav-link">
             <i class="fas fa-ban nav-icon text-info"></i>

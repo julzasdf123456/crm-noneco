@@ -8,6 +8,7 @@ use App\Models\BillingMeters;
 use App\Models\ServiceConnectionAccountTypes;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+ini_set('max_execution_time', 0);
 @endphp
 
 <style>
@@ -35,8 +36,8 @@ use Illuminate\Support\Facades\DB;
     }
 
     p {
-        margin: 0px;
-        padding: 0px;
+        margin: 1px !important;
+        padding: 1px !important;
     }
 }  
 
@@ -46,8 +47,8 @@ html, body {
 }
 
 p {
-    margin: 0px;
-    padding: 0px;
+    margin: 1px !important;
+    padding: 1px !important;
 }
 
 .left-indent {
@@ -130,39 +131,37 @@ p {
         $arrears = null;
     }
 @endphp
-<div class="print-area" style="padding-top: 5px;">
+<div class="print-area" style="padding-top: 8px;">
     <br>
     <br>
     <br>
-    <span style="margin-left: 55px;">{{ date('F Y', strtotime($item->ServicePeriod)) }}</span>
+    <span style="margin-left: 80px;">{{ date('F Y', strtotime($item->ServicePeriod)) }}</span>
     <span style="margin-left: 135px;">{{ date('F d, Y', strtotime($item->BillingDate)) }}</span>
     <span style="margin-left: 200px;">{{ $item->BillNumber }}</span><br>
     <br>
+    <div style="padding-top: 3px;">
+        <span style="padding-top: 10px !important;">{{ $account->OldAccountNo }}</span>
+        <span style="margin-left: 15px;">{{ $meters != null ? $meters->SerialNumber : '-' }}</span>
+        <span style="margin-left: 55px;">{{ $acctType != null ? $acctType->Alias : '-' }}</span>
+        <span style="margin-left: 15px;">{{ $item->Multiplier }}</span>
+        <span style="margin-left: 35px;">{{ date('m/d/Y', strtotime($item->DueDate)) }}</span>
+    </div>
     <br>
-    <span>{{ $account->OldAccountNo }}</span>
-    <span style="margin-left: 15px;">{{ $meters != null ? $meters->SerialNumber : '-' }}</span>
-    <span style="margin-left: 55px;">{{ $acctType != null ? $acctType->Alias : '-' }}</span>
-    <span style="margin-left: 15px;">{{ $item->Multiplier }}</span>
-    <span style="margin-left: 35px;">{{ date('m/d/Y', strtotime($item->DueDate)) }}</span>
+    <span style="padding-left: 35px; float: left;">{{ $account->ServiceAccountName }}</span>
+    <span style="padding-left: 260px; float: left;">{{ date('M d, Y', strtotime($item->ServiceDateFrom)) }}</span>
+    <span style="padding-left: 15px; float: left;">{{ date('M d, Y', strtotime($item->ServiceDateTo)) }}</span>
+    <span style="padding-left: 24px; float: left;">{{ $item->PresentKwh }}</span>
+    <span style="padding-left: 24px; float: left;">{{ $item->PreviousKwh }}</span>
+    <span style="padding-left: 35px; float: left;">{{ round(floatval($item->KwhUsed) * floatval($item->Multiplier), 2) }}</span>
+    <span style="padding-left: 35px; float: left;">{{ $item->KwhUsed }}</span>
     <br>
-    <br>
-    <span style="margin-left: 40px;">{{ $account->ServiceAccountName }}</span>
-    <span style="margin-left: 230px;">{{ date('M d, Y', strtotime($item->ServiceDateFrom)) }}</span>
-    <span style="margin-left: 10px;">{{ date('M d, Y', strtotime($item->ServiceDateTo)) }}</span>
-    <span style="margin-left: 15px;">{{ $item->PresentKwh }}</span>
-    <span style="margin-left: 15px;">{{ $item->PreviousKwh }}</span>
-    <span style="margin-left: 25px;">{{ $item->KwhUsed }}</span>
-    <span style="margin-left: 45px;">{{ round(floatval($item->KwhUsed) * floatval($item->Multiplier), 2) }}</span>
-    <br>
-
-    <span style="margin-left: 40px">{{ ServiceAccounts::getAddress($account) }}</span>
-    <br>
+    <span style="padding-left: 30px; float: left;">{{ ServiceAccounts::getAddress($account) }}</span>
     <br>
     <br>
     <br>
     <br>
     <br>
-    <div style="display: inline-table; width: 34%;">
+    <div style="display: inline-table; width: 37%;">
         <p style="text-align: right; margin-top: 5px;">{{ number_format($rate->GenerationSystemCharge, 4) ? number_format($rate->GenerationSystemCharge, 4) : $rate->GenerationSystemCharge }}</p>
         <p style="text-align: right; margin-top: 5px; opacity: 0;">0</p>
         <p style="text-align: right; margin-top: 5px; opacity: 0;">0</p>
@@ -183,16 +182,17 @@ p {
         <p style="text-align: right; opacity: 0;">0</p>
         <p style="text-align: right; opacity: 0;">0</p>
         <p style="text-align: right; opacity: 0;">0</p>
-        <p style="text-align: right; opacity: 0;">0</p>
+        <!-- <p style="text-align: right; opacity: 0;">0</p> -->
         <p style="text-align: right; ">{{ number_format($rate->GenerationVAT, 4) ? number_format($rate->GenerationVAT, 4) : $rate->GenerationVAT }}</p>
         <p style="text-align: right; margin-top: 5px; ">{{ number_format($rate->TransmissionVAT, 4) ? number_format($rate->TransmissionVAT, 4) : $rate->TransmissionVAT }}</p>
         <p style="text-align: right; margin-top: 5px; ">{{ number_format($rate->SystemLossVAT, 4) ? number_format($rate->SystemLossVAT, 4) : $rate->SystemLossVAT }}</p>
         <p style="text-align: right; margin-top: 5px; ">{{ number_format($rate->DistributionVAT, 4) ? number_format($rate->DistributionVAT, 4) : $rate->DistributionVAT }}</p>
-        <p style="margin-left: 70px; margin-top: 29px; ">{{ $account->ServiceAccountName }}</p>
-        <p style="margin-left: 55px; margin-top: 2px; ">{{ ServiceAccounts::getAddress($account) }}</p>
-        <p style="margin-left: 65px; margin-top: 2px; ">{{ $meters != null ? $meters->SerialNumber : $item->MeterNumber }}</p>
+        <br>
+        <p style="padding-left: 70px !important; margin-top: 29px; ">{{ $account->ServiceAccountName }}</p>
+        <p style="padding-left: 55px !important; margin-top: 2px; ">{{ ServiceAccounts::getAddress($account) }}</p>
+        <p style="padding-left: 65px !important; margin-top: 2px; ">{{ $meters != null ? $meters->SerialNumber : $item->MeterNumber }}</p>
     </div>    
-    <div style="display: inline-table; width: 10%;">
+    <div style="display: inline-table; width: 10%; padding-right: 20px;">
         <p style="text-align: right; margin-top: 5px;">{{ number_format($item->GenerationSystemCharge, 2) ? number_format($item->GenerationSystemCharge, 2) : $item->GenerationSystemCharge }}</p>
         <p style="text-align: right; margin-top: 5px;  opacity: 0;">0</p>
         <p style="text-align: right; margin-top: 5px; opacity: 0;">0</p>
@@ -213,14 +213,14 @@ p {
         <p style="text-align: right; opacity: 0;">0</p>
         <p style="text-align: right; opacity: 0;">0</p>
         <p style="text-align: right;  opacity: 0;">0</p>
-        <p style="text-align: right;  opacity: 0;">0</p>
-        <p style="text-align: right; ">{{ number_format($item->GenerationVAT, 2) ? number_format($item->GenerationVAT, 2) : $item->GenerationVAT }}</p>
+        <!-- <p style="text-align: right;  opacity: 0;">0</p> -->
+        <p style="text-align: right;">{{ number_format($item->GenerationVAT, 2) ? number_format($item->GenerationVAT, 2) : $item->GenerationVAT }}</p>
         <p style="text-align: right; margin-top: 5px; ">{{ number_format($item->TransmissionVAT, 2) ? number_format($item->TransmissionVAT, 2) : $item->TransmissionVAT }}</p>
         <p style="text-align: right; margin-top: 5px; ">{{ number_format($item->SystemLossVAT, 2) ? number_format($item->SystemLossVAT, 2) : $item->SystemLossVAT }}</p>
         <p style="text-align: right; margin-top: 5px; ">{{ number_format($item->DistributionVAT, 2) ? number_format($item->DistributionVAT, 2) : $item->DistributionVAT }}</p>
     </div>
 
-    <div style="display: inline-table; width: 33%;">
+    <div style="display: inline-table; width: 30%;">
         <p style="margin-left: 15px; margin-top: 5px; opacity: 0;">0</p>
         <p style="margin-left: 15px;  margin-top: 5px; opacity: 0;">0</p>
         <p style="margin-left: 15px; margin-top: 5px; opacity: 0;">0</p>
@@ -235,22 +235,23 @@ p {
         <p style="margin-left: 15px;  margin-top: 5px; opacity: 0;">0</p>
         <p style="margin-left: 15px;  margin-top: 5px; opacity: 0;">0</p>
         <p style="margin-left: 15px;  margin-top: 5px; opacity: 0;">0</p>  
-        <p style="margin-left: 15px;  margin-top: 5px; opacity: 0;">0</p>
+        <!-- <p style="margin-left: 15px;  margin-top: 5px; opacity: 0;">0</p> -->
         <p style="margin-left: 15px;  margin-top: 5px; opacity: 0;">0</p>   
-        <p style="margin-left: 20px; margin-top: 5px;">Other Generation Rate Adj. (Php/kWh)</p>
-        <p style="margin-left: 20px;">Other Transmission Cost Adj. (Php/kW)</p>
-        <p style="margin-left: 20px;">Other Transmission Cost Adj. (Php/kWh)</p>
-        <p style="margin-left: 20px; ">Other System Loss Cost Adj. (Php/kWh)</p>
-        <p style="margin-left: 20px;">Other Lifeline Rate Cost Adj. (Php/kWh)</p>
-        <p style="margin-left: 20px;">Sen. Cit. Discnt. Subsidy Adj. (Php/kWh)</p>
-        <p style="margin-left: 20px;">2% EWT</p>
-        <p style="text-align: right; margin-top: 28px;">{{ date('M d, Y', strtotime($item->DueDate)) }}</p>
-        <p style="margin-top: 30px; margin-left: 80px">{{ $account->OldAccountNo  }}</p>
-        <p style="margin-left: 80px; margin-top: 2px; ">{{ date('F Y', strtotime($item->ServicePeriod)) }}</p>
-        <p style="margin-left: 80px; margin-top: 2px; ">{{ date('M d, Y', strtotime($item->BillingDate)) }}</p>
+        <p style="margin-left: 20px; padding: 0px !important;">Other Generation Rate Adj. (Php/kWh)</p>
+        <p style="margin-left: 20px; padding: 0px !important;">Other Transmission Cost Adj. (Php/kW)</p>
+        <p style="margin-left: 20px; padding: 0px !important;">Other Transmission Cost Adj. (Php/kWh)</p>
+        <p style="margin-left: 20px; padding: 0px !important; ">Other System Loss Cost Adj. (Php/kWh)</p>
+        <p style="margin-left: 20px; padding: 0px !important;">Other Lifeline Rate Cost Adj. (Php/kWh)</p>
+        <p style="margin-left: 20px; padding: 0px !important;">Sen. Cit. Discnt. Subsidy Adj. (Php/kWh)</p>
+        <p style="margin-left: 20px; padding: 0px !important;">2% EWT</p>
+        <p style="text-align: right; margin-top: 5px !important;">{{ date('M d, Y', strtotime($item->DueDate)) }}</p>
+        <br>
+        <p style="margin-top: 30px !important; padding-left: 80px !important;">{{ $account->OldAccountNo  }}</p>
+        <p style="padding-left: 80px !important; margin-top: 2px; ">{{ date('F Y', strtotime($item->ServicePeriod)) }}</p>
+        <p style="padding-left: 80px !important; margin-top: 2px; ">{{ date('M d, Y', strtotime($item->BillingDate)) }}</p>
     </div>
 
-    <div style="display: inline-table; width: 10%;">
+    <div style="display: inline-table; width: 8%;">
         <p style="text-align: right; margin-top: 5px;">{{ number_format($rate->LifelineRate, 4) ? number_format($rate->LifelineRate, 4) : $rate->LifelineRate }}</p>
         <p style="text-align: right; margin-top: 5px; ">{{ number_format($rate->InterClassCrossSubsidyCharge, 4) ? number_format($rate->InterClassCrossSubsidyCharge, 4) : $rate->InterClassCrossSubsidyCharge }}</p>
         <p style="text-align: right; margin-top: 5px;">{{ number_format($rate->RealPropertyTax, 4) ? number_format($rate->RealPropertyTax, 4) : $rate->RealPropertyTax }}</p>
@@ -265,19 +266,19 @@ p {
         <p style="text-align: right; margin-top: 5px; ">{{ number_format($rate->MissionaryElectrificationREDCI, 4) ? number_format($rate->MissionaryElectrificationREDCI, 4) : $rate->MissionaryElectrificationREDCI }}</p>
         <p style="text-align: right; margin-top: 5px; ">{{ number_format($rate->FeedInTariffAllowance, 4) ? number_format($rate->FeedInTariffAllowance, 4) : $rate->FeedInTariffAllowance }}</p>
         <p style="text-align: right; margin-top: 5px; ">{{ number_format($rate->RFSC, 4) ? number_format($rate->RFSC, 4) : $rate->RFSC }}</p>
-        <p style="text-align: right; margin-top: 5px;  opacity: 0;">0</p>
-        <p style="text-align: right; margin-top: 5px; ">{{ number_format($rate->PPARefund, 4) ? number_format($rate->PPARefund, 4) : $rate->PPARefund }}</p>
-        <p style="text-align: right; margin-top: 5px; ">{{ number_format($rate->OtherGenerationRateAdjustment, 4) ? number_format($rate->OtherGenerationRateAdjustment, 4) : $rate->OtherGenerationRateAdjustment }}</p>
-        <p style="text-align: right;">{{ number_format($rate->OtherTransmissionCostAdjustmentKW, 4) ? number_format($rate->OtherTransmissionCostAdjustmentKW, 4) : $rate->OtherTransmissionCostAdjustmentKW }}</p>
-        <p style="text-align: right; ">{{ number_format($rate->OtherTransmissionCostAdjustmentKWH, 4) ? number_format($rate->OtherTransmissionCostAdjustmentKWH, 4) : $rate->OtherTransmissionCostAdjustmentKWH }}</p>
-        <p style="text-align: right; ">{{ number_format($rate->OtherSystemLossCostAdjustment, 4) ? number_format($rate->OtherSystemLossCostAdjustment, 4) : $rate->OtherSystemLossCostAdjustment }}</p>
-        <p style="text-align: right; ">{{ number_format($rate->OtherLifelineRateCostAdjustment, 4) ? number_format($rate->OtherLifelineRateCostAdjustment, 4) : $rate->OtherLifelineRateCostAdjustment }}</p>
-        <p style="text-align: right; ">{{ number_format($rate->SeniorCitizenDiscountAndSubsidyAdjustment, 4) ? number_format($rate->SeniorCitizenDiscountAndSubsidyAdjustment, 4) : $rate->SeniorCitizenDiscountAndSubsidyAdjustment }}</p>
+        <!-- <p style="text-align: right; margin-top: 5px;  opacity: 0;">0</p> -->
+        <p style="text-align: right;">{{ number_format($rate->PPARefund, 4) ? number_format($rate->PPARefund, 4) : $rate->PPARefund }}</p>
+        <p style="text-align: right;  padding: 0px !important;">{{ number_format($rate->OtherGenerationRateAdjustment, 4) ? number_format($rate->OtherGenerationRateAdjustment, 4) : $rate->OtherGenerationRateAdjustment }}</p>
+        <p style="text-align: right; padding: 0px !important;">{{ number_format($rate->OtherTransmissionCostAdjustmentKW, 4) ? number_format($rate->OtherTransmissionCostAdjustmentKW, 4) : $rate->OtherTransmissionCostAdjustmentKW }}</p>
+        <p style="text-align: right;  padding: 0px !important;">{{ number_format($rate->OtherTransmissionCostAdjustmentKWH, 4) ? number_format($rate->OtherTransmissionCostAdjustmentKWH, 4) : $rate->OtherTransmissionCostAdjustmentKWH }}</p>
+        <p style="text-align: right;  padding: 0px !important;">{{ number_format($rate->OtherSystemLossCostAdjustment, 4) ? number_format($rate->OtherSystemLossCostAdjustment, 4) : $rate->OtherSystemLossCostAdjustment }}</p>
+        <p style="text-align: right;  padding: 0px !important;">{{ number_format($rate->OtherLifelineRateCostAdjustment, 4) ? number_format($rate->OtherLifelineRateCostAdjustment, 4) : $rate->OtherLifelineRateCostAdjustment }}</p>
+        <p style="text-align: right;  padding: 0px !important;">{{ number_format($rate->SeniorCitizenDiscountAndSubsidyAdjustment, 4) ? number_format($rate->SeniorCitizenDiscountAndSubsidyAdjustment, 4) : $rate->SeniorCitizenDiscountAndSubsidyAdjustment }}</p>
         <p style="text-align: right; opacity: 0;">0</p>
         <p style="text-align: right; margin-top: 8px;  opacity: 0;">0</p>
     </div>
 
-    <div style="display: inline-table; width: 11%;">  
+    <div style="display: inline-table; width: 10%;">  
         <p style="text-align: right; margin-top: 5px;">{{ number_format($item->LifelineRate, 2) ? number_format($item->LifelineRate, 2) : $item->LifelineRate }}</p>
         <p style="text-align: right; margin-top: 5px; ">{{ number_format($item->InterClassCrossSubsidyCharge, 2) ? number_format($item->InterClassCrossSubsidyCharge, 2) : $item->InterClassCrossSubsidyCharge }}</p>
         <p style="text-align: right; margin-top: 5px;">{{ number_format($item->RealPropertyTax, 2) ? number_format($item->RealPropertyTax, 2) : $item->RealPropertyTax }}</p>
@@ -292,25 +293,27 @@ p {
         <p style="text-align: right; margin-top: 5px; ">{{ number_format($item->MissionaryElectrificationREDCI, 2) ? number_format($item->MissionaryElectrificationREDCI, 2) : $item->MissionaryElectrificationREDCI }}</p>
         <p style="text-align: right; margin-top: 5px; ">{{ number_format($item->FeedInTariffAllowance, 2) ? number_format($item->FeedInTariffAllowance, 2) : $item->FeedInTariffAllowance }}</p>
         <p style="text-align: right; margin-top: 5px; ">{{ number_format($item->RFSC, 2) ? number_format($item->RFSC, 2) : $item->RFSC }}</p>
-        <p style="text-align: right; margin-top: 5px;  opacity: 0;">0</p>
-        <p style="text-align: right; margin-top: 5px; ">{{ number_format($item->PPARefund, 2) ? number_format($item->PPARefund, 2) : $item->PPARefund }}</p>
-        <p style="text-align: right; margin-top: 5px; ">{{ number_format($item->OtherGenerationRateAdjustment, 2) ? number_format($item->OtherGenerationRateAdjustment, 2) : $item->OtherGenerationRateAdjustment }}</p>
-        <p style="text-align: right;">{{ number_format($item->OtherTransmissionCostAdjustmentKW, 2) ? number_format($item->OtherTransmissionCostAdjustmentKW, 2) : $item->OtherTransmissionCostAdjustmentKW }}</p>
-        <p style="text-align: right;">{{ number_format($item->OtherTransmissionCostAdjustmentKWH, 2) ? number_format($item->OtherTransmissionCostAdjustmentKWH, 2) : $item->OtherTransmissionCostAdjustmentKWH }}</p>
-        <p style="text-align: right; ">{{ number_format($item->OtherSystemLossCostAdjustment, 2) ? number_format($item->OtherSystemLossCostAdjustment, 2) : $item->OtherSystemLossCostAdjustment }}</p>
-        <p style="text-align: right; ">{{ number_format($item->OtherLifelineRateCostAdjustment, 2) ? number_format($item->OtherLifelineRateCostAdjustment, 2) : $item->OtherLifelineRateCostAdjustment }}</p>
-        <p style="text-align: right; ">{{ number_format($item->SeniorCitizenDiscountAndSubsidyAdjustment, 2) ? number_format($item->SeniorCitizenDiscountAndSubsidyAdjustment, 2) : $item->SeniorCitizenDiscountAndSubsidyAdjustment }}</p>
-        <p style="text-align: right; ">{{ number_format($item->Evat2Percent, 2) ? number_format($item->Evat2Percent, 2) : $item->Evat2Percent }}</p>
+        <!-- <p style="text-align: right; margin-top: 5px;  opacity: 0;">0</p> -->
+        <p style="text-align: right;">{{ number_format($item->PPARefund, 2) ? number_format($item->PPARefund, 2) : $item->PPARefund }}</p>
+        <p style="text-align: right;   padding: 0px !important;">{{ number_format($item->OtherGenerationRateAdjustment, 2) ? number_format($item->OtherGenerationRateAdjustment, 2) : $item->OtherGenerationRateAdjustment }}</p>
+        <p style="text-align: right;  padding: 0px !important;">{{ number_format($item->OtherTransmissionCostAdjustmentKW, 2) ? number_format($item->OtherTransmissionCostAdjustmentKW, 2) : $item->OtherTransmissionCostAdjustmentKW }}</p>
+        <p style="text-align: right;  padding: 0px !important;">{{ number_format($item->OtherTransmissionCostAdjustmentKWH, 2) ? number_format($item->OtherTransmissionCostAdjustmentKWH, 2) : $item->OtherTransmissionCostAdjustmentKWH }}</p>
+        <p style="text-align: right;  padding: 0px !important; ">{{ number_format($item->OtherSystemLossCostAdjustment, 2) ? number_format($item->OtherSystemLossCostAdjustment, 2) : $item->OtherSystemLossCostAdjustment }}</p>
+        <p style="text-align: right;  padding: 0px !important; ">{{ number_format($item->OtherLifelineRateCostAdjustment, 2) ? number_format($item->OtherLifelineRateCostAdjustment, 2) : $item->OtherLifelineRateCostAdjustment }}</p>
+        <p style="text-align: right;   padding: 0px !important;">{{ number_format($item->SeniorCitizenDiscountAndSubsidyAdjustment, 2) ? number_format($item->SeniorCitizenDiscountAndSubsidyAdjustment, 2) : $item->SeniorCitizenDiscountAndSubsidyAdjustment }}</p>
+        <p style="text-align: right;   padding: 0px !important;">{{ number_format($item->Evat2Percent, 2) ? number_format($item->Evat2Percent, 2) : $item->Evat2Percent }}</p>
         <p style="text-align: right; margin-top: 8px; ">{{ number_format($item->NetAmount, 2) ? number_format($item->NetAmount, 2) : $item->NetAmount }}</p>
-            
+
         @if (Bills::getAccountTypeByType($item->ConsumerType) == 'RESIDENTIAL')
             <p style="text-align: right; margin-top: 5px;  opacity: 0;">0</p>
-            <p style="text-align: right; margin-top: 5px; ">{{ number_format(floatval($item->NetAmount), 2)  }}</span>
-            <p style="text-align: right; margin-top: 15px; ">{{ number_format(floatval($item->NetAmount), 2)  }}</span>
+            <p style="text-align: right; margin-top: 5px">{{ number_format(floatval($item->NetAmount), 2)  }}</p>
+            <br>
+            <p style="text-align: right; margin-top: 15px; ">{{ number_format(floatval($item->NetAmount), 2)  }}</p>
         @else
             <p style="text-align: right; margin-top: 5px; ">{{ number_format(Bills::getFinalPenalty($item), 2) }}</p>
-            <p style="text-align: right; margin-top: 5px; ">{{ number_format(floatval(Bills::getFinalPenalty($item)) + floatval($item->NetAmount), 2)  }}</span>
-            <p style="text-align: right; margin-top: 15px; ">{{ number_format(floatval(Bills::getFinalPenalty($item)) + floatval($item->NetAmount), 2)  }}</span>
+            <p style="text-align: right; margin-top: 5px !important;">{{ number_format(floatval(Bills::getFinalPenalty($item)) + floatval($item->NetAmount), 2)  }}</p>
+            <br>
+            <p style="text-align: right; margin-top: 15px; ">{{ number_format(floatval(Bills::getFinalPenalty($item)) + floatval($item->NetAmount), 2)  }}</p>
         @endif
         
         @php

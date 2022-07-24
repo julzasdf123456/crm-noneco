@@ -1672,6 +1672,10 @@
         },
         {
             "name": "laravel/framework",
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> a9f97ebf5032fb49782486a3c817771437dfcb78
             "version": "v8.83.20",
             "source": {
                 "type": "git",
@@ -1682,6 +1686,21 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/framework/zipball/aa5908e83fccb18b135ca31aa0342cf4bd6909a8",
                 "reference": "aa5908e83fccb18b135ca31aa0342cf4bd6909a8",
+<<<<<<< HEAD
+=======
+=======
+            "version": "v8.83.19",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/framework.git",
+                "reference": "4264f2ee12330bdb1be050998f58ba7271236395"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/4264f2ee12330bdb1be050998f58ba7271236395",
+                "reference": "4264f2ee12330bdb1be050998f58ba7271236395",
+>>>>>>> c8cefea64704e5064876d789f487e04eab5aef67
+>>>>>>> a9f97ebf5032fb49782486a3c817771437dfcb78
                 "shasum": ""
             },
             "require": {
@@ -1841,7 +1860,15 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
+<<<<<<< HEAD
             "time": "2022-07-19T14:11:02+00:00"
+=======
+<<<<<<< HEAD
+            "time": "2022-07-19T14:11:02+00:00"
+=======
+            "time": "2022-07-13T13:23:09+00:00"
+>>>>>>> c8cefea64704e5064876d789f487e04eab5aef67
+>>>>>>> a9f97ebf5032fb49782486a3c817771437dfcb78
         },
         {
             "name": "laravel/serializable-closure",
@@ -3232,6 +3259,10 @@
         },
         {
             "name": "phpoffice/phpspreadsheet",
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> a9f97ebf5032fb49782486a3c817771437dfcb78
             "version": "1.24.1",
             "source": {
                 "type": "git",
@@ -3242,6 +3273,21 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/69991111e05fca3ff7398e1e7fca9ebed33efec6",
                 "reference": "69991111e05fca3ff7398e1e7fca9ebed33efec6",
+<<<<<<< HEAD
+=======
+=======
+            "version": "1.24.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PHPOffice/PhpSpreadsheet.git",
+                "reference": "ebe8745c92a7cac4514d040758393b5399633b83"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/ebe8745c92a7cac4514d040758393b5399633b83",
+                "reference": "ebe8745c92a7cac4514d040758393b5399633b83",
+>>>>>>> c8cefea64704e5064876d789f487e04eab5aef67
+>>>>>>> a9f97ebf5032fb49782486a3c817771437dfcb78
                 "shasum": ""
             },
             "require": {
@@ -3330,9 +3376,21 @@
             ],
             "support": {
                 "issues": "https://github.com/PHPOffice/PhpSpreadsheet/issues",
+<<<<<<< HEAD
                 "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.24.1"
             },
             "time": "2022-07-18T19:50:48+00:00"
+=======
+<<<<<<< HEAD
+                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.24.1"
+            },
+            "time": "2022-07-18T19:50:48+00:00"
+=======
+                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.24.0"
+            },
+            "time": "2022-07-09T13:49:09+00:00"
+>>>>>>> c8cefea64704e5064876d789f487e04eab5aef67
+>>>>>>> a9f97ebf5032fb49782486a3c817771437dfcb78
         },
         {
             "name": "phpoption/phpoption",
@@ -3766,6 +3824,7 @@
         },
         {
             "name": "psy/psysh",
+<<<<<<< HEAD
             "version": "v0.11.7",
             "source": {
                 "type": "git",
@@ -3776,6 +3835,31 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/bobthecow/psysh/zipball/77fc7270031fbc28f9a7bea31385da5c4855cb7a",
                 "reference": "77fc7270031fbc28f9a7bea31385da5c4855cb7a",
+=======
+<<<<<<< HEAD
+            "version": "v0.11.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bobthecow/psysh.git",
+                "reference": "3f5b5f8aaa979fbd0d1783173f4c82ad529fe621"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/3f5b5f8aaa979fbd0d1783173f4c82ad529fe621",
+                "reference": "3f5b5f8aaa979fbd0d1783173f4c82ad529fe621",
+=======
+            "version": "v0.11.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bobthecow/psysh.git",
+                "reference": "77fc7270031fbc28f9a7bea31385da5c4855cb7a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/77fc7270031fbc28f9a7bea31385da5c4855cb7a",
+                "reference": "77fc7270031fbc28f9a7bea31385da5c4855cb7a",
+>>>>>>> 84d0400a71dc597bcd548aa3c3262ec1595395a0
+>>>>>>> a9f97ebf5032fb49782486a3c817771437dfcb78
                 "shasum": ""
             },
             "require": {
@@ -3836,9 +3920,21 @@
             ],
             "support": {
                 "issues": "https://github.com/bobthecow/psysh/issues",
+<<<<<<< HEAD
                 "source": "https://github.com/bobthecow/psysh/tree/v0.11.7"
             },
             "time": "2022-07-07T13:49:11+00:00"
+=======
+<<<<<<< HEAD
+                "source": "https://github.com/bobthecow/psysh/tree/v0.11.6"
+            },
+            "time": "2022-07-03T16:40:23+00:00"
+=======
+                "source": "https://github.com/bobthecow/psysh/tree/v0.11.7"
+            },
+            "time": "2022-07-07T13:49:11+00:00"
+>>>>>>> 84d0400a71dc597bcd548aa3c3262ec1595395a0
+>>>>>>> a9f97ebf5032fb49782486a3c817771437dfcb78
         },
         {
             "name": "ralouphie/getallheaders",

@@ -449,7 +449,7 @@ $rate = Rates::where('ServicePeriod', $item->ServicePeriod)
                 <tr class="no-border-top-bottom">
                     <td class="no-border-top-bottom text-left left-indent">5% EVAT</td>
                     <td class="no-border-top-bottom text-right"></td>
-                    <td class="no-border-top-bottom text-right">{{ number_format($item->Evat5Percent, 2) }}</td>
+                    <td class="no-border-top-bottom text-right">{{ $item->Evat5Percent }}</td>
                 </tr>
                 <tr class="border-bottom-only">
                     <td class="border-bottom-only text-left left-indent">Senior Citizen Discount</td>
