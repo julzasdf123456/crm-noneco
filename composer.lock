@@ -1672,6 +1672,18 @@
         },
         {
             "name": "laravel/framework",
+<<<<<<< HEAD
+            "version": "v8.83.20",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/framework.git",
+                "reference": "aa5908e83fccb18b135ca31aa0342cf4bd6909a8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/aa5908e83fccb18b135ca31aa0342cf4bd6909a8",
+                "reference": "aa5908e83fccb18b135ca31aa0342cf4bd6909a8",
+=======
             "version": "v8.83.19",
             "source": {
                 "type": "git",
@@ -1682,6 +1694,7 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/framework/zipball/4264f2ee12330bdb1be050998f58ba7271236395",
                 "reference": "4264f2ee12330bdb1be050998f58ba7271236395",
+>>>>>>> c8cefea64704e5064876d789f487e04eab5aef67
                 "shasum": ""
             },
             "require": {
@@ -1841,7 +1854,11 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
+<<<<<<< HEAD
+            "time": "2022-07-19T14:11:02+00:00"
+=======
             "time": "2022-07-13T13:23:09+00:00"
+>>>>>>> c8cefea64704e5064876d789f487e04eab5aef67
         },
         {
             "name": "laravel/serializable-closure",
@@ -3232,6 +3249,18 @@
         },
         {
             "name": "phpoffice/phpspreadsheet",
+<<<<<<< HEAD
+            "version": "1.24.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PHPOffice/PhpSpreadsheet.git",
+                "reference": "69991111e05fca3ff7398e1e7fca9ebed33efec6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/69991111e05fca3ff7398e1e7fca9ebed33efec6",
+                "reference": "69991111e05fca3ff7398e1e7fca9ebed33efec6",
+=======
             "version": "1.24.0",
             "source": {
                 "type": "git",
@@ -3242,6 +3271,7 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/ebe8745c92a7cac4514d040758393b5399633b83",
                 "reference": "ebe8745c92a7cac4514d040758393b5399633b83",
+>>>>>>> c8cefea64704e5064876d789f487e04eab5aef67
                 "shasum": ""
             },
             "require": {
@@ -3330,9 +3360,15 @@
             ],
             "support": {
                 "issues": "https://github.com/PHPOffice/PhpSpreadsheet/issues",
+<<<<<<< HEAD
+                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.24.1"
+            },
+            "time": "2022-07-18T19:50:48+00:00"
+=======
                 "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.24.0"
             },
             "time": "2022-07-09T13:49:09+00:00"
+>>>>>>> c8cefea64704e5064876d789f487e04eab5aef67
         },
         {
             "name": "phpoption/phpoption",
@@ -6950,16 +6986,16 @@
         },
         {
             "name": "fakerphp/faker",
-            "version": "v1.19.0",
+            "version": "v1.20.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/FakerPHP/Faker.git",
-                "reference": "d7f08a622b3346766325488aa32ddc93ccdecc75"
+                "reference": "37f751c67a5372d4e26353bd9384bc03744ec77b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FakerPHP/Faker/zipball/d7f08a622b3346766325488aa32ddc93ccdecc75",
-                "reference": "d7f08a622b3346766325488aa32ddc93ccdecc75",
+                "url": "https://api.github.com/repos/FakerPHP/Faker/zipball/37f751c67a5372d4e26353bd9384bc03744ec77b",
+                "reference": "37f751c67a5372d4e26353bd9384bc03744ec77b",
                 "shasum": ""
             },
             "require": {
@@ -6986,7 +7022,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "v1.19-dev"
+                    "dev-main": "v1.20-dev"
                 }
             },
             "autoload": {
@@ -7011,9 +7047,9 @@
             ],
             "support": {
                 "issues": "https://github.com/FakerPHP/Faker/issues",
-                "source": "https://github.com/FakerPHP/Faker/tree/v1.19.0"
+                "source": "https://github.com/FakerPHP/Faker/tree/v1.20.0"
             },
-            "time": "2022-02-02T17:38:57+00:00"
+            "time": "2022-07-20T13:12:54+00:00"
         },
         {
             "name": "filp/whoops",
