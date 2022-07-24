@@ -111,3 +111,5 @@ You can also check out our other paid products on [CodeCanyon](https://codecanyo
     - Manual Change Meter
 - Tellering & Cashiering
     - Third party collection *
+    - OR Re-Printing
+    - Group Billing Payments

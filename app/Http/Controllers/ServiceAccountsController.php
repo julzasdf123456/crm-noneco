@@ -64,42 +64,74 @@ class ServiceAccountsController extends AppBaseController
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                        ->select('Billing_ServiceAccounts.id', 
+                            'Billing_ServiceAccounts.ServiceAccountName',
+                            'Billing_ServiceAccounts.Purok',
+                            'Billing_ServiceAccounts.OldAccountNo', 
+                            'Billing_ServiceAccounts.AccountCount',  
+                            'Billing_ServiceAccounts.AccountStatus',
+                            DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),   
+                            'CRM_Towns.Town', 
+                            'CRM_Barangays.Barangay')
                         ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
-                        ->paginate(15);
+                        ->paginate(18);
         } elseif ($request['params'] == null && $request['oldaccount'] != null) {
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                        ->select('Billing_ServiceAccounts.id', 
+                            'Billing_ServiceAccounts.ServiceAccountName',
+                            'Billing_ServiceAccounts.Purok',
+                            'Billing_ServiceAccounts.OldAccountNo',   
+                            'Billing_ServiceAccounts.AccountCount',  
+                            'Billing_ServiceAccounts.AccountStatus',
+                            DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                            'CRM_Towns.Town', 
+                            'CRM_Barangays.Barangay')
                         // ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
                         // ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
                         // ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
                         ->where('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldaccount'] . '%')
                         ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
-                        ->paginate(15);            
+                        ->paginate(18);            
         } elseif ($request['params'] != null && $request['oldaccount'] == null) {
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                        ->select('Billing_ServiceAccounts.id', 
+                            'Billing_ServiceAccounts.ServiceAccountName',
+                            'Billing_ServiceAccounts.Purok',
+                            'Billing_ServiceAccounts.OldAccountNo',   
+                            'Billing_ServiceAccounts.AccountCount',  
+                            'Billing_ServiceAccounts.AccountStatus',
+                            DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                            'CRM_Towns.Town', 
+                            'CRM_Barangays.Barangay')
                         ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
                         // ->where('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldaccount'] . '%')
                         ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
-                        ->paginate(15);            
+                        ->paginate(18);            
         } else {
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
+                        ->select('Billing_ServiceAccounts.id', 
+                            'Billing_ServiceAccounts.ServiceAccountName',
+                            'Billing_ServiceAccounts.Purok',
+                            'Billing_ServiceAccounts.OldAccountNo',   
+                            'Billing_ServiceAccounts.AccountCount',  
+                            'Billing_ServiceAccounts.AccountStatus',
+                            DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                            'CRM_Towns.Town', 
+                            'CRM_Barangays.Barangay')
                         ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldaccount'] . '%')
                         ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
-                        ->paginate(15);
+                        ->paginate(18);
         }  
 
         return view('service_accounts.index', ['serviceAccounts' => $serviceAccounts]);
@@ -1713,7 +1745,14 @@ class ServiceAccountsController extends AppBaseController
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay',
+                        ->select('Billing_ServiceAccounts.id', 
+                            'Billing_ServiceAccounts.ServiceAccountName',
+                            'Billing_ServiceAccounts.Purok',
+                            'Billing_ServiceAccounts.OldAccountNo',   
+                            'Billing_ServiceAccounts.AccountCount',  
+                            'CRM_Towns.Town', 
+                            'CRM_Barangays.Barangay',
+                            'Billing_ServiceAccounts.AccountStatus',
                             DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber")
                         )
                         ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
@@ -1722,7 +1761,14 @@ class ServiceAccountsController extends AppBaseController
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay',
+                        ->select('Billing_ServiceAccounts.id', 
+                            'Billing_ServiceAccounts.ServiceAccountName',
+                            'Billing_ServiceAccounts.Purok',
+                            'Billing_ServiceAccounts.OldAccountNo',   
+                            'Billing_ServiceAccounts.AccountCount',  
+                            'CRM_Towns.Town', 
+                            'CRM_Barangays.Barangay',
+                            'Billing_ServiceAccounts.AccountStatus',
                             DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber")
                         )
                         // ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
@@ -1735,7 +1781,14 @@ class ServiceAccountsController extends AppBaseController
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay',
+                        ->select('Billing_ServiceAccounts.id', 
+                            'Billing_ServiceAccounts.ServiceAccountName',
+                            'Billing_ServiceAccounts.Purok',
+                            'Billing_ServiceAccounts.OldAccountNo',   
+                            'Billing_ServiceAccounts.AccountCount',  
+                            'CRM_Towns.Town', 
+                            'CRM_Barangays.Barangay',
+                            'Billing_ServiceAccounts.AccountStatus',
                             DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber")
                         )
                         ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
@@ -1749,7 +1802,14 @@ class ServiceAccountsController extends AppBaseController
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay',
+                        ->select('Billing_ServiceAccounts.id', 
+                            'Billing_ServiceAccounts.ServiceAccountName',
+                            'Billing_ServiceAccounts.Purok',
+                            'Billing_ServiceAccounts.OldAccountNo',   
+                            'Billing_ServiceAccounts.AccountCount',  
+                            'CRM_Towns.Town', 
+                            'CRM_Barangays.Barangay',
+                            'Billing_ServiceAccounts.AccountStatus',
                             DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber")
                         )
                         ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')

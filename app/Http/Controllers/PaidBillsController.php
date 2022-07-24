@@ -1189,7 +1189,7 @@ class PaidBillsController extends AppBaseController
             ->leftJoin('Billing_ServiceAccounts', 'Billing_ServiceAccounts.id', '=', 'Billing_Bills.AccountNumber')
             ->whereRaw("Billing_Bills.ServicePeriod = '" . $period . "'")
             ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
-            ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod = '" . $period ."')")
+            ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod = '" . $period ."' AND Status IS NULL)")
             ->whereRaw("Billing_Bills.id NOT IN (SELECT BillId FROM Cashier_BAPAAdjustmentDetails WHERE BillId IS NOT NULL)")
             ->select('Billing_ServiceAccounts.id AS AccountNumber',
                 'Billing_ServiceAccounts.ServiceAccountName',
