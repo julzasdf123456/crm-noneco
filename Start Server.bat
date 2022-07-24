@@ -1,1 +1,1 @@
-php artisan serve --host 192.168.100.80
+php artisan serve --host 192.168.100.60
