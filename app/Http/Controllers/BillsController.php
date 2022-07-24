@@ -1453,7 +1453,7 @@ class BillsController extends AppBaseController
             ->where('Billing_Bills.ServicePeriod', $period)
             ->where('Billing_ServiceAccounts.Town', $town)
             ->where('Billing_ServiceAccounts.AreaCode', $route)
-            ->where('Billing_Bills.UserId', Auth::id())
+            ->whereRaw("Billing_Bills.UserId='" . Auth::id() ."'")
             ->where('Billing_Bills.BillingDate', $day)
             ->select('Billing_Bills.*',                
                 'Billing_ServiceAccounts.ServiceAccountName',
@@ -2135,5 +2135,28 @@ class BillsController extends AppBaseController
                 </tr>";
 
         return response()->json($output, 200);
+    }
+
+    public function changeBapaDueDate(Request $request) {
+        $period = $request['Period'];
+        $bapaName = $request['BAPAName'];
+        $newDueDate = $request['NewDueDate'];
+        $route = $request['Route'];
+
+        if ($route == 'All') {
+            $bills = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->whereRaw("Billing_Bills.ServicePeriod='" . $period . "' AND Billing_ServiceAccounts.OrganizationParentAccount='" . $bapaName . "'")
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "' AND AccountNumber=Billing_Bills.AccountNumber AND Status IS NULL)")
+                ->update(['Billing_Bills.DueDate' => $newDueDate]);
+        } else {
+            $bills = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->whereRaw("Billing_Bills.ServicePeriod='" . $period . "' AND Billing_ServiceAccounts.OrganizationParentAccount='" . $bapaName . "' AND Billing_ServiceAccounts.AreaCode='" . $route . "'")
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "' AND AccountNumber=Billing_Bills.AccountNumber AND Status IS NULL)")
+                ->update(['Billing_Bills.DueDate' => $newDueDate]);
+        }
+
+        return response()->json('ok', 200);
     }
 }

@@ -33,6 +33,7 @@ use App\Models\TransactionIndex;
 use App\Models\ArrearsLedgerDistribution;
 use App\Models\DisconnectionHistory;
 use App\Models\Tickets;
+use App\Models\ChangeMeterLogs;
 use App\Models\PrePaymentBalance;
 use App\Models\PrePaymentTransHistory;
 use App\Models\AccountLocationHistory;
@@ -58,20 +59,19 @@ class ServiceAccountsController extends AppBaseController
      *
      * @return Response
      */
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
         if ($request['params'] == null && $request['oldaccount'] == null) {
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.Purok', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
+                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
                         ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
                         ->paginate(15);
         } elseif ($request['params'] == null && $request['oldaccount'] != null) {
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.Purok', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
+                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
                         // ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
                         // ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
                         // ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
@@ -82,7 +82,7 @@ class ServiceAccountsController extends AppBaseController
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.Purok', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
+                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
                         ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
@@ -93,7 +93,7 @@ class ServiceAccountsController extends AppBaseController
             $serviceAccounts = DB::table('Billing_ServiceAccounts')
                         ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
                         ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-                        ->select('Billing_ServiceAccounts.ServiceAccountName', 'Billing_ServiceAccounts.id', 'Billing_ServiceAccounts.Purok', 'Billing_ServiceAccounts.OldAccountNo', 'CRM_Towns.Town', 'CRM_Barangays.Barangay', 'Billing_ServiceAccounts.AccountCount')
+                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay')
                         ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
                         ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
@@ -925,6 +925,7 @@ class ServiceAccountsController extends AppBaseController
                     'CRM_Barangays.Barangay')
             ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
             ->orderBy('Billing_ServiceAccounts.AreaCode')
+            ->orderBy('Billing_ServiceAccounts.OldAccountNo')
             ->get();
 
         $routes = DB::table('Billing_ServiceAccounts')
@@ -1084,13 +1085,18 @@ class ServiceAccountsController extends AppBaseController
             ->select('Billing_Readings.ServicePeriod',
                 'Billing_ServiceAccounts.id as AccountNumber',
                 'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.OldAccountNo',
                 'Billing_Readings.ReadingTimestamp',
                 'Billing_Readings.KwhUsed',
                 'Billing_ServiceAccounts.AccountStatus',
+                DB::raw("(SELECT id FROM Billing_Bills WHERE ServicePeriod='" . $period . "' AND AccountNumber=Billing_ServiceAccounts.id) AS BillId"),
                 DB::raw("(SELECT NetAmount FROM Billing_Bills WHERE ServicePeriod='" . $period . "' AND AccountNumber=Billing_ServiceAccounts.id) AS NetAmount"),
-                DB::raw("(SELECT BillNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "' AND AccountNumber=Billing_ServiceAccounts.id) AS BillNumber"))
+                DB::raw("(SELECT BillNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "' AND AccountNumber=Billing_ServiceAccounts.id) AS BillNumber"),
+                DB::raw("(SELECT DueDate FROM Billing_Bills WHERE ServicePeriod='" . $period . "' AND AccountNumber=Billing_ServiceAccounts.id) AS DueDate"))
             ->where('Billing_Readings.ServicePeriod', $period)
             ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
+            ->orderBy('Billing_ServiceAccounts.AreaCode')
+            ->orderBy('Billing_ServiceAccounts.OldAccountNo')
             ->get();
 
         return view('/service_accounts/bapa_view_readings', [
@@ -1570,5 +1576,307 @@ class ServiceAccountsController extends AppBaseController
             ->update(['OrganizationParentAccount' => $newBapaName]);
 
         return response()->json($newBapaName, 200);
+    }
+
+    public function manualAccountMigrationOne() {
+        $towns = Towns::orderBy('id')->pluck('Town', 'id');
+        $accountTypes = ServiceConnectionAccountTypes::all();
+        $meterReaders = User::role('Meter Reader Inhouse')->get();
+
+        return view('/service_accounts/manual_account_migration_one', [
+            'town' => $towns,
+            'accountTypes' => $accountTypes,
+            'meterReaders' => $meterReaders
+        ]);
+    }
+
+    public function validateOlAccountNo(Request $request) {
+        $oldAcctNo = $request['OldAccountNo'];
+
+        $account = ServiceAccounts::where('OldAccountNo', $oldAcctNo)->first();
+
+        if ($account != null) {
+            return response()->json('duplicate', 200);
+        } else {
+            return response()->json('ok', 200);
+        }
+    }
+
+    public function storeManual(CreateServiceAccountsRequest $request) {
+        $input = $request->all();
+        $input['id'] = $input['Town'] . '-' . IDGenerator::generateID();
+        $input['ServiceAccountName'] = strtoupper($input['ServiceAccountName']);
+        $serviceAccounts = $this->serviceAccountsRepository->create($input);
+        Flash::success('Service Accounts saved successfully.');
+
+        return redirect(route('serviceAccounts.manual-account-migration-two', [$serviceAccounts->id]));
+    }
+
+    public function manualAccountMigrationTwo($id) {
+        $serviceAccount = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_ServiceAccounts.Purok as Sitio',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.MeterDetailsId')
+            ->where('Billing_ServiceAccounts.id', $id)
+            ->first();
+
+        return view('/service_accounts/manual_account_migration_two', [
+            'serviceAccount' => $serviceAccount
+        ]);
+    }
+
+    public function storeMetersManual(Request $request) {
+        $input = $request->all();
+        $input['id'] = IDGenerator::generateIDandRandString();
+        $sa = ServiceAccounts::find($input['ServiceAccountId']);
+
+        $billingMeters = BillingMeters::create($input);
+
+        if ($sa != null) {
+            $sa->Multiplier = $billingMeters->Multiplier;
+            $sa->save();
+        }
+
+        return redirect(route('serviceAccounts.manual-account-migration-three', [$sa->id]));
+    }
+
+    public function manualAccountMigrationThree($id) {
+        $serviceAccount = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_ServiceAccounts.Purok as Sitio',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.MeterDetailsId')
+            ->where('Billing_ServiceAccounts.id', $id)
+            ->first();
+
+        $meters = BillingMeters::where('ServiceAccountId', $id)
+            ->orderByDesc('created_at')
+            ->first();
+
+        $bapa = DB::table('Billing_ServiceAccounts')
+            ->select('OrganizationParentAccount')
+            ->groupBy('OrganizationParentAccount')
+            ->orderBy('OrganizationParentAccount')
+            ->get();
+
+        return view('/service_accounts/manual_account_migration_three', [
+            'serviceAccount' => $serviceAccount,
+            'meters' => $meters,
+            'bapa' => $bapa,
+        ]);
+    }
+
+    public function storeTransformerManual(Request $request) {
+        $input = $request->all();
+        $input['id'] = IDGenerator::generateRandString(30);
+        $billingTransformers = BillingTransformers::create($input);
+
+        // UPDATE SERVICE ACCOUNT
+        $serviceAccount = ServiceAccounts::find($request['ServiceAccountId']);
+        $serviceAccount->Coreloss = $request['Coreloss'];
+        $serviceAccount->UserId = Auth::id();
+        $serviceAccount->Main = $request['Main'];
+        $serviceAccount->Organization = $request['BAPA'];
+        $serviceAccount->OrganizationParentAccount = $request['OrganizationParentAccount'];
+        $serviceAccount->TransformerDetailsId = $input['id'];
+        $serviceAccount->Locked = 'Yes';
+        $serviceAccount->Evat5Percent = $request['Evat5Percent'];
+        $serviceAccount->Ewt2Percent = $request['Ewt2Percent'];
+        $serviceAccount->save();
+
+        Flash::success('Account migrated successfully.');
+
+        return redirect(route('serviceAccounts.show', [$serviceAccount->id]));
+    }
+
+    public function changeMeterManual(Request $request) {
+        if ($request['params'] == null && $request['oldaccount'] == null) {
+            $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay',
+                            DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber")
+                        )
+                        ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                        ->paginate(18);
+        } elseif ($request['params'] == null && $request['oldaccount'] != null) {
+            $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay',
+                            DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber")
+                        )
+                        // ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                        // ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                        // ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
+                        ->where('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldaccount'] . '%')
+                        ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                        ->paginate(18);            
+        } elseif ($request['params'] != null && $request['oldaccount'] == null) {
+            $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay',
+                            DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber")
+                        )
+                        ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhereRaw("Billing_ServiceAccounts.id IN (SELECT ServiceAccountId FROM Billing_Meters WHERE SerialNumber LIKE '%" . $request['params'] . "%')")
+                        // ->where('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldaccount'] . '%')
+                        ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                        ->paginate(18);            
+        } else {
+            $serviceAccounts = DB::table('Billing_ServiceAccounts')
+                        ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                        ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                        ->select('Billing_ServiceAccounts.*', 'CRM_Towns.Town', 'CRM_Barangays.Barangay',
+                            DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber")
+                        )
+                        ->where('Billing_ServiceAccounts.ServiceAccountName', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.id', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['params'] . '%')
+                        ->orWhere('Billing_ServiceAccounts.OldAccountNo', 'LIKE', '%' . $request['oldaccount'] . '%')
+                        ->orWhereRaw("Billing_ServiceAccounts.id IN (SELECT ServiceAccountId FROM Billing_Meters WHERE SerialNumber LIKE '%" . $request['params'] . "%')")
+                        ->orderBy('Billing_ServiceAccounts.ServiceAccountName')
+                        ->paginate(18);
+        }  
+
+        return view('/service_accounts/change_meter_manual', [
+            'serviceAccounts' => $serviceAccounts
+        ]);
+    }
+
+    public function changeMeterManualConsole($id) {
+        $serviceAccount = DB::table('Billing_ServiceAccounts')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->select('Billing_ServiceAccounts.id',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'CRM_Towns.Town',
+                    'CRM_Barangays.Barangay',
+                    'Billing_ServiceAccounts.Purok as Sitio',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.ServiceConnectionId',
+                    'Billing_ServiceAccounts.MeterDetailsId')
+            ->where('Billing_ServiceAccounts.id', $id)
+            ->first();
+
+        $activeMeter = BillingMeters::where('ServiceAccountId', $id)
+            ->orderByDesc('created_at')
+            ->first();
+
+        return view('/service_accounts/change_meter_manual_console', [
+            'serviceAccount' => $serviceAccount,
+            'activeMeter' => $activeMeter
+        ]);
+    }
+
+    public function storeChangeMeterManual(Request $request) {
+        $input = $request->all();
+        $input['id'] = IDGenerator::generateIDandRandString();
+        $sa = ServiceAccounts::find($input['ServiceAccountId']);
+
+        // UPDATE PREV METER
+        $activeMeter = BillingMeters::where('ServiceAccountId', $sa->id)
+            ->orderByDesc('created_at')
+            ->first();
+        if ($activeMeter != null) {
+            $activeMeter->LatestReading = $input['PullOutReading'];
+            $activeMeter->LatestReadingDate = $input['ConnectionDate'] != null ? $input['ConnectionDate'] : date('Y-m-d');
+            $activeMeter->save();
+
+                // COMPUTE AVERAGING
+            // ------------------------------------
+            // 1. GET LATEST BILL
+            $latestBill = Bills::where('AccountNumber', $sa->id)
+                ->orderByDesc('ServicePeriod')
+                ->first();
+
+            if ($latestBill != null) {
+                // ------------------------------------
+                // 2. AVERAGE LATEST BILLS
+                $latestBills = Bills::where('AccountNumber', $sa->id)
+                ->orderByDesc('ServicePeriod')
+                ->limit(3)
+                ->get();
+
+                $averageKwh = 0;
+                foreach($latestBills as $item) {
+                    $averageKwh += floatval($item->KwhUsed);
+                }
+                $averageKwh = $averageKwh/count($latestBills);
+                
+                // ------------------------------------
+                // 3. COMPUTE DAYS INCURED
+                $lastReadingDate = strtotime($latestBill->BillingDate);
+                $now = $input['ConnectionDate'] != null ? strtotime($input['ConnectionDate']) : date('Y-m-d');
+                $daysIncured = $now - $lastReadingDate;
+                $daysIncured = round($daysIncured / (60 * 60 * 24));
+
+                // ------------------------------------
+                // 4. GET DAILY AVERAGE
+                $averageDaily = ($averageKwh/30) * $daysIncured;
+
+                // ------------------------------------
+                // 5. CREATE CHANGE METER LOGS
+                $changeMeterLogs = new ChangeMeterLogs;
+                $changeMeterLogs->id = IDGenerator::generateIDandRandString();
+                $changeMeterLogs->AccountNumber = $sa->id;
+                $changeMeterLogs->OldMeterSerial = $activeMeter->SerialNumber;
+                $changeMeterLogs->NewMeterSerial = $request['SerialNumber'];
+                $changeMeterLogs->PullOutReading = $input['PullOutReading']; 
+                $changeMeterLogs->NewMeterStartKwh = $input['InitialReading'];
+                $changeMeterLogs->AdditionalKwhForNextBilling = round($averageDaily, 2);
+                $changeMeterLogs->ServicePeriod = date('Y-m-01', strtotime($latestBill->ServicePeriod . ' +1 month')); 
+                $changeMeterLogs->save(); 
+            } else {
+                $svPeriod = date('Y-m-01');
+
+                $changeMeterLogs = new ChangeMeterLogs;
+                $changeMeterLogs->id = IDGenerator::generateIDandRandString();
+                $changeMeterLogs->AccountNumber = $sa->id;
+                $changeMeterLogs->OldMeterSerial = $activeMeter->SerialNumber;
+                $changeMeterLogs->NewMeterSerial = $request['SerialNumber'];
+                $changeMeterLogs->PullOutReading = $input['PullOutReading']; 
+                $changeMeterLogs->NewMeterStartKwh = $input['InitialReading'];
+                $changeMeterLogs->AdditionalKwhForNextBilling = '0';
+                $changeMeterLogs->ServicePeriod = $svPeriod; 
+                $changeMeterLogs->save(); 
+            }             
+        }    
+
+        // SAVE NEW METER
+        $billingMeters = BillingMeters::create($input);
+
+        // UPDATE MULTIPLIER
+        if ($sa != null) {
+            $sa->Multiplier = $billingMeters->Multiplier;
+            $sa->save();
+        }
+
+        return redirect(route('serviceAccounts.show', [$sa->id]));
     }
 }
