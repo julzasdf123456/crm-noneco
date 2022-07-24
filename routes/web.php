@@ -436,7 +436,7 @@ Route::get('/readings/print-billed-unbilled-bapa/{type}/{bapaName}/{period}/{tow
 Route::get('/readings/efficiency-report', [App\Http\Controllers\ReadingsController::class, 'efficiencyReport'])->name('readings.efficiency-report');
 Route::get('/readings/print-bapa-reading-list', [App\Http\Controllers\ReadingsController::class, 'printBapaReadingList'])->name('readings.print-bapa-reading-list');
 Route::get('/readings/search-print-bapa-reading-list', [App\Http\Controllers\ReadingsController::class, 'searchPrintBapaReadingList'])->name('readings.search-print-bapa-reading-list');
-Route::get('/readings/print-bapa-reading-list-to-paper/{bapaName}', [App\Http\Controllers\ReadingsController::class, 'printBapaReadingListToPaper'])->name('readings.print-bapa-reading-list-to-paper');
+Route::get('/readings/print-bapa-reading-list-to-paper/{bapaName}/{period}', [App\Http\Controllers\ReadingsController::class, 'printBapaReadingListToPaper'])->name('readings.print-bapa-reading-list-to-paper');
 Route::resource('readings', App\Http\Controllers\ReadingsController::class);
 
 Route::get('/bills/unbilled-readings', [App\Http\Controllers\BillsController::class, 'unbilledReadings'])->name('bills.unbilled-readings');
@@ -571,6 +571,7 @@ Route::get('/paid_bills/upload-third-party-collection', [App\Http\Controllers\Pa
 Route::post('/paid_bills/validate-tpc-upload', [App\Http\Controllers\PaidBillsController::class, 'validateTpcUpload'])->name('paidBills.validate-tpc-upload');
 Route::get('/paid_bills/tcp-upload-validator/{seriesNo}', [App\Http\Controllers\PaidBillsController::class, 'tcpUploadValidator'])->name('paidBills.tcp-upload-validator');
 Route::get('/paid_bills/deposit-double-payments/{seriesNo}', [App\Http\Controllers\PaidBillsController::class, 'depositDoublePayments'])->name('paidBills.deposit-double-payments');
+Route::get('/paid_bills/post-payments/{seriesNo}', [App\Http\Controllers\PaidBillsController::class, 'postPayments'])->name('paidBills.post-payments');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);
 
 Route::get('/disconnection_histories/generate-turn-off-list', [App\Http\Controllers\DisconnectionHistoryController::class, 'generateTurnOffList'])->name('disconnectionHistories.generate-turn-off-list');

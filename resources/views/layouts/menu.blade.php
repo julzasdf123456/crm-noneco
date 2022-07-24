@@ -951,7 +951,7 @@ use Illuminate\Support\Facades\Auth;
         </ul>
     </li>
 @endcanany
-@canany(['Super Admin', 'teller create'])
+{{-- @canany(['Super Admin', 'teller create'])
     <li class="nav-header">                
         Others
     </li>
@@ -961,7 +961,7 @@ use Illuminate\Support\Facades\Auth;
            <i class="fas fa-piggy-bank nav-icon text-info"></i><p>Pre-Payments/Deposits</p>
         </a>
     </li>
-@endcanany
+@endcanany --}}
 @canany(['Super Admin', 'teller create', 'teller approve'])
     <li class="nav-header">                
         Settings
