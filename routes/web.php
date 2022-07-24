@@ -235,6 +235,7 @@ Route::get('/service_accounts/change-meter-manual-console/{id}', [App\Http\Contr
 Route::post('/service_accounts/store-change-meter-manual', [App\Http\Controllers\ServiceAccountsController::class, 'storeChangeMeterManual'])->name('serviceAccounts.store-change-meter-manual');
 Route::get('/service_accounts/relocation-manual', [App\Http\Controllers\ServiceAccountsController::class, 'relocationManual'])->name('serviceAccounts.relocation-manual');
 Route::get('/service_accounts/relocation-form-manual/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'relocationFormManual'])->name('serviceAccounts.relocation-form-manual');
+Route::get('/service_accounts/print-group-bills-list/{period}/{groupId}', [App\Http\Controllers\ServiceAccountsController::class, 'printGroupBillsList'])->name('serviceAccounts.print-group-bills-list');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 
@@ -491,6 +492,8 @@ Route::get('/bills/mark-as-paid', [App\Http\Controllers\BillsController::class, 
 Route::get('/bills/dashboard', [App\Http\Controllers\BillsController::class, 'dashboard'])->name('bills.dashboard');
 Route::get('/bills/dashboard-reading-monitor', [App\Http\Controllers\BillsController::class, 'dashboardReadingMonitor'])->name('bills.dashboard-reading-monitor');
 Route::get('/bills/change-bapa-duedate', [App\Http\Controllers\BillsController::class, 'changeBapaDueDate'])->name('bills.change-bapa-duedate');
+Route::get('/bills/print-bulk-bill-old-format-group/{period}/{groupId}', [App\Http\Controllers\BillsController::class,  'printBulkBillOldFormatGroup'])->name('bills.print-bulk-bill-old-format-group');
+Route::get('/bills/print-bulk-bill-new-format-group/{period}/{groupId}', [App\Http\Controllers\BillsController::class,  'printBulkBillNewFormatGroup'])->name('bills.print-bulk-bill-new-format-group');
 Route::resource('bills', App\Http\Controllers\BillsController::class);
 
 

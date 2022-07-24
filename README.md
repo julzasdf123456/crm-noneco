@@ -110,6 +110,7 @@ You can also check out our other paid products on [CodeCanyon](https://codecanyo
     - Manual Adding of Accounts
     - Manual Change Meter
     - Manual Relocation
+    - Group Bill Printing (List, New Bill, Old Bill)
 - Tellering & Cashiering
     - Third party collection *
     - OR Re-Printing

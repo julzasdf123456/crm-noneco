@@ -1605,6 +1605,52 @@ class ServiceAccountsController extends AppBaseController
         ]);
     }
 
+    public function printGroupBillsList($period, $groupId) {
+        $readingReport = DB::table('Billing_Readings')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Readings.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Readings.ServicePeriod', $period)
+            ->whereRaw("Billing_ServiceAccounts.MemberConsumerId='" . $groupId . "'")
+            ->select('Billing_Readings.*',
+                'Billing_ServiceAccounts.id AS AccountId',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.SequenceCode',
+                'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.Multiplier',
+                DB::raw("(SELECT TOP 1 ReadingTimestamp FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReadingTimestamp"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "' ORDER BY ServicePeriod DESC) AS PrevReading"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS CurrentKwh"),
+                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . date('Y-m-01', strtotime($period . ' -1 month')) . "') AS PrevKwh"),
+                DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterNumber"),
+                DB::raw("(SELECT TOP 1 ORNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS ORNumber"),
+                DB::raw("(SELECT TOP 1 NetAmount FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS AmountDue"),
+                )
+            ->orderBy('AccountStatus')
+            ->orderBy('CurrentKwh')
+            ->orderBy('FieldStatus')
+            ->get();
+        
+        $memberConsumers = DB::table('CRM_MemberConsumers')
+            ->leftJoin('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
+            ->leftJoin('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
+            ->leftJoin('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
+            ->select('CRM_MemberConsumers.Id as ConsumerId',
+                    'CRM_MemberConsumers.MembershipType as MembershipType', 
+                    'CRM_MemberConsumers.FirstName as FirstName', 
+                    'CRM_MemberConsumers.MiddleName as MiddleName', 
+                    'CRM_MemberConsumers.LastName as LastName', 
+                    'CRM_MemberConsumers.Suffix', 
+                    'CRM_MemberConsumers.OrganizationName as OrganizationName')
+            ->where('CRM_MemberConsumers.Id', $groupId)
+            ->first();
+
+        return view('/service_accounts/print_group_bills_list', [
+            'readingReport' => $readingReport,
+            'memberConsumers' => $memberConsumers,
+            'period' => $period
+        ]);
+    }
+
     public function renameBapa(Request $request) {
         $oldBapaName = $request['OldBapaName'];
         $newBapaName = $request['NewBapaName'];
