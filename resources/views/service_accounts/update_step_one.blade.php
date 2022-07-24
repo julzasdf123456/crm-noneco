@@ -97,7 +97,7 @@
                     </div>
 
                     {{-- ADDRESS --}}
-                    {{-- <div class="form-group col-sm-12">
+                    <div class="form-group col-sm-12">
                         <div class="row">
                             <!-- Purok Field -->
                             <div class="col-lg-1 col-md-2">
@@ -132,7 +132,7 @@
                                 </div>
                             </div>
                         </div> 
-                    </div> --}}
+                    </div>
 
                     <div class="divider"></div>
 

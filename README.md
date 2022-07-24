@@ -106,6 +106,12 @@ You can also check out our other paid products on [CodeCanyon](https://codecanyo
 - Billing Module
     - Added Meter Reader Collection efficiency report
     - Billing and Reading Dashboard
-    - BAPA Change Due Date *
+    - BAPA Change Due Date
+    - Manual Adding of Accounts
+    - Manual Change Meter
+    - Manual Relocation
+    - Group Bill Printing (List, New Bill, Old Bill)
 - Tellering & Cashiering
     - Third party collection *
+    - OR Re-Printing
+    - Group Billing Payments

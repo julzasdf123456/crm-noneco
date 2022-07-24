@@ -61,7 +61,7 @@
                         All Accounts</a></li>
                 </ul>
             </div>
-            <div class="card-body table-responsive px-0">
+            <div class="card-body table-responsive p-0">
                 <div class="tab-content">
                     <div class="tab-pane active" id="readings">
                         @include('service_accounts.bapa_tab_readings')

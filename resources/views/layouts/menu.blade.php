@@ -464,7 +464,7 @@ use Illuminate\Support\Facades\Auth;
             <li class="nav-item">
                 <a href="{{ route('serviceAccounts.index') }}"
                    class="nav-link {{ Request::is('serviceAccounts*') ? 'active' : '' }}">                   
-                   <i class="fas fa-user-circle nav-icon text-primary"></i><p>Active Accounts</p>
+                   <i class="fas fa-user-circle nav-icon text-primary"></i><p>All Accounts</p>
                 </a>
             </li>
             <li class="nav-item">
@@ -483,7 +483,30 @@ use Illuminate\Support\Facades\Auth;
                    <i class="fas fa-user-alt-slash nav-icon text-primary"></i><p>Pending Accounts</p>
                 </a>
             </li>
-            
+            <li class="nav-item">
+                <a href="{{ route('serviceAccounts.manual-account-migration-one') }}"
+                   class="nav-link {{ Request::is('serviceAccounts.manual-account-migration-one*') ? 'active' : '' }}">                   
+                   <i class="fas fa-user-plus nav-icon text-primary"></i><p>Add New Account
+                    <span class="right badge badge-danger">New</span>
+                   </p>                   
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('serviceAccounts.change-meter-manual') }}"
+                   class="nav-link {{ Request::is('serviceAccounts.change-meter-manual*') ? 'active' : '' }}">                   
+                   <i class="fas fa-random nav-icon text-primary"></i><p>Change Meter
+                    <span class="right badge badge-danger">New</span>
+                   </p>                   
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('serviceAccounts.relocation-manual') }}"
+                   class="nav-link {{ Request::is('serviceAccounts.relocation-manual*') ? 'active' : '' }}">                   
+                   <i class="fas fa-map-marked-alt nav-icon text-primary"></i><p>Relocation
+                    <span class="right badge badge-danger">New</span>
+                   </p>                   
+                </a>
+            </li>
         </ul>
     </li>
 
