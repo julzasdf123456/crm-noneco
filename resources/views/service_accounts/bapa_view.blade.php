@@ -53,21 +53,21 @@
         <div class="card" style="height: 80vh;">
             <div class="card-header p-2">
                 <ul class="nav nav-pills">
-                    <li class="nav-item"><a class="nav-link active" href="#all-accounts" data-toggle="tab">
-                        <i class="fas fa-file-invoice"></i>
-                        All Accounts</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#readings" data-toggle="tab">
+                    <li class="nav-item"><a class="nav-link active" href="#readings" data-toggle="tab">
                         <i class="fas fa-unlink"></i>
                         Readings</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#all-accounts" data-toggle="tab">
+                        <i class="fas fa-file-invoice"></i>
+                        All Accounts</a></li>
                 </ul>
             </div>
-            <div class="card-body table-responsive px-0">
+            <div class="card-body table-responsive p-0">
                 <div class="tab-content">
-                    <div class="tab-pane active" id="all-accounts">
-                        @include('service_accounts.bapa_tab_all_accounts')
-                    </div>
-                    <div class="tab-pane" id="readings">
+                    <div class="tab-pane active" id="readings">
                         @include('service_accounts.bapa_tab_readings')
+                    </div>
+                    <div class="tab-pane" id="all-accounts">
+                        @include('service_accounts.bapa_tab_all_accounts')
                     </div>
                 </div>
                 

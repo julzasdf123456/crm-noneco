@@ -524,6 +524,7 @@
             dataType : "json",
             success : function(data) {
                 $('#Barangay option').remove();
+                $('#Barangay').append("<option value=''>-- Select --</option>");
                 $.each(data, function(index, element) {
                     $('#Barangay').append("<option value='" + element + "' " + (element==prevValue ? "selected='selected'" : " ") + ">" + index + "</option>");
                 });

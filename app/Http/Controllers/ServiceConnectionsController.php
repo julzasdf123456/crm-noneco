@@ -457,7 +457,8 @@ class ServiceConnectionsController extends AppBaseController
                     ->orWhere('CRM_MemberConsumers.Id', 'LIKE', '%' . $query . '%')
                     ->orWhere('CRM_MemberConsumers.OrganizationName', 'LIKE', '%' . $query . '%')
                     ->orWhere('CRM_MemberConsumers.MiddleName', 'LIKE', '%' . $query . '%')
-                    ->orWhere('CRM_MemberConsumers.FirstName', 'LIKE', '%' . $query . '%')
+                    ->orWhere('CRM_MemberConsumers.FirstName', 'LIKE', '%' . $query . '%')                    
+                    ->whereRaw("CRM_MemberConsumers.Notes NOT IN ('BILLING ACCOUNT GROUPING PARENT')")
                     ->orderBy('CRM_MemberConsumers.FirstName')
                     ->get();
             } else {
@@ -485,7 +486,8 @@ class ServiceConnectionsController extends AppBaseController
                                     'CRM_MemberConsumers.Sitio as Sitio', 
                                     'CRM_MemberConsumerTypes.*',
                                     'CRM_Towns.Town as Town',
-                                    'CRM_Barangays.Barangay as Barangay')
+                                    'CRM_Barangays.Barangay as Barangay')                                    
+                    ->whereRaw("CRM_MemberConsumers.Notes NOT IN ('BILLING ACCOUNT GROUPING PARENT')")
                     ->orderByDesc('CRM_MemberConsumers.created_at')
                     ->take(10)
                     ->get();
