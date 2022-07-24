@@ -267,9 +267,9 @@ class MemberConsumersController extends AppBaseController
             
             if ($query != '' ) {
                 $data = DB::table('CRM_MemberConsumers')
-                    ->join('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
-                    ->join('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
-                    ->join('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
+                    ->leftJoin('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
                     ->select('CRM_MemberConsumers.Id as ConsumerId',
                                     'CRM_MemberConsumers.MembershipType as MembershipType', 
                                     'CRM_MemberConsumers.FirstName as FirstName', 
@@ -295,13 +295,14 @@ class MemberConsumersController extends AppBaseController
                     ->orWhere('CRM_MemberConsumers.Id', 'LIKE', '%' . $query . '%')
                     ->orWhere('CRM_MemberConsumers.MiddleName', 'LIKE', '%' . $query . '%')
                     ->orWhere('CRM_MemberConsumers.FirstName', 'LIKE', '%' . $query . '%')
+                    ->whereRaw("CRM_MemberConsumers.Notes NOT IN ('BILLING ACCOUNT GROUPING PARENT')")
                     ->orderBy('CRM_MemberConsumers.FirstName')
                     ->get();
             } else {
                 $data = DB::table('CRM_MemberConsumers')
-                    ->join('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
-                    ->join('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
-                    ->join('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
+                    ->leftJoin('CRM_MemberConsumerTypes', 'CRM_MemberConsumers.MembershipType', '=', 'CRM_MemberConsumerTypes.Id')
+                    ->leftJoin('CRM_Barangays', 'CRM_MemberConsumers.Barangay', '=', 'CRM_Barangays.id')
+                    ->leftJoin('CRM_Towns', 'CRM_MemberConsumers.Town', '=', 'CRM_Towns.id')
                     ->select('CRM_MemberConsumers.Id as ConsumerId',
                                     'CRM_MemberConsumers.MembershipType as MembershipType', 
                                     'CRM_MemberConsumers.FirstName as FirstName', 
@@ -323,6 +324,7 @@ class MemberConsumersController extends AppBaseController
                                     'CRM_MemberConsumerTypes.*',
                                     'CRM_Towns.Town as Town',
                                     'CRM_Barangays.Barangay as Barangay')
+                    ->whereRaw("CRM_MemberConsumers.Notes NOT IN ('BILLING ACCOUNT GROUPING PARENT')")
                     ->orderByDesc('CRM_MemberConsumers.created_at')
                     ->take(10)
                     ->get();

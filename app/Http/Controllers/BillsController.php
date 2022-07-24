@@ -22,6 +22,7 @@ use App\Models\PaidBills;
 use App\Models\Barangays;
 use App\Models\User;
 use App\Models\Towns;
+use App\Models\ReadingSchedules;
 use App\Models\MemberConsumerTypes;
 use App\Models\MemberConsumers;
 use App\Models\PendingBillAdjustments;
@@ -1330,6 +1331,20 @@ class BillsController extends AppBaseController
         ]);
     }
 
+    public function printBulkBillOldFormatGroup($servicePeriod, $groupId) {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+            ->where('Billing_ServiceAccounts.MemberConsumerId', $groupId)
+            ->select('Billing_Bills.*')
+            ->orderBy('Billing_Bills.BillNumber')
+            ->get();
+
+        return view('/bills/print_bulk_old_format', [
+            'bills' => $bills
+        ]);
+    }
+
     public function printBulkBillOldFormatBapa($servicePeriod, $bapaName, $billNumberStart, $route) {
         $bapaName = urldecode($bapaName);
         if ($billNumberStart == 'All' && $route == 'All') {
@@ -1452,8 +1467,51 @@ class BillsController extends AppBaseController
             ->where('Billing_Bills.ServicePeriod', $period)
             ->where('Billing_ServiceAccounts.Town', $town)
             ->where('Billing_ServiceAccounts.AreaCode', $route)
-            // ->where('Billing_Bills.UserId', Auth::id())
+            ->whereRaw("Billing_Bills.UserId='" . Auth::id() ."'")
             ->where('Billing_Bills.BillingDate', $day)
+            ->select('Billing_Bills.*',                
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.AccountCount',
+                'Billing_ServiceAccounts.Purok',
+                'Billing_ServiceAccounts.AccountType',
+                'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.AreaCode',
+                'Billing_ServiceAccounts.SequenceCode',
+                'Billing_ServiceAccounts.ForDistribution',
+                'Billing_ServiceAccounts.Organization',
+                'Billing_ServiceAccounts.Main',
+                'Billing_ServiceAccounts.GroupCode',
+                'Billing_ServiceAccounts.Multiplier',
+                'Billing_ServiceAccounts.Coreloss',
+                'Billing_ServiceAccounts.ConnectionDate',
+                'Billing_ServiceAccounts.ServiceConnectionId',
+                'Billing_ServiceAccounts.SeniorCitizen',
+                'Billing_ServiceAccounts.Evat5Percent',
+                'Billing_ServiceAccounts.Ewt2Percent',
+                'Billing_ServiceAccounts.Contestable',
+                'Billing_ServiceAccounts.NetMetered',
+                'Billing_ServiceAccounts.AccountRetention',
+                'Billing_ServiceAccounts.DurationInMonths',
+                'Billing_ServiceAccounts.AccountExpiration',
+                'CRM_Towns.Town',
+                'CRM_Barangays.Barangay',
+                DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_Bills.AccountNumber ORDER BY created_at DESC) AS MeterNumber"),
+                DB::raw("(SELECT COUNT(id) FROM Billing_Bills WHERE AccountNumber=Billing_Bills.AccountNumber AND ServicePeriod != Billing_Bills.ServicePeriod AND AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_Bills.AccountNumber)) AS ArrearsCount"))
+            ->get();
+
+        return view('/bills/print_bulk_bill_new_format', [
+            'bills' => $bills
+        ]);
+    }
+
+    public function printBulkBillNewFormatGroup($period, $groupId) {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->where('Billing_ServiceAccounts.MemberConsumerId', $groupId)
             ->select('Billing_Bills.*',                
                 'Billing_ServiceAccounts.ServiceAccountName',
                 'Billing_ServiceAccounts.OldAccountNo',
@@ -2023,8 +2081,22 @@ class BillsController extends AppBaseController
     }
 
     public function dashboard() {
-        return view('/bills/dashboard', [
+        $latestRate = Rates::orderByDesc('ServicePeriod')->first();
+        $todaysReading = DB::table('Billing_ServiceAccounts')
+                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
+                ->whereIn("Billing_ServiceAccounts.Town", MeterReaders::getMeterAreaCodeScope(env('APP_AREA_CODE')))
+                ->whereNotNull('Billing_ServiceAccounts.MeterReader')
+                ->select('users.name', 'users.id',
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE CAST(ReadingTimestamp AS DATE)='" . date('Y-m-d') . "' AND MeterReader=CAST(users.id AS varchar)) AS TotalReading"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Bills WHERE BillingDate='" . date('Y-m-d') . "'  AND UserId=CAST(users.id AS varchar)) AS TotalBills"),
+                )
+                ->groupBy('users.name', 'users.id')
+                ->orderBy('users.name')
+                ->get();
 
+        return view('/bills/dashboard', [
+            'todaysReading' => $todaysReading,
+            'latestRate' => $latestRate,
         ]);
     }
 
@@ -2042,9 +2114,11 @@ class BillsController extends AppBaseController
                 ->whereNotNull('Billing_ServiceAccounts.MeterReader')
                 ->select('users.name', 'users.id',
                     DB::raw("(SELECT COUNT(r.id) FROM Billing_Readings r LEFT JOIN Billing_ServiceAccounts sa ON sa.id=r.AccountNumber WHERE sa.MeterReader=users.id AND r.ServicePeriod='" . $period . "' AND r.AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')) AS TotalUnbilledBasedFromReadings"),
-                    DB::raw("(SELECT COUNT(id) FROM Billing_ServiceAccounts WHERE MeterReader=users.id AND id NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='". $period ."')) AS AllUnbilled"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_ServiceAccounts WHERE MeterReader=CAST(users.id AS varchar) AND id NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='". $period ."')) AS AllUnbilled"),
                     DB::raw("(SELECT COUNT(r.id) FROM Billing_Readings r LEFT JOIN Billing_ServiceAccounts sa ON sa.id=r.AccountNumber WHERE r.AccountNumber IS NOT NULL AND sa.MeterReader=users.id AND r.ServicePeriod='" . $period . "') AS TotalReading"),
-                    DB::raw("(SELECT COUNT(b.id) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalBills")
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE AccountNumber IS NULL AND ServicePeriod='" . $period . "' AND MeterReader=CAST(users.id AS varchar)) AS Captured"),
+                    DB::raw("(SELECT COUNT(b.id) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalBills"),
+                    DB::raw("(SELECT SUM(CAST(KwhUsed AS DECIMAL(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE b.KwhUsed IS NOT NULL AND ISNUMERIC(b.KwhUsed)=1 AND sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalKwh")
                 )
                 ->groupBy('users.name', 'users.id')
                 ->orderBy('users.name')
@@ -2056,10 +2130,13 @@ class BillsController extends AppBaseController
                 ->where('Billing_ServiceAccounts.GroupCode', $day)
                 ->whereNotNull('Billing_ServiceAccounts.MeterReader')
                 ->select('users.name', 'users.id',
+                    DB::raw("(SELECT TOP 1 Town FROM Billing_ServiceAccounts WHERE GroupCode='" . $day . "' AND MeterReader=CAST(users.id AS varchar)) AS Town"),
                     DB::raw("(SELECT COUNT(r.id) FROM Billing_Readings r LEFT JOIN Billing_ServiceAccounts sa ON sa.id=r.AccountNumber WHERE sa.MeterReader=users.id AND sa.GroupCode='" . $day . "' AND r.ServicePeriod='" . $period . "' AND r.AccountNumber NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='" . $period . "')) AS TotalUnbilledBasedFromReadings"),
-                    DB::raw("(SELECT COUNT(id) FROM Billing_ServiceAccounts WHERE MeterReader=users.id AND GroupCode='" . $day . "' AND id NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='". $period ."')) AS AllUnbilled"),
+                    DB::raw("(SELECT COUNT(id) FROM Billing_ServiceAccounts WHERE MeterReader=CAST(users.id AS varchar) AND GroupCode='" . $day . "' AND id NOT IN (SELECT AccountNumber FROM Billing_Bills WHERE ServicePeriod='". $period ."')) AS AllUnbilled"),
                     DB::raw("(SELECT COUNT(r.id) FROM Billing_Readings r LEFT JOIN Billing_ServiceAccounts sa ON sa.id=r.AccountNumber WHERE r.AccountNumber IS NOT NULL AND sa.GroupCode='" . $day . "' AND sa.MeterReader=users.id AND r.ServicePeriod='" . $period . "') AS TotalReading"),
-                    DB::raw("(SELECT COUNT(b.id) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE sa.GroupCode='" . $day . "' AND sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalBills")
+                    DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE AccountNumber IS NULL AND ServicePeriod='" . $period . "' AND MeterReader=CAST(users.id AS varchar) AND CAST(ReadingTimestamp AS DATE)=(SELECT TOP 1 ScheduledDate FROM Billing_ReadingSchedules WHERE MeterReader=users.id AND ServicePeriod='" . $period . "' AND GroupCode='" . $day ."')) AS Captured"),
+                    DB::raw("(SELECT COUNT(b.id) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE sa.GroupCode='" . $day . "' AND sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalBills"),
+                    DB::raw("(SELECT SUM(CAST(KwhUsed AS DECIMAL(10,2))) FROM Billing_Bills b LEFT JOIN Billing_ServiceAccounts sa ON sa.id=b.AccountNumber WHERE b.KwhUsed IS NOT NULL AND ISNUMERIC(b.KwhUsed)=1 AND sa.GroupCode='" . $day . "' AND sa.MeterReader=users.id AND b.ServicePeriod='" . $period . "') AS TotalKwh")
                 )
                 ->groupBy('users.name', 'users.id')
                 ->orderBy('users.name')
@@ -2067,16 +2144,76 @@ class BillsController extends AppBaseController
         }
 
         $output = "";
+        $totalUnbilledFromReadings = 0;
+        $totalUnbilled = 0;
+        $totalReading = 0;
+        $totalCaputured = 0;
+        $totalBills = 0;
+        $totalKwh = 0;
         foreach($data as $item) {
-            $output .= "<tr>
-                            <th>" . $item->name . "</th>
-                            <td class='text-right'>" . number_format($item->TotalUnbilledBasedFromReadings) . "</td>
-                            <td class='text-right'>" . number_format($item->AllUnbilled) . "</td>
-                            <th class='text-right'>" . number_format($item->TotalReading) . "</th>
-                            <th class='text-right'>" . number_format($item->TotalBills) . "</th>
-                        </tr>";
+            if ($day == 'All' | $item->TotalReading==0) {
+                $output .= "<tr>
+                    <th>" . $item->name . "</th>
+                    <td class='text-right'>" . number_format($item->TotalUnbilledBasedFromReadings) . "</td>
+                    <td class='text-right'>" . number_format($item->AllUnbilled) . "</td>
+                    <th class='text-right text-info'>" . number_format($item->TotalReading) . "</th>
+                    <th class='text-right text-danger'>" . number_format($item->Captured) . "</th>
+                    <th class='text-right'>" . number_format($item->TotalBills) . "</th>
+                    <th class='text-right text-primary'>" . number_format($item->TotalKwh) . "</th>
+                </tr>";
+            } else {
+                $output .= "<tr>
+                    <th><a href='" . route('readings.view-full-report', [$period, $item->id, $day, $item->Town]) . "'>" . $item->name . "</a></th>
+                    <td class='text-right'>" . number_format($item->TotalUnbilledBasedFromReadings) . "</td>
+                    <td class='text-right'>" . number_format($item->AllUnbilled) . "</td>
+                    <th class='text-right text-info'>" . number_format($item->TotalReading) . "</th>
+                    <th class='text-right text-danger'>" . number_format($item->Captured) . "</th>
+                    <th class='text-right'>" . number_format($item->TotalBills) . "</th>
+                    <th class='text-right text-primary'>" . number_format($item->TotalKwh) . "</th>
+                </tr>";
+            }
+            
+            $totalUnbilledFromReadings += floatval($item->TotalUnbilledBasedFromReadings);
+            $totalUnbilled += floatval($item->AllUnbilled);
+            $totalReading += floatval($item->TotalReading);
+            $totalCaputured += floatval($item->Captured);
+            $totalBills += floatval($item->TotalBills);
+            $totalKwh += floatval($item->TotalKwh);
         }
 
+        $output .= "<tr>
+                    <th>Total</th>
+                    <th class='text-right'>" . number_format($totalUnbilledFromReadings) . "</th>
+                    <th class='text-right'>" . number_format($totalUnbilled) . "</th>
+                    <th class='text-right text-info'>" . number_format($totalReading) . "</th>
+                    <th class='text-right text-danger'>" . number_format($totalCaputured) . "</th>
+                    <th class='text-right'>" . number_format($totalBills) . "</th>
+                    <th class='text-right text-primary'>" . number_format($totalKwh) . "</th>
+                </tr>";
+
         return response()->json($output, 200);
+    }
+
+    public function changeBapaDueDate(Request $request) {
+        $period = $request['Period'];
+        $bapaName = $request['BAPAName'];
+        $newDueDate = $request['NewDueDate'];
+        $route = $request['Route'];
+
+        if ($route == 'All') {
+            $bills = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->whereRaw("Billing_Bills.ServicePeriod='" . $period . "' AND Billing_ServiceAccounts.OrganizationParentAccount='" . $bapaName . "'")
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "' AND AccountNumber=Billing_Bills.AccountNumber AND Status IS NULL)")
+                ->update(['Billing_Bills.DueDate' => $newDueDate]);
+        } else {
+            $bills = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->whereRaw("Billing_Bills.ServicePeriod='" . $period . "' AND Billing_ServiceAccounts.OrganizationParentAccount='" . $bapaName . "' AND Billing_ServiceAccounts.AreaCode='" . $route . "'")
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "' AND AccountNumber=Billing_Bills.AccountNumber AND Status IS NULL)")
+                ->update(['Billing_Bills.DueDate' => $newDueDate]);
+        }
+
+        return response()->json('ok', 200);
     }
 }

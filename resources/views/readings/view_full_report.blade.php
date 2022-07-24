@@ -224,6 +224,7 @@
                         <th>Account Number</th>
                         <th>Account Name</th>
                         <th>Address</th>
+                        <th>Meter No</th>
                         <th>Status</th>
                         <th></th>
                     </thead>
