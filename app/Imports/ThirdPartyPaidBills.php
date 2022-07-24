@@ -34,7 +34,7 @@ class ThirdPartyPaidBills implements WithCalculatedFormulas, ToModel, WithHeadin
             'KwhUsed' => null,
             'Teller' => $this->userId,
             'OfficeTransacted' => env('APP_LOCATION'),
-            'PostingDate' => date('Y-m-d'),
+            'PostingDate' => null,
             'Surcharge' => null,
             'Form2307TwoPercent' => null,
             'Form2307FivePercent' => null,

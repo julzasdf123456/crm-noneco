@@ -1189,7 +1189,7 @@ class PaidBillsController extends AppBaseController
             ->leftJoin('Billing_ServiceAccounts', 'Billing_ServiceAccounts.id', '=', 'Billing_Bills.AccountNumber')
             ->whereRaw("Billing_Bills.ServicePeriod = '" . $period . "'")
             ->where('Billing_ServiceAccounts.OrganizationParentAccount', $bapaName)
-            ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod = '" . $period ."')")
+            ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod = '" . $period ."' AND Status IS NULL)")
             ->whereRaw("Billing_Bills.id NOT IN (SELECT BillId FROM Cashier_BAPAAdjustmentDetails WHERE BillId IS NOT NULL)")
             ->select('Billing_ServiceAccounts.id AS AccountNumber',
                 'Billing_ServiceAccounts.ServiceAccountName',
@@ -1939,14 +1939,31 @@ class PaidBillsController extends AppBaseController
                 DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod) AS KwhUsed"),
                 DB::raw("(SELECT TOP 1 BillNumber FROM Billing_Bills WHERE AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod) AS BillNumber"),
                 DB::raw("(SELECT TOP 1 NetAmount FROM Billing_Bills WHERE AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod) AS BillAmount"),
-                DB::raw("(SELECT COUNT(p.id) FROM Cashier_PaidBills p WHERE p.AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod) AS Duplicates")
+                DB::raw("(SELECT COUNT(p.id) FROM Cashier_PaidBills p WHERE p.AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod AND Status IS NULL) AS Duplicates")
             )
             ->orderBy('OldAccountNo')
             ->get();
 
         return view('/paid_bills/tcp_upload_validator', [
-            'paidBills' => $paidBills
+            'paidBills' => $paidBills,
+            'seriesNo' => $seriesNo
         ]);
+    }
+
+    public function depositDoublePayments($seriesNo) {
+        $paidBills = DB::table('Cashier_PaidBills')
+            ->leftJoin('Billing_ServiceAccounts', 'Cashier_PaidBills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Cashier_PaidBills.Notes', $seriesNo)
+            ->where('Cashier_PaidBills.Status', 'PENDING POST')
+            ->whereRaw("Cashier_PaidBills.AccountNumber IN (SELECT AccountNumber FROM Cashier_PaidBills p WHERE p.AccountNumber=Cashier_PaidBills.AccountNumber AND ServicePeriod=Cashier_PaidBills.ServicePeriod AND Status IS NULL)")
+            ->select('Cashier_PaidBills.*',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.ServiceAccountName',
+            )
+            ->orderBy('OldAccountNo')
+            ->get();
+
+        dd($paidBills);
     }
 }
 

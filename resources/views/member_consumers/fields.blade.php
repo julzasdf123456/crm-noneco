@@ -215,7 +215,7 @@ use App\Models\IDGenerator;
                 <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
                 </div>
-                {!! Form::select('Barangay', [], null, ['class' => 'form-control',]) !!}
+                {!! Form::select('Barangay', [], null, ['class' => 'form-control',]) !!} 
             </div>
         </div>
     </div>    

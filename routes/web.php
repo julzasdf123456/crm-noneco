@@ -223,6 +223,19 @@ Route::get('/service_accounts/confirm-change-name/{id}', [App\Http\Controllers\S
 Route::post('/service_accounts/update-name', [App\Http\Controllers\ServiceAccountsController::class, 'updateName'])->name('serviceAccounts.update-name');
 Route::get('/service_accounts/search-bapa-ajax', [App\Http\Controllers\ServiceAccountsController::class, 'searchBapaAjax'])->name('serviceAccounts.search-bapa-ajax');
 Route::get('/service_accounts/rename-bapa', [App\Http\Controllers\ServiceAccountsController::class, 'renameBapa'])->name('serviceAccounts.rename-bapa');
+Route::get('/service_accounts/validate-old-account-no', [App\Http\Controllers\ServiceAccountsController::class, 'validateOlAccountNo'])->name('serviceAccounts.validate-old-account-no');
+Route::get('/service_accounts/manual-account-migration-one', [App\Http\Controllers\ServiceAccountsController::class, 'manualAccountMigrationOne'])->name('serviceAccounts.manual-account-migration-one');
+Route::post('/service_accounts/store-manual', [App\Http\Controllers\ServiceAccountsController::class, 'storeManual'])->name('serviceAccounts.store-manual');
+Route::get('/service_accounts/manual-account-migration-two/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'manualAccountMigrationTwo'])->name('serviceAccounts.manual-account-migration-two');
+Route::post('/service_accounts/store-meters-manual', [App\Http\Controllers\ServiceAccountsController::class, 'storeMetersManual'])->name('serviceAccounts.store-meters-manual');
+Route::get('/service_accounts/manual-account-migration-three/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'manualAccountMigrationThree'])->name('serviceAccounts.manual-account-migration-three');
+Route::post('/service_accounts/store-transformer-manual', [App\Http\Controllers\ServiceAccountsController::class, 'storeTransformerManual'])->name('serviceAccounts.store-transformer-manual');
+Route::get('/service_accounts/change-meter-manual', [App\Http\Controllers\ServiceAccountsController::class, 'changeMeterManual'])->name('serviceAccounts.change-meter-manual');
+Route::get('/service_accounts/change-meter-manual-console/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'changeMeterManualConsole'])->name('serviceAccounts.change-meter-manual-console');
+Route::post('/service_accounts/store-change-meter-manual', [App\Http\Controllers\ServiceAccountsController::class, 'storeChangeMeterManual'])->name('serviceAccounts.store-change-meter-manual');
+Route::get('/service_accounts/relocation-manual', [App\Http\Controllers\ServiceAccountsController::class, 'relocationManual'])->name('serviceAccounts.relocation-manual');
+Route::get('/service_accounts/relocation-form-manual/{id}', [App\Http\Controllers\ServiceAccountsController::class, 'relocationFormManual'])->name('serviceAccounts.relocation-form-manual');
+Route::get('/service_accounts/print-group-bills-list/{period}/{groupId}', [App\Http\Controllers\ServiceAccountsController::class, 'printGroupBillsList'])->name('serviceAccounts.print-group-bills-list');
 Route::resource('serviceAccounts', App\Http\Controllers\ServiceAccountsController::class);
 
 
@@ -478,6 +491,9 @@ Route::get('/bills/print-adjustment-report/{type}/{period}', [App\Http\Controlle
 Route::get('/bills/mark-as-paid', [App\Http\Controllers\BillsController::class, 'markAsPaid'])->name('bills.mark-as-paid');
 Route::get('/bills/dashboard', [App\Http\Controllers\BillsController::class, 'dashboard'])->name('bills.dashboard');
 Route::get('/bills/dashboard-reading-monitor', [App\Http\Controllers\BillsController::class, 'dashboardReadingMonitor'])->name('bills.dashboard-reading-monitor');
+Route::get('/bills/change-bapa-duedate', [App\Http\Controllers\BillsController::class, 'changeBapaDueDate'])->name('bills.change-bapa-duedate');
+Route::get('/bills/print-bulk-bill-old-format-group/{period}/{groupId}', [App\Http\Controllers\BillsController::class,  'printBulkBillOldFormatGroup'])->name('bills.print-bulk-bill-old-format-group');
+Route::get('/bills/print-bulk-bill-new-format-group/{period}/{groupId}', [App\Http\Controllers\BillsController::class,  'printBulkBillNewFormatGroup'])->name('bills.print-bulk-bill-new-format-group');
 Route::resource('bills', App\Http\Controllers\BillsController::class);
 
 
@@ -554,6 +570,7 @@ Route::get('/paid_bills/third-party-collection', [App\Http\Controllers\PaidBills
 Route::get('/paid_bills/upload-third-party-collection', [App\Http\Controllers\PaidBillsController::class, 'uploadThirdPartyCollection'])->name('paidBills.upload-third-party-collection');
 Route::post('/paid_bills/validate-tpc-upload', [App\Http\Controllers\PaidBillsController::class, 'validateTpcUpload'])->name('paidBills.validate-tpc-upload');
 Route::get('/paid_bills/tcp-upload-validator/{seriesNo}', [App\Http\Controllers\PaidBillsController::class, 'tcpUploadValidator'])->name('paidBills.tcp-upload-validator');
+Route::get('/paid_bills/deposit-double-payments/{seriesNo}', [App\Http\Controllers\PaidBillsController::class, 'depositDoublePayments'])->name('paidBills.deposit-double-payments');
 Route::resource('paidBills', App\Http\Controllers\PaidBillsController::class);
 
 Route::get('/disconnection_histories/generate-turn-off-list', [App\Http\Controllers\DisconnectionHistoryController::class, 'generateTurnOffList'])->name('disconnectionHistories.generate-turn-off-list');

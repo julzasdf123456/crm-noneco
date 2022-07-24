@@ -1331,6 +1331,20 @@ class BillsController extends AppBaseController
         ]);
     }
 
+    public function printBulkBillOldFormatGroup($servicePeriod, $groupId) {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->where('Billing_Bills.ServicePeriod', $servicePeriod)
+            ->where('Billing_ServiceAccounts.MemberConsumerId', $groupId)
+            ->select('Billing_Bills.*')
+            ->orderBy('Billing_Bills.BillNumber')
+            ->get();
+
+        return view('/bills/print_bulk_old_format', [
+            'bills' => $bills
+        ]);
+    }
+
     public function printBulkBillOldFormatBapa($servicePeriod, $bapaName, $billNumberStart, $route) {
         $bapaName = urldecode($bapaName);
         if ($billNumberStart == 'All' && $route == 'All') {
@@ -1453,8 +1467,51 @@ class BillsController extends AppBaseController
             ->where('Billing_Bills.ServicePeriod', $period)
             ->where('Billing_ServiceAccounts.Town', $town)
             ->where('Billing_ServiceAccounts.AreaCode', $route)
-            // ->where('Billing_Bills.UserId', Auth::id())
+            ->whereRaw("Billing_Bills.UserId='" . Auth::id() ."'")
             ->where('Billing_Bills.BillingDate', $day)
+            ->select('Billing_Bills.*',                
+                'Billing_ServiceAccounts.ServiceAccountName',
+                'Billing_ServiceAccounts.OldAccountNo',
+                'Billing_ServiceAccounts.AccountCount',
+                'Billing_ServiceAccounts.Purok',
+                'Billing_ServiceAccounts.AccountType',
+                'Billing_ServiceAccounts.AccountStatus',
+                'Billing_ServiceAccounts.AreaCode',
+                'Billing_ServiceAccounts.SequenceCode',
+                'Billing_ServiceAccounts.ForDistribution',
+                'Billing_ServiceAccounts.Organization',
+                'Billing_ServiceAccounts.Main',
+                'Billing_ServiceAccounts.GroupCode',
+                'Billing_ServiceAccounts.Multiplier',
+                'Billing_ServiceAccounts.Coreloss',
+                'Billing_ServiceAccounts.ConnectionDate',
+                'Billing_ServiceAccounts.ServiceConnectionId',
+                'Billing_ServiceAccounts.SeniorCitizen',
+                'Billing_ServiceAccounts.Evat5Percent',
+                'Billing_ServiceAccounts.Ewt2Percent',
+                'Billing_ServiceAccounts.Contestable',
+                'Billing_ServiceAccounts.NetMetered',
+                'Billing_ServiceAccounts.AccountRetention',
+                'Billing_ServiceAccounts.DurationInMonths',
+                'Billing_ServiceAccounts.AccountExpiration',
+                'CRM_Towns.Town',
+                'CRM_Barangays.Barangay',
+                DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_Bills.AccountNumber ORDER BY created_at DESC) AS MeterNumber"),
+                DB::raw("(SELECT COUNT(id) FROM Billing_Bills WHERE AccountNumber=Billing_Bills.AccountNumber AND ServicePeriod != Billing_Bills.ServicePeriod AND AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_Bills.AccountNumber)) AS ArrearsCount"))
+            ->get();
+
+        return view('/bills/print_bulk_bill_new_format', [
+            'bills' => $bills
+        ]);
+    }
+
+    public function printBulkBillNewFormatGroup($period, $groupId) {
+        $bills = DB::table('Billing_Bills')
+            ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+            ->where('Billing_Bills.ServicePeriod', $period)
+            ->where('Billing_ServiceAccounts.MemberConsumerId', $groupId)
             ->select('Billing_Bills.*',                
                 'Billing_ServiceAccounts.ServiceAccountName',
                 'Billing_ServiceAccounts.OldAccountNo',
@@ -2135,5 +2192,28 @@ class BillsController extends AppBaseController
                 </tr>";
 
         return response()->json($output, 200);
+    }
+
+    public function changeBapaDueDate(Request $request) {
+        $period = $request['Period'];
+        $bapaName = $request['BAPAName'];
+        $newDueDate = $request['NewDueDate'];
+        $route = $request['Route'];
+
+        if ($route == 'All') {
+            $bills = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->whereRaw("Billing_Bills.ServicePeriod='" . $period . "' AND Billing_ServiceAccounts.OrganizationParentAccount='" . $bapaName . "'")
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "' AND AccountNumber=Billing_Bills.AccountNumber AND Status IS NULL)")
+                ->update(['Billing_Bills.DueDate' => $newDueDate]);
+        } else {
+            $bills = DB::table('Billing_Bills')
+                ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                ->whereRaw("Billing_Bills.ServicePeriod='" . $period . "' AND Billing_ServiceAccounts.OrganizationParentAccount='" . $bapaName . "' AND Billing_ServiceAccounts.AreaCode='" . $route . "'")
+                ->whereRaw("Billing_Bills.AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE ServicePeriod='" . $period . "' AND AccountNumber=Billing_Bills.AccountNumber AND Status IS NULL)")
+                ->update(['Billing_Bills.DueDate' => $newDueDate]);
+        }
+
+        return response()->json('ok', 200);
     }
 }

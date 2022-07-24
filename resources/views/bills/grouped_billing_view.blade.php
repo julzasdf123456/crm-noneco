@@ -24,9 +24,12 @@
         <div class="card">
             <div class="card-header border-0">
                 <span class="card-title">Accounts in this Group</span>
+                <div class="card-tools">
+                    <a href="{{ route('bills.create-group-billing-step-two', [$memberConsumer->ConsumerId]) }}" class="btn btn-primary btn-sm">Edit This Group</a>
+                </div>
             </div>
-            <div class="card-body table-responsive px-0">
-                <table class="table table-hover">
+            <div class="card-body table-responsive p-0">
+                <table class="table table-hover table-borderd table-sm">
                     <thead>
                         <th>Account ID</th>
                         <th>Account No</th>
@@ -46,7 +49,7 @@
                 </table>
             </div>
             <div class="card-footer">
-                <a href="{{ route('bills.create-group-billing-step-two', [$memberConsumer->ConsumerId]) }}" class="btn btn-primary btn-sm">Edit This Group</a>
+                <p>No. of Consumers: <strong>{{ count($accounts) }}</strong></p>
             </div>
         </div>
     </div>
@@ -57,8 +60,8 @@
             <div class="card-header border-0">
                 <span class="card-title">Ledgers</span>
             </div>
-            <div class="card-body table-responsive px-0">
-                <table class="table table-hover">
+            <div class="card-body table-responsive p-0">
+                <table class="table table-hover table-sm table-bordered">
                     <thead>
                         <th>Billing Month</th>
                         <th>No. of Bills</th>
@@ -70,8 +73,11 @@
                                 <td>{{ date('F d, Y', strtotime($item->ServicePeriod)) }}</td>
                                 <td>{{ $item->BillCount }}</td>
                                 <td class="text-right">
-                                    <a href="{{ route('bills.print-group-billing', [$memberConsumer->ConsumerId, $item->ServicePeriod]) }}" class="text-warning ico-tab"><i class="fas fa-print"></i></a>
-                                    <a href="{{ route('bills.grouped-billing-bill-view', [$memberConsumer->ConsumerId, $item->ServicePeriod]) }}"><i class="fas fa-eye"></i></a>
+                                    <a title="Print Bills in List Form" href="{{ route('serviceAccounts.print-group-bills-list', [$item->ServicePeriod, $memberConsumer->ConsumerId]) }}" class="text-success ico-tab"><i class="fas fa-clipboard-list"></i></a>
+                                    <a title="Print Bills in New Format" href="{{ route('bills.print-bulk-bill-new-format-group', [$item->ServicePeriod, $memberConsumer->ConsumerId]) }}" class="text-primary ico-tab"><i class="fas fa-print"></i></a>
+                                    <a title="Print Bills in Old Format" href="{{ route('bills.print-bulk-bill-old-format-group', [$item->ServicePeriod, $memberConsumer->ConsumerId]) }}" class="text-warning ico-tab"><i class="fas fa-print"></i></a>
+                                    <a title="Print Statement Summary" href="{{ route('bills.print-group-billing', [$memberConsumer->ConsumerId, $item->ServicePeriod]) }}" class="text-info ico-tab"><i class="fas fa-print"></i></a>
+                                    <a title="View Details" href="{{ route('bills.grouped-billing-bill-view', [$memberConsumer->ConsumerId, $item->ServicePeriod]) }}"><i class="fas fa-eye"></i></a>
                                 </td>
                             </tr>
                         @endforeach

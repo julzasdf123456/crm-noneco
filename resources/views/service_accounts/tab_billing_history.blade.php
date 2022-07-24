@@ -33,7 +33,7 @@
                         <td>{{ date('F Y', strtotime($item->ServicePeriod)) }}</td>
                         <td class="text-right">{{ $item->PreviousKwh }}</td>
                         <td class="text-right">{{ $item->PresentKwh }}</td>
-                        <th class="text-right text-info">{{ round(floatval($item->KwhUsed) / floatval($item->Multiplier)) }}</th>
+                        <th class="text-right text-info">{{ is_numeric($item->Multiplier) ? round(floatval($item->KwhUsed) / floatval($item->Multiplier)) : 'MULT_ERR' }}</th>
                         <th class="text-right text-warning">{{ $item->Multiplier }}</th>
                         <th class="text-right text-primary">{{ $item->KwhUsed }}</th>
                         {{-- <td class="text-right">{{ $item->EffectiveRate != null ? number_format($item->EffectiveRate, 4) : '0' }}</td> --}}
