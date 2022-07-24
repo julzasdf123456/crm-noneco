@@ -47,7 +47,7 @@ class ThirdPartyPaidBills implements WithCalculatedFormulas, ToModel, WithHeadin
             'Status' => 'PENDING POST',
             'FiledBy' => null,
             'ApprovedBy' => null,
-            'AuditedBy' => null,
+            'AuditedBy' => $row['account_number'], // ACCOUNT NUMBER IN THE BILL
             'Notes' => $this->seriesNo, // SERIES REF NO
             'CheckNo' => $row['teller'], // TELLER
             'Bank' => $row['office'], // THIRD PARTY OFFICE

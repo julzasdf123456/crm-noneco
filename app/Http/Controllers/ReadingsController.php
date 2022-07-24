@@ -1727,7 +1727,7 @@ class ReadingsController extends AppBaseController
                 $output .= '<tr>
                                 <td><a href="' . route('serviceAccounts.bapa-view', [urlencode($item->OrganizationParentAccount)]) . '">' . $item->OrganizationParentAccount . '</a></td>
                                 <td style="width: 10%;">
-                                    <a href="' . route('readings.print-bapa-reading-list-to-paper', [urlencode($item->OrganizationParentAccount)]) . '" class="btn btn-warning btn-sm"><i class="fas fa-print ico-tab"></i>Print</a>
+                                    <button class="btn btn-warning btn-sm" onclick=selectPeriod("' . urlencode($item->OrganizationParentAccount) . '")><i class="fas fa-print ico-tab"></i>Print</button>
                                 </td>
                                 <td>' . $item->Town . '</td>
                                 <td>' . number_format($item->NoOfAccounts) . '</td>
@@ -1740,13 +1740,9 @@ class ReadingsController extends AppBaseController
         return response()->json($output, 200);
     }
 
-    public function printBapaReadingListToPaper($bapaName) {
+    public function printBapaReadingListToPaper($bapaName, $period) {
         $bapaName = urldecode($bapaName);
 
-        $latestRate = Rates::orderByDesc('ServicePeriod')
-            ->first();
-
-        $period = $latestRate != null ? $latestRate->ServicePeriod : date('Y-m-01');
         $prevMonth = date('Y-m-01', strtotime($period . ' -1 month'));
 
         $routes = ServiceAccounts::where('OrganizationParentAccount', $bapaName)
@@ -1788,7 +1784,7 @@ class ReadingsController extends AppBaseController
             ->get();
 
         return view('/readings/print_bapa_reading_list_to_paper', [
-            'latestRate' => $latestRate,
+            'period' => $period,
             'accounts' => $accounts,
             'bapaName' => $bapaName,
             'routes' => $routes,

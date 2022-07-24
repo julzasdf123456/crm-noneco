@@ -97,7 +97,7 @@
                 <th colspan="10" class="text-center">{{ strtoupper(env('APP_ADDRESS')) }}</th>
             </tr>
             <tr>
-                <th colspan="10" class="text-center">BAPA READING LIST FOR BILLING MONTH {{ $latestRate != null ? date('F Y', strtotime($latestRate->ServicePeriod)) : date('F Y') }}</th>
+                <th colspan="10" class="text-center">BAPA READING LIST FOR BILLING MONTH {{ $period }}</th>
             </tr>
             <tr>
                 <th colspan="10" class="text-left">BAPA: {{ $bapaName }}</th>

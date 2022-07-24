@@ -45,6 +45,7 @@
                         @php
                             $i=0;
                             $doublePayments = false;
+                            $postingEnabled = false;
                         @endphp
                         @foreach ($paidBills as $item)
                             @if ($item->OldAccountNo != null)
@@ -102,6 +103,9 @@
                                             <th class="text-right">{{ $item->BillAmount != null ? number_format($item->BillAmount, 2) : '' }}</th> 
                                             <th class="text-right">{{ number_format($item->NetAmount, 2) }}</th> 
                                         </tr>
+                                        @php
+                                            $postingEnabled = true;
+                                        @endphp 
                                     @endif
                                     
                                 @endif
@@ -111,7 +115,7 @@
                                     <td>{{ $i+1 }}</td>
                                     <td>{{ $item->DCRNumber }}</td>
                                     <td>{{ $item->BillNumber }}</td>
-                                    <th></th>
+                                    <th>*** {{ $item->AuditedBy }}</th>
                                     <td>{{ $item->ServiceAccountName }}</td>
                                     <td>{{ date('M Y', strtotime($item->ServicePeriod)) }}</td>
                                     <td class="text-right">{{ $item->ORNumber }}</td>
@@ -132,8 +136,12 @@
             </div>
 
             <div class="card-footer">
+                <a href="{{ route('paidBills.third-party-collection') }}" class="btn btn-sm btn-default"><i class="fas fa-check ico-tab-mini"></i>Done</a>
+                @if ($postingEnabled)
+                    <a href="{{ route('paidBills.post-payments', [$seriesNo]) }}" class="btn btn-sm btn-success float-right"><i class="fas fa-check-circle ico-tab-mini"></i> Post Payments</a>
+                @endif
+                
                 @if ($doublePayments==true)
-                    <a href="" class="btn btn-sm btn-success float-right"><i class="fas fa-check-circle ico-tab-mini"></i> Post Payments</a>
                     <a href="{{ route('paidBills.deposit-double-payments', [$seriesNo]) }}" class="btn btn-sm btn-default float-right ico-tab-mini"><i class="fas fa-piggy-bank ico-tab-mini"></i> Deposit Double Payments</a>
                 @endif                
             </div>

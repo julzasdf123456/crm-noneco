@@ -1,5 +1,9 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 php artisan serve --host 192.168.100.20
+=======
+php artisan serve --host 192.168.100.70
+>>>>>>> da8599692a9d15e110543de93276374849486e9f
 =======
 <<<<<<< HEAD
 php artisan serve --host 192.168.100.1

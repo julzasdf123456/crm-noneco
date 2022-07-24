@@ -6,34 +6,33 @@
         <br>
         {{-- NEW --}}
         <div class="card shadow-none">
-            <div class="card-header bg-success">
-                <span class="card-title"><strong>July 20, 2022 Update 😀!</strong> <i class="text-muted">12:00 AM</i> <br> <i>What's new?</i></span>
+            <div class="card-header bg-danger">
+                <span class="card-title"><strong>July 25, 2022 Update 😄!</strong> <i class="text-muted text-white">01:00 AM</i> <br> <i>What's new?</i></span>
             </div>
             <div class="card-body">
-                <h4><span class="text-muted"># </span> Main Menu</h4>
-                <ul>
-                    <li><strong class="text-primary">Menu Search</strong> is now added, it's right above all the menus on the left menu bar.</li>
-                </ul>
                 <h4><span class="text-muted"># </span> Billing Module</h4>
                 <ul>
-                    <li><strong>Application Adjustment</strong> - billing analyst can now mark bills as paid through application adjustment.
-                        This feature can be found when browsing the consumer file. A button is added in the bills tab (this button -> <i class="fas fa-check-circle text-info"></i> )
-                    Application Adjusment reports can also be printed in the <strong>Reports</strong> menu under Billing.</li>
-                    <li><strong>BAPA Renaming</strong> is now possible, which can be accessed in <strong class="text-primary">BAPA -> All BAPA -> Select the BAPA and View</strong></li>
-                    <li><strong>BAPA Reading List</strong> printing is also added under BAPA menu.</li>
+                    <li>Added Meter Reader Collection efficiency report (Partial, waiting for disconnection data)</li>
+                    <li>Billing and Reading Dashboard</li>
+                    <li><strong>BAPA Due Date</strong> can now be changed in the BAPA console</li>
+                    <li>Manual Adding of Newly Energized Accounts</li>
+                    <li>Manual Changing of Meters</li>
+                    <li>Manual Relocation</li>
+                    <li>Group Billing can now print all bills at once (Old and New Format)</li>
+                    <li>Added option to select billing month in the <strong>BAPA Reading List</strong> printing menu</li>
                 </ul>
-                <h4><span class="text-muted"># </span> Disconnection Module</h4>
+
+                <h4><span class="text-muted"># </span> Tellering & Cashiering</h4>
                 <ul>
-                    <li><strong>Turn Off List</strong> can now also be printed due to the lack of mobile phones in some areas. It can be found Under <strong>Disconnection</strong> menu</li>
+                    <li>Added <strong>Third-Party Collection module</strong></li>
+                    <li>Group Billing Payments can now be performed in tellering as well</li>
+                    <li>In JAVA Tellering, re-printing of OR on BAPA and Grouped Billing Payments is now available</li>
                 </ul>
-                <h4><span class="text-muted"># </span> Tickets Module</h4>
+                <h4><span class="text-muted"># </span> Bugs and Fixes</h4>
                 <ul>
-                    <li>MSDs can now update the accomplishment timelines even after execution of tickets.</li>
-                </ul>
-                <h4><span class="text-muted"># </span>Minor Adjustments and Bugs Fixes</h4>
-                <ul>
-                    <li>Filtered Meter Reader at generation of NoD</li>
-                    <li>Fixed unsorted notice of disconnections</li>
+                    <li>Fixed Printing problems on Old Format</li>
+                    <li>Fixed Collection Dashboard</li>
+                    <li>Captured and killed more than 10 bugs</li>
                 </ul>
             </div>
         </div>

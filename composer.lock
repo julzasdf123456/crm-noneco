@@ -1673,9 +1673,24 @@
         {
             "name": "laravel/framework",
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
 >>>>>>> a9f97ebf5032fb49782486a3c817771437dfcb78
+=======
+            "version": "v8.83.19",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/framework.git",
+                "reference": "4264f2ee12330bdb1be050998f58ba7271236395"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/4264f2ee12330bdb1be050998f58ba7271236395",
+                "reference": "4264f2ee12330bdb1be050998f58ba7271236395",
+=======
+<<<<<<< HEAD
+>>>>>>> da8599692a9d15e110543de93276374849486e9f
             "version": "v8.83.20",
             "source": {
                 "type": "git",
@@ -1860,6 +1875,9 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
+<<<<<<< HEAD
+            "time": "2022-07-13T13:23:09+00:00"
+=======
 <<<<<<< HEAD
             "time": "2022-07-19T14:11:02+00:00"
 =======
@@ -3260,9 +3278,24 @@
         {
             "name": "phpoffice/phpspreadsheet",
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
 >>>>>>> a9f97ebf5032fb49782486a3c817771437dfcb78
+=======
+            "version": "1.24.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PHPOffice/PhpSpreadsheet.git",
+                "reference": "ebe8745c92a7cac4514d040758393b5399633b83"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/ebe8745c92a7cac4514d040758393b5399633b83",
+                "reference": "ebe8745c92a7cac4514d040758393b5399633b83",
+=======
+<<<<<<< HEAD
+>>>>>>> da8599692a9d15e110543de93276374849486e9f
             "version": "1.24.1",
             "source": {
                 "type": "git",
@@ -3376,6 +3409,11 @@
             ],
             "support": {
                 "issues": "https://github.com/PHPOffice/PhpSpreadsheet/issues",
+<<<<<<< HEAD
+                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.24.0"
+            },
+            "time": "2022-07-09T13:49:09+00:00"
+=======
 <<<<<<< HEAD
                 "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.24.1"
             },

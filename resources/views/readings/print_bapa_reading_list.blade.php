@@ -1,3 +1,10 @@
+@php
+    // GET PREVIOUS MONTHS
+    for ($i = -1; $i <= 12; $i++) {
+        $months[] = date("Y-m-01", strtotime( date( 'Y-m-01' )." -$i months"));
+    }
+@endphp
+
 @extends('layouts.app')
 
 @section('content')
@@ -52,10 +59,40 @@
         </div>
     </div>
 </div>
+
+{{-- MODAL UPDATE READING FOR ZERO READINGS --}}
+<div class="modal fade" id="modal-select-period" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h4>Select Billing Month To Print</h4>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="ServicePeriodPrint">Billing Month</label>
+                    <select name="ServicePeriodPrint" id="ServicePeriodPrint" class="form-control">
+                        @for ($i = 0; $i < count($months); $i++)
+                            <option value="{{ $months[$i] }}">{{ date('F Y', strtotime($months[$i])) }}</option>
+                        @endfor
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="print-reading-list"><i class="fas fa-print ico-tab-mini"></i>Print</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('page_scripts')
 <script>
+    var bapa = ""
     $(document).ready(function() {
         $('#search-field').on("keyup", function(e) {
             e.stopPropagation()
@@ -74,7 +111,17 @@
         $('#search-btn').on('click', function() {
             searchBapa($('#search-field').val(), $('#towns').val())
         })
+
+        $('#print-reading-list').on('click', function() {
+            window.location.href = "{{ url('/readings/print-bapa-reading-list-to-paper') }}" + "/" + bapa + "/" + $('#ServicePeriodPrint').val()
+        })
     })
+
+    function selectPeriod(bapaName) {
+        bapa = bapaName
+
+        $('#modal-select-period').modal('show')
+    }
 
     function searchBapa(param, town) {
         $('#res-table tbody tr').remove()
