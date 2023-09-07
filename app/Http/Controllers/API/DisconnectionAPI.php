@@ -16,7 +16,8 @@ use App\Http\Requests\CreateReadingsRequest;
 class DisconnectionAPI extends Controller {
     public $successStatus = 200;
 
-    public function getDisconnectionListByMeterReader(Request $request) {        
+    public function getDisconnectionListByMeterReader(Request $request) {   
+        set_time_limit(1500);     
         $disconnectionList = DB::table('Billing_ServiceAccounts')
             ->leftJoin('Billing_Bills', 'Billing_ServiceAccounts.id', '=', 'Billing_Bills.AccountNumber')
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
@@ -86,7 +87,8 @@ class DisconnectionAPI extends Controller {
         return response()->json(['res' => 'Done'], $this->successStatus);
     }
 
-    public function getDisconnectionListByRoute(Request $request) {        
+    public function getDisconnectionListByRoute(Request $request) { 
+        set_time_limit(1500);          
         $disconnectionList = DB::table('Billing_ServiceAccounts')
             ->leftJoin('Billing_Bills', 'Billing_ServiceAccounts.id', '=', 'Billing_Bills.AccountNumber')
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
@@ -157,6 +159,7 @@ class DisconnectionAPI extends Controller {
     }
 
     public function getDisconnectionList(Request $request) {
+        set_time_limit(1500);   
         $disconnectionList = DB::table('CRM_Tickets')
             ->leftJoin('Billing_ServiceAccounts', 'CRM_Tickets.AccountNumber', '=', 'Billing_ServiceAccounts.id')
             ->leftJoin('CRM_Barangays', 'CRM_Tickets.Barangay', '=', 'CRM_Barangays.id')
