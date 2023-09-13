@@ -888,7 +888,7 @@ class DCRSummaryTransactionsController extends AppBaseController
 
         $tellers = DB::table('Cashier_PaidBills')
             ->leftJoin('users', 'Cashier_PaidBills.Teller', '=', 'users.id')
-            ->whereRaw("OfficeTransacted='" . $office . "' AND (ORDate BETWEEN '" . $from . "' AND '" . $to . "')")
+            ->whereRaw("OfficeTransacted='" . $office . "'")
             ->select('users.name', 'users.id')
             ->groupBy('users.name', 'users.id')
             ->orderBy('users.name')
