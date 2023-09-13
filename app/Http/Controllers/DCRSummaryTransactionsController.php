@@ -614,7 +614,7 @@ class DCRSummaryTransactionsController extends AppBaseController
 
     public function collectionOfficeEpand($office, Request $request) {
         $office = urldecode($office);
-        $office = trim($office);
+        // $office = trim($office);
         $teller = $request['Teller'];
         $from = $request['From'];
         $to = $request['To'];
