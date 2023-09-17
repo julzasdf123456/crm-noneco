@@ -223,6 +223,7 @@ class BAPAAdjustmentsController extends AppBaseController
     public function saveBapaAdjustments(Request $request) {
         $bapaName = urldecode($request['BAPAName']);
         $percentage = floatval($request['DiscountPercentage']);
+        $discountableAmountTotal = floatval($request['DiscountableAmountTotal']);
         $period = $request['Period'];
         // FETCH FIRST IF EXISTS IN BAPA ADJUSTMENTS
         $bAPAAdjustments = BAPAAdjustments::where('ServicePeriod', $request['Period'])
@@ -265,7 +266,21 @@ class BAPAAdjustmentsController extends AppBaseController
             if ($bill != null) {
                 // CHECK IF EXISTS IN ADJUSTMENT DETAILS
                 $adjusted = BAPAAdjustmentDetails::where('BillId', $bill->id)->first();
-                $discountAmnt = round(floatval($bill->NetAmount) * $percentage, 2);
+                $discountableAmount = floatval($bill->GenerationSystemCharge) +
+                    floatval($bill->TransmissionDeliveryChargeKW) +
+                    floatval($bill->TransmissionDeliveryChargeKWH) +
+                    floatval($bill->SystemLossCharge) +
+                    floatval($bill->DistributionDemandCharge) +
+                    floatval($bill->DistributionSystemCharge) +
+                    floatval($bill->SupplyRetailCustomerCharge) +
+                    floatval($bill->SupplySystemCharge) +
+                    floatval($bill->MeteringRetailCustomerCharge) +
+                    floatval($bill->MeteringSystemCharge) +
+                    floatval($bill->OtherGenerationRateAdjustment) +
+                    floatval($bill->OtherTransmissionCostAdjustmentKW) +
+                    floatval($bill->OtherTransmissionCostAdjustmentKWH) +
+                    floatval($bill->OtherSystemLossCostAdjustment);
+                $discountAmnt = round(floatval($discountableAmount) * $percentage, 2);
 
                 if ($adjusted != null) {
                     // UPDATE
@@ -379,13 +394,13 @@ class BAPAAdjustmentsController extends AppBaseController
                 ->where("Cashier_BAPAAdjustmentDetails.ServicePeriod", $period)
                 ->select('Cashier_BAPAAdjustmentDetails.DiscountPercentage',
                     'Cashier_BAPAAdjustmentDetails.ServicePeriod',
-                    DB::raw("CAST(Cashier_BAPAAdjustmentDetails.created_at AS DATE) AS DateAdjusted"),
+                    DB::raw("TRY_CAST(Cashier_BAPAAdjustmentDetails.created_at AS DATE) AS DateAdjusted"),
                     DB::raw("COUNT(Cashier_BAPAAdjustmentDetails.id) AS NoOfConsumers"),
-                    DB::raw("SUM(CAST(Billing_Bills.NetAmount AS DECIMAL(20,2))) AS TotalAmount"),
-                    DB::raw("SUM(CAST(Cashier_BAPAAdjustmentDetails.DiscountAmount AS DECIMAL(10,2))) AS DiscountTotal"))
+                    DB::raw("SUM(TRY_CAST(Billing_Bills.NetAmount AS DECIMAL(20,2))) AS TotalAmount"),
+                    DB::raw("SUM(TRY_CAST(Cashier_BAPAAdjustmentDetails.DiscountAmount AS DECIMAL(10,2))) AS DiscountTotal"))
                 ->groupBy('Cashier_BAPAAdjustmentDetails.DiscountPercentage', 
                     'Cashier_BAPAAdjustmentDetails.ServicePeriod',
-                    DB::raw("CAST(Cashier_BAPAAdjustmentDetails.created_at AS DATE)"))
+                    DB::raw("TRY_CAST(Cashier_BAPAAdjustmentDetails.created_at AS DATE)"))
                 ->get();
         } else {
             $bapaData = [];

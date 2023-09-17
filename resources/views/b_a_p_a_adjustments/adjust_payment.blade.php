@@ -69,7 +69,7 @@
                         <th>Account Status</th>
                         <th>kWh Used</th>
                         <th>Billing Mo.</th>
-                        <th>Bill Number</th>
+                        <th>Dscntble. Amnt.</th>
                         <th>Amount Due</th>
                         <th></th>
                     </thead>
@@ -156,6 +156,7 @@
         var change = 0
         var amountDue = 0
         var totalCountInit = 0
+        var discountableAmounts = 0
 
         $(document).ready(function() {
             // init
@@ -239,7 +240,7 @@
                                 res[index]['AccountStatus'],
                                 res[index]['KwhUsed'],
                                 res[index]['ServicePeriod'],
-                                res[index]['BillNumber'],
+                                res[index]['DiscountableAmount'],
                                 res[index]['NetAmount'],
                                 res[index]['ORNumber'],
                                 res[index]['BillId'],
@@ -258,7 +259,7 @@
             })
         }
 
-        function addToRow(acctNo, acctName, status, kwhused, billmo, billno, amtdue, or, id, acctId) {
+        function addToRow(acctNo, acctName, status, kwhused, billmo, discountableAmount, amtdue, or, id, acctId) {
             if (id != null) {
                 if (or != null) { // PAID AREA
                     return '<tr title="OR Number: ' + or + '" class="bg-teal disabled">' +
@@ -267,32 +268,32 @@
                                 '<td>' + status + '</td>' +
                                 '<td class="text-right">' + Number(parseFloat(kwhused).toFixed(2)).toLocaleString() + '</td>' +
                                 '<td>' + billmo + '</td>' +
-                                '<td class="text-right">' + (billno != null ? billno : '') + '</td>' +
+                                '<td class="text-right">' + (discountableAmount != null ? discountableAmount : '') + '</td>' +
                                 '<td class="text-right">' + (parseFloat(amtdue) ? Number(parseFloat(amtdue).toFixed(2)).toLocaleString() : '') + '</td>' +
                                 '<td></td>' +
                             '</tr>';
                 } else { // PAYABLE AREA
                     if (billmo == $('#ServicePeriod').val()) {
-                        return '<tr onclick=addToPayables("' + id + '") acctNo="' + acctNo + '" acctName="' + acctName + '" amnt="' + amtdue + '" id="' + id + '">' +
+                        return '<tr onclick=addToPayables("' + id + '") acctNo="' + acctNo + '" acctName="' + acctName + '" amnt="' + amtdue + '" dscntbl="' + discountableAmount + '" id="' + id + '">' +
                                     '<td><i class="ico-tab fas fa-exclamation text-primary"></i>' + acctNo + '</td>' +
                                     '<td>' + acctName + '</td>' +
                                     '<td>' + status + '</td>' +
                                     '<td class="text-right">' + Number(parseFloat(kwhused).toFixed(2)).toLocaleString() + '</td>' +
                                     '<td>' + billmo + '</td>' +
-                                    '<td class="text-right">' + (billno != null ? billno : '') + '</td>' +
+                                    '<td class="text-right">' + discountableAmount + '</td>' +
                                     '<td class="text-right">' + (parseFloat(amtdue) ? Number(parseFloat(amtdue).toFixed(2)).toLocaleString() : '') + '</td>' +
-                                    '<td><button class="btn btn-link btn-sm"><i ischecked=false amount="' + amtdue + '" id="btn-' + id + '" acctNo="' + acctId + '" class="fas fa-check-circle text-muted"></i></button></td>' +
+                                    '<td><button class="btn btn-link btn-sm"><i ischecked=false amount="' + amtdue + '" amnt="' + discountableAmount + '" id="btn-' + id + '" acctNo="' + acctId + '" class="fas fa-check-circle text-muted"></i></button></td>' +
                                 '</tr>';
                     } else { // arrears
-                        return '<tr onclick=addToPayables("' + id + '") acctNo="' + acctNo + '" acctName="' + acctName + '" amnt="' + amtdue + '" id="' + id + '" style="background-color: #ef9a9a;">' +
+                        return '<tr onclick=addToPayables("' + id + '") acctNo="' + acctNo + '" acctName="' + acctName + '" amnt="' + amtdue + '" dscntbl="' + discountableAmount + '" id="' + id + '" style="background-color: #ef9a9a;">' +
                                     '<td><i class="ico-tab fas fa-exclamation text-primary"></i>' + acctNo + '</td>' +
                                     '<td>' + acctName + '</td>' +
                                     '<td>' + status + '</td>' +
                                     '<td class="text-right">' + Number(parseFloat(kwhused).toFixed(2)).toLocaleString() + '</td>' +
                                     '<td>' + billmo + '</td>' +
-                                    '<td class="text-right">' + (billno != null ? billno : '') + '</td>' +
+                                    '<td class="text-right">' + discountableAmount + '</td>' +
                                     '<td class="text-right">' + (parseFloat(amtdue) ? Number(parseFloat(amtdue).toFixed(2)).toLocaleString() : '') + '</td>' +
-                                    '<td><button class="btn btn-link btn-sm"><i ischecked=false amount="' + amtdue + '" id="btn-' + id + '" acctNo="' + acctId + '" class="fas fa-check-circle text-muted"></i></button></td>' +
+                                    '<td><button class="btn btn-link btn-sm"><i ischecked=false amount="' + amtdue + '" amnt="' + discountableAmount + '" id="btn-' + id + '" acctNo="' + acctId + '" class="fas fa-check-circle text-muted"></i></button></td>' +
                                 '</tr>';
                     }                    
                 }
@@ -303,7 +304,7 @@
                                 '<td>' + status + '</td>' +
                                 '<td class="text-right">' + Number(parseFloat(kwhused).toFixed(2)).toLocaleString() + '</td>' +
                                 '<td>' + billmo + '</td>' +
-                                '<td class="text-right">' + (billno != null ? billno : '') + '</td>' +
+                                '<td class="text-right">' + (discountableAmount != null ? discountableAmount : '') + '</td>' +
                                 '<td class="text-right">' + (parseFloat(amtdue) ? Number(parseFloat(amtdue).toFixed(2)).toLocaleString() : '') + '</td>' +
                                 '<td></td>' +
                             '</tr>';
@@ -320,6 +321,7 @@
                 accountsAdded.push(id)
                 // ADD PAYABLE
                 totalAmount += parseFloat($('#btn-' + id).attr('amount'))
+                discountableAmounts += parseFloat($('#btn-' + id).attr('amnt'))
                 amountDue = totalAmount
 
                 // ADD TO QUEUE
@@ -342,6 +344,7 @@
                 // REMOVE ITEM FROM ARRAY
                 removeItemFromArray(id)
                 totalAmount -= parseFloat($('#btn-' + id).attr('amount'))
+                discountableAmounts -= parseFloat($('#btn-' + id).attr('amnt'))
                 amountDue = totalAmount
 
                 $('#queue-' + id).remove()
@@ -359,7 +362,7 @@
 
         function computeAmounts(update = false) {
             // COMPUTE DISCOUNT
-            discount = parseFloat($('#discountPercent').val()) * totalAmount
+            discount = parseFloat($('#discountPercent').val()) * discountableAmounts
             amountDue = totalAmount - discount
         }
 
@@ -429,6 +432,7 @@
                     BillNumbers : accountsAdded,
                     DiscountPercentage : $('#discountPercent').val(),
                     DiscountAmount : discount,
+                    DiscountableAmountTotal : discountableAmounts,
                     NetAmount : amountDue,
                     NoOfConsumers : accountsAdded.length,
                     BAPAName : "{{ urlencode($bapaName) }}",

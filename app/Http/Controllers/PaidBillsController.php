@@ -1209,8 +1209,20 @@ class PaidBillsController extends AppBaseController
                 'Billing_Bills.ServicePeriod',
                 'Billing_Bills.id as BillId',
                 'Billing_Bills.NetAmount',
-                // DB::raw("(SELECT TOP 1 id FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Bills.ServicePeriod) AS BillId"),
-                // DB::raw("(SELECT TOP 1 NetAmount FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Bills.ServicePeriod) AS NetAmount"),
+                DB::raw("(TRY_CAST(GenerationSystemCharge AS DECIMAL(12,2)) +
+                    TRY_CAST(TransmissionDeliveryChargeKW AS DECIMAL(12,2)) +
+                    TRY_CAST(TransmissionDeliveryChargeKWH AS DECIMAL(12,2)) +
+                    TRY_CAST(SystemLossCharge AS DECIMAL(12,2)) +
+                    TRY_CAST(DistributionDemandCharge AS DECIMAL(12,2)) +
+                    TRY_CAST(DistributionSystemCharge AS DECIMAL(12,2)) +
+                    TRY_CAST(SupplyRetailCustomerCharge AS DECIMAL(12,2)) +
+                    TRY_CAST(SupplySystemCharge AS DECIMAL(12,2)) +
+                    TRY_CAST(MeteringRetailCustomerCharge AS DECIMAL(12,2)) +
+                    TRY_CAST(MeteringSystemCharge AS DECIMAL(12,2)) +
+                    TRY_CAST(OtherGenerationRateAdjustment AS DECIMAL(12,2)) +
+                    TRY_CAST(OtherTransmissionCostAdjustmentKW AS DECIMAL(12,2)) +
+                    TRY_CAST(OtherTransmissionCostAdjustmentKWH AS DECIMAL(12,2)) +
+                    TRY_CAST(OtherSystemLossCostAdjustment AS DECIMAL(12,2))) AS DiscountableAmount"),
                 DB::raw("(SELECT TOP 1 ORNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod=Billing_Bills.ServicePeriod AND Status IS NULL) AS ORNumber"),)
             ->orderBy('Billing_ServiceAccounts.OldAccountNo')
             ->get();
