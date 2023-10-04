@@ -193,7 +193,7 @@ class HomeController extends Controller
     public function dashGetCollectionSummary() {
         $data = DB::table('Cashier_PaidBills')
             ->select(
-                DB::raw("(SELECT SUM(TRY_CAST(NetAmount AS DECIMAL(14,2))) FROM Cashier_PaidBills WHERE ORDate='" . date('Y-m-d') . "' AND Status IS NULL AND AccountNumber IS NOT NULL
+                DB::raw("(SELECT SUM(TRY_CAST(NetAmount AS DECIMAL(14,2))) FROM Cashier_PaidBills WHERE ORDate='" . date('Y-m-d') . "' AND (Status IS NULL) AND AccountNumber IS NOT NULL
                         AND OfficeTransacted IN ('CADIZ', 'EB MAGALONA', 'MANAPLA', 'VICTORIAS', 'SAN CARLOS', 'SAGAY', 'ESCALANTE', 'CALATRAVA', 'TOBOSO')) AS TodaysPowerBill"),
                 DB::raw("(SELECT SUM(TRY_CAST(NetAmount AS DECIMAL(14,2))) FROM Cashier_PaidBills WHERE ORDate='" . date('Y-m-d', strtotime('yesterday')) . "' AND Status IS NULL AND AccountNumber IS NOT NULL) AS YesterdaysPowerBill"),
                 DB::raw("(SELECT SUM(TRY_CAST(Total AS DECIMAL(14,2))) FROM Cashier_TransactionIndex WHERE ORDate='" . date('Y-m-d') . "' AND Status IS NULL) AS TodaysNonPowerBill"),

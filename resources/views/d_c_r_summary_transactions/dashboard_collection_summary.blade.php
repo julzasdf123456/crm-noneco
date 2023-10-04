@@ -66,8 +66,8 @@
                     if (jQuery.isEmptyObject(res)) {
 
                     } else {
-                        var today = parseFloat(res['TodaysPowerBill']) + parseFloat(res['TodaysNonPowerBill'])
-                        var yesterday = parseFloat(res['YesterdaysPowerBill']) + parseFloat(res['YesterdaysNonPowerBill'])
+                        var today = (jQuery.isEmptyObject(res['TodaysPowerBill']) ? 0 : parseFloat(res['TodaysPowerBill'])) + (jQuery.isEmptyObject(res['TodaysNonPowerBill']) ? 0 : parseFloat(res['TodaysNonPowerBill']))
+                        var yesterday = (jQuery.isEmptyObject(res['YesterdaysPowerBill']) ? 0 : parseFloat(res['YesterdaysPowerBill'])) + (jQuery.isEmptyObject(res['YesterdaysNonPowerBill']) ? 0 : parseFloat(res['YesterdaysNonPowerBill']))
 
                         var cadiz = parseFloat(res['Cadiz'])
                         var magalona = parseFloat(res['Magalona'])

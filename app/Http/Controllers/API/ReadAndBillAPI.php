@@ -390,7 +390,7 @@ class ReadAndBillAPI extends Controller {
     }
 
     public function getBapaAccountList(Request $request) {
-        set_time_limit(500);
+        set_time_limit(2500);
         $bapaName = $request['BAPAName'];
         $period = $request['ServicePeriod'];
 
