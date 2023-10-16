@@ -58,49 +58,96 @@ class ReadAndBillAPI extends Controller {
 
         $prevMonth = date('Y-m-01', strtotime($request['ServicePeriod'] . ' -1 month'));
 
-        $accounts = DB::table('Billing_ServiceAccounts')
-            ->leftJoin('Billing_Collectibles', 'Billing_ServiceAccounts.id', '=', 'Billing_Collectibles.AccountNumber')
-            ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
-            ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-            ->leftJoin('Billing_KatasNgVat', 'Billing_ServiceAccounts.id', '=', 'Billing_KatasNgVat.AccountNumber')
-            ->whereRaw("Billing_ServiceAccounts.MeterReader='" . $request['MeterReader'] . "' AND Billing_ServiceAccounts.Item1 IS NULL AND Billing_ServiceAccounts.Town='" . $request['AreaCode'] . "' AND Billing_ServiceAccounts.GroupCode='" . $request['GroupCode'] . "' AND Billing_ServiceAccounts.AccountStatus IN ('ACTIVE', 'DISCONNECTED') AND Billing_ServiceAccounts.OrganizationParentAccount IS NULL")
-            ->whereRaw("(Billing_ServiceAccounts.NetMetered IS NULL OR Billing_ServiceAccounts.NetMetered='No') AND (Billing_ServiceAccounts.Main IS NULL OR Billing_ServiceAccounts.Main='No') 
-                AND Billing_ServiceAccounts.AccountType NOT IN ('PUBLIC BUILDING HIGH VOLTAGE', 'COMMERCIAL HIGH VOLTAGE', 'INDUSTRIAL HIGH VOLTAGE')
-                AND Billing_ServiceAccounts.id NOT IN (SELECT AccountNumber FROM Billing_Readings WHERE ServicePeriod='" . $request['ServicePeriod'] . "' AND AccountNumber IS NOT NULL)")
-            ->whereRaw("((Billing_ServiceAccounts.AccountExpiration > '" . date('Y-m-d') . "' AND AccountRetention='Temporary') OR AccountRetention='Permanent' OR AccountExpiration IS NULL)")
-            ->select('Billing_ServiceAccounts.id', 
-                'Billing_ServiceAccounts.ServiceAccountName',
-                'Billing_ServiceAccounts.Multiplier',
-                // 'Billing_ServiceAccounts.Coreloss',
-                'Billing_ServiceAccounts.AccountType',
-                'Billing_ServiceAccounts.AccountStatus',
-                'Billing_ServiceAccounts.AreaCode',
-                'Billing_ServiceAccounts.GroupCode',
-                'Billing_ServiceAccounts.Town',
-                'Billing_ServiceAccounts.Barangay',
-                'Billing_ServiceAccounts.Latitude',
-                'Billing_ServiceAccounts.Longitude',
-                'Billing_ServiceAccounts.OldAccountNo',
-                'Billing_ServiceAccounts.SequenceCode',
-                'Billing_ServiceAccounts.SeniorCitizen',
-                'Billing_ServiceAccounts.Evat5Percent',
-                'Billing_ServiceAccounts.Ewt2Percent',
-                'CRM_Towns.Town as TownFull',
-                'CRM_Barangays.Barangay as BarangayFull',
-                'Billing_ServiceAccounts.Purok',
-                'Billing_Collectibles.Balance',
-                'Billing_KatasNgVat.Balance as KatasNgVat',
-                DB::raw("(SELECT TOP 1 Amount FROM Billing_ArrearsLedgerDistribution WHERE AccountNumber=Billing_ServiceAccounts.id AND IsPaid IS NULL AND ServicePeriod='" . $request['ServicePeriod'] . "') AS ArrearsLedger"),
-                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE ServicePeriod=(SELECT TOP 1 ServicePeriod FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id ORDER BY ServicePeriod DESC) AND AccountNumber=Billing_ServiceAccounts.id) AS KwhUsed"),
-                DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE ServicePeriod=(SELECT TOP 1 ServicePeriod FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id ORDER BY ServicePeriod DESC) AND AccountNumber=Billing_ServiceAccounts.id) AS PrevKwhUsed"),
-                DB::raw("(SELECT TOP 1 CAST(ReadingTimestamp AS DATE) FROM Billing_Readings WHERE ServicePeriod='" . $prevMonth . "' AND AccountNumber=Billing_ServiceAccounts.id) AS ReadingTimestamp"),
-                DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterSerial"),
-                DB::raw("(SELECT TOP 1 Balance FROM Billing_PrePaymentBalance WHERE AccountNumber=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS Deposit"),
-                DB::raw("(SELECT TOP 1 AdditionalKwhForNextBilling FROM Billing_ChangeMeterLogs WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $request['ServicePeriod'] . "' ORDER BY created_at DESC) AS ChangeMeterAdditionalKwh"),
-                DB::raw("(SELECT TOP 1 NewMeterStartKwh FROM Billing_ChangeMeterLogs WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $request['ServicePeriod'] . "' ORDER BY created_at DESC) AS ChangeMeterStartKwh"),
-                DB::raw("(SELECT SUM(TRY_CAST(NetAmount AS DECIMAL(8, 2))) FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND MergedToCollectible IS NULL AND AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_ServiceAccounts.id AND AccountNumber IS NOT NULL AND (Status IS NULL OR Status='Application') AND ServicePeriod=Billing_Bills.ServicePeriod)) AS ArrearsTotal"),
-                DB::raw("'" . date('Y-m-d', strtotime($request['ServicePeriod'])) . "' AS ServicePeriod"))
-            ->get();
+        if ($request['MeterReader'] == '1658308857537') {
+            $accounts = DB::table('Billing_ServiceAccounts')
+                ->leftJoin('Billing_Collectibles', 'Billing_ServiceAccounts.id', '=', 'Billing_Collectibles.AccountNumber')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->leftJoin('Billing_KatasNgVat', 'Billing_ServiceAccounts.id', '=', 'Billing_KatasNgVat.AccountNumber')
+                ->whereRaw("Billing_ServiceAccounts.MeterReader='" . $request['MeterReader'] . "' AND Billing_ServiceAccounts.Item1 IS NULL AND Billing_ServiceAccounts.Town='" . $request['AreaCode'] . "' AND Billing_ServiceAccounts.GroupCode='" . $request['GroupCode'] . "' AND Billing_ServiceAccounts.AccountStatus IN ('ACTIVE', 'DISCONNECTED') AND Billing_ServiceAccounts.OrganizationParentAccount IS NULL")
+                ->whereRaw("(Billing_ServiceAccounts.NetMetered IS NULL OR Billing_ServiceAccounts.NetMetered='No') AND (Billing_ServiceAccounts.Main IS NULL OR Billing_ServiceAccounts.Main='No') 
+                    AND Billing_ServiceAccounts.AccountType NOT IN ('PUBLIC BUILDING HIGH VOLTAGE', 'COMMERCIAL HIGH VOLTAGE', 'INDUSTRIAL HIGH VOLTAGE')")
+                ->whereRaw("((Billing_ServiceAccounts.AccountExpiration > '" . date('Y-m-d') . "' AND AccountRetention='Temporary') OR AccountRetention='Permanent' OR AccountExpiration IS NULL)")
+                ->select('Billing_ServiceAccounts.id', 
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.Multiplier',
+                    // 'Billing_ServiceAccounts.Coreloss',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.GroupCode',
+                    'Billing_ServiceAccounts.Town',
+                    'Billing_ServiceAccounts.Barangay',
+                    'Billing_ServiceAccounts.Latitude',
+                    'Billing_ServiceAccounts.Longitude',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.SeniorCitizen',
+                    'Billing_ServiceAccounts.Evat5Percent',
+                    'Billing_ServiceAccounts.Ewt2Percent',
+                    'CRM_Towns.Town as TownFull',
+                    'CRM_Barangays.Barangay as BarangayFull',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_Collectibles.Balance',
+                    'Billing_KatasNgVat.Balance as KatasNgVat',
+                    DB::raw("(SELECT TOP 1 Amount FROM Billing_ArrearsLedgerDistribution WHERE AccountNumber=Billing_ServiceAccounts.id AND IsPaid IS NULL AND ServicePeriod='" . $request['ServicePeriod'] . "') AS ArrearsLedger"),
+                    DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE ServicePeriod=(SELECT TOP 1 ServicePeriod FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id ORDER BY ServicePeriod DESC) AND AccountNumber=Billing_ServiceAccounts.id) AS KwhUsed"),
+                    DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE ServicePeriod=(SELECT TOP 1 ServicePeriod FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id ORDER BY ServicePeriod DESC) AND AccountNumber=Billing_ServiceAccounts.id) AS PrevKwhUsed"),
+                    DB::raw("(SELECT TOP 1 CAST(ReadingTimestamp AS DATE) FROM Billing_Readings WHERE ServicePeriod='" . $prevMonth . "' AND AccountNumber=Billing_ServiceAccounts.id) AS ReadingTimestamp"),
+                    DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterSerial"),
+                    DB::raw("(SELECT TOP 1 Balance FROM Billing_PrePaymentBalance WHERE AccountNumber=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS Deposit"),
+                    DB::raw("(SELECT TOP 1 AdditionalKwhForNextBilling FROM Billing_ChangeMeterLogs WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $request['ServicePeriod'] . "' ORDER BY created_at DESC) AS ChangeMeterAdditionalKwh"),
+                    DB::raw("(SELECT TOP 1 NewMeterStartKwh FROM Billing_ChangeMeterLogs WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $request['ServicePeriod'] . "' ORDER BY created_at DESC) AS ChangeMeterStartKwh"),
+                    DB::raw("(SELECT SUM(TRY_CAST(NetAmount AS DECIMAL(8, 2))) FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND MergedToCollectible IS NULL AND AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_ServiceAccounts.id AND AccountNumber IS NOT NULL AND (Status IS NULL OR Status='Application') AND ServicePeriod=Billing_Bills.ServicePeriod)) AS ArrearsTotal"),
+                    DB::raw("'" . date('Y-m-d', strtotime($request['ServicePeriod'])) . "' AS ServicePeriod"))
+                ->get();
+        } else {
+            $accounts = DB::table('Billing_ServiceAccounts')
+                ->leftJoin('Billing_Collectibles', 'Billing_ServiceAccounts.id', '=', 'Billing_Collectibles.AccountNumber')
+                ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
+                ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
+                ->leftJoin('Billing_KatasNgVat', 'Billing_ServiceAccounts.id', '=', 'Billing_KatasNgVat.AccountNumber')
+                ->whereRaw("Billing_ServiceAccounts.MeterReader='" . $request['MeterReader'] . "' AND Billing_ServiceAccounts.Item1 IS NULL AND Billing_ServiceAccounts.Town='" . $request['AreaCode'] . "' AND Billing_ServiceAccounts.GroupCode='" . $request['GroupCode'] . "' AND Billing_ServiceAccounts.AccountStatus IN ('ACTIVE', 'DISCONNECTED') AND Billing_ServiceAccounts.OrganizationParentAccount IS NULL")
+                ->whereRaw("(Billing_ServiceAccounts.NetMetered IS NULL OR Billing_ServiceAccounts.NetMetered='No') AND (Billing_ServiceAccounts.Main IS NULL OR Billing_ServiceAccounts.Main='No') 
+                    AND Billing_ServiceAccounts.AccountType NOT IN ('PUBLIC BUILDING HIGH VOLTAGE', 'COMMERCIAL HIGH VOLTAGE', 'INDUSTRIAL HIGH VOLTAGE')
+                    AND Billing_ServiceAccounts.id NOT IN (SELECT AccountNumber FROM Billing_Readings WHERE ServicePeriod='" . $request['ServicePeriod'] . "' AND AccountNumber IS NOT NULL)")
+                ->whereRaw("((Billing_ServiceAccounts.AccountExpiration > '" . date('Y-m-d') . "' AND AccountRetention='Temporary') OR AccountRetention='Permanent' OR AccountExpiration IS NULL)")
+                ->select('Billing_ServiceAccounts.id', 
+                    'Billing_ServiceAccounts.ServiceAccountName',
+                    'Billing_ServiceAccounts.Multiplier',
+                    // 'Billing_ServiceAccounts.Coreloss',
+                    'Billing_ServiceAccounts.AccountType',
+                    'Billing_ServiceAccounts.AccountStatus',
+                    'Billing_ServiceAccounts.AreaCode',
+                    'Billing_ServiceAccounts.GroupCode',
+                    'Billing_ServiceAccounts.Town',
+                    'Billing_ServiceAccounts.Barangay',
+                    'Billing_ServiceAccounts.Latitude',
+                    'Billing_ServiceAccounts.Longitude',
+                    'Billing_ServiceAccounts.OldAccountNo',
+                    'Billing_ServiceAccounts.SequenceCode',
+                    'Billing_ServiceAccounts.SeniorCitizen',
+                    'Billing_ServiceAccounts.Evat5Percent',
+                    'Billing_ServiceAccounts.Ewt2Percent',
+                    'CRM_Towns.Town as TownFull',
+                    'CRM_Barangays.Barangay as BarangayFull',
+                    'Billing_ServiceAccounts.Purok',
+                    'Billing_Collectibles.Balance',
+                    'Billing_KatasNgVat.Balance as KatasNgVat',
+                    DB::raw("(SELECT TOP 1 Amount FROM Billing_ArrearsLedgerDistribution WHERE AccountNumber=Billing_ServiceAccounts.id AND IsPaid IS NULL AND ServicePeriod='" . $request['ServicePeriod'] . "') AS ArrearsLedger"),
+                    DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Readings WHERE ServicePeriod=(SELECT TOP 1 ServicePeriod FROM Billing_Readings WHERE AccountNumber=Billing_ServiceAccounts.id ORDER BY ServicePeriod DESC) AND AccountNumber=Billing_ServiceAccounts.id) AS KwhUsed"),
+                    DB::raw("(SELECT TOP 1 KwhUsed FROM Billing_Bills WHERE ServicePeriod=(SELECT TOP 1 ServicePeriod FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id ORDER BY ServicePeriod DESC) AND AccountNumber=Billing_ServiceAccounts.id) AS PrevKwhUsed"),
+                    DB::raw("(SELECT TOP 1 CAST(ReadingTimestamp AS DATE) FROM Billing_Readings WHERE ServicePeriod='" . $prevMonth . "' AND AccountNumber=Billing_ServiceAccounts.id) AS ReadingTimestamp"),
+                    DB::raw("(SELECT TOP 1 SerialNumber FROM Billing_Meters WHERE ServiceAccountId=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS MeterSerial"),
+                    DB::raw("(SELECT TOP 1 Balance FROM Billing_PrePaymentBalance WHERE AccountNumber=Billing_ServiceAccounts.id ORDER BY created_at DESC) AS Deposit"),
+                    DB::raw("(SELECT TOP 1 AdditionalKwhForNextBilling FROM Billing_ChangeMeterLogs WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $request['ServicePeriod'] . "' ORDER BY created_at DESC) AS ChangeMeterAdditionalKwh"),
+                    DB::raw("(SELECT TOP 1 NewMeterStartKwh FROM Billing_ChangeMeterLogs WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $request['ServicePeriod'] . "' ORDER BY created_at DESC) AS ChangeMeterStartKwh"),
+                    DB::raw("(SELECT SUM(TRY_CAST(NetAmount AS DECIMAL(8, 2))) FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND MergedToCollectible IS NULL AND AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE AccountNumber=Billing_ServiceAccounts.id AND AccountNumber IS NOT NULL AND (Status IS NULL OR Status='Application') AND ServicePeriod=Billing_Bills.ServicePeriod)) AS ArrearsTotal"),
+                    DB::raw("'" . date('Y-m-d', strtotime($request['ServicePeriod'])) . "' AS ServicePeriod"))
+                ->get();
+        }
+
+        
 
         /**
          * CHECK IF RATE IS AVAILABLE
