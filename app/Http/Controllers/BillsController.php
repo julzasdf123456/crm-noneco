@@ -3469,6 +3469,7 @@ class BillsController extends AppBaseController
             $todaysReading = DB::table('Billing_ServiceAccounts')
                 ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'TRY_CAST(users.id AS VARCHAR)')
                 ->whereNotNull('Billing_ServiceAccounts.MeterReader')
+                ->whereNotNull('users.id')
                 ->select('users.name', 'users.id',
                     DB::raw("(SELECT COUNT(id) FROM Billing_Readings WHERE TRY_CAST(ReadingTimestamp AS DATE)='" . date('Y-m-d') . "' AND MeterReader=TRY_CAST(users.id AS varchar)) AS TotalReading"),
                     DB::raw("(SELECT COUNT(id) FROM Billing_Bills WHERE BillingDate='" . date('Y-m-d') . "'  AND UserId=TRY_CAST(users.id AS varchar)) AS TotalBills"),
