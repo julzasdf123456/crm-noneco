@@ -193,7 +193,7 @@ class ServiceAccountsController extends AppBaseController
         $serviceAccounts = DB::table('Billing_ServiceAccounts')
             ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
             ->leftJoin('CRM_Barangays', 'Billing_ServiceAccounts.Barangay', '=', 'CRM_Barangays.id')
-            ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
+            ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', DB::raw("TRY_CAST(users.id AS VARCHAR)"))
             ->select('Billing_ServiceAccounts.id',
                     'Billing_ServiceAccounts.ServiceAccountName',
                     'Billing_ServiceAccounts.OldAccountNo',
