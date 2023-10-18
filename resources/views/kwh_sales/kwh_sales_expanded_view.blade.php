@@ -43,7 +43,7 @@
                                     <td><a href="{{ route('serviceAccounts.show', [$item->AccountNumber]) }}">{{ $item->OldAccountNo }}</a></td>
                                     <td>{{ ServiceAccounts::getAddress($item) }}</td>
                                     <td class="text-right text-info">{{ is_numeric($item->Multiplier) ? round(floatval($item->PresentKwh) - floatval($item->PreviousKwh),2) : 'MULT_ERR' }}</td>
-                                    <td class="text-right">{{ number_format($item->Multiplier) }}</td>
+                                    <td class="text-right">{{ is_numeric($item->Multiplier) ? number_format($item->Multiplier) : $item->Multiplier }}</td>
                                     <th class="text-right text-primary">{{ number_format($item->KwhUsed, 2) }}</th>
                                     <th class="text-right text-success">{{ number_format($item->NetAmount, 2) }}</th>
                                 </tr>
