@@ -172,23 +172,51 @@ class DisconnectionHistoryController extends AppBaseController
     public function generateTurnOffList() {
         $towns = Towns::orderBy('Town')->get();
         if (env('APP_AREA_CODE') == '15') {
-            $meterReaders = DB::table('Billing_ServiceAccounts')
-                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
-                ->whereNotNull('MeterReader')
-                ->select('users.name', 'users.id')
-                ->groupBy('users.name', 'users.id')
+            $acts = DB::table('Billing_ServiceAccounts')
+                ->select(DB::raw("TRY_CAST(MeterReader AS VARCHAR) as MeterReader"))
+                ->groupBy('MeterReader')
+                ->whereRaw("MeterReader IS NOT NULL")
+                ->get();
+            
+            $ids = "";
+            $i=0; 
+            foreach ($acts as $item) {
+                if ($i < count($acts)-1) {
+                    $ids .= "'" . $item->MeterReader . "',";
+                } else {
+                    $ids .= "'" . $item->MeterReader . "'";
+                }                
+                $i++;
+            }
+
+            $meterReaders = DB::table('users')
+                ->whereRaw("TRY_CAST(id AS VARCHAR) IN (" . $ids . ")")
                 ->orderBy('users.name')
                 ->get();
         } else {
-            $meterReaders = DB::table('Billing_ServiceAccounts')
-                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
-                ->whereIn('Billing_ServiceAccounts.Town', MeterReaders::getMeterAreaCodeScope(env("APP_AREA_CODE")))
-                ->whereNotNull('MeterReader')
-                ->select('users.name', 'users.id')
-                ->groupBy('users.name', 'users.id')
+            $acts = DB::table('Billing_ServiceAccounts')
+                ->select(DB::raw("TRY_CAST(MeterReader AS VARCHAR) as MeterReader"))
+                ->groupBy('MeterReader')
+                ->whereRaw("MeterReader IS NOT NULL")
+                ->whereIn('Town', MeterReaders::getMeterAreaCodeScope(env("APP_AREA_CODE")))
+                ->get();
+            
+            $ids = "";
+            $i=0; 
+            foreach ($acts as $item) {
+                if ($i < count($acts)-1) {
+                    $ids .= "'" . $item->MeterReader . "',";
+                } else {
+                    $ids .= "'" . $item->MeterReader . "'";
+                }                
+                $i++;
+            }
+
+            $meterReaders = DB::table('users')
+                ->whereRaw("TRY_CAST(id AS VARCHAR) IN (" . $ids . ")")
                 ->orderBy('users.name')
                 ->get();
-        }
+        }  
 
         return view('/disconnection_histories/generate_turn_off_list', [
             'towns' => $towns,
