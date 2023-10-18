@@ -3479,7 +3479,7 @@ class BillsController extends AppBaseController
                 ->get();
         } else {
             $todaysReading = DB::table('Billing_ServiceAccounts')
-                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', DB::raw("TRY_CAST(users.id AS VARCHAR)")
+                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', DB::raw("TRY_CAST(users.id AS VARCHAR)"))
                 ->whereIn("Billing_ServiceAccounts.Town", MeterReaders::getMeterAreaCodeScope(env('APP_AREA_CODE')))
                 ->whereNotNull('Billing_ServiceAccounts.MeterReader')
                 ->select('users.name', 'users.id',
