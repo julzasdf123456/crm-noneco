@@ -169,19 +169,21 @@ class DiscoNoticeHistoryController extends AppBaseController
 
         if (env('APP_AREA_CODE') == '15') {
             $meterReaders = DB::table('Billing_ServiceAccounts')
-                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'TRY_CAST(users.id AS VARCHAR)')
+                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
                 ->whereNotNull('MeterReader')
-                ->select('users.name', 'users.id')
-                ->groupBy('users.name', 'users.id')
+                ->select('users.name', DB::raw("TRY_CAST(users.id AS VARCHAR) AS id"))
+                ->groupBy('users.name')
+                ->groupByRaw("TRY_CAST(users.id AS VARCHAR) as id")
                 ->orderBy('users.name')
                 ->get();
         } else {
             $meterReaders = DB::table('Billing_ServiceAccounts')
-                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'TRY_CAST(users.id AS VARCHAR)')
+                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
                 ->whereIn('Billing_ServiceAccounts.Town', MeterReaders::getMeterAreaCodeScope(env("APP_AREA_CODE")))
                 ->whereNotNull('MeterReader')
-                ->select('users.name', 'users.id')
-                ->groupBy('users.name', 'users.id')
+                ->select('users.name', DB::raw("TRY_CAST(users.id AS VARCHAR) AS id"))
+                ->groupBy('users.name')
+                ->groupByRaw("TRY_CAST(users.id AS VARCHAR) as id")
                 ->orderBy('users.name')
                 ->get();
         }       
