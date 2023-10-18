@@ -3467,7 +3467,7 @@ class BillsController extends AppBaseController
         $latestRate = Rates::orderByDesc('ServicePeriod')->first();
         if (env("APP_AREA_CODE") == '15') {
             $todaysReading = DB::table('Billing_ServiceAccounts')
-                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'TRY_CAST(users.id AS VARCHAR)')
+                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', DB::raw("TRY_CAST(users.id AS VARCHAR)"))
                 ->whereNotNull('Billing_ServiceAccounts.MeterReader')
                 ->whereNotNull('users.id')
                 ->select('users.name', 'users.id',
