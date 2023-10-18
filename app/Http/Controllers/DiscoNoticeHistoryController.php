@@ -174,13 +174,13 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->whereRaw("MeterReader IS NOT NULL")
                 ->get();
             
-            $ids = [];
+            $ids = "";
             foreach ($acts as $item) {
-                $ids[] = $item->MeterReader;
+                $ids .= "'" . $item->MeterReader . "',";
             }
 
             $meterReaders = DB::table('users')
-                ->whereIn('id', $ids)
+                ->whereRaw("id IN (" . $ids . ")")
                 ->orderBy('users.name')
                 ->get();
         } else {
@@ -191,13 +191,13 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->whereIn('Town', MeterReaders::getMeterAreaCodeScope(env("APP_AREA_CODE")))
                 ->get();
             
-            $ids = [];
+            $ids = "";
             foreach ($acts as $item) {
-                $ids[] = $item->MeterReader;
+                $ids .= "'" . $item->MeterReader . "',";
             }
 
             $meterReaders = DB::table('users')
-                ->whereIn('id', $ids)
+                ->whereRaw("id IN (" . $ids . ")")
                 ->orderBy('users.name')
                 ->get();
         }       
