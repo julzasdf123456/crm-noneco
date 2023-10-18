@@ -168,22 +168,36 @@ class DiscoNoticeHistoryController extends AppBaseController
         $towns = Towns::orderBy('Town')->get();
 
         if (env('APP_AREA_CODE') == '15') {
-            $meterReaders = DB::table('Billing_ServiceAccounts')
-                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
-                ->whereNotNull('MeterReader')
-                ->select('users.name', DB::raw("TRY_CAST(users.id AS VARCHAR) AS id"))
-                ->groupBy('users.name')
-                ->groupByRaw("TRY_CAST(users.id AS VARCHAR)")
+            $acts = DB::table('Billing_ServiceAccounts')
+                ->select('MeterReader')
+                ->groupBy('MeterReader')
+                ->whereRaw("MeterReader IS NOT NULL")
+                ->get();
+            
+            $ids = [];
+            foreach ($acts as $item) {
+                $ids[] = $item->MeterReader;
+            }
+
+            $meterReaders = DB::table('users')
+                ->whereIn('id', $ids)
                 ->orderBy('users.name')
                 ->get();
         } else {
-            $meterReaders = DB::table('Billing_ServiceAccounts')
-                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
-                ->whereIn('Billing_ServiceAccounts.Town', MeterReaders::getMeterAreaCodeScope(env("APP_AREA_CODE")))
-                ->whereNotNull('MeterReader')
-                ->select('users.name', DB::raw("TRY_CAST(users.id AS VARCHAR) AS id"))
-                ->groupBy('users.name')
-                ->groupByRaw("TRY_CAST(users.id AS VARCHAR)")
+            $acts = DB::table('Billing_ServiceAccounts')
+                ->select('MeterReader')
+                ->groupBy('MeterReader')
+                ->whereRaw("MeterReader IS NOT NULL")
+                ->whereIn('Town', MeterReaders::getMeterAreaCodeScope(env("APP_AREA_CODE")))
+                ->get();
+            
+            $ids = [];
+            foreach ($acts as $item) {
+                $ids[] = $item->MeterReader;
+            }
+
+            $meterReaders = DB::table('users')
+                ->whereIn('id', $ids)
                 ->orderBy('users.name')
                 ->get();
         }       
