@@ -169,7 +169,7 @@ class DiscoNoticeHistoryController extends AppBaseController
 
         if (env('APP_AREA_CODE') == '15') {
             $acts = DB::table('Billing_ServiceAccounts')
-                ->select('MeterReader')
+                ->select(DB::raw("TRY_CAST(MeterReader AS VARCHAR) as MeterReader"))
                 ->groupBy('MeterReader')
                 ->whereRaw("MeterReader IS NOT NULL")
                 ->get();
@@ -185,7 +185,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->get();
         } else {
             $acts = DB::table('Billing_ServiceAccounts')
-                ->select('MeterReader')
+                ->select(DB::raw("TRY_CAST(MeterReader AS VARCHAR) as MeterReader"))
                 ->groupBy('MeterReader')
                 ->whereRaw("MeterReader IS NOT NULL")
                 ->whereIn('Town', MeterReaders::getMeterAreaCodeScope(env("APP_AREA_CODE")))
