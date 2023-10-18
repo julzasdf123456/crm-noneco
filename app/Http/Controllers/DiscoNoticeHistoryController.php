@@ -173,7 +173,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->whereNotNull('MeterReader')
                 ->select('users.name', DB::raw("TRY_CAST(users.id AS VARCHAR) AS id"))
                 ->groupBy('users.name')
-                ->groupByRaw("TRY_CAST(users.id AS VARCHAR) as id")
+                ->groupByRaw("TRY_CAST(users.id AS VARCHAR)")
                 ->orderBy('users.name')
                 ->get();
         } else {
@@ -183,7 +183,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->whereNotNull('MeterReader')
                 ->select('users.name', DB::raw("TRY_CAST(users.id AS VARCHAR) AS id"))
                 ->groupBy('users.name')
-                ->groupByRaw("TRY_CAST(users.id AS VARCHAR) as id")
+                ->groupByRaw("TRY_CAST(users.id AS VARCHAR)")
                 ->orderBy('users.name')
                 ->get();
         }       
