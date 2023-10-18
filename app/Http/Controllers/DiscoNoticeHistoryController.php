@@ -175,8 +175,14 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->get();
             
             $ids = "";
+            $i=0; 
             foreach ($acts as $item) {
-                $ids .= "'" . $item->MeterReader . "',";
+                if ($i < count($acts)-1) {
+                    $ids .= "'" . $item->MeterReader . "',";
+                } else {
+                    $ids .= "'" . $item->MeterReader . "'";
+                }                
+                $i++;
             }
 
             $meterReaders = DB::table('users')
@@ -192,8 +198,14 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->get();
             
             $ids = "";
+            $i=0; 
             foreach ($acts as $item) {
-                $ids .= "'" . $item->MeterReader . "',";
+                if ($i < count($acts)-1) {
+                    $ids .= "'" . $item->MeterReader . "',";
+                } else {
+                    $ids .= "'" . $item->MeterReader . "'";
+                }                
+                $i++;
             }
 
             $meterReaders = DB::table('users')
