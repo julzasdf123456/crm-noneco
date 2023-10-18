@@ -169,7 +169,7 @@ class DiscoNoticeHistoryController extends AppBaseController
 
         if (env('APP_AREA_CODE') == '15') {
             $meterReaders = DB::table('Billing_ServiceAccounts')
-                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
+                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'TRY_CAST(users.id AS VARCHAR)')
                 ->whereNotNull('MeterReader')
                 ->select('users.name', 'users.id')
                 ->groupBy('users.name', 'users.id')
@@ -177,7 +177,7 @@ class DiscoNoticeHistoryController extends AppBaseController
                 ->get();
         } else {
             $meterReaders = DB::table('Billing_ServiceAccounts')
-                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'users.id')
+                ->leftJoin('users', 'Billing_ServiceAccounts.MeterReader', '=', 'TRY_CAST(users.id AS VARCHAR)')
                 ->whereIn('Billing_ServiceAccounts.Town', MeterReaders::getMeterAreaCodeScope(env("APP_AREA_CODE")))
                 ->whereNotNull('MeterReader')
                 ->select('users.name', 'users.id')
