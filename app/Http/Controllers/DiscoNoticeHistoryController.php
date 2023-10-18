@@ -186,7 +186,7 @@ class DiscoNoticeHistoryController extends AppBaseController
             }
 
             $meterReaders = DB::table('users')
-                ->whereRaw("id IN (" . $ids . ")")
+                ->whereRaw("TRY_CAST(id AS VARCHAR) IN (" . $ids . ")")
                 ->orderBy('users.name')
                 ->get();
         } else {
@@ -209,7 +209,7 @@ class DiscoNoticeHistoryController extends AppBaseController
             }
 
             $meterReaders = DB::table('users')
-                ->whereRaw("id IN (" . $ids . ")")
+                ->whereRaw("TRY_CAST(id AS VARCHAR) IN (" . $ids . ")")
                 ->orderBy('users.name')
                 ->get();
         }       
