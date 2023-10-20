@@ -36,6 +36,7 @@
                             <tbody>
                                 @if ($meterReaders != null)
                                     @foreach ($meterReaders as $item)
+                                        @if ($item->id != null) 
                                         <tr>
                                             <td>{{ $item->name }}</td>
                                             <td>{{ $item->GroupCodes }}</td>
@@ -46,6 +47,8 @@
                                                 </span>
                                             </td>
                                         </tr>
+                                        @endif
+                                        
                                     @endforeach
                                 @endif
                             </tbody>
