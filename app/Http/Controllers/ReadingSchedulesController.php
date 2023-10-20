@@ -276,7 +276,7 @@ class ReadingSchedulesController extends AppBaseController
             ->where('Town', $request['AreaCode'])
             ->whereNotNull('GroupCode')
             ->whereNotNull('MeterReader')
-            ->whereRaw("LEN(MeterReader) > 0")
+            ->whereRaw("LEN(MeterReader) > 0 AND LEN(GroupCode) < 3")
             ->select('GroupCode')
             ->groupBy('GroupCode')
             ->orderByRaw('TRY_CAST(GroupCode AS INTEGER)')
