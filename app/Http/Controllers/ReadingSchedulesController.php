@@ -202,13 +202,24 @@ class ReadingSchedulesController extends AppBaseController
     }
 
     public function readingScheduleIndex() {
-        $periods = DB::table('Billing_ReadingSchedules')
-            ->where('AreaCode', env("APP_AREA_CODE"))
-            ->select('ServicePeriod',
-                DB::raw("COUNT(id) AS SchedulesCreated"))
-            ->groupBy('ServicePeriod')
-            ->orderByDesc('ServicePeriod')
-            ->get();
+        if (env("APP_AREA_CODE") == '15') {
+            $periods = DB::table('Billing_ReadingSchedules')
+                // ->where('AreaCode', env("APP_AREA_CODE"))
+                ->select('ServicePeriod',
+                    DB::raw("COUNT(id) AS SchedulesCreated"))
+                ->groupBy('ServicePeriod')
+                ->orderByDesc('ServicePeriod')
+                ->get();
+        } else {
+            $periods = DB::table('Billing_ReadingSchedules')
+                ->where('AreaCode', env("APP_AREA_CODE"))
+                ->select('ServicePeriod',
+                    DB::raw("COUNT(id) AS SchedulesCreated"))
+                ->groupBy('ServicePeriod')
+                ->orderByDesc('ServicePeriod')
+                ->get();
+        }
+        
         return view('/reading_schedules/reading_schedule_index', [
             'periods' => $periods,
         ]);
