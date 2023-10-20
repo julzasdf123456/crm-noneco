@@ -228,16 +228,28 @@ class ReadingSchedulesController extends AppBaseController
     public function viewMeterReadingSchedsInPeriod($period) {
         // $readingSchedules = $this->readingSchedulesRepository->all();
         // $meterReaders = User::role('Meter Reader')->get();
-        $meterReaders = DB::table('Billing_ReadingSchedules')
-            ->leftJoin('users', 'Billing_ReadingSchedules.MeterReader', '=', 'users.id')
-            ->whereIn('Billing_ReadingSchedules.AreaCode', MeterReaders::getMeterAreaCodeScope(env('APP_AREA_CODE')))
-            ->where('Billing_ReadingSchedules.ServicePeriod', $period)
-            ->select('users.id', 'users.name', 
-                DB::raw("SUBSTRING((SELECT ', ' + GroupCode AS 'data()' FROM Billing_ReadingSchedules WHERE ServicePeriod='" . $period . "' AND MeterReader = users.id FOR XML PATH('')), 2 , 9999) As GroupCodes")
-            )
-            ->groupBy('users.id', 'users.name')
-            ->get();
-
+        if (env("APP_AREA_CODE") == '15') {
+            $meterReaders = DB::table('Billing_ReadingSchedules')
+                ->leftJoin('users', 'Billing_ReadingSchedules.MeterReader', '=', 'users.id')
+                // ->whereIn('Billing_ReadingSchedules.AreaCode', MeterReaders::getMeterAreaCodeScope(env('APP_AREA_CODE')))
+                ->where('Billing_ReadingSchedules.ServicePeriod', $period)
+                ->select('users.id', 'users.name', 
+                    DB::raw("SUBSTRING((SELECT ', ' + GroupCode AS 'data()' FROM Billing_ReadingSchedules WHERE ServicePeriod='" . $period . "' AND MeterReader = users.id FOR XML PATH('')), 2 , 9999) As GroupCodes")
+                )
+                ->groupBy('users.id', 'users.name')
+                ->get();
+        } else {
+            $meterReaders = DB::table('Billing_ReadingSchedules')
+                ->leftJoin('users', 'Billing_ReadingSchedules.MeterReader', '=', 'users.id')
+                ->whereIn('Billing_ReadingSchedules.AreaCode', MeterReaders::getMeterAreaCodeScope(env('APP_AREA_CODE')))
+                ->where('Billing_ReadingSchedules.ServicePeriod', $period)
+                ->select('users.id', 'users.name', 
+                    DB::raw("SUBSTRING((SELECT ', ' + GroupCode AS 'data()' FROM Billing_ReadingSchedules WHERE ServicePeriod='" . $period . "' AND MeterReader = users.id FOR XML PATH('')), 2 , 9999) As GroupCodes")
+                )
+                ->groupBy('users.id', 'users.name')
+                ->get();
+        }
+        
         // $meterReaders = User::role('Meter Reader Inhouse')
         //     ->select('*',
         //         DB::raw("SUBSTRING((SELECT ', ' + GroupCode AS 'data()' FROM Billing_ReadingSchedules WHERE AreaCode='" . env('APP_AREA_CODE') . "' AND ServicePeriod='" . $period . "' AND MeterReader = users.id FOR XML PATH('')), 2 , 9999) As GroupCodes"))
