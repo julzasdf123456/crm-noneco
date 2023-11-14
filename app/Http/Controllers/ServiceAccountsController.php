@@ -2348,7 +2348,7 @@ class ServiceAccountsController extends AppBaseController
                     'Disconnection_History.TimeDisconnected',
                     'Disconnection_History.Notes',
                     DB::raw("(SELECT SUM(TRY_CAST(NetAmount AS decimal(15,2))) FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND AccountNumber NOT IN (SELECT AccountNumber FROM Cashier_PaidBills WHERE AccountNumber IS NOT NULL AND AccountNumber=Billing_ServiceAccounts.id AND (Status IS NULL OR Status='Application') AND ServicePeriod=Billing_Bills.ServicePeriod)) AS Arrears"),
-                    DB::raw("(SELECT NetAmount FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS BillAmount")
+                    DB::raw("(SELECT TOP 1 NetAmount FROM Billing_Bills WHERE AccountNumber=Billing_ServiceAccounts.id AND ServicePeriod='" . $period . "') AS BillAmount")
                     )
                 ->orderBy('OldAccountNo')
                 ->get();
