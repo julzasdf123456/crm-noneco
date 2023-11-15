@@ -366,7 +366,7 @@ class DemandLettersController extends AppBaseController
     }
 
     public function printPerRoute($route, $asOf, $town) {
-        if ($route != 0 && $asOf != 0) {
+        if ($route != null && $asOf != null) {
             $data = DB::table('Billing_Bills')
                 ->leftJoin('Billing_ServiceAccounts', 'Billing_Bills.AccountNumber', '=', 'Billing_ServiceAccounts.id')
                 ->leftJoin('CRM_Towns', 'Billing_ServiceAccounts.Town', '=', 'CRM_Towns.id')
