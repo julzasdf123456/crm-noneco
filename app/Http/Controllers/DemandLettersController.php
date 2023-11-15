@@ -335,6 +335,7 @@ class DemandLettersController extends AppBaseController
             'data' => $data,
             'route' => $route,
             'asOf' => $asOf,
+            'town' => $town,
             'towns' => Towns::orderBy('Town')->get(),
         ]);
     }

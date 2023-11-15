@@ -53,7 +53,7 @@
                <label for="town" class="col-lg-3">Town</label>
                <select name="Town" id="town" class="form-control form-control-sm col-lg-9">
                   @foreach ($towns as $item)
-                      <option value="{{ $item->id }}">{{ $item->Town }}</option>
+                      <option value="{{ $item->id }}" {{ isset($town) && $town==$item->id ? 'selected' : '' }}>{{ $item->Town }}</option>
                   @endforeach
                </select>
             </div>
