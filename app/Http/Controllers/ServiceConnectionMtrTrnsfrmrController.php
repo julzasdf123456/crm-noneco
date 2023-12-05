@@ -230,7 +230,7 @@ class ServiceConnectionMtrTrnsfrmrController extends AppBaseController
                                     'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
                                     'CRM_Barangays.Barangay as Barangay')
                     ->whereNotNull('CRM_ServiceConnections.ORNumber')
-                    ->whereNotIn('CRM_ServiceConnections.id', DB::table('CRM_ServiceConnectionMeterAndTransformer')->pluck('ServiceConnectionId'))
+                    ->whereRaw("CRM_ServiceConnections.id NOT IN (SELECT ServiceConnectionId FROM CRM_ServiceConnectionMeterAndTransformer)")
                     ->where(function ($query) {
                         $query->where('CRM_ServiceConnections.Trash', 'No')
                             ->orWhereNull('CRM_ServiceConnections.Trash');
@@ -255,7 +255,7 @@ class ServiceConnectionMtrTrnsfrmrController extends AppBaseController
                                     'CRM_ServiceConnectionAccountTypes.AccountType as AccountType',
                                     'CRM_Barangays.Barangay as Barangay')
                     ->whereNotNull('CRM_ServiceConnections.ORNumber')
-                    ->whereNotIn('CRM_ServiceConnections.id', DB::table('CRM_ServiceConnectionMeterAndTransformer')->pluck('ServiceConnectionId'))
+                    ->whereRaw("CRM_ServiceConnections.id NOT IN (SELECT ServiceConnectionId FROM CRM_ServiceConnectionMeterAndTransformer)")
                     ->where(function ($query) {
                         $query->where('CRM_ServiceConnections.Trash', 'No')
                             ->orWhereNull('CRM_ServiceConnections.Trash');
