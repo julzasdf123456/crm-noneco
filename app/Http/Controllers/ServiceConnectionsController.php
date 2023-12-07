@@ -1029,7 +1029,7 @@ class ServiceConnectionsController extends AppBaseController
                         $query->where('CRM_ServiceConnections.Status', 'Approved')
                             ->orWhere('CRM_ServiceConnections.Status', 'Not Energized');
                     })
-                    ->whereIn('CRM_ServiceConnections.id', DB::table('CRM_ServiceConnectionMeterAndTransformer')->pluck('ServiceConnectionId'))
+                    ->whereRaw("CRM_ServiceConnections.id NOT IN (SELECT ServiceConnectionId FROM CRM_ServiceConnectionMeterAndTransformer)")
                     ->orderBy('CRM_ServiceConnections.ServiceAccountName')
                     ->get();
             } else {
@@ -1060,7 +1060,7 @@ class ServiceConnectionsController extends AppBaseController
                         $query->where('CRM_ServiceConnections.Status', 'Approved')
                             ->orWhere('CRM_ServiceConnections.Status', 'Not Energized');
                     })
-                    ->whereIn('CRM_ServiceConnections.id', DB::table('CRM_ServiceConnectionMeterAndTransformer')->pluck('ServiceConnectionId'))
+                    ->whereRaw("CRM_ServiceConnections.id NOT IN (SELECT ServiceConnectionId FROM CRM_ServiceConnectionMeterAndTransformer)")
                     ->orderBy('CRM_ServiceConnections.ServiceAccountName')
                     ->get();
             }
