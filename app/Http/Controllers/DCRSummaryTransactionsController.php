@@ -694,7 +694,8 @@ class DCRSummaryTransactionsController extends AppBaseController
                         ->on('Cashier_PaidBills.AccountNumber', '=', 'Cashier_PaidBillsDetails.AccountNumber');
                 })
                 ->whereRaw("TRY_CAST(Cashier_PaidBillsDetails.created_at AS DATE) BETWEEN '" . $from . "' AND '" . $to . "'")
-                ->whereRaw("Cashier_PaidBillsDetails.PaymentUsed LIKE '%Check%' AND Cashier_PaidBills.OfficeTransacted='" . $office . "'")
+                // ->whereRaw("Cashier_PaidBillsDetails.PaymentUsed LIKE '%Check%' AND Cashier_PaidBills.OfficeTransacted='" . $office . "'")
+                ->whereRaw("Cashier_PaidBillsDetails.PaymentUsed LIKE '%Check%'")
                 ->select('Cashier_PaidBillsDetails.ORNumber',
                     'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.ServiceAccountName',
@@ -822,7 +823,8 @@ class DCRSummaryTransactionsController extends AppBaseController
                 })
                 ->where('Cashier_PaidBillsDetails.UserId', $teller)
                 ->whereRaw("TRY_CAST(Cashier_PaidBillsDetails.created_at AS DATE) BETWEEN '" . $from . "' AND '" . $to . "'")
-                ->whereRaw("Cashier_PaidBillsDetails.PaymentUsed LIKE '%Check%' AND Cashier_PaidBills.OfficeTransacted='" . $office . "'")
+                // ->whereRaw("Cashier_PaidBillsDetails.PaymentUsed LIKE '%Check%' AND Cashier_PaidBills.OfficeTransacted='" . $office . "'")
+                ->whereRaw("Cashier_PaidBillsDetails.PaymentUsed LIKE '%Check%'")
                 ->select('Cashier_PaidBillsDetails.ORNumber',
                     'Billing_ServiceAccounts.OldAccountNo',
                     'Billing_ServiceAccounts.ServiceAccountName',
