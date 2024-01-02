@@ -838,7 +838,7 @@ class DCRSummaryTransactionsController extends AppBaseController
                 ->leftJoin('Cashier_TransactionIndex', 'Cashier_TransactionPaymentDetails.ORNumber', '=', 'Cashier_TransactionIndex.ORNumber')
                 ->whereBetween('Cashier_TransactionIndex.ORDate', [$from, $to])
                 ->whereRaw("Cashier_TransactionPaymentDetails.PaymentUsed LIKE '%Check%'")
-                ->whereRaw("Cashier_TransactionIndex.TransactionNumber LIKE '" . $office . "%'")
+                // ->whereRaw("Cashier_TransactionIndex.TransactionNumber LIKE '" . $office . "%'")
                 ->where('Cashier_TransactionIndex.UserId', $teller)
                 ->select('Cashier_TransactionIndex.ORNumber',
                     'Cashier_TransactionIndex.AccountNumber',
