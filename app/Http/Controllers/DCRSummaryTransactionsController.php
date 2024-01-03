@@ -160,7 +160,10 @@ class DCRSummaryTransactionsController extends AppBaseController
             'nonPowerBillsCheck' => $nonPowerBillsCheck,
             'powerBillsCancelled' => $powerBillsCancelled,
             'nonPowerBillsCancelled' => $nonPowerBillsCancelled,
-            'summary' => $summary
+            'summary' => $summary,
+            'office' => 'All',
+            'from' => $request['Day'] != null ? $request['Day'] : date('Y-m-d'),
+            'to' => $request['Day'] != null ? $request['Day'] : date('Y-m-d'),
         ]);
     }
 
@@ -914,48 +917,89 @@ class DCRSummaryTransactionsController extends AppBaseController
         $office = $request['Office'];
         $teller = $request['Teller'];
 
-        if ($teller == 'All') {
-            $data = DB::table('Cashier_DCRSummaryTransactions')
-                ->leftJoin('Billing_ServiceAccounts', 'Cashier_DCRSummaryTransactions.AccountNumber', '=', 'Billing_ServiceAccounts.id')
-                ->leftJoin('users', 'Cashier_DCRSummaryTransactions.Teller', '=', 'users.id')
-                ->whereRaw("(Cashier_DCRSummaryTransactions.Day BETWEEN '" . $from . "' AND '" . $to . "') 
-                    AND Cashier_DCRSummaryTransactions.GLCode='" . $glCode . "' AND (TRY_CAST(Amount AS DECIMAL(12,2)) > 0 OR TRY_CAST(Amount AS DECIMAL(12,2)) < 0 OR Amount IS NOT NULL) 
-                    AND ReportDestination IN ('COLLECTION', 'BOTH') AND Cashier_DCRSummaryTransactions.Office='" . $office . "'")
-                ->select(
-                    'Billing_ServiceAccounts.id',
-                    'OldAccountNo',
-                    'ServiceAccountName',
-                    'Amount',
-                    'ORNumber',
-                    'Day',
-                    'name'
-                )
-                ->orderBy('Day')
-                ->orderBy('ORNumber')
-                ->get();
+        if ($office == 'All') {
+            if ($teller == 'All') {
+                $data = DB::table('Cashier_DCRSummaryTransactions')
+                    ->leftJoin('Billing_ServiceAccounts', 'Cashier_DCRSummaryTransactions.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->leftJoin('users', 'Cashier_DCRSummaryTransactions.Teller', '=', 'users.id')
+                    ->whereRaw("(Cashier_DCRSummaryTransactions.Day BETWEEN '" . $from . "' AND '" . $to . "') 
+                        AND Cashier_DCRSummaryTransactions.GLCode='" . $glCode . "' AND (TRY_CAST(Amount AS DECIMAL(12,2)) > 0 OR TRY_CAST(Amount AS DECIMAL(12,2)) < 0 OR Amount IS NOT NULL) 
+                        AND ReportDestination IN ('COLLECTION', 'BOTH') ")
+                    ->select(
+                        'Billing_ServiceAccounts.id',
+                        'OldAccountNo',
+                        'ServiceAccountName',
+                        'Amount',
+                        'ORNumber',
+                        'Day',
+                        'name'
+                    )
+                    ->orderBy('Day')
+                    ->orderBy('ORNumber')
+                    ->get();
+            } else {
+                $data = DB::table('Cashier_DCRSummaryTransactions')
+                    ->leftJoin('Billing_ServiceAccounts', 'Cashier_DCRSummaryTransactions.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->leftJoin('users', 'Cashier_DCRSummaryTransactions.Teller', '=', 'users.id')
+                    ->whereRaw("(Cashier_DCRSummaryTransactions.Day BETWEEN '" . $from . "' AND '" . $to . "') 
+                        AND Cashier_DCRSummaryTransactions.GLCode='" . $glCode . "' AND (TRY_CAST(Amount AS DECIMAL(12,2)) > 0 OR TRY_CAST(Amount AS DECIMAL(12,2)) < 0 OR Amount IS NOT NULL) 
+                        AND ReportDestination IN ('COLLECTION', 'BOTH')  
+                        AND Cashier_DCRSummaryTransactions.Teller='" . $teller . "'")
+                    ->select(
+                        'Billing_ServiceAccounts.id',
+                        'OldAccountNo',
+                        'ServiceAccountName',
+                        'Amount',
+                        'ORNumber',
+                        'Day',
+                        'name'
+                    )
+                    ->orderBy('Day')
+                    ->orderBy('ORNumber')
+                    ->get();
+            }
         } else {
-            $data = DB::table('Cashier_DCRSummaryTransactions')
-                ->leftJoin('Billing_ServiceAccounts', 'Cashier_DCRSummaryTransactions.AccountNumber', '=', 'Billing_ServiceAccounts.id')
-                ->leftJoin('users', 'Cashier_DCRSummaryTransactions.Teller', '=', 'users.id')
-                ->whereRaw("(Cashier_DCRSummaryTransactions.Day BETWEEN '" . $from . "' AND '" . $to . "') 
-                    AND Cashier_DCRSummaryTransactions.GLCode='" . $glCode . "' AND (TRY_CAST(Amount AS DECIMAL(12,2)) > 0 OR TRY_CAST(Amount AS DECIMAL(12,2)) < 0 OR Amount IS NOT NULL) 
-                    AND ReportDestination IN ('COLLECTION', 'BOTH') AND Cashier_DCRSummaryTransactions.Office='" . $office . "' 
-                    AND Cashier_DCRSummaryTransactions.Teller='" . $teller . "'")
-                ->select(
-                    'Billing_ServiceAccounts.id',
-                    'OldAccountNo',
-                    'ServiceAccountName',
-                    'Amount',
-                    'ORNumber',
-                    'Day',
-                    'name'
-                )
-                ->orderBy('Day')
-                ->orderBy('ORNumber')
-                ->get();
+            if ($teller == 'All') {
+                $data = DB::table('Cashier_DCRSummaryTransactions')
+                    ->leftJoin('Billing_ServiceAccounts', 'Cashier_DCRSummaryTransactions.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->leftJoin('users', 'Cashier_DCRSummaryTransactions.Teller', '=', 'users.id')
+                    ->whereRaw("(Cashier_DCRSummaryTransactions.Day BETWEEN '" . $from . "' AND '" . $to . "') 
+                        AND Cashier_DCRSummaryTransactions.GLCode='" . $glCode . "' AND (TRY_CAST(Amount AS DECIMAL(12,2)) > 0 OR TRY_CAST(Amount AS DECIMAL(12,2)) < 0 OR Amount IS NOT NULL) 
+                        AND ReportDestination IN ('COLLECTION', 'BOTH') AND Cashier_DCRSummaryTransactions.Office='" . $office . "'")
+                    ->select(
+                        'Billing_ServiceAccounts.id',
+                        'OldAccountNo',
+                        'ServiceAccountName',
+                        'Amount',
+                        'ORNumber',
+                        'Day',
+                        'name'
+                    )
+                    ->orderBy('Day')
+                    ->orderBy('ORNumber')
+                    ->get();
+            } else {
+                $data = DB::table('Cashier_DCRSummaryTransactions')
+                    ->leftJoin('Billing_ServiceAccounts', 'Cashier_DCRSummaryTransactions.AccountNumber', '=', 'Billing_ServiceAccounts.id')
+                    ->leftJoin('users', 'Cashier_DCRSummaryTransactions.Teller', '=', 'users.id')
+                    ->whereRaw("(Cashier_DCRSummaryTransactions.Day BETWEEN '" . $from . "' AND '" . $to . "') 
+                        AND Cashier_DCRSummaryTransactions.GLCode='" . $glCode . "' AND (TRY_CAST(Amount AS DECIMAL(12,2)) > 0 OR TRY_CAST(Amount AS DECIMAL(12,2)) < 0 OR Amount IS NOT NULL) 
+                        AND ReportDestination IN ('COLLECTION', 'BOTH') AND Cashier_DCRSummaryTransactions.Office='" . $office . "' 
+                        AND Cashier_DCRSummaryTransactions.Teller='" . $teller . "'")
+                    ->select(
+                        'Billing_ServiceAccounts.id',
+                        'OldAccountNo',
+                        'ServiceAccountName',
+                        'Amount',
+                        'ORNumber',
+                        'Day',
+                        'name'
+                    )
+                    ->orderBy('Day')
+                    ->orderBy('ORNumber')
+                    ->get();
+            }
         }
-
-        
 
         $output = "";
         $i=1;
